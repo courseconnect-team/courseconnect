@@ -34,6 +34,6 @@
       "eslint --cache --fix",
       "prettier --write"
     ],
-    "*.{md}": "prettier --list-different --write"
+    "*.{md}": "prettier --check --write"
   }
 }
