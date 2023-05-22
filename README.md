@@ -108,20 +108,22 @@ Use the following steps to test your changes in a production-ready build.
 > These two steps correspond to the commands `next build` and `next start` in the *Next.js* CLI; documentation is available <a href="https://nextjs.org/docs/app/api-reference/next-cli">here</a>.
 
 ## List of Dependencies
-Below is a complete list of all dependencies (npm packages) used in this project.
-- react
-- react-dom
-- next
-- typescript
-- @types/react
-- @types/node
-- @types/react-dom
-- tailwindcss
-- postcss
-- autoprefixer
-- eslint
-- eslint-config-next
-- firebase
-- react-firebase-hooks
+Below is a complete list of all dependencies (npm packages) used in this project as of May 22nd, 2023:
+- @types/node@20.2.3
+- @types/react-dom@18.2.4
+- @types/react@18.2.6
+- autoprefixer@10.4.14
+- eslint-config-next@13.4.3
+- eslint-config-prettier@8.8.0
+- eslint@8.41.0
+- husky@8.0.3
+- lint-staged@13.2.2
+- next@13.4.3
+- postcss@8.4.23
+- prettier@2.8.8
+- react-dom@18.2.0
+- react@18.2.0
+- tailwindcss@3.3.2
+- typescript@5.0.4
 
 To add a package, make sure you are in the `cc-app` directory and run `npm install (PACKAGE NAME HERE)` in your terminal.
