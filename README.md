@@ -138,6 +138,9 @@ Use the following steps to test your changes in a production-ready build.
 
 Below is a complete list of all dependencies (npm packages) used in this project as of May 22nd, 2023:
 
+- @emotion/react@11.11.0
+- @emotion/styled@11.11.0
+- @mui/material@5.13.2
 - @types/node@20.2.3
 - @types/react-dom@18.2.4
 - @types/react@18.2.6
