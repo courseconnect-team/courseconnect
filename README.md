@@ -39,6 +39,10 @@ JavaScript framework: <a href="https://nextjs.org/">Next.js</a>
 
 _Next.js_ is a framework built on top of React to extend its utility and add functionality, namely server-side rendering, static site generation, a built-in routing system, and more - as well as a more streamlined development experience with several quality-of-life tools.
 
+React component library: <a href="https://mui.com/">Material UI (MUI)</a>
+
+_Material UI (MUI)_ is a component library for React that comes with a spectacular and stylable collection of components which emphasize accessibility. It will be used to jumpstart the interactivity of Course Connect.
+
 CSS framework: <a href="https://tailwindcss.com/">Tailwind CSS</a>
 
 _Tailwind CSS_ is a CSS framework which provides a comprehensive set of low-level utility classes which encapsulate specific CSS properties and values, which allow developers to apply styles without writing custom CSS and build a highly configurable, modern, and responsive user interface.
