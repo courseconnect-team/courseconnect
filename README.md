@@ -1,18 +1,21 @@
 # About
 
-**Course Connect** is a web application designed to streamline the hiring process of teaching assignments, undergraduate peer instructors, and graders by providing essential digital tools to students, faculty, and department leaders.
+**Course Connect** is a web application designed to streamline the hiring process of teaching assignments, undergraduate peer instructors, and graders by providing essential digital tools to _students_, _faculty_, and _department leaders_.
 
 # Features
 
 Course Connect works through an online portal that leads to a dashboard with useful tools for each type of user we serve: _students_, _faculty_, and _department leaders_.
 
 - Students
-  - Submit an application and check its status.
-  - fjfj
+  - Submit an application to be a TA, UPI, or Grader and check its status.
+  - After hiring, view information about your assigned course(s) from a database.
 - Faculty
+  - Review applications for TAs, UPIs, and Graders to streamline the hiring process.
+  - Invite students to apply for a TA, UPI, or Grader position.
+  - View information about your course(s) from a database.
 - Department Leaders
-  - Add courses manually using a form or automatically by uploading a spreadsheet (.xls, .xlsx, .csv, etc.).
-  - Manage
+  - Add courses to a database manually using a form or automatically by uploading a spreadsheet (.xls, .xlsx, .csv, etc.).
+  - Manage (add, delete, edit) information of users (students and faculty) and courses within the database.
 
 # Development Stack
 
