@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import firebase from '../firebase/auth/firebase_config';
+import firebase from '../firebase/firebase_config';
 // useAuthState is a hook that returns the current user object from Firebase
 import { useAuthState } from 'react-firebase-hooks/auth';
 // useCollection is a hook that returns a collection from Firestore

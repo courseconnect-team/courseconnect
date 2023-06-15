@@ -1,14 +1,12 @@
 import Header from '@/components/Header';
-import Login from '@/components/Login';
-import SideMenu from '@/components/SideMenu';
-import Dashboard from './dashboard/page';
+import SignInForm from '@/components/SignIn/SignInForm';
 
 export default function Home() {
   return (
     <>
       <main className="">
         <Header />
-        <Login />
+        <SignInForm />
       </main>
     </>
   );

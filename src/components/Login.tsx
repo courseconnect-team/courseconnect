@@ -2,7 +2,7 @@
 import React from 'react';
 import * as firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
-import firebase from '../firebase/auth/firebase_config';
+import firebase from '../firebase/firebase_config';
 
 // Configure FirebaseUI
 const uiConfig = {
