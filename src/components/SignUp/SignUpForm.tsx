@@ -14,6 +14,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import DepartmentSelect from './DepartmentSelect';
 import RoleSelect from './RoleSelect';
 
+import handleSignUp from '../../firebase/auth/auth_signup_password';
+import handleSignIn from '@/firebase/auth/auth_signin_password';
+
 function Copyright(props: any) {
   return (
     <Typography
@@ -36,13 +39,56 @@ function Copyright(props: any) {
 const defaultTheme = createTheme();
 
 export default function SignUpForm() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    // extract the form data from the current event
+    const formData = new FormData(event.currentTarget);
+    // extract the specific user data from the form data into a parsable object
+    const userData = {
+      firstname: formData.get('firstName') as string,
+      lastname: formData.get('lastName') as string,
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+      department: formData.get('department-select') as string,
+      role: formData.get('roles-radio-group') as string,
+      ufid: formData.get('ufid') as string,
+      uid: '',
+    };
+
+    const uid_from_signup = await handleSignUp(
+      userData.email,
+      userData.password
+    );
+    userData.uid = uid_from_signup;
+
+    if (userData.uid === '-1' || userData.uid === '') {
+      // error: user not created
+      console.log('ERROR: User not created');
+    } else {
+      // user created successfully
+      console.log('SUCCESS: User created successfully');
+
+      // use fetch to send the user data to the server
+      // this goes to a cloud function which creates a document based on
+      // the data from the form, identified by the user's firebase auth uid
+      const response = await fetch(
+        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userData),
+        }
+      );
+
+      if (response.ok) {
+        console.log('SUCCESS: User data sent to server successfully');
+        handleSignIn(userData.email, userData.password);
+      } else {
+        console.log('ERROR: User data failed to send to server');
+      }
+    }
   };
 
   return (
@@ -112,8 +158,19 @@ export default function SignUpForm() {
                   autoComplete="new-password"
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <DepartmentSelect />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  id="ufid"
+                  label="UFID"
+                  name="ufid"
+                  autoComplete="ufid"
+                  helperText="No dashes or spaces."
+                />
               </Grid>
               <Grid item xs={12}>
                 <RoleSelect />

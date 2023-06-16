@@ -6,21 +6,28 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 
 export default function RoleSelect() {
+  const [value, setValue] = React.useState('');
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue((event.target as HTMLInputElement).value);
+  };
+
   return (
     <FormControl>
-      <FormLabel required id="roles-radio-group-label">
-        Gender
+      <FormLabel required id="role-radio-group-label">
+        Role
       </FormLabel>
       <RadioGroup
         row
-        aria-labelledby="roles-radio-group-label"
-        defaultValue="Student"
+        aria-labelledby="role-radio-group-label"
         name="roles-radio-group"
+        value={value}
+        onChange={handleChange}
       >
-        <FormControlLabel value="Student" control={<Radio />} label="Student" />
-        <FormControlLabel value="Faculty" control={<Radio />} label="Faculty" />
+        <FormControlLabel value="student" control={<Radio />} label="Student" />
+        <FormControlLabel value="faculty" control={<Radio />} label="Faculty" />
         <FormControlLabel
-          value="Administrator"
+          value="admin"
           control={<Radio />}
           label="Administrator"
         />

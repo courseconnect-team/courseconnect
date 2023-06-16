@@ -25,19 +25,20 @@ export default function DepartmentSelect() {
           labelId="department-select-label"
           id="department-select"
           value={department}
+          name="department-select"
           label="Department"
           onChange={handleChange}
         >
-          <MenuItem value={10}>ECE</MenuItem>
-          <MenuItem value={20}>CISE</MenuItem>
-          <MenuItem value={30}>ESSIE</MenuItem>
-          <MenuItem value={40}>MAE</MenuItem>
-          <MenuItem value={50}>MSE</MenuItem>
-          <MenuItem value={60}>ABE</MenuItem>
-          <MenuItem value={70}>CHE</MenuItem>
-          <MenuItem value={80}>ISE</MenuItem>
-          <MenuItem value={90}>EED</MenuItem>
-          <MenuItem value={100}>BME</MenuItem>
+          <MenuItem value={'ECE'}>ECE</MenuItem>
+          <MenuItem value={'CISE'}>CISE</MenuItem>
+          <MenuItem value={'ESSIE'}>ESSIE</MenuItem>
+          <MenuItem value={'MAE'}>MAE</MenuItem>
+          <MenuItem value={'MSE'}>MSE</MenuItem>
+          <MenuItem value={'ABE'}>ABE</MenuItem>
+          <MenuItem value={'CHE'}>CHE</MenuItem>
+          <MenuItem value={'ISE'}>ISE</MenuItem>
+          <MenuItem value={'EED'}>EED</MenuItem>
+          <MenuItem value={'BME'}>BME</MenuItem>
         </Select>
       </FormControl>
     </Box>
