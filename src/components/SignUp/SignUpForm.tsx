@@ -84,6 +84,7 @@ export default function SignUpForm() {
 
       if (response.ok) {
         console.log('SUCCESS: User data sent to server successfully');
+        // then, sign in the user
         handleSignIn(userData.email, userData.password);
       } else {
         console.log('ERROR: User data failed to send to server');
