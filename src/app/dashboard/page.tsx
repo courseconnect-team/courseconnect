@@ -8,14 +8,7 @@ import { useAuth } from '@/firebase/auth/auth_context';
 export default function Dashboard() {
   const { user } = useAuth();
 
-  if (!user) {
-    return (
-      <>
-        <h1>Please sign in!</h1>
-        <h2>USE THIS FOR ROUTING LATER!</h2>
-      </>
-    );
-  } else
+  if (user) {
     return (
       <>
         <h1>Dashboard page</h1>
@@ -24,4 +17,5 @@ export default function Dashboard() {
         <SignOutButton />
       </>
     );
+  }
 }
