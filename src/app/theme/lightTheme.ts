@@ -1,16 +1,13 @@
 import { ThemeOptions } from '@mui/material';
-
+// https://brandcenter.ufl.edu/colors/
 const lightTheme: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
-      main: '#ffff00',
+      main: '#0021a5',
     },
     secondary: {
-      main: '#ff8400',
-    },
-    background: {
-      default: '#dddddd',
+      main: '#FA4616',
     },
   },
 };

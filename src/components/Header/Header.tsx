@@ -1,4 +1,3 @@
-'use client';
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -8,22 +7,27 @@ import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import ThemeToggleButton from '../ThemeInteraction/ThemeToggleButton';
 
+import UserIcon from './UserIcon';
+import handleSignOut from '@/firebase/auth/auth_signout';
+
+import { useAuth } from '@/firebase/auth/auth_context';
+// user information reference: https://firebase.google.com/docs/auth/web/manage-users
+
 const pages = ['Products', 'Pricing', 'Blog'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 export type HeaderProps = {
   ColorModeContext: React.Context<{ toggleColorMode: () => void }>;
 };
 
-function ResponsiveAppBar(props: HeaderProps) {
+const Header = (props: HeaderProps) => {
   const { ColorModeContext } = props;
+  const { user } = useAuth();
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -66,7 +70,7 @@ function ResponsiveAppBar(props: HeaderProps) {
               textDecoration: 'none',
             }}
           >
-            Course Connect
+            CourseConnect
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -122,14 +126,14 @@ function ResponsiveAppBar(props: HeaderProps) {
               textDecoration: 'none',
             }}
           >
-            LOGO
+            DataSoft
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button
                 key={page}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block' }}
+                sx={{ my: 2, color: 'inherit', display: 'block' }}
               >
                 {page}
               </Button>
@@ -137,9 +141,9 @@ function ResponsiveAppBar(props: HeaderProps) {
           </Box>
           <ThemeToggleButton ColorModeContext={ColorModeContext} />
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
+            <Tooltip title="Open profile settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <UserIcon />
               </IconButton>
             </Tooltip>
             <Menu
@@ -158,16 +162,20 @@ function ResponsiveAppBar(props: HeaderProps) {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
+              <MenuItem
+                onClick={() =>
+                  user ? handleSignOut() : (window.location.href = '/')
+                }
+              >
+                <Typography textAlign="center">
+                  {user ? 'Logout' : 'Login'}
+                </Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>
       </Container>
     </AppBar>
   );
-}
-export default ResponsiveAppBar;
+};
+export default Header;

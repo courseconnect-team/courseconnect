@@ -4,10 +4,11 @@ import React from 'react';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import darkTheme from './theme/darkTheme';
 import lightTheme from './theme/lightTheme';
-import UpdatedHeader from '@/components/Header/UpdatedHeader';
+import Header from '@/components/Header/Header';
 
-const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
-
+const ColorModeContext = React.createContext({
+  toggleColorMode: () => {},
+});
 export const metadata = {
   title: 'Course Connect',
   description: 'Hiring management for students, faculty, and administrators.',
@@ -52,7 +53,7 @@ export default function RootLayout({
           >
             <AuthProvider>
               <CssBaseline />
-              <UpdatedHeader ColorModeContext={ColorModeContext} />
+              <Header ColorModeContext={ColorModeContext} />
               {children}
             </AuthProvider>
           </ThemeProvider>
