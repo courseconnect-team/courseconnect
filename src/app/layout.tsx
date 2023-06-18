@@ -1,7 +1,8 @@
 'use client';
 import { AuthProvider } from '@/firebase/auth/auth_context';
-import React from 'react';
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import React, { useEffect } from 'react';
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import darkTheme from './theme/darkTheme';
 import lightTheme from './theme/lightTheme';
 import Header from '@/components/Header/Header';
@@ -43,6 +44,21 @@ export default function RootLayout({
       }),
     []
   );
+
+  useEffect(() => {
+    // Retrieve the saved theme preference from local storage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme && savedTheme === 'dark') {
+      setMode('dark');
+    } else {
+      setMode('light');
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save the current theme preference to local storage
+    localStorage.setItem('theme', mode);
+  }, [mode]);
 
   return (
     <html lang="en">

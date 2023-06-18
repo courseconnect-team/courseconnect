@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import React from 'react';
-import { useTheme } from '@mui/system';
+import { useTheme } from '@mui/material/styles';
 
 export type ThemeToggleButtonProps = {
   ColorModeContext: React.Context<{ toggleColorMode: () => void }>;

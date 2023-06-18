@@ -13,7 +13,6 @@ export default function Dashboard() {
       <>
         <h1>Dashboard page</h1>
         <h2>Welcome, {user?.email}!</h2>
-        <UserDisplay />
         <SignOutButton />
       </>
     );
