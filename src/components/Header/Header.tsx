@@ -139,6 +139,7 @@ const Header = (props: HeaderProps) => {
               </Button>
             ))}
           </Box>
+
           <ThemeToggleButton ColorModeContext={ColorModeContext} />
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open profile settings">
