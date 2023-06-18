@@ -1,12 +1,27 @@
+'use client';
 import UserDisplay from '@/components/UserDisplay';
 import SignOutButton from '@/components/SignOut/SignOutButton';
 
+import { useAuth } from '@/firebase/auth/auth_context';
+// user information reference: https://firebase.google.com/docs/auth/web/manage-users
+
 export default function Dashboard() {
-  return (
-    <>
-      <h1>Dashboard page</h1>
-      <UserDisplay />
-      <SignOutButton />
-    </>
-  );
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <>
+        <h1>Please sign in!</h1>
+        <h2>USE THIS FOR ROUTING LATER!</h2>
+      </>
+    );
+  } else
+    return (
+      <>
+        <h1>Dashboard page</h1>
+        <h2>Welcome, {user?.email}!</h2>
+        <UserDisplay />
+        <SignOutButton />
+      </>
+    );
 }

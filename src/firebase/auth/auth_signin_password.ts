@@ -1,17 +1,15 @@
 import firebase from '../firebase_config';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
-const auth = getAuth();
+const auth = firebase.auth();
 
-function handleSignIn(email, password) {
+function handleSignIn(email: string, password: string) {
   signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in
       const user = userCredential.user;
       console.log('User signed in successfully!');
-
-      window.location = '/dashboard';
-      // ...
+      window.location.href = '/dashboard';
     })
     .catch((error) => {
       const errorCode = error.code;

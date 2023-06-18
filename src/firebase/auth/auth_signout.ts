@@ -1,15 +1,14 @@
 import firebase from '../firebase_config';
-import { getAuth, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 
-const auth = getAuth();
+const auth = firebase.auth();
 
 function handleSignOut() {
   signOut(auth)
     .then(() => {
       // Sign-out successful.
       console.log('User signed out successfully!');
-      window.location = '/';
-      // ...
+      window.location.href = '/';
     })
     .catch((error) => {
       // An error happened.
