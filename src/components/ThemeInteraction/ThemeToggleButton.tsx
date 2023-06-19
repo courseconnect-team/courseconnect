@@ -18,7 +18,7 @@ const ThemeToggleButton = (props: ThemeToggleButtonProps) => {
   return (
     <>
       <IconButton
-        sx={{ mr: 2 }}
+        sx={{ mr: 1 }}
         aria-label={theme.palette.mode + ' mode button'}
         onClick={colorMode.toggleColorMode}
         color="inherit"

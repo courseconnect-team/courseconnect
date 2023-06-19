@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import darkTheme from './theme/darkTheme';
 import lightTheme from './theme/lightTheme';
-import Header from '@/components/Header/Header';
+import TestHeader from '@/components/Header/TestHeader';
 
 const ColorModeContext = React.createContext({
   toggleColorMode: () => {},
@@ -69,7 +69,7 @@ export default function RootLayout({
           >
             <AuthProvider>
               <CssBaseline />
-              <Header ColorModeContext={ColorModeContext} />
+              <TestHeader ColorModeContext={ColorModeContext} />
               {children}
             </AuthProvider>
           </ThemeProvider>
