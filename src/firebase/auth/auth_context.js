@@ -27,7 +27,8 @@ export function AuthProvider({ children }) {
         pathname !== '/' &&
         pathname !== '/signup' &&
         pathname != '/signin' &&
-        pathname !== '/about'
+        pathname !== '/about' &&
+        pathname !== '/features'
       ) {
         router.push('/');
       }
