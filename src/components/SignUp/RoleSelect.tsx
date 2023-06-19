@@ -24,7 +24,11 @@ export default function RoleSelect() {
         value={value}
         onChange={handleChange}
       >
-        <FormControlLabel value="student" control={<Radio />} label="Student" />
+        <FormControlLabel
+          value="student_applying"
+          control={<Radio />}
+          label="Student"
+        />
         <FormControlLabel value="faculty" control={<Radio />} label="Faculty" />
         <FormControlLabel
           value="admin"

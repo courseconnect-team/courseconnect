@@ -57,7 +57,7 @@ const Header = (props: HeaderProps) => {
 
   return (
     <AppBar position="static">
-      <Container maxWidth={false}>
+      <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Box sx={{ flexGrow: 0, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
