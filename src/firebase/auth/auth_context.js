@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, [router, pathname]);
 
   const value = {
     user,
