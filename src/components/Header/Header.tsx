@@ -19,7 +19,7 @@ import handleSignOut from '@/firebase/auth/auth_signout';
 import { useAuth } from '@/firebase/auth/auth_context';
 // user information reference: https://firebase.google.com/docs/auth/web/manage-users
 
-const pages = ['Products', 'Pricing', 'Blog'];
+const pages = ['About', 'Features'];
 
 export type HeaderProps = {
   ColorModeContext: React.Context<{ toggleColorMode: () => void }>;
@@ -54,7 +54,6 @@ const Header = (props: HeaderProps) => {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
           <Typography
             variant="h6"
             noWrap
@@ -109,7 +108,6 @@ const Header = (props: HeaderProps) => {
               ))}
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
             variant="h5"
             noWrap
@@ -126,7 +124,7 @@ const Header = (props: HeaderProps) => {
               textDecoration: 'none',
             }}
           >
-            DataSoft
+            CourseConnect
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
