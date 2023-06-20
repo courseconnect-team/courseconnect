@@ -2,16 +2,20 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
-import RestoreIcon from '@mui/icons-material/Restore';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ArchiveIcon from '@mui/icons-material/Archive';
 import Paper from '@mui/material/Paper';
+// icons
+import GroupIcon from '@mui/icons-material/Group'; // users
+import MenuBookIcon from '@mui/icons-material/MenuBook'; // courses
+import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark'; // applications
+import EditNoteIcon from '@mui/icons-material/EditNote'; // application
+import AccountBoxIcon from '@mui/icons-material/AccountBox'; // profile
+import SettingsIcon from '@mui/icons-material/Settings'; // settings
 
 /* Depending on whether or not the signed-in user is a student, faculty, or admin,
   the bottom menu will be displaying different things.
 
   For a student:
-  - apply (if applying or applied) or courses (if accepted)
+  - application (if applying or applied) or courses (if accepted)
 
   For a faculty member:
   - applications
@@ -27,74 +31,21 @@ import Paper from '@mui/material/Paper';
   - profile
   */
 
-function generateOptions(role: string) {
-  switch (role) {
-    case 'admin':
-      return (
-        <>
-          <BottomNavigationAction label="Users" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Courses" icon={<FavoriteIcon />} />
-          <BottomNavigationAction label="Applications" icon={<ArchiveIcon />} />
-          <BottomNavigationAction label="Profile" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Settings" icon={<FavoriteIcon />} />
-        </>
-      );
-    case 'faculty':
-      return (
-        <>
-          <BottomNavigationAction label="Applications" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Courses" icon={<FavoriteIcon />} />
-          <BottomNavigationAction label="Profile" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Settings" icon={<FavoriteIcon />} />
-        </>
-      );
-    case 'student_applying':
-      return (
-        <>
-          <BottomNavigationAction label="Application" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Profile" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Settings" icon={<FavoriteIcon />} />
-        </>
-      );
-    case 'student_applied':
-      return (
-        <>
-          <BottomNavigationAction label="Status" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Courses" icon={<FavoriteIcon />} />
-          <BottomNavigationAction label="Profile" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Settings" icon={<FavoriteIcon />} />
-        </>
-      );
-    case 'student_accepted':
-      return (
-        <>
-          <BottomNavigationAction label="Application" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Profile" icon={<RestoreIcon />} />
-          <BottomNavigationAction
-            label="Settings"
-            icon={<FavoriteIcon />}
-          />{' '}
-        </>
-      );
-    default:
-      return (
-        <>
-          <BottomNavigationAction label="Profile" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Settings" icon={<FavoriteIcon />} />
-        </>
-      );
-  }
-}
-
 export type BottomMenuProps = {
   user_role: string;
+  onComponentChange: (componentName: string) => void;
 };
 
 export default function BottomMenu(props: BottomMenuProps) {
-  const { user_role } = props;
+  const { user_role, onComponentChange } = props;
 
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = React.useState('');
   const ref = React.useRef<HTMLDivElement>(null);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    setValue(newValue);
+    onComponentChange(newValue);
+  };
 
   switch (user_role) {
     case 'admin':
@@ -108,26 +59,32 @@ export default function BottomMenu(props: BottomMenuProps) {
               <BottomNavigation
                 showLabels
                 value={value}
-                onChange={(event, newValue) => {
-                  setValue(newValue);
-                }}
+                onChange={handleChange}
               >
-                <BottomNavigationAction label="Users" icon={<RestoreIcon />} />
+                <BottomNavigationAction
+                  label="Users"
+                  value="users"
+                  icon={<GroupIcon />}
+                />
                 <BottomNavigationAction
                   label="Courses"
-                  icon={<FavoriteIcon />}
+                  value="courses"
+                  icon={<MenuBookIcon />}
                 />
                 <BottomNavigationAction
                   label="Applications"
-                  icon={<ArchiveIcon />}
+                  value="applications"
+                  icon={<CollectionsBookmarkIcon />}
                 />
                 <BottomNavigationAction
                   label="Profile"
-                  icon={<RestoreIcon />}
+                  value="profile"
+                  icon={<AccountBoxIcon />}
                 />
                 <BottomNavigationAction
                   label="Settings"
-                  icon={<FavoriteIcon />}
+                  value="settings"
+                  icon={<SettingsIcon />}
                 />
               </BottomNavigation>
             </Paper>
@@ -145,25 +102,27 @@ export default function BottomMenu(props: BottomMenuProps) {
               <BottomNavigation
                 showLabels
                 value={value}
-                onChange={(event, newValue) => {
-                  setValue(newValue);
-                }}
+                onChange={handleChange}
               >
                 <BottomNavigationAction
                   label="Applications"
-                  icon={<RestoreIcon />}
+                  value="applications"
+                  icon={<CollectionsBookmarkIcon />}
                 />
                 <BottomNavigationAction
                   label="Courses"
-                  icon={<FavoriteIcon />}
+                  value="courses"
+                  icon={<MenuBookIcon />}
                 />
                 <BottomNavigationAction
                   label="Profile"
-                  icon={<RestoreIcon />}
+                  value="profile"
+                  icon={<AccountBoxIcon />}
                 />
                 <BottomNavigationAction
                   label="Settings"
-                  icon={<FavoriteIcon />}
+                  value="settings"
+                  icon={<SettingsIcon />}
                 />
               </BottomNavigation>
             </Paper>
@@ -181,21 +140,22 @@ export default function BottomMenu(props: BottomMenuProps) {
               <BottomNavigation
                 showLabels
                 value={value}
-                onChange={(event, newValue) => {
-                  setValue(newValue);
-                }}
+                onChange={handleChange}
               >
                 <BottomNavigationAction
                   label="Application"
-                  icon={<RestoreIcon />}
+                  value="application"
+                  icon={<EditNoteIcon />}
                 />
                 <BottomNavigationAction
                   label="Profile"
-                  icon={<RestoreIcon />}
+                  value="profile"
+                  icon={<AccountBoxIcon />}
                 />
                 <BottomNavigationAction
                   label="Settings"
-                  icon={<FavoriteIcon />}
+                  value="settings"
+                  icon={<SettingsIcon />}
                 />
               </BottomNavigation>
             </Paper>
@@ -213,21 +173,22 @@ export default function BottomMenu(props: BottomMenuProps) {
               <BottomNavigation
                 showLabels
                 value={value}
-                onChange={(event, newValue) => {
-                  setValue(newValue);
-                }}
+                onChange={handleChange}
               >
                 <BottomNavigationAction
                   label="Application"
-                  icon={<RestoreIcon />}
+                  value="application"
+                  icon={<EditNoteIcon />}
                 />
                 <BottomNavigationAction
                   label="Profile"
-                  icon={<RestoreIcon />}
+                  value="profile"
+                  icon={<AccountBoxIcon />}
                 />
                 <BottomNavigationAction
                   label="Settings"
-                  icon={<FavoriteIcon />}
+                  value="settings"
+                  icon={<SettingsIcon />}
                 />
               </BottomNavigation>
             </Paper>
@@ -245,21 +206,22 @@ export default function BottomMenu(props: BottomMenuProps) {
               <BottomNavigation
                 showLabels
                 value={value}
-                onChange={(event, newValue) => {
-                  setValue(newValue);
-                }}
+                onChange={handleChange}
               >
                 <BottomNavigationAction
                   label="Courses"
-                  icon={<RestoreIcon />}
+                  value="courses"
+                  icon={<MenuBookIcon />}
                 />
                 <BottomNavigationAction
                   label="Profile"
-                  icon={<RestoreIcon />}
+                  value="profile"
+                  icon={<AccountBoxIcon />}
                 />
                 <BottomNavigationAction
                   label="Settings"
-                  icon={<FavoriteIcon />}
+                  value="settings"
+                  icon={<SettingsIcon />}
                 />
               </BottomNavigation>
             </Paper>
@@ -277,17 +239,17 @@ export default function BottomMenu(props: BottomMenuProps) {
               <BottomNavigation
                 showLabels
                 value={value}
-                onChange={(event, newValue) => {
-                  setValue(newValue);
-                }}
+                onChange={handleChange}
               >
                 <BottomNavigationAction
                   label="Profile"
-                  icon={<RestoreIcon />}
+                  value="profile"
+                  icon={<AccountBoxIcon />}
                 />
                 <BottomNavigationAction
                   label="Settings"
-                  icon={<FavoriteIcon />}
+                  value="settings"
+                  icon={<SettingsIcon />}
                 />
               </BottomNavigation>
             </Paper>

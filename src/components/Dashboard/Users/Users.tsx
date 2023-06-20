@@ -1,7 +1,7 @@
 export default function Users() {
   return (
     <>
-      <h1>Users page in dashboard</h1>
+      <h1>admin view of users</h1>
     </>
   );
 }

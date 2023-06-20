@@ -2,7 +2,7 @@
 import PersonIcon from '@mui/icons-material/Person'; // not signed in
 import EngineeringIcon from '@mui/icons-material/Engineering'; // admin
 import BadgeIcon from '@mui/icons-material/Badge'; // faculty
-import BackpackIcon from '@mui/icons-material/Backpack'; // student
+import SchoolIcon from '@mui/icons-material/School'; // student
 import Avatar from '@mui/material/Avatar'; // avatar component to be exported
 
 import React, { useEffect } from 'react';
@@ -14,25 +14,42 @@ function chooseIcon(role) {
   switch (role) {
     case 'admin':
       return (
-        <Avatar>
+        <Avatar sx={{ bgcolor: 'secondary.main' }}>
           <EngineeringIcon />
         </Avatar>
       );
     case 'faculty':
       return (
-        <Avatar>
+        <Avatar sx={{ bgcolor: 'secondary.main' }}>
           <BadgeIcon />
         </Avatar>
       );
-    case 'student':
+    case 'student_applying':
       return (
-        <Avatar>
-          <BackpackIcon />
+        <Avatar
+          sx={{
+            bgcolor: 'transparent',
+            '&:hover': { color: 'secondary.main' },
+          }}
+        >
+          <SchoolIcon />
+        </Avatar>
+      );
+    case 'student_applied':
+      return (
+        <Avatar sx={{ bgcolor: 'secondary.main' }}>
+          <SchoolIcon />
+        </Avatar>
+      );
+    case 'student_accepted':
+      return (
+        <Avatar sx={{ bgcolor: 'secondary.main' }}>
+          <SchoolIcon />
         </Avatar>
       );
     default:
       return (
-        <Avatar>
+        <Avatar sx={{ bgcolor: 'secondary.main' }}>
           <PersonIcon />
         </Avatar>
       );
@@ -65,7 +82,7 @@ export default function UserIcon() {
 
   if (!user) {
     return (
-      <Avatar>
+      <Avatar sx={{ bgcolor: 'secondary.main' }}>
         <PersonIcon />
       </Avatar>
     );
