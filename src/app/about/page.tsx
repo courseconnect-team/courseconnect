@@ -51,7 +51,7 @@ const AboutPage: React.FC = () => {
         </ul>
         <Typography variant="body1" component="p" paragraph>
           Course Connect is supervised by Professor Cristophe Bobda, an esteemed
-          faculty member at the University of Florida (UF). Professor Bobda's
+          faculty member at the University of Florida (UF). 
         </Typography>
         <Accordion>
           <AccordionSummary
