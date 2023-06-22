@@ -1,9 +1,7 @@
-
-
-
-import * as React from "react";
-import * as ReactDOM from "react-dom/client";
-import Button from "@mui/material/Button";
+'use client';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom/client';
+import Button from '@mui/material/Button';
 import {
   Container,
   Box,
@@ -12,13 +10,12 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  TextField
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+  TextField,
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const AboutPage: React.FC = () => {
   return (
-  
     <Container maxWidth="sm">
       <Box sx={{ my: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
@@ -51,7 +48,7 @@ const AboutPage: React.FC = () => {
         </ul>
         <Typography variant="body1" component="p" paragraph>
           Course Connect is supervised by Professor Cristophe Bobda, an esteemed
-          faculty member at the University of Florida (UF). 
+          faculty member at the University of Florida (UF).
         </Typography>
         <Accordion>
           <AccordionSummary
@@ -91,7 +88,6 @@ const AboutPage: React.FC = () => {
       </Box>
     </Container>
   );
-}
-
+};
 
 export default AboutPage;
