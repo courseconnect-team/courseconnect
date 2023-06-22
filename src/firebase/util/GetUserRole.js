@@ -1,3 +1,5 @@
+// given a user ID, this function returns the role (student, faculty, admin) of that user
+
 import { useEffect, useState } from 'react';
 import firebase from '@/firebase/firebase_config';
 import { useDocument } from 'react-firebase-hooks/firestore';

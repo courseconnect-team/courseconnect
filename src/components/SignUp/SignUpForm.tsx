@@ -10,8 +10,8 @@ import Box from '@mui/material/Box';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import DepartmentSelect from './DepartmentSelect';
-import RoleSelect from './RoleSelect';
+import DepartmentSelect from '../FormUtil/DepartmentSelect';
+import RoleSelect from '../FormUtil/RoleSelect';
 
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
