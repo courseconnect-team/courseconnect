@@ -3,7 +3,6 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
 
 export default function PositionSelect() {
   const [value, setValue] = React.useState('');
@@ -14,12 +13,7 @@ export default function PositionSelect() {
 
   return (
     <FormControl>
-      <FormLabel required id="position-radio-group-label">
-        Position
-      </FormLabel>
       <RadioGroup
-        row
-        aria-labelledby="position-radio-group-label"
         name="positions-radio-group"
         value={value}
         onChange={handleChange}
