@@ -17,8 +17,7 @@ import ProficiencySelect from '@/components/FormUtil/ProficiencySelect';
 import PositionSelect from '@/components/FormUtil/PositionSelect';
 import AvailabilityCheckbox from '@/components/FormUtil/AvailabilityCheckbox';
 import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
-import CourseSelect from '@/components/FormUtil/CourseSelect';
-
+import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
 
 export default function Application() {
@@ -30,7 +29,7 @@ export default function Application() {
   const current = new Date();
   const current_date = `${
     current.getMonth() + 1
-  }/${current.getDate()}/${current.getFullYear()}`;
+  }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -62,7 +61,7 @@ export default function Application() {
       .map((course) => course.trim());
 
     // extract the specific user data from the form data into a parsable object
-    const userData = {
+    const applicationData = {
       firstname: formData.get('firstName') as string,
       lastname: formData.get('lastName') as string,
       email: formData.get('email') as string,
@@ -90,7 +89,31 @@ export default function Application() {
       date: current_date,
     };
 
-    console.log(userData);
+    // console.log(applicationData); // FOR DEBUGGING ONLY!
+
+    // use fetch to send the user data to the server
+    // this goes to a cloud function which creates a document based on
+    // the data from the form, identified by the user's firebase auth uid
+    const response = await fetch(
+      'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(applicationData),
+      }
+    );
+
+    if (response.ok) {
+      console.log('SUCCESS: Application data sent to server successfully');
+      // now, update the role of the user to student_applied
+      UpdateRole(userId, 'student_applied');
+      // then, refresh the page somehow to reflect the state changing
+      // so the form goes away and the user can see the status of their application
+    } else {
+      console.log('ERROR: Application data failed to send to server');
+    }
   };
 
   return (

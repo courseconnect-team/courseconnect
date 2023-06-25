@@ -6,7 +6,6 @@
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
-
 import * as functions from 'firebase-functions';
 const admin = require('firebase-admin');
 admin.initializeApp();
@@ -69,26 +68,37 @@ export const processApplicationForm = functions.https.onRequest(
       // Handle other requests
 
       // Extract user object data from post request
-      const userObject = {
+      const applicationObject = {
         firstname: request.body.firstname,
         lastname: request.body.lastname,
         email: request.body.email,
-        password: request.body.password,
-        department: request.body.department,
-        role: request.body.role,
         ufid: request.body.ufid,
+        phonenumber: request.body.phonenumber,
+        department: request.body.department,
+        degree: request.body.degree,
+        semesterstatus: request.body.semesterstatus,
+        nationality: request.body.nationality,
+        englishproficiency: request.body.englishproficiency,
+        position: request.body.position,
+        available_hours: request.body.available_hours,
+        available_semesters: request.body.available_semesters,
+        courses: request.body.courses,
+        qualifications: request.body.qualifications,
         uid: request.body.uid,
+        date: request.body.date,
       };
 
       // Create the document within the "users" collection
       db.collection('applications')
-        .doc(userObject.uid)
-        .set(userObject)
+        .doc(applicationObject.uid)
+        .set(applicationObject)
         .then(() => {
-          response.status(200).send('User created successfully');
+          response.status(200).send('Application created successfully');
         })
         .catch((error: any) => {
-          response.status(500).send('Error creating user: ' + error.message);
+          response
+            .status(500)
+            .send('Error creating application: ' + error.message);
         });
     }
   }
