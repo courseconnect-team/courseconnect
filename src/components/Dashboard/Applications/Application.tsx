@@ -17,9 +17,7 @@ import ProficiencySelect from '@/components/FormUtil/ProficiencySelect';
 import PositionSelect from '@/components/FormUtil/PositionSelect';
 import AvailabilityCheckbox from '@/components/FormUtil/AvailabilityCheckbox';
 import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
-import QualificationsPrompt from '@/components/FormUtil/QualificationsPrompt';
 import CourseSelect from '@/components/FormUtil/CourseSelect';
-import { useForm } from 'react-hook-form';
 
 import { useAuth } from '@/firebase/auth/auth_context';
 
@@ -58,6 +56,11 @@ export default function Application() {
     const semesterCheckbox_spring_2024 =
       formData.get('semesterCheckbox_spring_2024') === 'on';
 
+    const courseListString = formData.get('course-prompt') as string;
+    const courseList = courseListString
+      .split(',')
+      .map((course) => course.trim());
+
     // extract the specific user data from the form data into a parsable object
     const userData = {
       firstname: formData.get('firstName') as string,
@@ -81,7 +84,7 @@ export default function Application() {
         fall_2023: semesterCheckbox_fall_2023,
         spring_2024: semesterCheckbox_spring_2024,
       },
-      courses: formData.getAll('courses-checkboxes') as any,
+      courses: courseList as string[],
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
       date: current_date,
@@ -226,14 +229,36 @@ export default function Application() {
             </Grid>
             <Grid item xs={12}>
               <Typography>
-                Please select the course(s) for which you are applying.
+                Please list the course(s) for which you are applying, separated
+                by commas.
               </Typography>
+              <TextField
+                required
+                fullWidth
+                id="course-prompt"
+                name="course-prompt"
+                label="Course(s)"
+                multiline
+                rows={1}
+                variant="filled"
+                helperText="Example: COP3502, COP3503, COP3504"
+              />
             </Grid>
             <Grid item xs={12}>
               <Typography>
                 Please describe your qualifications for the position and
                 course(s) for which you are applying.
               </Typography>
+              <TextField
+                required
+                fullWidth
+                id="qualifications-prompt"
+                name="qualifications-prompt"
+                label="I am qualified because..."
+                multiline
+                rows={8}
+                variant="filled"
+              />
             </Grid>
             <Grid item xs={12}></Grid>
           </Grid>

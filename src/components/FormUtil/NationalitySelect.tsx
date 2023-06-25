@@ -30,7 +30,7 @@ export default function NationalitySelect({
       id="nationality-select"
       options={nationalities}
       sx={{ width: 300 }}
-      renderInput={(params) => <TextField {...params} label="Controllable" />}
+      renderInput={(params) => <TextField {...params} label="Nationality" />}
       renderOption={(props, option) => {
         return (
           <li {...props} key={option}>
