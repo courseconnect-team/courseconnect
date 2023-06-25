@@ -176,8 +176,8 @@ export default function BottomMenu(props: BottomMenuProps) {
                 onChange={handleChange}
               >
                 <BottomNavigationAction
-                  label="Application"
-                  value="application"
+                  label="Application Status"
+                  value="application_status"
                   icon={<EditNoteIcon />}
                 />
                 <BottomNavigationAction

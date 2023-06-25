@@ -12,7 +12,7 @@ import Users from '@/components/Dashboard/Users/Users';
 import Courses from '@/components/Dashboard/Courses/Courses';
 import Applications from '@/components/Dashboard/Applications/Applications';
 import Application from '@/components/Dashboard/Applications/Application';
-import TestForm from '@/components/Dashboard/Applications/TestForm';
+import ShowApplicationStatus from '@/components/Dashboard/Applications/AppStatus';
 
 // user information reference: https://firebase.google.com/docs/auth/web/manage-users
 
@@ -39,6 +39,7 @@ export default function Dashboard() {
         {activeComponent === 'courses' && <Courses />}
         {activeComponent === 'applications' && <Applications />}
         {activeComponent === 'application' && <Application />}
+        {activeComponent === 'application_status' && <ShowApplicationStatus />}
 
         <BottomMenu
           user_role={role as string}

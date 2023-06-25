@@ -108,9 +108,10 @@ export default function Application() {
     if (response.ok) {
       console.log('SUCCESS: Application data sent to server successfully');
       // now, update the role of the user to student_applied
-      UpdateRole(userId, 'student_applied');
+      await UpdateRole(userId, 'student_applied');
       // then, refresh the page somehow to reflect the state changing
       // so the form goes away and the user can see the status of their application
+      location.reload();
     } else {
       console.log('ERROR: Application data failed to send to server');
     }
