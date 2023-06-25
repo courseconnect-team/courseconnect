@@ -12,6 +12,7 @@ import Users from '@/components/Dashboard/Users/Users';
 import Courses from '@/components/Dashboard/Courses/Courses';
 import Applications from '@/components/Dashboard/Applications/Applications';
 import Application from '@/components/Dashboard/Applications/Application';
+import TestForm from '@/components/Dashboard/Applications/TestForm';
 
 // user information reference: https://firebase.google.com/docs/auth/web/manage-users
 

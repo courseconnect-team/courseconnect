@@ -1,9 +1,19 @@
 import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import Chip from '@mui/material/Chip';
 
-export default function NationalitySelect() {
-  const [value, setValue] = React.useState<string | null>(nationalities[3]);
+// important autocomplete warning fix
+// https://stackoverflow.com/questions/75818761/material-ui-autocomplete-warning-a-props-object-containing-a-key-prop-is-be
+
+interface NationalitySelectProps {
+  onNationalityChange: (value: string | null) => void;
+}
+
+export default function NationalitySelect({
+  onNationalityChange,
+}: NationalitySelectProps) {
+  const [value, setValue] = React.useState<string | null>(null);
   const [inputValue, setInputValue] = React.useState('');
 
   return (
@@ -11,6 +21,7 @@ export default function NationalitySelect() {
       value={value}
       onChange={(event: any, newValue: string | null) => {
         setValue(newValue);
+        onNationalityChange(newValue);
       }}
       inputValue={inputValue}
       onInputChange={(event, newInputValue) => {
@@ -20,6 +31,18 @@ export default function NationalitySelect() {
       options={nationalities}
       sx={{ width: 300 }}
       renderInput={(params) => <TextField {...params} label="Controllable" />}
+      renderOption={(props, option) => {
+        return (
+          <li {...props} key={option}>
+            {option}
+          </li>
+        );
+      }}
+      renderTags={(tagValue, getTagProps) => {
+        return tagValue.map((option, index) => (
+          <Chip {...getTagProps({ index })} key={option} label={option} />
+        ));
+      }}
     />
   );
 }

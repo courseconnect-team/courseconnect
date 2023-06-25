@@ -14,11 +14,12 @@ import DegreeSelect from '@/components/FormUtil/DegreeSelect';
 import SemesterStatusSelect from '@/components/FormUtil/SemesterStatusSelect';
 import NationalitySelect from '@/components/FormUtil/NationalitySelect';
 import ProficiencySelect from '@/components/FormUtil/ProficiencySelect';
-import SemesterSelect from '@/components/FormUtil/SemesterSelect';
-import AvailabilitySelect from '@/components/FormUtil/AvailabilitySelect';
 import PositionSelect from '@/components/FormUtil/PositionSelect';
+import AvailabilityCheckbox from '@/components/FormUtil/AvailabilityCheckbox';
+import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
 import QualificationsPrompt from '@/components/FormUtil/QualificationsPrompt';
 import CourseSelect from '@/components/FormUtil/CourseSelect';
+import { useForm } from 'react-hook-form';
 
 import { useAuth } from '@/firebase/auth/auth_context';
 
@@ -33,12 +34,31 @@ export default function Application() {
     current.getMonth() + 1
   }/${current.getDate()}/${current.getFullYear()}`;
 
+  // extract the nationality
+  const [nationality, setNationality] = React.useState<string | null>(null);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
-    // extract the specific user data from the form data into a parsable object
 
+    // extract availability checkbox's values
+    const availabilityCheckbox_seven =
+      formData.get('availabilityCheckbox_seven') === 'on';
+    const availabilityCheckbox_fourteen =
+      formData.get('availabilityCheckbox_fourteen') === 'on';
+    const availabilityCheckbox_twenty =
+      formData.get('availabilityCheckbox_twenty') === 'on';
+
+    // extract semester checkbox's values
+    const semesterCheckbox_summerb_2023 =
+      formData.get('semesterCheckbox_summerb_2023') === 'on';
+    const semesterCheckbox_fall_2023 =
+      formData.get('semesterCheckbox_fall_2023') === 'on';
+    const semesterCheckbox_spring_2024 =
+      formData.get('semesterCheckbox_spring_2024') === 'on';
+
+    // extract the specific user data from the form data into a parsable object
     const userData = {
       firstname: formData.get('firstName') as string,
       lastname: formData.get('lastName') as string,
@@ -48,14 +68,20 @@ export default function Application() {
       department: formData.get('department-select') as string,
       degree: formData.get('degrees-radio-group') as string,
       semesterstatus: formData.get('semstatus-radio-group') as string,
-      nationality: formData.get('nationality-select') as string,
+      nationality: nationality as string,
       englishproficiency: formData.get('proficiency-select') as string,
       position: formData.get('positions-radio-group') as string,
-      availablesemesters: formData.get(
-        'availability-semesters-checkbox'
-      ) as any,
-      availablehours: formData.get('availability-hours-checkbox') as any,
-      courses: formData.get('courses-checkboxes') as any,
+      available_hours: {
+        seven: availabilityCheckbox_seven,
+        fourteen: availabilityCheckbox_fourteen,
+        twenty: availabilityCheckbox_twenty,
+      },
+      available_semesters: {
+        summerb_2023: semesterCheckbox_summerb_2023,
+        fall_2023: semesterCheckbox_fall_2023,
+        spring_2024: semesterCheckbox_spring_2024,
+      },
+      courses: formData.getAll('courses-checkboxes') as any,
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
       date: current_date,
@@ -165,7 +191,7 @@ export default function Application() {
                 demographic basis for the applicant&apos;s proficiency in
                 English.
               </Typography>
-              <NationalitySelect />
+              <NationalitySelect onNationalityChange={setNationality} />
             </Grid>
             <Grid item xs={12}>
               <Typography>
@@ -189,28 +215,27 @@ export default function Application() {
               <Typography>
                 Please select the semester(s) for which you are applying.
               </Typography>
-              <SemesterSelect />
+              <SemesterCheckbox name="semesterCheckbox" />
             </Grid>
             <Grid item xs={12}>
               <Typography>
                 Please select one or more options describing the number of hours
                 per week you will be available.
               </Typography>
-              <AvailabilitySelect />
+              <AvailabilityCheckbox name="availabilityCheckbox" />
             </Grid>
             <Grid item xs={12}>
               <Typography>
                 Please select the course(s) for which you are applying.
               </Typography>
-              <CourseSelect />
             </Grid>
             <Grid item xs={12}>
               <Typography>
                 Please describe your qualifications for the position and
                 course(s) for which you are applying.
               </Typography>
-              <QualificationsPrompt />
             </Grid>
+            <Grid item xs={12}></Grid>
           </Grid>
 
           <Button
