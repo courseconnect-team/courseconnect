@@ -86,6 +86,7 @@ export const processApplicationForm = functions.https.onRequest(
         qualifications: request.body.qualifications,
         uid: request.body.uid,
         date: request.body.date,
+        status: request.body.status,
       };
 
       // Create the document within the "users" collection
