@@ -5,7 +5,6 @@ export default function Home() {
   return (
     <>
       <main className={scss.main}>
-        <h1>This is a test</h1>
         <SignInForm />
       </main>
     </>
