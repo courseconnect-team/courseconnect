@@ -20,6 +20,14 @@ import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
 
+// note that the application needs to be able to be connected to a specific faculty member
+// so that the faculty member can view the application and accept/reject it
+// the user can indicate whether or not it is unspecified I suppose?
+// but that would leave a little bit of a mess.
+// best to parse the existing courses and then have the user select
+// from a list of existing courses
+// ...yeah that's probably the best way to do it
+
 export default function Application() {
   // get the current user's uid
   const { user } = useAuth();

@@ -3,7 +3,7 @@ import UserTable from './UserTable';
 export default function Users() {
   return (
     <>
-      <h1>admin view of users</h1>
+      <h1>Admin view of users with table and CRUD</h1>
       <UserTable />
     </>
   );

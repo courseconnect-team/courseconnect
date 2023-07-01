@@ -40,6 +40,8 @@ export default function CreateCourseDialog() {
       class_number: formData.get('class-number') as string,
       professor_names: professorNameList as string[],
       professor_emails: professorEmailList as string[],
+      helper_names: [] as string[],
+      helper_emails: [] as string[],
       credits: formData.get('course-credits') as string,
       enrollment_cap: formData.get('enrollment-cap') as string,
       num_enrolled: formData.get('num-enrolled') as string,

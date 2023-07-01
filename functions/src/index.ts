@@ -118,6 +118,8 @@ export const processCreateCourseForm = functions.https.onRequest(
         class_number: request.body.class_number,
         professor_names: request.body.professor_names,
         professor_emails: request.body.professor_emails,
+        helper_names: request.body.helper_names,
+        helper_emails: request.body.helper_emails,
         credits: request.body.credits,
         enrollment_cap: request.body.enrollment_cap,
         num_enrolled: request.body.num_enrolled,
