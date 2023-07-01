@@ -15,54 +15,77 @@ import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
+import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
+import DeleteCourse from '@/firebase/util/DeleteCourse';
 
 interface CourseData {
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-  role: string;
-  department: string;
-  ufid: string;
-  firebase_uid: string;
+  class_number: string;
+  code: string;
+  title: string;
+  credits: string;
+  num_enrolled: string;
+  enrollment_cap: string;
+  professor_names: string[];
+  professor_emails: string[];
+  helper_names: string[];
+  helper_emails: string[];
 }
 
 function createData(
-  firstname: string,
-  lastname: string,
-  email: string,
-  password: string,
-  role: string,
-  department: string,
-  ufid: string,
-  firebase_uid: string
+  class_number: string,
+  code: string,
+  title: string,
+  credits: string,
+  num_enrolled: string,
+  enrollment_cap: string,
+  professor_names: string[],
+  professor_emails: string[],
+  helper_names: string[],
+  helper_emails: string[]
 ): CourseData {
   return {
-    firstname,
-    lastname,
-    email,
-    password,
-    role,
-    department,
-    ufid,
-    firebase_uid,
+    class_number,
+    code,
+    title,
+    credits,
+    num_enrolled,
+    enrollment_cap,
+    professor_names,
+    professor_emails,
+    helper_names,
+    helper_emails,
   };
 }
 
 // parse the firestore data of each user and create the rows
+// MAKE SURE TO ADD A NEWLINE CHARACTER AFTER EACH NAME AND EMAIL EXCEPT LAST!!
 const rows = [
   createData(
-    'firstname',
-    'lastname',
-    'email',
-    'password',
-    'role',
-    'department',
-    'ufid',
-    'firebase_uid'
+    '12345',
+    'COP 4331',
+    'Database Systems',
+    '3',
+    '100',
+    '100',
+    ['John Doe\n', 'Jane Doe'],
+    ['johndoe@ufl.edu\n', 'janedoe@ufl.edu'],
+    ['Albert Gator'],
+    ['albert@ufl.edu']
+  ),
+  createData(
+    '1234',
+    'COP 4331',
+    'Database Systems',
+    '3',
+    '100',
+    '100',
+    ['John Doe'],
+    ['johndoe@ufl.edu'],
+    ['Jane Doe'],
+    ['janedoe@ufl.edu']
   ),
 ];
 
@@ -118,52 +141,64 @@ interface HeadCell {
 
 const headCells: readonly HeadCell[] = [
   {
-    id: 'firstname',
+    id: 'class_number',
     numeric: false,
     disablePadding: false,
-    label: 'First Name',
+    label: 'Class Number',
   },
   {
-    id: 'lastname',
+    id: 'code',
     numeric: false,
     disablePadding: false,
-    label: 'Last Name',
+    label: 'Course Code',
   },
   {
-    id: 'email',
+    id: 'title',
     numeric: false,
     disablePadding: false,
-    label: 'Email',
+    label: 'Course Title',
   },
   {
-    id: 'password',
-    numeric: false,
+    id: 'credits',
+    numeric: true,
     disablePadding: false,
-    label: 'Password',
+    label: 'Credits',
   },
   {
-    id: 'role',
-    numeric: false,
+    id: 'num_enrolled',
+    numeric: true,
     disablePadding: false,
-    label: 'Role',
+    label: 'Number Enrolled',
   },
   {
-    id: 'department',
-    numeric: false,
+    id: 'enrollment_cap',
+    numeric: true,
     disablePadding: false,
-    label: 'Department',
+    label: 'Enrollment Capacity',
   },
   {
-    id: 'ufid',
+    id: 'professor_names',
     numeric: false,
     disablePadding: false,
-    label: 'UFID',
+    label: 'Professor Names',
   },
   {
-    id: 'firebase_uid',
+    id: 'professor_emails',
     numeric: false,
     disablePadding: false,
-    label: 'Firebase UID',
+    label: 'Professor Emails',
+  },
+  {
+    id: 'helper_names',
+    numeric: false,
+    disablePadding: false,
+    label: 'Assistant Names',
+  },
+  {
+    id: 'helper_emails',
+    numeric: false,
+    disablePadding: false,
+    label: 'Assistant Emails',
   },
 ];
 
@@ -235,10 +270,17 @@ function CourseTableHead(props: EnhancedTableProps) {
 
 interface EnhancedTableToolbarProps {
   numSelected: number;
+  selectedItems: readonly string[];
 }
 
 function CourseTableToolbar(props: EnhancedTableToolbarProps) {
-  const { numSelected } = props;
+  const { numSelected, selectedItems } = props;
+
+  const deleteCourseButton = () => {
+    selectedItems.forEach((course_code) => {
+      DeleteCourse(course_code);
+    });
+  };
 
   return (
     <Toolbar
@@ -275,9 +317,13 @@ function CourseTableToolbar(props: EnhancedTableToolbarProps) {
       )}
       {numSelected > 0 ? (
         <Tooltip title="Delete">
-          <IconButton>
-            <DeleteIcon />
-          </IconButton>
+          <Button
+            variant="contained"
+            onClick={deleteCourseButton}
+            startIcon={<DeleteIcon />}
+          >
+            Delete
+          </Button>
         </Tooltip>
       ) : (
         <Tooltip title="Filter list">
@@ -292,7 +338,8 @@ function CourseTableToolbar(props: EnhancedTableToolbarProps) {
 
 export default function CourseTable() {
   const [order, setOrder] = React.useState<Order>('asc');
-  const [orderBy, setOrderBy] = React.useState<keyof CourseData>('firstname');
+  const [orderBy, setOrderBy] =
+    React.useState<keyof CourseData>('class_number');
   const [selected, setSelected] = React.useState<readonly string[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -308,7 +355,7 @@ export default function CourseTable() {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.firstname);
+      const newSelected = rows.map((n) => n.class_number);
       setSelected(newSelected);
       return;
     }
@@ -354,7 +401,7 @@ export default function CourseTable() {
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
+      stableSort(rows as any, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
@@ -364,7 +411,10 @@ export default function CourseTable() {
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <CourseTableToolbar numSelected={selected.length} />
+        <CourseTableToolbar
+          selectedItems={selected}
+          numSelected={selected.length}
+        />
         <TableContainer>
           <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
             <CourseTableHead
@@ -377,17 +427,19 @@ export default function CourseTable() {
             />
             <TableBody>
               {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.firstname);
+                const isItemSelected = isSelected(row.class_number as string);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.firstname)}
+                    onClick={(event) =>
+                      handleClick(event, row.class_number as string)
+                    }
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.firstname}
+                    key={row.class_number}
                     selected={isItemSelected}
                     sx={{ cursor: 'pointer' }}
                   >
@@ -406,15 +458,17 @@ export default function CourseTable() {
                       scope="row"
                       padding="none"
                     >
-                      {row.firstname}
+                      {row.class_number}
                     </TableCell>
-                    <TableCell align="right">{row.lastname}</TableCell>
-                    <TableCell align="right">{row.email}</TableCell>
-                    <TableCell align="right">{row.password}</TableCell>
-                    <TableCell align="right">{row.role}</TableCell>
-                    <TableCell align="right">{row.department}</TableCell>
-                    <TableCell align="right">{row.ufid}</TableCell>
-                    <TableCell align="right">{row.firebase_uid}</TableCell>
+                    <TableCell align="right">{row.code}</TableCell>
+                    <TableCell align="right">{row.title}</TableCell>
+                    <TableCell align="right">{row.credits}</TableCell>
+                    <TableCell align="right">{row.num_enrolled}</TableCell>
+                    <TableCell align="right">{row.enrollment_cap}</TableCell>
+                    <TableCell align="right">{row.professor_names}</TableCell>
+                    <TableCell align="right">{row.professor_emails}</TableCell>
+                    <TableCell align="right">{row.helper_names}</TableCell>
+                    <TableCell align="right">{row.helper_emails}</TableCell>
                   </TableRow>
                 );
               })}
