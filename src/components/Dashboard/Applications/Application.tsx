@@ -92,7 +92,7 @@ export default function Application() {
 
     // console.log(applicationData); // FOR DEBUGGING ONLY!
 
-    // use fetch to send the user data to the server
+    // use fetch to send the application data to the server
     // this goes to a cloud function which creates a document based on
     // the data from the form, identified by the user's firebase auth uid
     const response = await fetch(
@@ -178,7 +178,7 @@ export default function Application() {
                 fullWidth
                 name="phone-number"
                 label="Phone Number"
-                type="phone-number"
+                type="tel"
                 id="phone-number"
                 autoComplete="phone-number"
                 helperText="Enter your phone number. Example: 123-456-7890"

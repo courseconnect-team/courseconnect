@@ -11,12 +11,6 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
-// export const createUserDocument = functions.auth.user().onCreate((user) => {
-//   db.collection('users')
-//     .doc(user.uid)
-//     .set(JSON.parse(JSON.stringify(user)));
-// });
-
 export const processSignUpForm = functions.https.onRequest(
   (request, response) => {
     response.set('Access-Control-Allow-Origin', '*');
@@ -89,7 +83,7 @@ export const processApplicationForm = functions.https.onRequest(
         status: request.body.status,
       };
 
-      // Create the document within the "users" collection
+      // Create the document within the "applications" collection
       db.collection('applications')
         .doc(applicationObject.uid)
         .set(applicationObject)
@@ -105,10 +99,40 @@ export const processApplicationForm = functions.https.onRequest(
   }
 );
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+export const processCreateCourseForm = functions.https.onRequest(
+  (request, response) => {
+    response.set('Access-Control-Allow-Origin', '*');
+    response.set('Access-Control-Allow-Methods', 'GET, POST');
+    response.set('Access-Control-Allow-Headers', 'Content-Type');
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+    if (request.method === 'OPTIONS') {
+      // Handle preflight request
+      response.status(204).send('');
+    } else {
+      // Handle other requests
+
+      // Extract user object data from post request
+      const courseObject = {
+        code: request.body.code,
+        title: request.body.title,
+        class_number: request.body.class_number,
+        professor_names: request.body.professor_names,
+        professor_emails: request.body.professor_emails,
+        credits: request.body.credits,
+        enrollment_cap: request.body.enrollment_cap,
+        num_enrolled: request.body.num_enrolled,
+      };
+
+      // Create the document within the "courses" collection
+      db.collection('courses')
+        .doc(courseObject.class_number)
+        .set(courseObject)
+        .then(() => {
+          response.status(200).send('Course created successfully');
+        })
+        .catch((error: any) => {
+          response.status(500).send('Error creating course: ' + error.message);
+        });
+    }
+  }
+);
