@@ -28,10 +28,6 @@ export default function Dashboard() {
   if (user) {
     return (
       <>
-        <h1>
-          role: {role as string} email: {user?.email}
-        </h1>
-
         {activeComponent === 'welcome' && <DashboardWelcome />}
         {activeComponent === 'profile' && <Profile />}
         {activeComponent === 'settings' && <Settings />}
