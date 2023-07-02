@@ -113,7 +113,25 @@ export default function TestGrid() {
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+    const updatedRow = userData.find((row) => row.id === id);
+    if (updatedRow) {
+      firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .update(updatedRow)
+        .then(() => {
+          setRowModesModel({
+            ...rowModesModel,
+            [id]: { mode: GridRowModes.View },
+          });
+        })
+        .catch((error) => {
+          console.error('Error updating document: ', error);
+        });
+    } else {
+      console.error('No matching user data found for id: ', id);
+    }
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
@@ -131,23 +149,67 @@ export default function TestGrid() {
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
-    setRowModesModel({
-      ...rowModesModel,
-      [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    });
-
     const editedRow = userData.find((row) => row.id === id);
     if (editedRow!.isNew) {
-      setUserData(userData.filter((row) => row.id !== id));
+      firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .delete()
+        .then(() => {
+          setUserData(userData.filter((row) => row.id !== id));
+        })
+        .catch((error) => {
+          console.error('Error removing document: ', error);
+        });
+    } else {
+      setRowModesModel({
+        ...rowModesModel,
+        [id]: { mode: GridRowModes.View, ignoreModifications: true },
+      });
     }
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
     const updatedRow = { ...(newRow as User), isNew: false };
-    setUserData(
-      userData.map((row) => (row.id === newRow.id ? updatedRow : row))
-    );
-    return updatedRow;
+    if (updatedRow) {
+      if (updatedRow.isNew) {
+        return firebase
+          .firestore()
+          .collection('users')
+          .add(updatedRow)
+          .then(() => {
+            setUserData(
+              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
+            );
+            return updatedRow;
+          })
+          .catch((error) => {
+            console.error('Error adding document: ', error);
+            throw error;
+          });
+      } else {
+        return firebase
+          .firestore()
+          .collection('users')
+          .doc(updatedRow.id)
+          .update(updatedRow)
+          .then(() => {
+            setUserData(
+              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
+            );
+            return updatedRow;
+          })
+          .catch((error) => {
+            console.error('Error updating document: ', error);
+            throw error;
+          });
+      }
+    } else {
+      return Promise.reject(
+        new Error('No matching user data found for id: ' + newRow.id)
+      );
+    }
   };
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
