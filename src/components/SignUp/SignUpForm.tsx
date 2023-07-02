@@ -126,7 +126,7 @@ export default function SignUpForm() {
                 fullWidth
                 name="password"
                 label="Password"
-                type="text"
+                type="password"
                 id="password"
                 autoComplete="new-password"
               />

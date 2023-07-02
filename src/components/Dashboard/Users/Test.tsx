@@ -1,31 +1,28 @@
+'use client';
 import * as React from 'react';
-import firebase from '@/firebase/firebase_config';
-import 'firebase/firestore';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
-import { Box } from '@mui/material';
 import {
+  GridRowsProp,
+  GridRowModesModel,
+  GridRowModes,
   DataGrid,
   GridColDef,
-  GridActionsCellItem,
-  GridRowId,
-  GridEventListener,
-  GridRowEditStopReasons,
-  GridRowsProp,
-  GridRowModes,
-  GridRowModesModel,
   GridToolbarContainer,
+  GridActionsCellItem,
+  GridEventListener,
+  GridRowId,
+  GridRowModel,
+  GridRowEditStopReasons,
 } from '@mui/x-data-grid';
-import { Button } from '@mui/material';
 import { randomId } from '@mui/x-data-grid-generator';
-
-interface UserGridProps {
-  data: User[];
-  setData: React.Dispatch<React.SetStateAction<User[]>>;
-}
+import firebase from '@/firebase/firebase_config';
+import 'firebase/firestore';
 
 interface User {
   id: string;
@@ -52,10 +49,23 @@ function EditToolbar(props: EditToolbarProps) {
 
   const handleClick = () => {
     const id = randomId();
-    setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
+    setRows((oldRows) => [
+      ...oldRows,
+      {
+        id,
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: '',
+        department: '',
+        role: '',
+        ufid: '',
+        isNew: true,
+      },
+    ]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'id' },
     }));
   };
 
@@ -68,8 +78,23 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-const UserGrid: React.FC<UserGridProps> = ({ data, setData }) => {
-  const [rows, setRows] = React.useState(data);
+export default function TestGrid() {
+  const [userData, setUserData] = React.useState<User[]>([]);
+
+  React.useEffect(() => {
+    const usersRef = firebase.firestore().collection('users');
+    usersRef.get().then((querySnapshot) => {
+      const data = querySnapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as User)
+      );
+      setUserData(data);
+    });
+  }, []);
+
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
@@ -92,13 +117,7 @@ const UserGrid: React.FC<UserGridProps> = ({ data, setData }) => {
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    const docRef = firebase
-      .firestore()
-      .collection('users')
-      .doc(id as string);
-    const doc = docRef.get();
-    docRef.delete();
-    setRows(rows.filter((row) => row.id !== id));
+    setUserData(userData.filter((row) => row.id !== id));
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -107,10 +126,22 @@ const UserGrid: React.FC<UserGridProps> = ({ data, setData }) => {
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
 
-    const editedRow = rows.find((row) => row.id === id);
+    const editedRow = userData.find((row) => row.id === id);
     if (editedRow!.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
+      setUserData(userData.filter((row) => row.id !== id));
     }
+  };
+
+  const processRowUpdate = (newRow: GridRowModel) => {
+    const updatedRow = { ...(newRow as User), isNew: false };
+    setUserData(
+      userData.map((row) => (row.id === newRow.id ? updatedRow : row))
+    );
+    return updatedRow;
+  };
+
+  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+    setRowModesModel(newRowModesModel);
   };
 
   const columns: GridColDef[] = [
@@ -184,25 +215,6 @@ const UserGrid: React.FC<UserGridProps> = ({ data, setData }) => {
     },
   ];
 
-  const saveRow = async (id: string) => {
-    const docRef = firebase.firestore().collection('users').doc(id);
-    const doc = await docRef.get();
-    if (doc.exists) {
-      // find the user within the local 'data' array
-      const localUser = data.find((item: User) => item.id === id);
-      if (localUser) {
-        // update the firestore document with the local user data
-        await docRef.set(localUser, { merge: true });
-        // update the local data to move the user out of edit mode
-        setData((prevData) =>
-          prevData.map((item) =>
-            item.id === id ? { ...localUser, mode: undefined } : item
-          )
-        );
-      }
-    }
-  };
-
   return (
     <Box
       sx={{
@@ -217,14 +229,20 @@ const UserGrid: React.FC<UserGridProps> = ({ data, setData }) => {
       }}
     >
       <DataGrid
-        rows={data}
+        rows={userData}
         columns={columns}
-        slots={{ toolbar: EditToolbar }}
-        slotProps={{ toolbar: { setRows, setRowModesModel } }}
+        editMode="row"
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
+        processRowUpdate={processRowUpdate}
+        slots={{
+          toolbar: EditToolbar,
+        }}
+        slotProps={{
+          toolbar: { setRows: setUserData, setRowModesModel },
+        }}
       />
     </Box>
   );
-};
-
-export default UserGrid;
+}
