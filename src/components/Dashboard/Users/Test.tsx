@@ -117,7 +117,17 @@ export default function TestGrid() {
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    setUserData(userData.filter((row) => row.id !== id));
+    firebase
+      .firestore()
+      .collection('users')
+      .doc(id.toString())
+      .delete()
+      .then(() => {
+        setUserData(userData.filter((row) => row.id !== id));
+      })
+      .catch((error) => {
+        console.error('Error removing document: ', error);
+      });
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
