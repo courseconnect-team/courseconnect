@@ -32,9 +32,13 @@ export function AuthProvider({ children }) {
       ) {
         router.push('/');
       }
-      // if (!user) {
-      //   router.push('/'); // Redirect to home page if user is not authenticated
-      // }
+      // if the user is authenticated and the current page is the signin screen or the signup screen, then push to './dashboard'
+      if (
+        user &&
+        (pathname === '/' || pathname === '/signup' || pathname === '/signin')
+      ) {
+        router.push('/dashboard');
+      }
     });
 
     return () => unsubscribe();

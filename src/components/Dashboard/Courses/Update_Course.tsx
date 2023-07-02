@@ -7,8 +7,13 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function CreateCourseDialog() {
+export type UpdateCourseDialogProps = {
+  courseCode: string;
+};
+
+export default function UpdateCourseDialog(props: UpdateCourseDialogProps) {
   const [open, setOpen] = React.useState(false);
+  const { courseCode } = props;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -85,14 +90,14 @@ export default function CreateCourseDialog() {
   return (
     <div>
       <Button variant="outlined" onClick={handleClickOpen}>
-        Create Course
+        Update Course
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Create a Course</DialogTitle>
+        <DialogTitle>Update a Course</DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
             <DialogContentText>
-              To create a course manually, please enter the course information
+              To update a course manually, please enter the course information
               in the form below.
             </DialogContentText>
             <TextField

@@ -313,7 +313,7 @@ function CourseTableToolbar(props: EnhancedTableToolbarProps) {
           id="tableTitle"
           component="div"
         >
-          Nutrition
+          Courses
         </Typography>
       )}
       {numSelected > 0 ? (
@@ -322,7 +322,7 @@ function CourseTableToolbar(props: EnhancedTableToolbarProps) {
             <Button
               variant="contained"
               onClick={deleteCourseButton}
-              startIcon={<DeleteIcon />}
+              startIcon={<ChangeCircleIcon />}
             >
               Update
             </Button>
