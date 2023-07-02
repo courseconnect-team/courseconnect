@@ -17,6 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import DeleteCourse from '@/firebase/util/DeleteCourse';
@@ -64,14 +65,14 @@ function createData(
 // MAKE SURE TO ADD A NEWLINE CHARACTER AFTER EACH NAME AND EMAIL EXCEPT LAST!!
 const rows = [
   createData(
-    '12345',
+    '123456',
     'COP 4331',
     'Database Systems',
     '3',
     '100',
     '100',
-    ['John Doe\n', 'Jane Doe'],
-    ['johndoe@ufl.edu\n', 'janedoe@ufl.edu'],
+    ['John Doe,\n', 'Jane Doe'],
+    ['johndoe@ufl.edu,\n', 'janedoe@ufl.edu'],
     ['Albert Gator'],
     ['albert@ufl.edu']
   ),
@@ -316,15 +317,26 @@ function CourseTableToolbar(props: EnhancedTableToolbarProps) {
         </Typography>
       )}
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <Button
-            variant="contained"
-            onClick={deleteCourseButton}
-            startIcon={<DeleteIcon />}
-          >
-            Delete
-          </Button>
-        </Tooltip>
+        <>
+          <Tooltip title="Update">
+            <Button
+              variant="contained"
+              onClick={deleteCourseButton}
+              startIcon={<DeleteIcon />}
+            >
+              Update
+            </Button>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <Button
+              variant="contained"
+              onClick={deleteCourseButton}
+              startIcon={<DeleteIcon />}
+            >
+              Delete
+            </Button>
+          </Tooltip>
+        </>
       ) : (
         <Tooltip title="Filter list">
           <IconButton>
