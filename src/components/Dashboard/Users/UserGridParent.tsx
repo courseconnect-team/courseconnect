@@ -12,6 +12,8 @@ interface User {
   department: string;
   role: string;
   ufid: string;
+  isNew?: boolean;
+  mode?: 'edit' | 'view' | undefined;
 }
 
 const UserGridParent: React.FC = () => {
@@ -31,7 +33,7 @@ const UserGridParent: React.FC = () => {
     });
   }, []);
 
-  return <UserGrid data={userData} />;
+  return <UserGrid data={userData} setData={setUserData} />;
 };
 
 export default UserGridParent;
