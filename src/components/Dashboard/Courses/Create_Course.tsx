@@ -23,25 +23,15 @@ export default function CreateCourseDialog() {
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
 
-    const professorNameString = formData.get('professor-names') as string;
-    const professorNameList = professorNameString
-      .split(',')
-      .map((professorName) => professorName.trim());
-
-    const professorsEmailString = formData.get('professor-emails') as string;
-    const professorEmailList = professorsEmailString
-      .split(',')
-      .map((professorEmail) => professorEmail.trim());
-
     // extract the specific user data from the form data into a parsable object
     const courseData = {
       code: formData.get('course-code') as string,
       title: formData.get('course-title') as string,
       class_number: formData.get('class-number') as string,
-      professor_names: professorNameList as string[],
-      professor_emails: professorEmailList as string[],
-      helper_names: [] as string[],
-      helper_emails: [] as string[],
+      professor_names: formData.get('professor-names') as string,
+      professor_emails: formData.get('professor-emails') as string,
+      helper_names: '' as string,
+      helper_emails: '' as string,
       credits: formData.get('course-credits') as string,
       enrollment_cap: formData.get('enrollment-cap') as string,
       num_enrolled: formData.get('num-enrolled') as string,
@@ -196,7 +186,6 @@ export default function CreateCourseDialog() {
               id="course-credits"
               name="course-credits"
               label="Number of Credits"
-              type="number"
               fullWidth
               variant="standard"
               helperText={

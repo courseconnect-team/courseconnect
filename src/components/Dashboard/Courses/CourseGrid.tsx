@@ -15,37 +15,40 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
+  GridValueFormatterParams,
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 
-interface User {
+interface Course {
   id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-  department: string;
-  role: string;
-  ufid: string;
+  code: string;
+  title: string;
+  credits: string;
+  num_enrolled: string;
+  enrollment_cap: string;
+  professor_names: string;
+  professor_emails: string;
+  helper_names: string;
+  helper_emails: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
 }
 
-export default function UserGrid() {
-  const [userData, setUserData] = React.useState<User[]>([]);
+export default function CourseGrid() {
+  const [courseData, setCourseData] = React.useState<Course[]>([]);
 
   React.useEffect(() => {
-    const usersRef = firebase.firestore().collection('users');
-    usersRef.get().then((querySnapshot) => {
+    const coursesRef = firebase.firestore().collection('courses');
+    coursesRef.get().then((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
           ({
             id: doc.id,
             ...doc.data(),
-          } as User)
+          } as Course)
       );
-      setUserData(data);
+      setCourseData(data);
     });
   }, []);
 
@@ -67,11 +70,11 @@ export default function UserGrid() {
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
-    const updatedRow = userData.find((row) => row.id === id);
+    const updatedRow = courseData.find((row) => row.id === id);
     if (updatedRow) {
       firebase
         .firestore()
-        .collection('users')
+        .collection('courses')
         .doc(id.toString())
         .update(updatedRow)
         .then(() => {
@@ -91,11 +94,11 @@ export default function UserGrid() {
   const handleDeleteClick = (id: GridRowId) => () => {
     firebase
       .firestore()
-      .collection('users')
+      .collection('courses')
       .doc(id.toString())
       .delete()
       .then(() => {
-        setUserData(userData.filter((row) => row.id !== id));
+        setCourseData(courseData.filter((row) => row.id !== id));
       })
       .catch((error) => {
         console.error('Error removing document: ', error);
@@ -103,15 +106,15 @@ export default function UserGrid() {
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
-    const editedRow = userData.find((row) => row.id === id);
+    const editedRow = courseData.find((row) => row.id === id);
     if (editedRow!.isNew) {
       firebase
         .firestore()
-        .collection('users')
+        .collection('courses')
         .doc(id.toString())
         .delete()
         .then(() => {
-          setUserData(userData.filter((row) => row.id !== id));
+          setCourseData(courseData.filter((row) => row.id !== id));
         })
         .catch((error) => {
           console.error('Error removing document: ', error);
@@ -125,16 +128,16 @@ export default function UserGrid() {
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...(newRow as User), isNew: false };
+    const updatedRow = { ...(newRow as Course), isNew: false };
     if (updatedRow) {
       if (updatedRow.isNew) {
         return firebase
           .firestore()
-          .collection('users')
+          .collection('courses')
           .add(updatedRow)
           .then(() => {
-            setUserData(
-              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
+            setCourseData(
+              courseData.map((row) => (row.id === newRow.id ? updatedRow : row))
             );
             return updatedRow;
           })
@@ -145,12 +148,12 @@ export default function UserGrid() {
       } else {
         return firebase
           .firestore()
-          .collection('users')
+          .collection('courses')
           .doc(updatedRow.id)
           .update(updatedRow)
           .then(() => {
-            setUserData(
-              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
+            setCourseData(
+              courseData.map((row) => (row.id === newRow.id ? updatedRow : row))
             );
             return updatedRow;
           })
@@ -171,24 +174,51 @@ export default function UserGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'Firestore UID', width: 70, editable: true },
+    { field: 'id', headerName: 'Class Number', width: 70, editable: true },
     {
-      field: 'firstname',
-      headerName: 'First Name',
+      field: 'code',
+      headerName: 'Course Code',
       width: 130,
       editable: true,
     },
-    { field: 'lastname', headerName: 'Last Name', width: 130, editable: true },
-    { field: 'email', headerName: 'Email', width: 200, editable: true },
-    { field: 'password', headerName: 'Password', width: 200, editable: true },
+    { field: 'title', headerName: 'Course Title', width: 130, editable: true },
+    { field: 'credits', headerName: 'Credits', width: 200, editable: true },
     {
-      field: 'department',
-      headerName: 'Department',
+      field: 'num_enrolled',
+      headerName: 'Number Enrolled',
+      width: 200,
+      editable: true,
+    },
+    {
+      field: 'enrollment_cap',
+      headerName: 'Enrollment Cap',
       width: 130,
       editable: true,
     },
-    { field: 'role', headerName: 'Role', width: 130, editable: true },
-    { field: 'ufid', headerName: 'UFID', width: 130, editable: true },
+    {
+      field: 'professor_names',
+      headerName: 'Professor Name(s)',
+      width: 130,
+      editable: true,
+    },
+    {
+      field: 'professor_emails',
+      headerName: 'Professor Email(s)',
+      width: 130,
+      editable: true,
+    },
+    {
+      field: 'helper_names',
+      headerName: 'Assistant Name(s)',
+      width: 130,
+      editable: true,
+    },
+    {
+      field: 'helper_emails',
+      headerName: 'Assistant Email(s)',
+      width: 130,
+      editable: true,
+    },
     {
       field: 'actions',
       type: 'actions',
@@ -255,13 +285,14 @@ export default function UserGrid() {
       }}
     >
       <DataGrid
-        rows={userData}
+        rows={courseData}
         columns={columns}
         editMode="row"
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        getRowHeight={() => 'auto'}
       />
     </Box>
   );

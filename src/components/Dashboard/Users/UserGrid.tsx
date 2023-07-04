@@ -11,6 +11,7 @@ import {
   GridRowModes,
   GridToolbarContainer,
   GridToolbarExport,
+  GridToolbar,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
@@ -273,13 +274,13 @@ export default function UserGrid() {
       <DataGrid
         rows={userData}
         columns={columns}
-        slots={{ toolbar: CustomToolbar }}
+        slots={{ toolbar: GridToolbar }}
         editMode="row"
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
-        checkboxSelection
+        pageSizeOptions={[25, 50, 75]}
       />
     </Box>
   );
