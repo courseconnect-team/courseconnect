@@ -16,6 +16,7 @@ import {
   GridRowModel,
   GridRowEditStopReasons,
 } from '@mui/x-data-grid';
+import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 
@@ -95,6 +96,7 @@ export default function UserGrid() {
       .doc(id.toString())
       .delete()
       .then(() => {
+        deleteUserHTTPRequest(id.toString());
         setUserData(userData.filter((row) => row.id !== id));
       })
       .catch((error) => {

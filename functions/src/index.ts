@@ -10,6 +10,7 @@ import * as functions from 'firebase-functions';
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
+const auth = admin.auth();
 
 export const processSignUpForm = functions.https.onRequest(
   (request, response) => {
@@ -134,6 +135,36 @@ export const processCreateCourseForm = functions.https.onRequest(
         })
         .catch((error: any) => {
           response.status(500).send('Error creating course: ' + error.message);
+        });
+    }
+  }
+);
+
+export const deleteUserFromID = functions.https.onRequest(
+  (request, response) => {
+    response.set('Access-Control-Allow-Origin', '*');
+    response.set('Access-Control-Allow-Methods', 'GET, POST');
+    response.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (request.method === 'OPTIONS') {
+      // Handle preflight request
+      response.status(204).send('');
+    } else {
+      // Handle other requests
+
+      // Extract user object data from post request
+      const userObject = {
+        auth_id: request.body.auth_id,
+      };
+
+      // Delete the user from firebase auth
+      auth
+        .deleteUser(userObject.auth_id)
+        .then(() => {
+          response.status(200).send('User deleted successfully');
+        })
+        .catch((error: any) => {
+          response.status(500).send('Error deleting user: ' + error.message);
         });
     }
   }

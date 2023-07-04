@@ -1,3 +1,5 @@
+// incorporate clickable link to the application form as a pop-up.
+
 'use client';
 import * as React from 'react';
 import Box from '@mui/material/Box';
