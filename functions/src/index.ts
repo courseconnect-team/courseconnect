@@ -116,7 +116,7 @@ export const processCreateCourseForm = functions.https.onRequest(
       const courseObject = {
         code: request.body.code,
         title: request.body.title,
-        class_number: request.body.class_number,
+        id: request.body.id,
         professor_names: request.body.professor_names,
         professor_emails: request.body.professor_emails,
         helper_names: request.body.helper_names,
@@ -128,7 +128,7 @@ export const processCreateCourseForm = functions.https.onRequest(
 
       // Create the document within the "courses" collection
       db.collection('courses')
-        .doc(courseObject.class_number)
+        .doc(courseObject.id)
         .set(courseObject)
         .then(() => {
           response.status(200).send('Course created successfully');

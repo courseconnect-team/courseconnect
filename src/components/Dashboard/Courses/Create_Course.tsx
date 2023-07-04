@@ -6,10 +6,19 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { GridRowsProp } from '@mui/x-data-grid';
 
-export default function CreateCourseDialog() {
-  const [open, setOpen] = React.useState(false);
+interface CreateCourseDialogProps {
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  setCourseData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+}
 
+const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
+  open,
+  setOpen,
+  setCourseData,
+}) => {
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -27,7 +36,7 @@ export default function CreateCourseDialog() {
     const courseData = {
       code: formData.get('course-code') as string,
       title: formData.get('course-title') as string,
-      class_number: formData.get('class-number') as string,
+      id: formData.get('class-number') as string,
       professor_names: formData.get('professor-names') as string,
       professor_emails: formData.get('professor-emails') as string,
       helper_names: '' as string,
@@ -65,8 +74,12 @@ export default function CreateCourseDialog() {
 
     if (response.ok) {
       console.log('SUCCESS: Course data sent to server successfully');
-      // location.reload(); refreshes the entire page, but ideally this shouldn't need to happen and the table should just update
-      location.reload();
+
+      // Update the course data with the new row
+      setCourseData((oldRows) => [...oldRows, courseData]);
+
+      // close the dialog
+      handleClose();
     } else {
       console.log('ERROR: Course data failed to send to server');
     }
@@ -245,4 +258,6 @@ export default function CreateCourseDialog() {
       </Dialog>
     </div>
   );
-}
+};
+
+export default CreateCourseDialog;

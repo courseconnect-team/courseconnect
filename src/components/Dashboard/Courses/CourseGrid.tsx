@@ -1,10 +1,13 @@
 'use client';
 import * as React from 'react';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
+import CreateCourseDialog from './Create_Course';
 import {
   GridRowModesModel,
   GridRowModes,
@@ -15,7 +18,8 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-  GridValueFormatterParams,
+  GridRowsProp,
+  GridToolbarContainer,
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -33,6 +37,31 @@ interface Course {
   helper_emails: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
+}
+
+interface EditToolbarProps {
+  setCourseData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+  setRowModesModel: (
+    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
+  ) => void;
+}
+
+function EditToolbar(props: EditToolbarProps) {
+  const { setCourseData, setRowModesModel } = props;
+
+  // Add state to control the dialog open status
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <GridToolbarContainer>
+      {/* Include your Dialog component here and pass the open state and setOpen function as props */}
+      <CreateCourseDialog
+        open={open}
+        setOpen={setOpen}
+        setCourseData={setCourseData}
+      />
+    </GridToolbarContainer>
+  );
 }
 
 export default function CourseGrid() {
@@ -293,6 +322,12 @@ export default function CourseGrid() {
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
         getRowHeight={() => 'auto'}
+        slots={{
+          toolbar: EditToolbar,
+        }}
+        slotProps={{
+          toolbar: { setCourseData, setRowModesModel },
+        }}
       />
     </Box>
   );
