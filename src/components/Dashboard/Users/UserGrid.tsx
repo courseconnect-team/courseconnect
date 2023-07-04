@@ -5,9 +5,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
+import Button from '@mui/material/Button';
 import {
   GridRowModesModel,
   GridRowModes,
+  GridToolbarContainer,
+  GridToolbarExport,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
@@ -15,6 +18,7 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
+  useGridApiContext,
 } from '@mui/x-data-grid';
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
@@ -104,6 +108,16 @@ export default function UserGrid() {
       });
   };
 
+  function CustomToolbar() {
+    const apiRef = useGridApiContext();
+
+    return (
+      <GridToolbarContainer>
+        <GridToolbarExport />
+      </GridToolbarContainer>
+    );
+  }
+
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = userData.find((row) => row.id === id);
     if (editedRow!.isNew) {
@@ -173,7 +187,7 @@ export default function UserGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'Firestore UID', width: 70, editable: true },
+    { field: 'id', headerName: 'Firestore UID', width: 130, editable: true },
     {
       field: 'firstname',
       headerName: 'First Name',
@@ -259,11 +273,13 @@ export default function UserGrid() {
       <DataGrid
         rows={userData}
         columns={columns}
+        slots={{ toolbar: CustomToolbar }}
         editMode="row"
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        checkboxSelection
       />
     </Box>
   );
