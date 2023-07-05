@@ -8,6 +8,7 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import DepartmentSelect from '@/components/FormUtil/DepartmentSelect';
+import GPA_Select from '@/components/FormUtil/GPASelect';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import DegreeSelect from '@/components/FormUtil/DegreeSelect';
@@ -17,9 +18,7 @@ import ProficiencySelect from '@/components/FormUtil/ProficiencySelect';
 import PositionSelect from '@/components/FormUtil/PositionSelect';
 import AvailabilityCheckbox from '@/components/FormUtil/AvailabilityCheckbox';
 import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
-import AdditionalSemesterPrompt, {
-  AdditionalSemesterPromptProps,
-} from '@/components/FormUtil/AddtlSemesterPrompt';
+import AdditionalSemesterPrompt from '@/components/FormUtil/AddtlSemesterPrompt';
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
 
@@ -81,6 +80,7 @@ export default function Application() {
       email: formData.get('email') as string,
       ufid: formData.get('ufid') as string,
       phonenumber: formData.get('phone-number') as string,
+      gpa: formData.get('gpa-select') as string,
       department: formData.get('department-select') as string,
       degree: formData.get('degrees-radio-group') as string,
       semesterstatus: formData.get('semstatus-radio-group') as string,
@@ -158,6 +158,7 @@ export default function Application() {
               <TextField
                 autoComplete="given-name"
                 name="firstName"
+                variant="filled"
                 required
                 fullWidth
                 id="firstName"
@@ -169,6 +170,7 @@ export default function Application() {
               <TextField
                 required
                 fullWidth
+                variant="filled"
                 id="lastName"
                 label="Last Name"
                 name="lastName"
@@ -179,6 +181,7 @@ export default function Application() {
               <TextField
                 required
                 fullWidth
+                variant="filled"
                 id="email"
                 label="Email Address"
                 name="email"
@@ -190,6 +193,7 @@ export default function Application() {
               <TextField
                 required
                 fullWidth
+                variant="filled"
                 name="phone-number"
                 label="Phone Number"
                 type="tel"
@@ -205,6 +209,7 @@ export default function Application() {
               <TextField
                 required
                 fullWidth
+                variant="filled"
                 id="ufid"
                 label="UFID"
                 name="ufid"
@@ -239,7 +244,7 @@ export default function Application() {
               <NationalitySelect onNationalityChange={setNationality} />
             </Grid>
             <Grid item xs={12}>
-              <Typography>
+              <Typography sx={{ paddingBottom: 2 }}>
                 Please select your proficiency in English.
               </Typography>
               <ProficiencySelect />
@@ -285,6 +290,12 @@ export default function Application() {
                 variant="filled"
                 helperText="Example: COP3502, COP3503, COP3504"
               />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography>
+                Please provide your most recently calculated cumulative UF GPA.
+              </Typography>
+              <GPA_Select />
             </Grid>
             <Grid item xs={12}>
               <Typography>
