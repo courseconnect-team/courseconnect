@@ -201,7 +201,7 @@ export default function CourseGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'Class Number', width: 70, editable: true },
+    { field: 'id', headerName: 'Class Number', width: 120, editable: true },
     {
       field: 'code',
       headerName: 'Course Code',

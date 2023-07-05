@@ -4,7 +4,6 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
-import AdditionalSemesterPrompt from './AddtlSemesterPrompt';
 import { AdditionalSemesterPromptProps } from './AddtlSemesterPrompt';
 
 interface SemesterStatusSelectProps {
@@ -32,12 +31,12 @@ export default function SemesterStatusSelect(props: SemesterStatusSelectProps) {
         onChange={handleChange}
       >
         <FormControlLabel
-          value="undergraduate"
+          value="Undergraduate"
           control={<Radio />}
           label="Undergraduate"
         />
         <FormControlLabel
-          value="graduate"
+          value="Graduate"
           control={<Radio />}
           label="Graduate"
         />

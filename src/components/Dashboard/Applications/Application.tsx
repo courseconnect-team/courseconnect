@@ -62,16 +62,32 @@ export default function Application() {
     const availabilityCheckbox_twenty =
       formData.get('availabilityCheckbox_twenty') === 'on';
 
+    const availabilityArray: string[] = [];
+    if (availabilityCheckbox_seven) {
+      availabilityArray.push('7');
+    }
+    if (availabilityCheckbox_fourteen) {
+      availabilityArray.push('14');
+    }
+    if (availabilityCheckbox_twenty) {
+      availabilityArray.push('20');
+    }
+    const availabilityString = availabilityArray.join(',');
+
     // extract semester checkbox's values
     const semesterCheckbox_fall_2023 =
       formData.get('semesterCheckbox_fall_2023') === 'on';
     const semesterCheckbox_spring_2024 =
       formData.get('semesterCheckbox_spring_2024') === 'on';
 
-    const courseListString = formData.get('course-prompt') as string;
-    const courseList = courseListString
-      .split(',')
-      .map((course) => course.trim());
+    const semesterArray: string[] = [];
+    if (semesterCheckbox_fall_2023) {
+      semesterArray.push('Fall 2023');
+    }
+    if (semesterCheckbox_spring_2024) {
+      semesterArray.push('Spring 2024');
+    }
+    const semesterString = semesterArray.join(',');
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
@@ -88,23 +104,16 @@ export default function Application() {
       nationality: nationality as string,
       englishproficiency: formData.get('proficiency-select') as string,
       position: formData.get('positions-radio-group') as string,
-      available_hours: {
-        seven: availabilityCheckbox_seven,
-        fourteen: availabilityCheckbox_fourteen,
-        twenty: availabilityCheckbox_twenty,
-      },
-      available_semesters: {
-        fall_2023: semesterCheckbox_fall_2023,
-        spring_2024: semesterCheckbox_spring_2024,
-      },
-      courses: courseList as string[],
+      available_hours: availabilityString,
+      available_semesters: semesterString,
+      courses: formData.get('course-prompt') as string,
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
       date: current_date,
-      status: 'submitted',
+      status: 'Submitted',
     };
 
-    console.log(applicationData); // FOR DEBUGGING ONLY!
+    // console.log(applicationData); // FOR DEBUGGING ONLY!
 
     // use fetch to send the application data to the server
     // this goes to a cloud function which creates a document based on

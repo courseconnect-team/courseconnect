@@ -7,6 +7,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
 import {
   GridRowModesModel,
   GridRowModes,
@@ -20,34 +22,64 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 
-interface User {
+interface Application {
   id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
+  additionalprompt: string;
+  available_hours: string;
+  available_semesters: string;
+  courses: string;
+  date: string;
+  degree: string;
   department: string;
-  role: string;
+  email: string;
+  englishproficiency: string;
+  firstname: string;
+  gpa: string;
+  lastname: string;
+  nationality: string;
+  phonenumber: string;
+  position: string;
+  qualifications: string;
+  semesterstatus: string;
   ufid: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
 }
 
-export default function UserGrid() {
-  const [userData, setUserData] = React.useState<User[]>([]);
+export default function ApplicationGrid() {
+  const [applicationData, setApplicationData] = React.useState<Application[]>(
+    []
+  );
 
+  // pop-up view setup
+  const [open, setOpen] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<Application | null>(
+    null
+  );
+
+  const handleClickOpen = (user: Application) => {
+    setSelectedUser(user);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  // application data from firestore
   React.useEffect(() => {
-    const usersRef = firebase.firestore().collection('users');
-    usersRef.get().then((querySnapshot) => {
+    const applicationsRef = firebase.firestore().collection('applications');
+    applicationsRef.get().then((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
           ({
             id: doc.id,
             ...doc.data(),
-          } as User)
+          } as Application)
       );
-      setUserData(data);
+      setApplicationData(data);
     });
   }, []);
 
@@ -64,16 +96,83 @@ export default function UserGrid() {
     }
   };
 
+  // approve/deny click handlers
+  const handleDenyClick = (id: GridRowId) => {
+    // Update the 'applications' collection
+    firebase
+      .firestore()
+      .collection('applications')
+      .doc(id.toString())
+      .update({ status: 'Denied' })
+      .then(() => {
+        // Update the 'users' collection
+        firebase
+          .firestore()
+          .collection('users')
+          .doc(id.toString())
+          .update({ role: 'student_denied' })
+          .then(() => {
+            // Update the local state
+            const updatedData = applicationData.map((row) => {
+              if (row.id === id) {
+                return { ...row, status: 'Denied' };
+              }
+              return row;
+            });
+            setApplicationData(updatedData);
+          })
+          .catch((error) => {
+            console.error('Error updating user document: ', error);
+          });
+      })
+      .catch((error) => {
+        console.error('Error updating application document: ', error);
+      });
+  };
+
+  const handleApproveClick = (id: GridRowId) => {
+    // Update the 'applications' collection
+    firebase
+      .firestore()
+      .collection('applications')
+      .doc(id.toString())
+      .update({ status: 'Approved' })
+      .then(() => {
+        // Update the 'users' collection
+        firebase
+          .firestore()
+          .collection('users')
+          .doc(id.toString())
+          .update({ role: 'student_accepted' })
+          .then(() => {
+            // Update the local state
+            const updatedData = applicationData.map((row) => {
+              if (row.id === id) {
+                return { ...row, status: 'Approved' };
+              }
+              return row;
+            });
+            setApplicationData(updatedData);
+          })
+          .catch((error) => {
+            console.error('Error updating user document: ', error);
+          });
+      })
+      .catch((error) => {
+        console.error('Error updating application document: ', error);
+      });
+  };
+
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
-    const updatedRow = userData.find((row) => row.id === id);
+    const updatedRow = applicationData.find((row) => row.id === id);
     if (updatedRow) {
       firebase
         .firestore()
-        .collection('users')
+        .collection('applications')
         .doc(id.toString())
         .update(updatedRow)
         .then(() => {
@@ -93,11 +192,11 @@ export default function UserGrid() {
   const handleDeleteClick = (id: GridRowId) => () => {
     firebase
       .firestore()
-      .collection('users')
+      .collection('applications')
       .doc(id.toString())
       .delete()
       .then(() => {
-        setUserData(userData.filter((row) => row.id !== id));
+        setApplicationData(applicationData.filter((row) => row.id !== id));
       })
       .catch((error) => {
         console.error('Error removing document: ', error);
@@ -105,15 +204,15 @@ export default function UserGrid() {
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
-    const editedRow = userData.find((row) => row.id === id);
+    const editedRow = applicationData.find((row) => row.id === id);
     if (editedRow!.isNew) {
       firebase
         .firestore()
-        .collection('users')
+        .collection('applications')
         .doc(id.toString())
         .delete()
         .then(() => {
-          setUserData(userData.filter((row) => row.id !== id));
+          setApplicationData(applicationData.filter((row) => row.id !== id));
         })
         .catch((error) => {
           console.error('Error removing document: ', error);
@@ -127,16 +226,18 @@ export default function UserGrid() {
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...(newRow as User), isNew: false };
+    const updatedRow = { ...(newRow as Application), isNew: false };
     if (updatedRow) {
       if (updatedRow.isNew) {
         return firebase
           .firestore()
-          .collection('users')
+          .collection('applications')
           .add(updatedRow)
           .then(() => {
-            setUserData(
-              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
+            setApplicationData(
+              applicationData.map((row) =>
+                row.id === newRow.id ? updatedRow : row
+              )
             );
             return updatedRow;
           })
@@ -147,12 +248,14 @@ export default function UserGrid() {
       } else {
         return firebase
           .firestore()
-          .collection('users')
+          .collection('applications')
           .doc(updatedRow.id)
           .update(updatedRow)
           .then(() => {
-            setUserData(
-              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
+            setApplicationData(
+              applicationData.map((row) =>
+                row.id === newRow.id ? updatedRow : row
+              )
             );
             return updatedRow;
           })
@@ -173,7 +276,31 @@ export default function UserGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'Firestore UID', width: 70, editable: true },
+    {
+      field: 'id',
+      headerName: 'User ID',
+      width: 70,
+      editable: false,
+
+      renderCell: (params) => (
+        <Button color="primary" onClick={() => handleClickOpen(params.row)}>
+          {params.value}
+        </Button>
+      ),
+    },
+    { field: 'position', headerName: 'Position', width: 70, editable: true },
+    {
+      field: 'available_semesters',
+      headerName: 'Semester(s)',
+      width: 130,
+      editable: true,
+    },
+    {
+      field: 'available_hours',
+      headerName: 'Hours',
+      width: 100,
+      editable: true,
+    },
     {
       field: 'firstname',
       headerName: 'First Name',
@@ -182,20 +309,20 @@ export default function UserGrid() {
     },
     { field: 'lastname', headerName: 'Last Name', width: 130, editable: true },
     { field: 'email', headerName: 'Email', width: 200, editable: true },
-    { field: 'password', headerName: 'Password', width: 200, editable: true },
+    { field: 'courses', headerName: 'Courses', width: 200, editable: true },
     {
-      field: 'department',
-      headerName: 'Department',
+      field: 'semesterstatus',
+      headerName: 'Academic Status',
       width: 130,
       editable: true,
     },
-    { field: 'role', headerName: 'Role', width: 130, editable: true },
-    { field: 'ufid', headerName: 'UFID', width: 130, editable: true },
+    { field: 'date', headerName: 'Date', width: 130, editable: true },
+    { field: 'status', headerName: 'App Status', width: 130, editable: true },
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 100,
+      width: 200,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -225,6 +352,22 @@ export default function UserGrid() {
         return [
           <GridActionsCellItem
             key="3"
+            icon={<ThumbUpAltIcon />}
+            label="Approve"
+            onClick={(event) => handleApproveClick(id)}
+            className="textPrimary"
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key="4"
+            icon={<ThumbDownAltIcon />}
+            label="Deny"
+            onClick={(event) => handleDenyClick(id)}
+            className="textPrimary"
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key="5"
             icon={<EditIcon />}
             label="Edit"
             className="textPrimary"
@@ -232,7 +375,7 @@ export default function UserGrid() {
             color="inherit"
           />,
           <GridActionsCellItem
-            key="4"
+            key="6"
             icon={<DeleteIcon />}
             label="Delete"
             onClick={handleDeleteClick(id)}
@@ -257,14 +400,27 @@ export default function UserGrid() {
       }}
     >
       <DataGrid
-        rows={userData}
+        rows={applicationData}
         columns={columns}
         editMode="row"
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
+        getRowHeight={() => 'auto'}
         processRowUpdate={processRowUpdate}
       />
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{'User Application'}</DialogTitle>
+        <DialogContent>
+          {/* Display the application data of the selected user */}
+          {selectedUser && (
+            <div>
+              {selectedUser.firstname}
+              {/* Display the user's application data in a different format */}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

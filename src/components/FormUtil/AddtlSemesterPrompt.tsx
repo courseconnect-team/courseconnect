@@ -23,7 +23,7 @@ export default function AdditionalSemesterPrompt({
     onValueChange(value); // call the passed in prop function
   }, [value, onValueChange]);
 
-  if (semester === 'undergraduate') {
+  if (semester === 'Undergraduate') {
     return (
       <FormControl>
         <FormLabel required id="additional-status-prompt-label">
@@ -54,7 +54,7 @@ export default function AdditionalSemesterPrompt({
         </RadioGroup>
       </FormControl>
     );
-  } else if (semester === 'graduate') {
+  } else if (semester === 'Graduate') {
     return (
       <FormControl>
         <FormLabel required id="additional-status-prompt-label">

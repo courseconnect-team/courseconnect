@@ -5,7 +5,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
-import Button from '@mui/material/Button';
 import {
   GridRowModesModel,
   GridRowModes,
@@ -188,7 +187,7 @@ export default function UserGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'Firestore UID', width: 130, editable: true },
+    { field: 'id', headerName: 'User ID', width: 130, editable: true },
     {
       field: 'firstname',
       headerName: 'First Name',
@@ -279,6 +278,7 @@ export default function UserGrid() {
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
+        getRowHeight={() => 'auto'}
         processRowUpdate={processRowUpdate}
         pageSizeOptions={[25, 50, 75]}
       />
