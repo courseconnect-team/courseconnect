@@ -313,7 +313,7 @@ export default function CourseGrid(props: CourseGridProps) {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 100,
+      width: 120,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -343,6 +343,13 @@ export default function CourseGrid(props: CourseGridProps) {
         return [
           <GridActionsCellItem
             key="3"
+            icon={<ZoomInIcon />}
+            label="View"
+            onClick={(event) => handleClickOpenGrid(id)}
+            color="primary"
+          />,
+          <GridActionsCellItem
+            key="4"
             icon={<EditIcon />}
             label="Edit"
             className="textPrimary"
@@ -350,7 +357,7 @@ export default function CourseGrid(props: CourseGridProps) {
             color="inherit"
           />,
           <GridActionsCellItem
-            key="4"
+            key="5"
             icon={<DeleteIcon />}
             label="Delete"
             onClick={handleDeleteClick(id)}

@@ -11,7 +11,6 @@ export default function Applications(props: ApplicationsProps) {
   return (
     <>
       <h1>Applications</h1>
-      <p>{userRole}</p>
       <ApplicationGrid userRole={userRole} />
     </>
   );
