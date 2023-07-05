@@ -33,13 +33,18 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
 
+    const professorsEmailString = formData.get('professor-emails') as string;
+    const professorEmailList = professorsEmailString
+      .split(',')
+      .map((professorEmail) => professorEmail.trim());
+
     // extract the specific user data from the form data into a parsable object
     const courseData = {
       code: formData.get('course-code') as string,
       title: formData.get('course-title') as string,
       id: formData.get('class-number') as string,
       professor_names: formData.get('professor-names') as string,
-      professor_emails: formData.get('professor-emails') as string,
+      professor_emails: professorEmailList as string[],
       helper_names: '' as string,
       helper_emails: '' as string,
       credits: formData.get('course-credits') as string,

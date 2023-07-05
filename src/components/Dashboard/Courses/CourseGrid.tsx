@@ -24,6 +24,7 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { useAuth } from '@/firebase/auth/auth_context';
 
 interface Course {
   id: string;
@@ -33,7 +34,7 @@ interface Course {
   num_enrolled: string;
   enrollment_cap: string;
   professor_names: string;
-  professor_emails: string;
+  professor_emails: string[];
   helper_names: string;
   helper_emails: string;
   isNew?: boolean;
@@ -74,21 +75,44 @@ interface CourseGridProps {
 
 export default function CourseGrid(props: CourseGridProps) {
   const { userRole } = props;
+  const { user } = useAuth();
   const [courseData, setCourseData] = React.useState<Course[]>([]);
+  // fetching course data from firestore.
+  const userEmail = user?.email;
 
   React.useEffect(() => {
     const coursesRef = firebase.firestore().collection('courses');
-    coursesRef.get().then((querySnapshot) => {
-      const data = querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Course)
-      );
-      setCourseData(data);
-    });
-  }, []);
+    if (userRole === 'admin') {
+      // IF USER IS ADMIN, THEN FETCH ALL COURSES.
+      coursesRef.get().then((querySnapshot) => {
+        const data = querySnapshot.docs.map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Course)
+        );
+        setCourseData(data);
+      });
+    } else if (userRole === 'faculty') {
+      // IF USER IS FACULTY, THEN ONLY FETCH COURSES WHICH CORRESPOND TO PROFESSOR EMAIL
+
+      // Assume 'professor_emails' is an array in Firestore.
+      coursesRef
+        .where('professor_emails', 'array-contains', userEmail)
+        .get()
+        .then((querySnapshot) => {
+          const data = querySnapshot.docs.map(
+            (doc) =>
+              ({
+                id: doc.id,
+                ...doc.data(),
+              } as Course)
+          );
+          setCourseData(data);
+        });
+    }
+  }, [userRole, userEmail]);
 
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -125,7 +149,7 @@ export default function CourseGrid(props: CourseGridProps) {
           console.error('Error updating document: ', error);
         });
     } else {
-      console.error('No matching user data found for id: ', id);
+      console.error('No matching course data found for id: ', id);
     }
   };
 
@@ -166,7 +190,14 @@ export default function CourseGrid(props: CourseGridProps) {
   };
 
   const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...(newRow as Course), isNew: false };
+    const professorEmailsArray = (newRow.professor_emails as string)
+      .split(',')
+      .map((email) => email.trim());
+    const updatedRow = {
+      ...(newRow as Course),
+      professor_emails: professorEmailsArray,
+      isNew: false,
+    };
     if (updatedRow) {
       if (updatedRow.isNew) {
         return firebase
@@ -202,7 +233,7 @@ export default function CourseGrid(props: CourseGridProps) {
       }
     } else {
       return Promise.reject(
-        new Error('No matching user data found for id: ' + newRow.id)
+        new Error('No matching course data found for id: ' + newRow.id)
       );
     }
   };
@@ -310,36 +341,38 @@ export default function CourseGrid(props: CourseGridProps) {
   ];
 
   return (
-    <Box
-      sx={{
-        height: 600,
-        width: '100%',
-        '& .actions': {
-          color: 'text.secondary',
-        },
-        '& .textPrimary': {
-          color: 'text.primary',
-        },
-      }}
-    >
-      <DataGrid
-        rows={courseData}
-        columns={columns}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        processRowUpdate={processRowUpdate}
-        slots={{
-          toolbar: EditToolbar,
+    <>
+      <Box
+        sx={{
+          height: 600,
+          width: '100%',
+          '& .actions': {
+            color: 'text.secondary',
+          },
+          '& .textPrimary': {
+            color: 'text.primary',
+          },
         }}
-        slotProps={{
-          toolbar: { setCourseData, setRowModesModel },
-        }}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 25 } },
-        }}
-      />
-    </Box>
+      >
+        <DataGrid
+          rows={courseData}
+          columns={columns}
+          editMode="row"
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={handleRowModesModelChange}
+          onRowEditStop={handleRowEditStop}
+          processRowUpdate={processRowUpdate}
+          slots={{
+            toolbar: EditToolbar,
+          }}
+          slotProps={{
+            toolbar: { setCourseData, setRowModesModel },
+          }}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 25 } },
+          }}
+        />
+      </Box>
+    </>
   );
 }

@@ -9,7 +9,6 @@ export default function Courses(props: CoursesProps) {
   return (
     <>
       <h1>Courses</h1>
-      <p>{userRole}</p>
       <CourseGrid userRole={userRole} />
     </>
   );
