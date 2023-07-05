@@ -22,6 +22,7 @@ export default function ProficiencySelect() {
           English Proficiency
         </InputLabel>
         <Select
+          variant="filled"
           labelId="proficiency-select-label"
           id="proficiency-select"
           value={proficiency}

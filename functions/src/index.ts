@@ -69,6 +69,7 @@ export const processApplicationForm = functions.https.onRequest(
         email: request.body.email,
         ufid: request.body.ufid,
         phonenumber: request.body.phonenumber,
+        gpa: request.body.gpa,
         department: request.body.department,
         degree: request.body.degree,
         semesterstatus: request.body.semesterstatus,

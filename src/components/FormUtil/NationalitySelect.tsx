@@ -18,6 +18,7 @@ export default function NationalitySelect({
 
   return (
     <Autocomplete
+      fullWidth
       value={value}
       onChange={(event: any, newValue: string | null) => {
         setValue(newValue);
@@ -29,8 +30,9 @@ export default function NationalitySelect({
       }}
       id="nationality-select"
       options={nationalities}
-      sx={{ width: 300 }}
-      renderInput={(params) => <TextField {...params} label="Nationality" />}
+      renderInput={(params) => (
+        <TextField {...params} fullWidth variant="filled" label="Nationality" />
+      )}
       renderOption={(props, option) => {
         return (
           <li {...props} key={option}>
