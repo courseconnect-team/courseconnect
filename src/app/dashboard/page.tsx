@@ -28,12 +28,18 @@ export default function Dashboard() {
   if (user) {
     return (
       <>
-        {activeComponent === 'welcome' && <DashboardWelcome />}
-        {activeComponent === 'profile' && <Profile />}
+        {activeComponent === 'welcome' && (
+          <DashboardWelcome user={user} userRole={role as string} />
+        )}
+        {activeComponent === 'profile' && (
+          <Profile user={user} userRole={role as string} />
+        )}
         {activeComponent === 'settings' && <Settings />}
-        {activeComponent === 'users' && <Users />}
-        {activeComponent === 'courses' && <Courses />}
-        {activeComponent === 'applications' && <Applications />}
+        {activeComponent === 'users' && <Users userRole={role as string} />}
+        {activeComponent === 'courses' && <Courses userRole={role as string} />}
+        {activeComponent === 'applications' && (
+          <Applications userRole={role as string} />
+        )}
         {activeComponent === 'application' && <Application />}
         {activeComponent === 'application_status' && <ShowApplicationStatus />}
 

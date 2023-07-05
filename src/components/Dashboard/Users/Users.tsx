@@ -1,10 +1,15 @@
 import UserGrid from './UserGrid';
 
-export default function Users() {
+interface UsersProps {
+  userRole: string;
+}
+
+export default function Users(props: UsersProps) {
+  const { userRole } = props;
   return (
     <>
       <h1>Users</h1>
-      <UserGrid />
+      <UserGrid userRole={userRole} />
     </>
   );
 }

@@ -1,10 +1,16 @@
 import CourseGrid from './CourseGrid';
 
-export default function Courses() {
+interface CoursesProps {
+  userRole: string;
+}
+
+export default function Courses(props: CoursesProps) {
+  const { userRole } = props;
   return (
     <>
       <h1>Courses</h1>
-      <CourseGrid />
+      <p>{userRole}</p>
+      <CourseGrid userRole={userRole} />
     </>
   );
 }

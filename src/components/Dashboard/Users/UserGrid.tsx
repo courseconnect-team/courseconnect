@@ -62,7 +62,12 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-export default function UserGrid() {
+interface UserGridProps {
+  userRole: string;
+}
+
+export default function UserGrid(props: UserGridProps) {
+  const { userRole } = props;
   const [userData, setUserData] = React.useState<User[]>([]);
 
   React.useEffect(() => {
@@ -309,6 +314,9 @@ export default function UserGrid() {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 25 } },
+        }}
       />
     </Box>
   );

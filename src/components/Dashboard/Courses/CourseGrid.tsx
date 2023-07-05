@@ -68,7 +68,12 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-export default function CourseGrid() {
+interface CourseGridProps {
+  userRole: string;
+}
+
+export default function CourseGrid(props: CourseGridProps) {
+  const { userRole } = props;
   const [courseData, setCourseData] = React.useState<Course[]>([]);
 
   React.useEffect(() => {
@@ -330,6 +335,9 @@ export default function CourseGrid() {
         }}
         slotProps={{
           toolbar: { setCourseData, setRowModesModel },
+        }}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 25 } },
         }}
       />
     </Box>

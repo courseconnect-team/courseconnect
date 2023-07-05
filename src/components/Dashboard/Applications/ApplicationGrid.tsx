@@ -1,5 +1,3 @@
-// incorporate clickable link to the application form as a pop-up.
-
 'use client';
 import * as React from 'react';
 import Box from '@mui/material/Box';
@@ -28,13 +26,7 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-} from '@mui/material';
+import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 
 interface Application {
   id: string;
@@ -85,7 +77,12 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-export default function ApplicationGrid() {
+interface ApplicationGridProps {
+  userRole: string;
+}
+
+export default function ApplicationGrid(props: ApplicationGridProps) {
+  const { userRole } = props;
   const [applicationData, setApplicationData] = React.useState<Application[]>(
     []
   );
@@ -445,6 +442,9 @@ export default function ApplicationGrid() {
         }}
         slotProps={{
           toolbar: { setApplicationData, setRowModesModel },
+        }}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 25 } },
         }}
       />
       <Dialog open={open} onClose={handleClose}>
