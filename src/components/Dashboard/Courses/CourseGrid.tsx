@@ -3,6 +3,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import CreateCourseDialog from './Create_Course';
@@ -25,6 +26,7 @@ import {
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
+import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 
 interface Course {
   id: string;
@@ -39,34 +41,6 @@ interface Course {
   helper_emails: string[];
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
-}
-
-interface EditToolbarProps {
-  setCourseData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
-  ) => void;
-}
-
-function EditToolbar(props: EditToolbarProps) {
-  const { setCourseData, setRowModesModel } = props;
-
-  // Add state to control the dialog open status
-  const [open, setOpen] = React.useState(false);
-
-  return (
-    <GridToolbarContainer>
-      {/* Include your Dialog component here and pass the open state and setOpen function as props */}
-      <CreateCourseDialog
-        open={open}
-        setOpen={setOpen}
-        setCourseData={setCourseData}
-      />
-      <GridToolbarExport />
-      <GridToolbarFilterButton />
-      <GridToolbarColumnsButton />
-    </GridToolbarContainer>
-  );
 }
 
 interface CourseGridProps {
@@ -111,7 +85,7 @@ export default function CourseGrid(props: CourseGridProps) {
           );
           setCourseData(data);
         });
-    } else if (userRole === 'student-accepted') {
+    } else if (userRole === 'student_accepted') {
       // IF USER IS ACCEPTED STUDENT, THEN ONLY FETCH COURSES WHICH CORRESPOND TO STUDENT EMAIL
 
       // Assume 'helper_emails' is an array in Firestore.
@@ -130,6 +104,61 @@ export default function CourseGrid(props: CourseGridProps) {
         });
     }
   }, [userRole, userEmail]);
+
+  // dialog
+  // pop-up view setup
+  const [open, setOpen] = React.useState(false);
+  const [selectedCourseGrid, setSelectedCourseGrid] =
+    React.useState<GridRowId | null>(null);
+
+  const handleClickOpenGrid = (id: GridRowId) => {
+    setSelectedCourseGrid(id);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  // toolbar
+  interface EditToolbarProps {
+    setCourseData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+    setRowModesModel: (
+      newModel: (oldModel: GridRowModesModel) => GridRowModesModel
+    ) => void;
+  }
+
+  function EditToolbar(props: EditToolbarProps) {
+    const { setCourseData, setRowModesModel } = props;
+
+    // Add state to control the dialog open status
+    const [open, setOpen] = React.useState(false);
+
+    if (userRole === 'faculty' || userRole === 'student_accepted') {
+      return (
+        <GridToolbarContainer>
+          {/* Include your Dialog component here and pass the open state and setOpen function as props */}
+          <GridToolbarExport />
+          <GridToolbarFilterButton />
+          <GridToolbarColumnsButton />
+        </GridToolbarContainer>
+      );
+    }
+
+    return (
+      <GridToolbarContainer>
+        {/* Include your Dialog component here and pass the open state and setOpen function as props */}
+        <CreateCourseDialog
+          open={open}
+          setOpen={setOpen}
+          setCourseData={setCourseData}
+        />
+        <GridToolbarExport />
+        <GridToolbarFilterButton />
+        <GridToolbarColumnsButton />
+      </GridToolbarContainer>
+    );
+  }
 
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -279,7 +308,7 @@ export default function CourseGrid(props: CourseGridProps) {
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef[] = [
+  let columns: GridColDef[] = [
     {
       field: 'actions',
       type: 'actions',
@@ -377,6 +406,79 @@ export default function CourseGrid(props: CourseGridProps) {
     },
   ];
 
+  if (userRole === 'faculty' || userRole === 'student_accepted') {
+    columns = [
+      {
+        field: 'actions',
+        type: 'actions',
+        headerName: 'Actions',
+        width: 70,
+        cellClassName: 'actions',
+        getActions: ({ id }) => {
+          return [
+            <GridActionsCellItem
+              key="3"
+              icon={<ZoomInIcon />}
+              label="View"
+              onClick={(event) => handleClickOpenGrid(id)}
+              color="primary"
+            />,
+          ];
+        },
+      },
+      { field: 'id', headerName: 'Class Number', width: 120, editable: false },
+      {
+        field: 'code',
+        headerName: 'Course Code',
+        width: 130,
+        editable: false,
+      },
+      {
+        field: 'title',
+        headerName: 'Course Title',
+        width: 130,
+        editable: false,
+      },
+      { field: 'credits', headerName: 'Credits', width: 70, editable: false },
+      {
+        field: 'num_enrolled',
+        headerName: '# Enrolled',
+        width: 80,
+        editable: false,
+      },
+      {
+        field: 'enrollment_cap',
+        headerName: 'Capacity',
+        width: 80,
+        editable: false,
+      },
+      {
+        field: 'professor_names',
+        headerName: 'Professor Name(s)',
+        width: 150,
+        editable: false,
+      },
+      {
+        field: 'professor_emails',
+        headerName: 'Professor Email(s)',
+        width: 150,
+        editable: false,
+      },
+      {
+        field: 'helper_names',
+        headerName: 'Assistant Name(s)',
+        width: 130,
+        editable: false,
+      },
+      {
+        field: 'helper_emails',
+        headerName: 'Assistant Email(s)',
+        width: 130,
+        editable: false,
+      },
+    ];
+  }
+
   return (
     <>
       <Box
@@ -412,6 +514,18 @@ export default function CourseGrid(props: CourseGridProps) {
             pagination: { paginationModel: { pageSize: 25 } },
           }}
         />
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{'Course Pop-up'}</DialogTitle>
+          <DialogContent>
+            {/* Display the application data of the selected user */}
+            {selectedCourseGrid && (
+              <div>
+                {selectedCourseGrid}
+                {/* Display the user's application data in a different format */}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </Box>
     </>
   );
