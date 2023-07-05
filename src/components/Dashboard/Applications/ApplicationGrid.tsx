@@ -7,6 +7,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
 import {
@@ -19,10 +20,21 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
+  GridRowsProp,
+  GridToolbarContainer,
+  GridToolbarExport,
+  GridToolbarFilterButton,
+  GridToolbarColumnsButton,
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+} from '@mui/material';
 
 interface Application {
   id: string;
@@ -48,6 +60,31 @@ interface Application {
   mode?: 'edit' | 'view' | undefined;
 }
 
+interface EditToolbarProps {
+  setApplicationData: (
+    newRows: (oldRows: GridRowsProp) => GridRowsProp
+  ) => void;
+  setRowModesModel: (
+    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
+  ) => void;
+}
+
+function EditToolbar(props: EditToolbarProps) {
+  const { setApplicationData, setRowModesModel } = props;
+
+  // Add state to control the dialog open status
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <GridToolbarContainer>
+      {/* Include your Dialog component here and pass the open state and setOpen function as props */}
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
+    </GridToolbarContainer>
+  );
+}
+
 export default function ApplicationGrid() {
   const [applicationData, setApplicationData] = React.useState<Application[]>(
     []
@@ -55,12 +92,11 @@ export default function ApplicationGrid() {
 
   // pop-up view setup
   const [open, setOpen] = React.useState(false);
-  const [selectedUser, setSelectedUser] = React.useState<Application | null>(
-    null
-  );
+  const [selectedUserGrid, setSelectedUserGrid] =
+    React.useState<GridRowId | null>(null);
 
-  const handleClickOpen = (user: Application) => {
-    setSelectedUser(user);
+  const handleClickOpenGrid = (id: GridRowId) => {
+    setSelectedUserGrid(id);
     setOpen(true);
   };
 
@@ -277,16 +313,79 @@ export default function ApplicationGrid() {
 
   const columns: GridColDef[] = [
     {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 200,
+      cellClassName: 'actions',
+      getActions: ({ id }) => {
+        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              key="1"
+              icon={<SaveIcon />}
+              label="Save"
+              sx={{
+                color: 'primary.main',
+              }}
+              onClick={handleSaveClick(id)}
+            />,
+            <GridActionsCellItem
+              key="2"
+              icon={<CancelIcon />}
+              label="Cancel"
+              onClick={handleCancelClick(id)}
+              color="inherit"
+            />,
+          ];
+        }
+
+        return [
+          <GridActionsCellItem
+            key="3"
+            icon={<ZoomInIcon />}
+            label="View"
+            onClick={(event) => handleClickOpenGrid(id)}
+            color="primary"
+          />,
+          <GridActionsCellItem
+            key="4"
+            icon={<ThumbUpAltIcon />}
+            label="Approve"
+            onClick={(event) => handleApproveClick(id)}
+            color="success"
+          />,
+          <GridActionsCellItem
+            key="5"
+            icon={<ThumbDownAltIcon />}
+            label="Deny"
+            onClick={(event) => handleDenyClick(id)}
+            color="error"
+          />,
+          <GridActionsCellItem
+            key="6"
+            icon={<EditIcon />}
+            label="Edit"
+            onClick={handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key="7"
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
+    {
       field: 'id',
       headerName: 'User ID',
       width: 70,
-      editable: false,
-
-      renderCell: (params) => (
-        <Button color="primary" onClick={() => handleClickOpen(params.row)}>
-          {params.value}
-        </Button>
-      ),
+      editable: true,
     },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     {
@@ -316,80 +415,14 @@ export default function ApplicationGrid() {
       width: 130,
       editable: true,
     },
-    { field: 'date', headerName: 'Date', width: 130, editable: true },
-    { field: 'status', headerName: 'App Status', width: 130, editable: true },
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Actions',
-      width: 200,
-      cellClassName: 'actions',
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              key="1"
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{
-                color: 'primary.main',
-              }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              key="2"
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
-        return [
-          <GridActionsCellItem
-            key="3"
-            icon={<ThumbUpAltIcon />}
-            label="Approve"
-            onClick={(event) => handleApproveClick(id)}
-            className="textPrimary"
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="4"
-            icon={<ThumbDownAltIcon />}
-            label="Deny"
-            onClick={(event) => handleDenyClick(id)}
-            className="textPrimary"
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="5"
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="6"
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
-        ];
-      },
-    },
+    { field: 'date', headerName: 'Date', width: 80, editable: true },
+    { field: 'status', headerName: 'App Status', width: 100, editable: true },
   ];
 
   return (
     <Box
       sx={{
-        height: 500,
+        height: 600,
         width: '100%',
         '& .actions': {
           color: 'text.secondary',
@@ -406,16 +439,21 @@ export default function ApplicationGrid() {
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
-        getRowHeight={() => 'auto'}
         processRowUpdate={processRowUpdate}
+        slots={{
+          toolbar: EditToolbar,
+        }}
+        slotProps={{
+          toolbar: { setApplicationData, setRowModesModel },
+        }}
       />
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{'User Application'}</DialogTitle>
         <DialogContent>
           {/* Display the application data of the selected user */}
-          {selectedUser && (
+          {selectedUserGrid && (
             <div>
-              {selectedUser.firstname}
+              {selectedUserGrid}
               {/* Display the user's application data in a different format */}
             </div>
           )}

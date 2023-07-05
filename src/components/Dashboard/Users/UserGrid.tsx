@@ -7,10 +7,12 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import {
   GridRowModesModel,
+  GridRowsProp,
   GridRowModes,
   GridToolbarContainer,
   GridToolbarExport,
-  GridToolbar,
+  GridToolbarFilterButton,
+  GridToolbarColumnsButton,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
@@ -35,6 +37,29 @@ interface User {
   ufid: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
+}
+
+interface EditToolbarProps {
+  setUserData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+  setRowModesModel: (
+    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
+  ) => void;
+}
+
+function EditToolbar(props: EditToolbarProps) {
+  const { setUserData, setRowModesModel } = props;
+
+  // Add state to control the dialog open status
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <GridToolbarContainer>
+      {/* Include your Dialog component here and pass the open state and setOpen function as props */}
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
+    </GridToolbarContainer>
+  );
 }
 
 export default function UserGrid() {
@@ -187,24 +212,6 @@ export default function UserGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'User ID', width: 130, editable: true },
-    {
-      field: 'firstname',
-      headerName: 'First Name',
-      width: 130,
-      editable: true,
-    },
-    { field: 'lastname', headerName: 'Last Name', width: 130, editable: true },
-    { field: 'email', headerName: 'Email', width: 200, editable: true },
-    { field: 'password', headerName: 'Password', width: 200, editable: true },
-    {
-      field: 'department',
-      headerName: 'Department',
-      width: 130,
-      editable: true,
-    },
-    { field: 'role', headerName: 'Role', width: 130, editable: true },
-    { field: 'ufid', headerName: 'UFID', width: 130, editable: true },
     {
       field: 'actions',
       type: 'actions',
@@ -255,12 +262,30 @@ export default function UserGrid() {
         ];
       },
     },
+    { field: 'id', headerName: 'User ID', width: 70, editable: true },
+    {
+      field: 'firstname',
+      headerName: 'First Name',
+      width: 100,
+      editable: true,
+    },
+    { field: 'lastname', headerName: 'Last Name', width: 100, editable: true },
+    { field: 'email', headerName: 'Email', width: 200, editable: true },
+    { field: 'password', headerName: 'Password', width: 100, editable: true },
+    {
+      field: 'department',
+      headerName: 'Department',
+      width: 130,
+      editable: true,
+    },
+    { field: 'role', headerName: 'Role', width: 130, editable: true },
+    { field: 'ufid', headerName: 'UFID', width: 130, editable: true },
   ];
 
   return (
     <Box
       sx={{
-        height: 500,
+        height: 600,
         width: '100%',
         '& .actions': {
           color: 'text.secondary',
@@ -273,14 +298,17 @@ export default function UserGrid() {
       <DataGrid
         rows={userData}
         columns={columns}
-        slots={{ toolbar: GridToolbar }}
+        slots={{
+          toolbar: EditToolbar,
+        }}
+        slotProps={{
+          toolbar: { setUserData, setRowModesModel },
+        }}
         editMode="row"
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
-        getRowHeight={() => 'auto'}
         processRowUpdate={processRowUpdate}
-        pageSizeOptions={[25, 50, 75]}
       />
     </Box>
   );

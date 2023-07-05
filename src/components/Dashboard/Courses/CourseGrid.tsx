@@ -18,6 +18,9 @@ import {
   GridRowEditStopReasons,
   GridRowsProp,
   GridToolbarContainer,
+  GridToolbarExport,
+  GridToolbarFilterButton,
+  GridToolbarColumnsButton,
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -58,6 +61,9 @@ function EditToolbar(props: EditToolbarProps) {
         setOpen={setOpen}
         setCourseData={setCourseData}
       />
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
     </GridToolbarContainer>
   );
 }
@@ -201,51 +207,6 @@ export default function CourseGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'Class Number', width: 120, editable: true },
-    {
-      field: 'code',
-      headerName: 'Course Code',
-      width: 130,
-      editable: true,
-    },
-    { field: 'title', headerName: 'Course Title', width: 130, editable: true },
-    { field: 'credits', headerName: 'Credits', width: 200, editable: true },
-    {
-      field: 'num_enrolled',
-      headerName: 'Number Enrolled',
-      width: 200,
-      editable: true,
-    },
-    {
-      field: 'enrollment_cap',
-      headerName: 'Enrollment Cap',
-      width: 130,
-      editable: true,
-    },
-    {
-      field: 'professor_names',
-      headerName: 'Professor Name(s)',
-      width: 130,
-      editable: true,
-    },
-    {
-      field: 'professor_emails',
-      headerName: 'Professor Email(s)',
-      width: 130,
-      editable: true,
-    },
-    {
-      field: 'helper_names',
-      headerName: 'Assistant Name(s)',
-      width: 130,
-      editable: true,
-    },
-    {
-      field: 'helper_emails',
-      headerName: 'Assistant Email(s)',
-      width: 130,
-      editable: true,
-    },
     {
       field: 'actions',
       type: 'actions',
@@ -296,12 +257,57 @@ export default function CourseGrid() {
         ];
       },
     },
+    { field: 'id', headerName: 'Class Number', width: 120, editable: true },
+    {
+      field: 'code',
+      headerName: 'Course Code',
+      width: 130,
+      editable: true,
+    },
+    { field: 'title', headerName: 'Course Title', width: 130, editable: true },
+    { field: 'credits', headerName: 'Credits', width: 70, editable: true },
+    {
+      field: 'num_enrolled',
+      headerName: '# Enrolled',
+      width: 80,
+      editable: true,
+    },
+    {
+      field: 'enrollment_cap',
+      headerName: 'Capacity',
+      width: 80,
+      editable: true,
+    },
+    {
+      field: 'professor_names',
+      headerName: 'Professor Name(s)',
+      width: 150,
+      editable: true,
+    },
+    {
+      field: 'professor_emails',
+      headerName: 'Professor Email(s)',
+      width: 150,
+      editable: true,
+    },
+    {
+      field: 'helper_names',
+      headerName: 'Assistant Name(s)',
+      width: 130,
+      editable: true,
+    },
+    {
+      field: 'helper_emails',
+      headerName: 'Assistant Email(s)',
+      width: 130,
+      editable: true,
+    },
   ];
 
   return (
     <Box
       sx={{
-        height: 500,
+        height: 600,
         width: '100%',
         '& .actions': {
           color: 'text.secondary',
@@ -319,7 +325,6 @@ export default function CourseGrid() {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
-        getRowHeight={() => 'auto'}
         slots={{
           toolbar: EditToolbar,
         }}

@@ -6,6 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import AddIcon from '@mui/icons-material/Add';
 import { GridRowsProp } from '@mui/x-data-grid';
 
 interface CreateCourseDialogProps {
@@ -87,7 +88,12 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
+      <Button
+        size="small"
+        variant="text"
+        startIcon={<AddIcon />}
+        onClick={handleClickOpen}
+      >
         Create Course
       </Button>
       <Dialog open={open} onClose={handleClose}>
@@ -99,7 +105,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               in the form below.
             </DialogContentText>
             <TextField
-              autoFocus
               required
               margin="dense"
               id="course-code"
@@ -117,7 +122,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               }
             />
             <TextField
-              autoFocus
               required
               margin="dense"
               id="course-title"
@@ -135,7 +139,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               }
             />
             <TextField
-              autoFocus
               required
               margin="dense"
               id="class-number"
@@ -153,7 +156,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               }
             />
             <TextField
-              autoFocus
               required
               margin="dense"
               id="professor-names"
@@ -173,7 +175,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               }
             />
             <TextField
-              autoFocus
               required
               margin="dense"
               id="professor-emails"
@@ -193,7 +194,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               }
             />
             <TextField
-              autoFocus
               required
               margin="dense"
               id="course-credits"
@@ -210,7 +210,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               }
             />
             <TextField
-              autoFocus
               margin="dense"
               id="enrollment-cap"
               name="enrollment-cap"
@@ -230,7 +229,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               }
             />
             <TextField
-              autoFocus
               margin="dense"
               id="num-enrolled"
               name="num-enrolled"

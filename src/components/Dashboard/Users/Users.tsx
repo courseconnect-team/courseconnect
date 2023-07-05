@@ -3,7 +3,7 @@ import UserGrid from './UserGrid';
 export default function Users() {
   return (
     <>
-      <h1>Admin view of users with table and CRUD TO BE STYLED!</h1>
+      <h1>Users</h1>
       <UserGrid />
     </>
   );

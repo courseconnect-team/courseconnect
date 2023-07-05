@@ -4,7 +4,7 @@ import ApplicationGrid from './ApplicationGrid';
 export default function Applications() {
   return (
     <>
-      <h1>Admin view of applications that has a table & CRUD</h1>
+      <h1>Applications</h1>
       <ApplicationGrid />
     </>
   );
