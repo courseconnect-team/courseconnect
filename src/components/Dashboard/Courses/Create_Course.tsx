@@ -33,6 +33,11 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
 
+    const professorsNameString = formData.get('professor-names') as string;
+    const professorNameList = professorsNameString
+      .split(',')
+      .map((professorEmail) => professorEmail.trim());
+
     const professorsEmailString = formData.get('professor-emails') as string;
     const professorEmailList = professorsEmailString
       .split(',')
@@ -43,10 +48,10 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       code: formData.get('course-code') as string,
       title: formData.get('course-title') as string,
       id: formData.get('class-number') as string,
-      professor_names: formData.get('professor-names') as string,
+      professor_names: professorNameList as string[],
       professor_emails: professorEmailList as string[],
-      helper_names: '' as string,
-      helper_emails: '' as string,
+      helper_names: [] as string[],
+      helper_emails: [] as string[],
       credits: formData.get('course-credits') as string,
       enrollment_cap: formData.get('enrollment-cap') as string,
       num_enrolled: formData.get('num-enrolled') as string,

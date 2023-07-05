@@ -33,10 +33,10 @@ interface Course {
   credits: string;
   num_enrolled: string;
   enrollment_cap: string;
-  professor_names: string;
+  professor_names: string[];
   professor_emails: string[];
-  helper_names: string;
-  helper_emails: string;
+  helper_names: string[];
+  helper_emails: string[];
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
 }
@@ -100,6 +100,23 @@ export default function CourseGrid(props: CourseGridProps) {
       // Assume 'professor_emails' is an array in Firestore.
       coursesRef
         .where('professor_emails', 'array-contains', userEmail)
+        .get()
+        .then((querySnapshot) => {
+          const data = querySnapshot.docs.map(
+            (doc) =>
+              ({
+                id: doc.id,
+                ...doc.data(),
+              } as Course)
+          );
+          setCourseData(data);
+        });
+    } else if (userRole === 'student-accepted') {
+      // IF USER IS ACCEPTED STUDENT, THEN ONLY FETCH COURSES WHICH CORRESPOND TO STUDENT EMAIL
+
+      // Assume 'helper_emails' is an array in Firestore.
+      coursesRef
+        .where('helper_emails', 'array-contains', userEmail)
         .get()
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
@@ -189,13 +206,33 @@ export default function CourseGrid(props: CourseGridProps) {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const professorEmailsArray = (newRow.professor_emails as string)
-      .split(',')
-      .map((email) => email.trim());
+  const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
+    const professorEmailsArray =
+      typeof newRow.professor_emails === 'string' && newRow.professor_emails
+        ? newRow.professor_emails.split(',').map((p_email) => p_email.trim())
+        : oldRow.professor_emails;
+
+    const professorNamesArray =
+      typeof newRow.professor_names === 'string' && newRow.professor_names
+        ? newRow.professor_names.split(',').map((p_name) => p_name.trim())
+        : oldRow.professor_names;
+
+    const helperEmailsArray =
+      typeof newRow.helper_emails === 'string' && newRow.helper_emails
+        ? newRow.helper_emails.split(',').map((h_email) => h_email.trim())
+        : oldRow.helper_emails;
+
+    const helperNamesArray =
+      typeof newRow.helper_names === 'string' && newRow.helper_names
+        ? newRow.helper_names.split(',').map((h_name) => h_name.trim())
+        : oldRow.helper_names;
+
     const updatedRow = {
       ...(newRow as Course),
       professor_emails: professorEmailsArray,
+      professor_names: professorNamesArray,
+      helper_emails: helperEmailsArray,
+      helper_names: helperNamesArray,
       isNew: false,
     };
     if (updatedRow) {
@@ -362,6 +399,9 @@ export default function CourseGrid(props: CourseGridProps) {
           onRowModesModelChange={handleRowModesModelChange}
           onRowEditStop={handleRowEditStop}
           processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={(error) =>
+            console.error('Error processing row update: ', error)
+          }
           slots={{
             toolbar: EditToolbar,
           }}
