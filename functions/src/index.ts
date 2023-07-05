@@ -72,6 +72,7 @@ export const processApplicationForm = functions.https.onRequest(
         department: request.body.department,
         degree: request.body.degree,
         semesterstatus: request.body.semesterstatus,
+        additionalprompt: request.body.additionalprompt,
         nationality: request.body.nationality,
         englishproficiency: request.body.englishproficiency,
         position: request.body.position,

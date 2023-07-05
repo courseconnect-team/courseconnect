@@ -12,11 +12,12 @@ export default function PositionSelect() {
   };
 
   return (
-    <FormControl>
+    <FormControl required>
       <RadioGroup
         name="positions-radio-group"
         value={value}
         onChange={handleChange}
+        aria-required="true"
       >
         <FormControlLabel
           value="TA"

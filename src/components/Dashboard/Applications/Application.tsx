@@ -17,6 +17,9 @@ import ProficiencySelect from '@/components/FormUtil/ProficiencySelect';
 import PositionSelect from '@/components/FormUtil/PositionSelect';
 import AvailabilityCheckbox from '@/components/FormUtil/AvailabilityCheckbox';
 import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
+import AdditionalSemesterPrompt, {
+  AdditionalSemesterPromptProps,
+} from '@/components/FormUtil/AddtlSemesterPrompt';
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
 
@@ -42,6 +45,11 @@ export default function Application() {
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
 
+  const [additionalPromptValue, setAdditionalPromptValue] = React.useState('');
+  const handleAdditionalPromptChange = (newValue: string) => {
+    setAdditionalPromptValue(newValue);
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // extract the form data from the current event
@@ -56,8 +64,6 @@ export default function Application() {
       formData.get('availabilityCheckbox_twenty') === 'on';
 
     // extract semester checkbox's values
-    const semesterCheckbox_summerb_2023 =
-      formData.get('semesterCheckbox_summerb_2023') === 'on';
     const semesterCheckbox_fall_2023 =
       formData.get('semesterCheckbox_fall_2023') === 'on';
     const semesterCheckbox_spring_2024 =
@@ -78,6 +84,7 @@ export default function Application() {
       department: formData.get('department-select') as string,
       degree: formData.get('degrees-radio-group') as string,
       semesterstatus: formData.get('semstatus-radio-group') as string,
+      additionalprompt: additionalPromptValue,
       nationality: nationality as string,
       englishproficiency: formData.get('proficiency-select') as string,
       position: formData.get('positions-radio-group') as string,
@@ -87,7 +94,6 @@ export default function Application() {
         twenty: availabilityCheckbox_twenty,
       },
       available_semesters: {
-        summerb_2023: semesterCheckbox_summerb_2023,
         fall_2023: semesterCheckbox_fall_2023,
         spring_2024: semesterCheckbox_spring_2024,
       },
@@ -98,7 +104,7 @@ export default function Application() {
       status: 'submitted',
     };
 
-    // console.log(applicationData); // FOR DEBUGGING ONLY!
+    console.log(applicationData); // FOR DEBUGGING ONLY!
 
     // use fetch to send the application data to the server
     // this goes to a cloud function which creates a document based on
@@ -207,7 +213,10 @@ export default function Application() {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <SemesterStatusSelect />
+              <SemesterStatusSelect
+                component={AdditionalSemesterPrompt}
+                onValueChange={handleAdditionalPromptChange}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <DegreeSelect />
@@ -280,7 +289,14 @@ export default function Application() {
             <Grid item xs={12}>
               <Typography>
                 Please describe your qualifications for the position and
-                course(s) for which you are applying.
+                course(s) for which you are applying. <br />
+                <em>
+                  If you have been a TA, UPI, or grader before, please mention
+                  the course(s) and teacher(s) for which you worked.
+                </em>{' '}
+                <br /> <br />
+                Write about any relevant experience, such as teaching, tutoring,
+                grading, or coursework. <br />
               </Typography>
               <TextField
                 required

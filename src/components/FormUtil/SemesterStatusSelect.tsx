@@ -4,8 +4,15 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import AdditionalSemesterPrompt from './AddtlSemesterPrompt';
+import { AdditionalSemesterPromptProps } from './AddtlSemesterPrompt';
 
-export default function SemesterStatusSelect() {
+interface SemesterStatusSelectProps {
+  component: React.ComponentType<AdditionalSemesterPromptProps>;
+  onValueChange: (value: string) => void;
+}
+
+export default function SemesterStatusSelect(props: SemesterStatusSelectProps) {
   const [value, setValue] = React.useState('');
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,6 +42,7 @@ export default function SemesterStatusSelect() {
           label="Graduate"
         />
       </RadioGroup>
+      <props.component semester={value} onValueChange={props.onValueChange} />
     </FormControl>
   );
 }

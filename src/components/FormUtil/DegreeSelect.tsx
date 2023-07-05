@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
+import FormHelperText from '@mui/material/FormHelperText';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
@@ -28,6 +29,9 @@ export default function DegreeSelect() {
         <FormControlLabel value="MS" control={<Radio />} label="MS" />
         <FormControlLabel value="PhD" control={<Radio />} label="PhD" />
       </RadioGroup>
+      <FormHelperText id="degree-radio-group-helper-text" sx={{ ml: '0' }}>
+        Select the degree you are currently pursuing.
+      </FormHelperText>
     </FormControl>
   );
 }
