@@ -1,3 +1,4 @@
+import SubmitAppDialog from './ApplicationDialog';
 /*
 there are multiple states represented here:
   1. student has applied (student_applied)
@@ -29,7 +30,7 @@ export default function ShowApplicationStatus(props: AppStatusProps) {
       <>
         <h1>Your application has been denied.</h1>
         <h2>You can reapply below:</h2>
-        <p>button here</p>
+        <SubmitAppDialog />
       </>
     );
   } else if (userRole === 'student_accepted') {
