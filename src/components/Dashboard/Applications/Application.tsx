@@ -72,7 +72,6 @@ export default function Application() {
     if (availabilityCheckbox_twenty) {
       availabilityArray.push('20');
     }
-    const availabilityString = availabilityArray.join(',');
 
     // extract semester checkbox's values
     const semesterCheckbox_fall_2023 =
@@ -87,7 +86,13 @@ export default function Application() {
     if (semesterCheckbox_spring_2024) {
       semesterArray.push('Spring 2024');
     }
-    const semesterString = semesterArray.join(',');
+
+    // get courses as array
+    const coursesString = formData.get('course-prompt') as string;
+
+    const coursesArray = coursesString
+      .split(',')
+      .map((professorEmail) => professorEmail.trim());
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
@@ -104,9 +109,9 @@ export default function Application() {
       nationality: nationality as string,
       englishproficiency: formData.get('proficiency-select') as string,
       position: formData.get('positions-radio-group') as string,
-      available_hours: availabilityString,
-      available_semesters: semesterString,
-      courses: formData.get('course-prompt') as string,
+      available_hours: availabilityArray as string[],
+      available_semesters: semesterArray as string[],
+      courses: coursesArray as string[],
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
       date: current_date,

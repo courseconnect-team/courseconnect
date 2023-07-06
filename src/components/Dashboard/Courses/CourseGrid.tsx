@@ -137,7 +137,6 @@ export default function CourseGrid(props: CourseGridProps) {
     if (userRole === 'faculty' || userRole === 'student_accepted') {
       return (
         <GridToolbarContainer>
-          {/* Include your Dialog component here and pass the open state and setOpen function as props */}
           <GridToolbarExport />
           <GridToolbarFilterButton />
           <GridToolbarColumnsButton />
@@ -264,6 +263,7 @@ export default function CourseGrid(props: CourseGridProps) {
       helper_names: helperNamesArray,
       isNew: false,
     };
+
     if (updatedRow) {
       if (updatedRow.isNew) {
         return firebase

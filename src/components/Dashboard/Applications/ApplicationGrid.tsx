@@ -52,31 +52,6 @@ interface Application {
   mode?: 'edit' | 'view' | undefined;
 }
 
-interface EditToolbarProps {
-  setApplicationData: (
-    newRows: (oldRows: GridRowsProp) => GridRowsProp
-  ) => void;
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
-  ) => void;
-}
-
-function EditToolbar(props: EditToolbarProps) {
-  const { setApplicationData, setRowModesModel } = props;
-
-  // Add state to control the dialog open status
-  const [open, setOpen] = React.useState(false);
-
-  return (
-    <GridToolbarContainer>
-      {/* Include your Dialog component here and pass the open state and setOpen function as props */}
-      <GridToolbarExport />
-      <GridToolbarFilterButton />
-      <GridToolbarColumnsButton />
-    </GridToolbarContainer>
-  );
-}
-
 interface ApplicationGridProps {
   userRole: string;
 }
@@ -86,6 +61,31 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const [applicationData, setApplicationData] = React.useState<Application[]>(
     []
   );
+
+  // toolbar
+  interface EditToolbarProps {
+    setApplicationData: (
+      newRows: (oldRows: GridRowsProp) => GridRowsProp
+    ) => void;
+    setRowModesModel: (
+      newModel: (oldModel: GridRowModesModel) => GridRowModesModel
+    ) => void;
+  }
+
+  function EditToolbar(props: EditToolbarProps) {
+    const { setApplicationData, setRowModesModel } = props;
+
+    // Add state to control the dialog open status
+    const [open, setOpen] = React.useState(false);
+
+    return (
+      <GridToolbarContainer>
+        <GridToolbarExport />
+        <GridToolbarFilterButton />
+        <GridToolbarColumnsButton />
+      </GridToolbarContainer>
+    );
+  }
 
   // pop-up view setup
   const [open, setOpen] = React.useState(false);
@@ -258,8 +258,33 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...(newRow as Application), isNew: false };
+  const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
+    const availableHoursArray =
+      typeof newRow.available_hours === 'string' && newRow.available_hours
+        ? newRow.available_hours.split(',').map((hour) => hour.trim())
+        : oldRow.available_hours;
+
+    const availableSemestersArray =
+      typeof newRow.available_semesters === 'string' &&
+      newRow.available_semesters
+        ? newRow.available_semesters
+            .split(',')
+            .map((semester) => semester.trim())
+        : oldRow.available_semesters;
+
+    const coursesArray =
+      typeof newRow.courses === 'string' && newRow.courses
+        ? newRow.courses.split(',').map((course) => course.trim())
+        : oldRow.courses;
+
+    const updatedRow = {
+      ...(newRow as Application),
+      available_hours: availableHoursArray,
+      available_semesters: availableSemestersArray,
+      courses: coursesArray,
+      isNew: false,
+    };
+
     if (updatedRow) {
       if (updatedRow.isNew) {
         return firebase
@@ -308,7 +333,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef[] = [
+  let columns: GridColDef[] = [
     {
       field: 'actions',
       type: 'actions',
@@ -415,6 +440,89 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     { field: 'date', headerName: 'Date', width: 80, editable: true },
     { field: 'status', headerName: 'App Status', width: 100, editable: true },
   ];
+
+  if (userRole === 'faculty') {
+    columns = [
+      {
+        field: 'actions',
+        type: 'actions',
+        headerName: 'Actions',
+        width: 130,
+        cellClassName: 'actions',
+        getActions: ({ id }) => {
+          return [
+            <GridActionsCellItem
+              key="3"
+              icon={<ZoomInIcon />}
+              label="View"
+              onClick={(event) => handleClickOpenGrid(id)}
+              color="primary"
+            />,
+            <GridActionsCellItem
+              key="4"
+              icon={<ThumbUpAltIcon />}
+              label="Approve"
+              onClick={(event) => handleApproveClick(id)}
+              color="success"
+            />,
+            <GridActionsCellItem
+              key="5"
+              icon={<ThumbDownAltIcon />}
+              label="Deny"
+              onClick={(event) => handleDenyClick(id)}
+              color="error"
+            />,
+          ];
+        },
+      },
+      {
+        field: 'id',
+        headerName: 'User ID',
+        width: 70,
+        editable: false,
+      },
+      { field: 'position', headerName: 'Position', width: 70, editable: false },
+      {
+        field: 'available_semesters',
+        headerName: 'Semester(s)',
+        width: 130,
+        editable: false,
+      },
+      {
+        field: 'available_hours',
+        headerName: 'Hours',
+        width: 100,
+        editable: false,
+      },
+      {
+        field: 'firstname',
+        headerName: 'First Name',
+        width: 130,
+        editable: false,
+      },
+      {
+        field: 'lastname',
+        headerName: 'Last Name',
+        width: 130,
+        editable: false,
+      },
+      { field: 'email', headerName: 'Email', width: 200, editable: false },
+      { field: 'courses', headerName: 'Courses', width: 200, editable: false },
+      {
+        field: 'semesterstatus',
+        headerName: 'Academic Status',
+        width: 130,
+        editable: false,
+      },
+      { field: 'date', headerName: 'Date', width: 80, editable: false },
+      {
+        field: 'status',
+        headerName: 'App Status',
+        width: 100,
+        editable: false,
+      },
+    ];
+  }
 
   return (
     <Box
