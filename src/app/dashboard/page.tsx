@@ -7,7 +7,6 @@ import BottomMenu from '@/components/BottomMenu/BottomMenu';
 // dashboard components
 import DashboardWelcome from '@/components/Dashboard/Welcome/Welcome';
 import Profile from '@/components/Dashboard/Profile/Profile';
-import Settings from '@/components/Dashboard/Settings/Settings';
 import Users from '@/components/Dashboard/Users/Users';
 import Courses from '@/components/Dashboard/Courses/Courses';
 import Applications from '@/components/Dashboard/Applications/Applications';
@@ -34,7 +33,6 @@ export default function Dashboard() {
         {activeComponent === 'profile' && (
           <Profile user={user} userRole={role as string} />
         )}
-        {activeComponent === 'settings' && <Settings />}
         {activeComponent === 'users' && <Users userRole={role as string} />}
         {activeComponent === 'courses' && <Courses userRole={role as string} />}
         {activeComponent === 'applications' && (

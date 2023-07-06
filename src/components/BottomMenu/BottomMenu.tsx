@@ -9,7 +9,6 @@ import MenuBookIcon from '@mui/icons-material/MenuBook'; // courses
 import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark'; // applications
 import EditNoteIcon from '@mui/icons-material/EditNote'; // application
 import AccountBoxIcon from '@mui/icons-material/AccountBox'; // profile
-import SettingsIcon from '@mui/icons-material/Settings'; // settings
 
 /* Depending on whether or not the signed-in user is a student, faculty, or admin,
   the bottom menu will be displaying different things.
@@ -27,8 +26,7 @@ import SettingsIcon from '@mui/icons-material/Settings'; // settings
   - applications
 
   For all:
-  - settings
-  - profile
+  - profile, with some kind of embedded settings
   */
 
 export type BottomMenuProps = {
@@ -81,11 +79,6 @@ export default function BottomMenu(props: BottomMenuProps) {
                   value="profile"
                   icon={<AccountBoxIcon />}
                 />
-                <BottomNavigationAction
-                  label="Settings"
-                  value="settings"
-                  icon={<SettingsIcon />}
-                />
               </BottomNavigation>
             </Paper>
           </Box>
@@ -119,11 +112,6 @@ export default function BottomMenu(props: BottomMenuProps) {
                   value="profile"
                   icon={<AccountBoxIcon />}
                 />
-                <BottomNavigationAction
-                  label="Settings"
-                  value="settings"
-                  icon={<SettingsIcon />}
-                />
               </BottomNavigation>
             </Paper>
           </Box>
@@ -151,11 +139,6 @@ export default function BottomMenu(props: BottomMenuProps) {
                   label="Profile"
                   value="profile"
                   icon={<AccountBoxIcon />}
-                />
-                <BottomNavigationAction
-                  label="Settings"
-                  value="settings"
-                  icon={<SettingsIcon />}
                 />
               </BottomNavigation>
             </Paper>
@@ -185,11 +168,6 @@ export default function BottomMenu(props: BottomMenuProps) {
                   value="profile"
                   icon={<AccountBoxIcon />}
                 />
-                <BottomNavigationAction
-                  label="Settings"
-                  value="settings"
-                  icon={<SettingsIcon />}
-                />
               </BottomNavigation>
             </Paper>
           </Box>
@@ -218,11 +196,6 @@ export default function BottomMenu(props: BottomMenuProps) {
                   value="profile"
                   icon={<AccountBoxIcon />}
                 />
-                <BottomNavigationAction
-                  label="Settings"
-                  value="settings"
-                  icon={<SettingsIcon />}
-                />
               </BottomNavigation>
             </Paper>
           </Box>
@@ -245,11 +218,6 @@ export default function BottomMenu(props: BottomMenuProps) {
                   label="Profile"
                   value="profile"
                   icon={<AccountBoxIcon />}
-                />
-                <BottomNavigationAction
-                  label="Settings"
-                  value="settings"
-                  icon={<SettingsIcon />}
                 />
               </BottomNavigation>
             </Paper>
