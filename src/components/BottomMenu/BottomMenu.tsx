@@ -146,6 +146,8 @@ export default function BottomMenu(props: BottomMenuProps) {
         </>
       );
     case 'student_applied':
+    case 'student_accepted':
+    case 'student_denied':
       return (
         <>
           <Box sx={{ pb: 7 }} ref={ref}>
@@ -173,7 +175,7 @@ export default function BottomMenu(props: BottomMenuProps) {
           </Box>
         </>
       );
-    case 'student_accepted':
+    case 'student_assigned':
       return (
         <>
           <Box sx={{ pb: 7 }} ref={ref}>

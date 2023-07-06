@@ -39,7 +39,9 @@ export default function Dashboard() {
           <Applications userRole={role as string} />
         )}
         {activeComponent === 'application' && <Application />}
-        {activeComponent === 'application_status' && <ShowApplicationStatus />}
+        {activeComponent === 'application_status' && (
+          <ShowApplicationStatus user={user} userRole={role as string} />
+        )}
 
         <BottomMenu
           user_role={role as string}

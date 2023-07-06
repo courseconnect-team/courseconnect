@@ -85,8 +85,8 @@ export default function CourseGrid(props: CourseGridProps) {
           );
           setCourseData(data);
         });
-    } else if (userRole === 'student_accepted') {
-      // IF USER IS ACCEPTED STUDENT, THEN ONLY FETCH COURSES WHICH CORRESPOND TO STUDENT EMAIL
+    } else if (userRole === 'student_assigned') {
+      // IF USER IS ASSIGNED STUDENT, THEN ONLY FETCH COURSES WHICH CORRESPOND TO STUDENT EMAIL
 
       // Assume 'helper_emails' is an array in Firestore.
       coursesRef
@@ -134,7 +134,7 @@ export default function CourseGrid(props: CourseGridProps) {
     // Add state to control the dialog open status
     const [open, setOpen] = React.useState(false);
 
-    if (userRole === 'faculty' || userRole === 'student_accepted') {
+    if (userRole === 'faculty' || userRole === 'student_assigned') {
       return (
         <GridToolbarContainer>
           <GridToolbarExport />
@@ -413,7 +413,7 @@ export default function CourseGrid(props: CourseGridProps) {
     },
   ];
 
-  if (userRole === 'faculty' || userRole === 'student_accepted') {
+  if (userRole === 'faculty' || userRole === 'student_assigned') {
     columns = [
       {
         field: 'actions',
