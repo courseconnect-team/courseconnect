@@ -1,5 +1,5 @@
 import ApplicationGrid from './ApplicationGrid';
-
+import Container from '@mui/material/Container';
 // for admin and faculty views
 
 interface ApplicationsProps {
@@ -10,8 +10,10 @@ export default function Applications(props: ApplicationsProps) {
   const { userRole } = props;
   return (
     <>
-      <h1>Applications</h1>
-      <ApplicationGrid userRole={userRole} />
+      <Container maxWidth="lg">
+        <h1>Applications</h1>
+        <ApplicationGrid userRole={userRole} />
+      </Container>
     </>
   );
 }

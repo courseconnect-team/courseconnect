@@ -1,3 +1,4 @@
+import Container from '@mui/material/Container';
 import UserGrid from './UserGrid';
 
 interface UsersProps {
@@ -8,8 +9,10 @@ export default function Users(props: UsersProps) {
   const { userRole } = props;
   return (
     <>
-      <h1>Users</h1>
-      <UserGrid userRole={userRole} />
+      <Container maxWidth="lg">
+        <h1>Users</h1>
+        <UserGrid userRole={userRole} />
+      </Container>
     </>
   );
 }

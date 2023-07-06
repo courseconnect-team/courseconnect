@@ -1,5 +1,4 @@
-// little message welcoming user to dashboard, inviting user to explore and click stuff
-// include user name or something here
+import Container from '@mui/material/Container';
 
 interface DashboardProps {
   user: any;
@@ -11,9 +10,11 @@ export default function DashboardWelcome(props: DashboardProps) {
 
   return (
     <>
-      <h1>
-        Welcome, {userRole} {user?.email}!
-      </h1>
+      <Container maxWidth="lg">
+        <h1>
+          Welcome, {userRole} {user?.email}!
+        </h1>
+      </Container>
     </>
   );
 }
