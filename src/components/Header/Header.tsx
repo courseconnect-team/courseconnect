@@ -67,9 +67,6 @@ const Header = (props: HeaderProps) => {
               textAlign: 'left',
               display: { xs: 'flex', md: 'flex' },
               justifyContent: 'left',
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.1rem',
               color: 'inherit',
               textDecoration: 'none',
             }}

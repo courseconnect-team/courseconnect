@@ -25,23 +25,10 @@ function chooseIcon(role) {
         </Avatar>
       );
     case 'student_applying':
-      return (
-        <Avatar
-          sx={{
-            bgcolor: 'transparent',
-            '&:hover': { color: 'secondary.main' },
-          }}
-        >
-          <SchoolIcon />
-        </Avatar>
-      );
     case 'student_applied':
-      return (
-        <Avatar sx={{ bgcolor: 'secondary.main' }}>
-          <SchoolIcon />
-        </Avatar>
-      );
     case 'student_accepted':
+    case 'student_assigned':
+    case 'student_denied':
       return (
         <Avatar sx={{ bgcolor: 'secondary.main' }}>
           <SchoolIcon />
