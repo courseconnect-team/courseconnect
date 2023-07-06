@@ -13,6 +13,7 @@ export default function Applications(props: ApplicationsProps) {
       <Container maxWidth="lg">
         <h1>Applications</h1>
         <ApplicationGrid userRole={userRole} />
+        <h1>Assignment</h1>
       </Container>
     </>
   );

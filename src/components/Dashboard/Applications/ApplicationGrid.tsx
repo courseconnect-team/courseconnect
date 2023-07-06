@@ -27,6 +27,7 @@ import {
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+import UnderDevelopment from '@/components/UnderDevelopment';
 
 interface Application {
   id: string;
@@ -561,8 +562,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           {/* Display the application data of the selected user */}
           {selectedUserGrid && (
             <div>
-              {selectedUserGrid}
+              <p>User ID: {selectedUserGrid}</p>
               {/* Display the user's application data in a different format */}
+              <UnderDevelopment />
             </div>
           )}
         </DialogContent>

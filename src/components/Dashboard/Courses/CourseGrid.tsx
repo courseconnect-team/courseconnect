@@ -27,6 +27,7 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+import UnderDevelopment from '@/components/UnderDevelopment';
 
 interface Course {
   id: string;
@@ -522,13 +523,14 @@ export default function CourseGrid(props: CourseGridProps) {
           }}
         />
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{'Course Pop-up'}</DialogTitle>
+          <DialogTitle>{'Course Data'}</DialogTitle>
           <DialogContent>
-            {/* Display the application data of the selected user */}
+            {/* Display the data of the selected course */}
             {selectedCourseGrid && (
               <div>
-                {selectedCourseGrid}
-                {/* Display the user's application data in a different format */}
+                <p>Class Number: {selectedCourseGrid}</p>
+                {/* Display the course's data in a different format */}
+                <UnderDevelopment />
               </div>
             )}
           </DialogContent>

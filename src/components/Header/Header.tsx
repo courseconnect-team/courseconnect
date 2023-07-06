@@ -59,18 +59,23 @@ const Header = (props: HeaderProps) => {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box sx={{ flexGrow: 0, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                href={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'inherit', display: 'block' }}
-              >
-                {page}
-              </Button>
-            ))}
-          </Box>
+          <Typography
+            variant="h5"
+            component="a"
+            href="/"
+            sx={{
+              textAlign: 'left',
+              display: { xs: 'flex', md: 'flex' },
+              justifyContent: 'left',
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              letterSpacing: '.1rem',
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            CourseConnect
+          </Typography>
 
           <Box sx={{ flexGrow: 0, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
@@ -116,28 +121,22 @@ const Header = (props: HeaderProps) => {
             </Menu>
           </Box>
 
-          <Typography
-            variant="h5"
-            component="a"
-            href="/"
-            sx={{
-              textAlign: 'center',
-              display: { xs: 'flex', md: 'flex' },
-              justifyContent: 'center',
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.2rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            CourseConnect
-          </Typography>
+          <Box sx={{ flexGrow: 0, display: { xs: 'none', md: 'flex' } }}>
+            {pages.map((page) => (
+              <Button
+                key={page}
+                href={page}
+                onClick={handleCloseNavMenu}
+                sx={{ my: 2, color: 'inherit', display: 'block' }}
+              >
+                {page}
+              </Button>
+            ))}
+          </Box>
 
           <Box
             className={scss.rightIcons}
-            sx={{ flexGrow: 0, display: 'flex' }}
+            sx={{ flexGrow: 1, display: 'flex', justifyContent: 'right' }}
           >
             <ThemeToggleButton ColorModeContext={ColorModeContext} />
             <Box sx={{ flexGrow: 0 }}>

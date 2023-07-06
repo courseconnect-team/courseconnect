@@ -1,4 +1,5 @@
 import Container from '@mui/material/Container';
+import UnderDevelopment from '@/components/UnderDevelopment';
 
 interface ProfileProps {
   userRole: string;
@@ -11,8 +12,7 @@ export default function Profile(props: ProfileProps) {
     <>
       <Container maxWidth="lg">
         <h1>Profile</h1>
-        <h2>Role: {userRole}</h2>
-        <h2>Email: {user?.email}</h2>
+        <UnderDevelopment />
       </Container>
     </>
   );

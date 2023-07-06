@@ -1,4 +1,5 @@
 import Container from '@mui/material/Container';
+import UnderDevelopment from '@/components/UnderDevelopment';
 
 interface DashboardProps {
   user: any;
@@ -14,6 +15,7 @@ export default function DashboardWelcome(props: DashboardProps) {
         <h1>
           Welcome, {userRole} {user?.email}!
         </h1>
+        <UnderDevelopment />
       </Container>
     </>
   );
