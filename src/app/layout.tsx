@@ -10,10 +10,6 @@ import Header from '@/components/Header/Header';
 const ColorModeContext = React.createContext({
   toggleColorMode: () => {},
 });
-export const metadata = {
-  title: 'Course Connect',
-  description: 'Hiring management for students, faculty, and administrators.',
-};
 
 export default function RootLayout({
   children,
