@@ -1,4 +1,5 @@
 import ApplicationGrid from './ApplicationGrid';
+import AssignmentGrid from './AssignmentGrid';
 import Container from '@mui/material/Container';
 // for admin and faculty views
 
@@ -14,6 +15,7 @@ export default function Applications(props: ApplicationsProps) {
         <h1>Applications</h1>
         <ApplicationGrid userRole={userRole} />
         <h1>Assignment</h1>
+        <AssignmentGrid userRole={userRole} />
       </Container>
     </>
   );

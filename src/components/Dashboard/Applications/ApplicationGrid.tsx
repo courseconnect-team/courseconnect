@@ -26,6 +26,8 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { useAuth } from '@/firebase/auth/auth_context';
+import GetUserName from '@/firebase/util/GetUserName';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
 
@@ -58,7 +60,12 @@ interface ApplicationGridProps {
 }
 
 export default function ApplicationGrid(props: ApplicationGridProps) {
+  // current user
+  const { user } = useAuth();
   const { userRole } = props;
+  const userName = GetUserName(user?.uid);
+
+  // application props
   const [applicationData, setApplicationData] = React.useState<Application[]>(
     []
   );
@@ -194,6 +201,41 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       })
       .catch((error) => {
         console.error('Error updating application document: ', error);
+      });
+
+    // eventually here an email would be sent to the student as a notification
+    // however, for now there will just be an "assignment" object generated in the database
+    /*
+        the assignment object will have the following fields:
+        - date
+        - student's uid (same as grid row id here)
+        - approver's uid (uid of the logged-in user)
+        - approver's role
+        --> EVENTUALLY THERE WILL BE SUGGESTED SECTIONS AND CLASSES. FOR NOW, NOTHING.
+      */
+
+    // get the current date in month/day/year format
+    const current = new Date();
+    const current_date = `${
+      current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
+
+    const assignmentObject = {
+      date: current_date as string,
+      student_uid: id.toString() as string,
+      approver_uid: user?.uid as string,
+      approver_role: userRole as string,
+      approver_name: userName as string,
+    };
+
+    // Create the document within the "assignments" collection
+    firebase
+      .firestore()
+      .collection('assignments')
+      .doc(assignmentObject.student_uid)
+      .set(assignmentObject)
+      .catch((error: any) => {
+        console.error('Error writing assignment document: ', error);
       });
   };
 
@@ -528,7 +570,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   return (
     <Box
       sx={{
-        height: 600,
+        height: 400,
         width: '100%',
         '& .actions': {
           color: 'text.secondary',
