@@ -24,7 +24,7 @@ export default function DepartmentSelect() {
         <Select
           labelId="department-select-label"
           id="department-select"
-          variant="filled"
+          variant="outlined"
           value={department}
           name="department-select"
           label="Department"
