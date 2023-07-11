@@ -7,6 +7,7 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 import * as functions from 'firebase-functions';
+import { DocumentSnapshot } from 'firebase-functions/v2/firestore';
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
@@ -152,12 +153,80 @@ export const deleteUserFromID = functions.https.onRequest(
       // Handle preflight request
       response.status(204).send('');
     } else {
-      // Handle other requests
-
       // Extract user object data from post request
       const userObject = {
         auth_id: request.body.auth_id,
       };
+
+      // If there is any data associated with the user in the database, delete it
+      // This must be done for the users, applications, and assignments collections
+      const userDocRef = db.collection('users').doc(userObject.auth_id);
+      const applicationDocRef = db
+        .collection('applications')
+        .doc(userObject.auth_id);
+      const assignmentDocRef = db
+        .collection('assignments')
+        .doc(userObject.auth_id);
+
+      userDocRef
+        .get()
+        .then((doc: DocumentSnapshot) => {
+          if (doc.exists) {
+            userDocRef
+              .delete()
+              .then(() => {
+                console.log('Document successfully deleted.');
+              })
+              .catch((error: any) => {
+                console.error('Error deleting document: ', error);
+              });
+          } else {
+            console.log('Document does not exist.');
+          }
+        })
+        .catch((error: any) => {
+          console.error('Error getting document: ', error);
+        });
+
+      applicationDocRef
+        .get()
+        .then((doc: DocumentSnapshot) => {
+          if (doc.exists) {
+            applicationDocRef
+              .delete()
+              .then(() => {
+                console.log('Document successfully deleted.');
+              })
+              .catch((error: any) => {
+                console.error('Error deleting document: ', error);
+              });
+          } else {
+            console.log('Document does not exist.');
+          }
+        })
+        .catch((error: any) => {
+          console.error('Error getting document: ', error);
+        });
+
+      assignmentDocRef
+        .get()
+        .then((doc: DocumentSnapshot) => {
+          if (doc.exists) {
+            assignmentDocRef
+              .delete()
+              .then(() => {
+                console.log('Document successfully deleted.');
+              })
+              .catch((error: any) => {
+                console.error('Error deleting document: ', error);
+              });
+          } else {
+            console.log('Document does not exist.');
+          }
+        })
+        .catch((error: any) => {
+          console.error('Error getting document: ', error);
+        });
 
       // Delete the user from firebase auth
       auth

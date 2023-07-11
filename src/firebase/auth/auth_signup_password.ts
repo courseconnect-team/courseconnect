@@ -22,7 +22,7 @@ export default async function handleSignUp(
     await sendEmailVerification(auth.currentUser as User).catch((error) => {
       console.log(error);
     });
-    await updateProfile(auth.currentUser as User, { displayName: email }).catch(
+    await updateProfile(auth.currentUser as User, { displayName: name }).catch(
       (error) => {
         console.log(error);
       }
