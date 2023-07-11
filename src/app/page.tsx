@@ -15,3 +15,8 @@ export default function Home() {
     </>
   );
 }
+
+export const metadata = {
+  title: 'Course Connect',
+  description: 'Hiring management for students, faculty, and administrators.',
+};
