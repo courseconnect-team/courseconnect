@@ -24,7 +24,7 @@ export default function Dashboard() {
     setActiveComponent(componentName);
   };
 
-  if (user) {
+  if (user && user.emailVerified) {
     return (
       <>
         {activeComponent === 'welcome' && (
@@ -47,6 +47,13 @@ export default function Dashboard() {
           user_role={role as string}
           onComponentChange={handleComponentChange}
         />
+      </>
+    );
+  } else if (user && !user.emailVerified) {
+    return (
+      <>
+        <h1>Email Verification Required</h1>
+        <p>Please check your email for a verification link.</p>
       </>
     );
   }

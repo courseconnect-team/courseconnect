@@ -9,14 +9,30 @@ interface ApplicationsProps {
 
 export default function Applications(props: ApplicationsProps) {
   const { userRole } = props;
-  return (
-    <>
-      <Container maxWidth="lg">
-        <h1>Applications</h1>
-        <ApplicationGrid userRole={userRole} />
-        <h1>Assignment</h1>
-        <AssignmentGrid userRole={userRole} />
-      </Container>
-    </>
-  );
+  // if admin
+  if (userRole === 'admin') {
+    return (
+      <>
+        <Container maxWidth="lg">
+          <h1>Applications</h1>
+          <ApplicationGrid userRole={userRole} />
+          <h1>Assignment</h1>
+          <AssignmentGrid userRole={userRole} />
+        </Container>
+      </>
+    );
+  }
+  // if faculy
+  else if (userRole === 'faculty') {
+    return (
+      <>
+        <Container maxWidth="lg">
+          <h1>Applications</h1>
+          <ApplicationGrid userRole={userRole} />
+        </Container>
+      </>
+    );
+  }
+  // default: return nothing
+  return <></>;
 }

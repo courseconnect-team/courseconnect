@@ -30,11 +30,6 @@ export default function RoleSelect() {
           label="Student"
         />
         <FormControlLabel value="faculty" control={<Radio />} label="Faculty" />
-        <FormControlLabel
-          value="admin"
-          control={<Radio />}
-          label="Administrator"
-        />
       </RadioGroup>
     </FormControl>
   );

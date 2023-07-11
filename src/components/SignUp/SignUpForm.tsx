@@ -34,6 +34,7 @@ export default function SignUpForm() {
     };
 
     const uid_from_signup = await handleSignUp(
+      userData.firstname + ' ' + userData.lastname,
       userData.email,
       userData.password
     );

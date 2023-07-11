@@ -26,6 +26,7 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { query, where, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserName from '@/firebase/util/GetUserName';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
@@ -109,20 +110,55 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setOpen(false);
   };
 
-  // application data from firestore
+  // fetching application data from firestore
+
   React.useEffect(() => {
     const applicationsRef = firebase.firestore().collection('applications');
-    applicationsRef.get().then((querySnapshot) => {
-      const data = querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Application)
+    const usersRef = firebase.firestore().collection('users');
+    const coursesRef = firebase.firestore().collection('courses');
+
+    if (userRole === 'admin') {
+      applicationsRef.get().then((querySnapshot) => {
+        const data = querySnapshot.docs.map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Application)
+        );
+        setApplicationData(data);
+      });
+    } else if (userRole === 'faculty') {
+      // the faculty member can only see applications that specify the same class as they have
+      // get the courses that the application specifies
+      // find the courses that the faculty member teaches
+      // if there is an intersection, then the faculty member can see the application
+
+      // find courses that the faculty member teaches
+      const facultyCourses = collection(firebase.firestore(), 'courses');
+      const q = query(
+        facultyCourses,
+        where('professor_emails', 'array-contains', user?.email)
       );
-      setApplicationData(data);
-    });
-  }, []);
+      const facultyCoursesSnapshot = getDocs(q);
+
+      // now we have every course that the faculty member teaches
+      // we need the course code from each of them
+      // then we can compare them to the courses that the application specifies
+      // if there is an intersection, then the faculty member can see the application
+
+      applicationsRef.get().then((querySnapshot) => {
+        const data = querySnapshot.docs.map(
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Application)
+        );
+        setApplicationData(data);
+      });
+    }
+  }, [userRole, user?.email]);
 
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
