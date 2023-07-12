@@ -240,3 +240,32 @@ export const deleteUserFromID = functions.https.onRequest(
     }
   }
 );
+
+export const checkIfIDInDatabase = functions.https.onRequest(
+  (request, response) => {
+    response.set('Access-Control-Allow-Origin', '*');
+    response.set('Access-Control-Allow-Methods', 'GET, POST');
+    response.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    const userObject = {
+      school_id: request.body.auth_id,
+    };
+
+    // check if ufid exists in database
+    // if it does, return error
+    // if it doesn't, create user
+
+    const usersRef = db.collection('users');
+    const snapshot = usersRef.where('ufid', '==', userObject.school_id).get();
+    // this snapshot represents the users with the same ufid
+    if (!snapshot.empty) {
+      // there is a user with the same ufid
+      // send an error response
+      console.log('User with same school ID already exists!');
+      response.status(500).send('User with same school ID already exists!');
+    }
+    // else, there are no users with the same ufid
+    // send an ok response
+    response.status(200).send('No user with that school ID found!');
+  }
+);

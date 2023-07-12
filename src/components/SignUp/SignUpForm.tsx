@@ -36,13 +36,15 @@ export default function SignUpForm() {
     const uid_from_signup = await handleSignUp(
       userData.firstname + ' ' + userData.lastname,
       userData.email,
-      userData.password
+      userData.password,
+      userData.ufid
     );
     userData.uid = uid_from_signup;
 
     if (userData.uid === '-1' || userData.uid === '') {
       // error: user not created
       console.log('ERROR: User not created');
+      // display some kind of snackbar or toast saying UFID is already in use
     } else {
       // user created successfully
       console.log('SUCCESS: User created successfully');
@@ -67,6 +69,7 @@ export default function SignUpForm() {
         handleSignIn(userData.email, userData.password);
       } else {
         console.log('ERROR: User data failed to send to server');
+        // display some kind of snackbar or toast saying data failed to send to server
       }
     }
   };
