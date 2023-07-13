@@ -17,17 +17,19 @@ export default async function handleSignUp(
   // use fetch to send the user data to the server
   // this goes to a cloud function which creates a document based on
   // the data from the form, identified by the user's firebase auth uid
+
+  const userIDObject = {
+    ufid: ufid,
+  };
+
   const response = await fetch(
     'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/checkIfIDInDatabase',
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*', // Required for CORS support to work
-        'Access-Control-Allow-Headers': 'Content-Type', // Required for CORS support to work
-        'Access-Control-Allow-Methods': 'POST',
       },
-      body: JSON.stringify(ufid),
+      body: JSON.stringify(userIDObject),
     }
   );
   if (response.ok) {

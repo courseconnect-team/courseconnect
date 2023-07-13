@@ -8,10 +8,13 @@
  */
 import * as functions from 'firebase-functions';
 import { DocumentSnapshot } from 'firebase-functions/v2/firestore';
+import * as cors from 'cors';
+
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 const auth = admin.auth();
+const corsHandler = cors({ origin: true });
 
 export const processSignUpForm = functions.https.onRequest(
   (request, response) => {
@@ -243,29 +246,20 @@ export const deleteUserFromID = functions.https.onRequest(
 
 export const checkIfIDInDatabase = functions.https.onRequest(
   (request, response) => {
-    response.set('Access-Control-Allow-Origin', '*');
-    response.set('Access-Control-Allow-Methods', 'GET, POST');
-    response.set('Access-Control-Allow-Headers', 'Content-Type');
+    corsHandler(request, response, async () => {
+      // Your existing function code.
+      const userObject = {
+        school_id: request.body.ufid,
+      };
 
-    const userObject = {
-      school_id: request.body.auth_id,
-    };
+      const usersRef = db.collection('users');
+      const snapshot = usersRef.where('ufid', '==', userObject.school_id).get();
 
-    // check if ufid exists in database
-    // if it does, return error
-    // if it doesn't, create user
-
-    const usersRef = db.collection('users');
-    const snapshot = usersRef.where('ufid', '==', userObject.school_id).get();
-    // this snapshot represents the users with the same ufid
-    if (!snapshot.empty) {
-      // there is a user with the same ufid
-      // send an error response
-      console.log('User with same school ID already exists!');
-      response.status(500).send('User with same school ID already exists!');
-    }
-    // else, there are no users with the same ufid
-    // send an ok response
-    response.status(200).send('No user with that school ID found!');
+      if (!snapshot.empty) {
+        console.log('User with same school ID already exists!');
+        response.status(500).send('User with same school ID already exists!');
+      }
+      response.status(200).send('No user with that school ID found!');
+    });
   }
 );
