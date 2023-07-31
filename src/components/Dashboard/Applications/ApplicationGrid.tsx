@@ -722,7 +722,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
             <DialogContentText>
-              Please enter one or more class numbers to which the student shall
+              Please enter one or more course codes to which the student shall
               be assigned.
             </DialogContentText>
             <TextField
