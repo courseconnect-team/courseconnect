@@ -8,13 +8,13 @@
  */
 import * as functions from 'firebase-functions';
 import { DocumentSnapshot } from 'firebase-functions/v2/firestore';
-import * as cors from 'cors';
+// import * as cors from 'cors';
 
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 const auth = admin.auth();
-const corsHandler = cors({ origin: true });
+// const corsHandler = cors({ origin: true });
 
 export const processSignUpForm = functions.https.onRequest(
   (request, response) => {
@@ -244,22 +244,22 @@ export const deleteUserFromID = functions.https.onRequest(
   }
 );
 
-export const checkIfIDInDatabase = functions.https.onRequest(
-  (request, response) => {
-    corsHandler(request, response, async () => {
-      // Your existing function code.
-      const userObject = {
-        school_id: request.body.ufid,
-      };
+// export const checkIfIDInDatabase = functions.https.onRequest(
+//   (request, response) => {
+//     corsHandler(request, response, async () => {
+//       // Your existing function code.
+//       const userObject = {
+//         school_id: request.body.ufid,
+//       };
 
-      const usersRef = db.collection('users');
-      const snapshot = usersRef.where('ufid', '==', userObject.school_id).get();
+//       const usersRef = db.collection('users');
+//       const snapshot = usersRef.where('ufid', '==', userObject.school_id).get();
 
-      if (!snapshot.empty) {
-        console.log('User with same school ID already exists!');
-        response.status(500).send('User with same school ID already exists!');
-      }
-      response.status(200).send('No user with that school ID found!');
-    });
-  }
-);
+//       if (!snapshot.empty) {
+//         console.log('User with same school ID already exists!');
+//         response.status(500).send('User with same school ID already exists!');
+//       }
+//       response.status(200).send('No user with that school ID found!');
+//     });
+//   }
+// );
