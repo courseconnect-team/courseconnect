@@ -24,7 +24,7 @@ export default function Dashboard() {
     setActiveComponent(componentName);
   };
 
-  if (user && user.emailVerified) {
+  if ((user && user.emailVerified) || (user && role === 'admin')) {
     return (
       <>
         {activeComponent === 'welcome' && (

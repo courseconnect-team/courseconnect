@@ -107,7 +107,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   // application data from firestore
   React.useEffect(() => {
     const assignmentsRef = firebase.firestore().collection('assignments');
-    assignmentsRef.get().then((querySnapshot) => {
+
+    const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
           ({
@@ -117,6 +118,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       );
       setAssignmentData(data);
     });
+
+    // Clean up the subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
@@ -347,13 +351,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             color="primary"
           />,
           <GridActionsCellItem
-            key="4"
-            icon={<AssignmentIndIcon />}
-            label="Approve"
-            onClick={(event) => handleOpenAssignmentDialog(id)}
-            color="success"
-          />,
-          <GridActionsCellItem
             key="6"
             icon={<EditIcon />}
             label="Edit"
@@ -372,26 +369,14 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
     {
       field: 'id',
-      headerName: 'Approved User ID',
+      headerName: 'Approved UFID',
       width: 150,
       editable: true,
     },
     {
-      field: 'approver_name',
-      headerName: 'Approved By',
-      width: 150,
-      editable: true,
-    },
-    {
-      field: 'approver_role',
-      headerName: 'Approver Role',
-      width: 120,
-      editable: true,
-    },
-    {
-      field: 'approver_uid',
-      headerName: 'Approver User ID',
-      width: 150,
+      field: 'class_codes',
+      headerName: 'Class Codes',
+      width: 250,
       editable: true,
     },
     { field: 'date', headerName: 'Date Approved', width: 120, editable: true },

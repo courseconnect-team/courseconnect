@@ -22,22 +22,22 @@ export default async function handleSignUp(
     ufid: ufid,
   };
 
-  const response = await fetch(
-    'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/checkIfIDInDatabase',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userIDObject),
-    }
-  );
-  if (response.ok) {
-    console.log('SUCCESS: UFID does not exist in database.');
-  } else {
-    console.log('ERROR: Inputted UFID already exists in database.');
-    return '-1';
-  }
+  // const response = await fetch(
+  //   'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/checkIfIDInDatabase',
+  //   {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(userIDObject),
+  //   }
+  // );
+  // if (response.ok) {
+  //   console.log('SUCCESS: UFID does not exist in database.');
+  // } else {
+  //   console.log('ERROR: Inputted UFID already exists in database.');
+  //   return '-1';
+  // }
 
   try {
     await createUserWithEmailAndPassword(auth, email, password).catch(
