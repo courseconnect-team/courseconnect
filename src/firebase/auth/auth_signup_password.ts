@@ -11,8 +11,34 @@ const auth = firebase.auth();
 export default async function handleSignUp(
   name: string,
   email: string,
-  password: string
+  password: string,
+  ufid: string
 ): Promise<string> {
+  // use fetch to send the user data to the server
+  // this goes to a cloud function which creates a document based on
+  // the data from the form, identified by the user's firebase auth uid
+
+  const userIDObject = {
+    ufid: ufid,
+  };
+
+  // const response = await fetch(
+  //   'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/checkIfIDInDatabase',
+  //   {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(userIDObject),
+  //   }
+  // );
+  // if (response.ok) {
+  //   console.log('SUCCESS: UFID does not exist in database.');
+  // } else {
+  //   console.log('ERROR: Inputted UFID already exists in database.');
+  //   return '-1';
+  // }
+
   try {
     await createUserWithEmailAndPassword(auth, email, password).catch(
       (error) => {

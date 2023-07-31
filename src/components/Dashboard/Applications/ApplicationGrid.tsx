@@ -23,14 +23,24 @@ import {
   GridToolbarExport,
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
+  GridValueGetterParams,
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { query, where, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserName from '@/firebase/util/GetUserName';
-import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogContentText,
+  Button,
+  TextField,
+  DialogActions,
+} from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
+import AppView from './AppView';
 
 interface Application {
   id: string;
@@ -60,6 +70,10 @@ interface ApplicationGridProps {
   userRole: string;
 }
 
+function getFullName(params: GridValueGetterParams) {
+  return `${params.row.firstname || ''} ${params.row.lastname || ''}`;
+}
+
 export default function ApplicationGrid(props: ApplicationGridProps) {
   // current user
   const { user } = useAuth();
@@ -70,6 +84,88 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const [applicationData, setApplicationData] = React.useState<Application[]>(
     []
   );
+
+  // assignment dialog pop-up view setup
+  const [openAssignmentDialog, setOpenAssignmentDialog] = React.useState(false);
+  const handleOpenAssignmentDialog = (id: GridRowId) => {
+    setSelectedUserGrid(id);
+    setOpenAssignmentDialog(true);
+  };
+  const handleCloseAssignmentDialog = () => {
+    setOpenAssignmentDialog(false);
+  };
+
+  const handleSubmitAssignment = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    // extract the form data from the current event
+    const formData = new FormData(event.currentTarget);
+
+    // get student's user id
+    const student_uid = selectedUserGrid as string;
+
+    // update student's application to approved
+    firebase
+      .firestore()
+      .collection('applications')
+      .doc(student_uid.toString())
+      .update({ status: 'Approved' })
+      // .then(() => {
+      //   // Update the 'users' collection
+      //   firebase
+      //     .firestore()
+      //     .collection('users')
+      //     .doc(id.toString())
+      //     .update({ role: 'student_accepted' })
+      //     .then(() => {
+      //       // Update the local state
+      //       const updatedData = applicationData.map((row) => {
+      //         if (row.id === id) {
+      //           return { ...row, status: 'Approved' };
+      //         }
+      //         return row;
+      //       });
+      //       setApplicationData(updatedData);
+      //     })
+      //     .catch((error) => {
+      //       console.error('Error updating user document: ', error);
+      //     });
+      // })
+      .catch((error) => {
+        console.error('Error updating application document: ', error);
+      });
+
+    // get class codes as array
+    const classCodeString = formData.get('class-codes') as string;
+    const classCodeArray = classCodeString
+      .split(',')
+      .map((classCode) => classCode.trim());
+
+    // get the current date in month/day/year format
+    const current = new Date();
+    const current_date = `${
+      current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
+
+    const assignmentObject = {
+      date: current_date as string,
+      student_uid: student_uid as string,
+      class_codes: classCodeArray,
+    };
+
+    // Create the document within the "assignments" collection
+    firebase
+      .firestore()
+      .collection('assignments')
+      .doc(assignmentObject.student_uid)
+      .set(assignmentObject)
+      .catch((error: any) => {
+        console.error('Error writing assignment document: ', error);
+      });
+
+    handleCloseAssignmentDialog();
+  };
 
   // toolbar
   interface EditToolbarProps {
@@ -114,11 +210,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   React.useEffect(() => {
     const applicationsRef = firebase.firestore().collection('applications');
-    const usersRef = firebase.firestore().collection('users');
-    const coursesRef = firebase.firestore().collection('courses');
 
     if (userRole === 'admin') {
-      applicationsRef.get().then((querySnapshot) => {
+      const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
             ({
@@ -128,6 +222,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         );
         setApplicationData(data);
       });
+
+      // Clean up the subscription on unmount
+      return () => unsubscribe();
     } else if (userRole === 'faculty') {
       // the faculty member can only see applications that specify the same class as they have
       // get the courses that the application specifies
@@ -181,27 +278,27 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .collection('applications')
       .doc(id.toString())
       .update({ status: 'Denied' })
-      .then(() => {
-        // Update the 'users' collection
-        firebase
-          .firestore()
-          .collection('users')
-          .doc(id.toString())
-          .update({ role: 'student_denied' })
-          .then(() => {
-            // Update the local state
-            const updatedData = applicationData.map((row) => {
-              if (row.id === id) {
-                return { ...row, status: 'Denied' };
-              }
-              return row;
-            });
-            setApplicationData(updatedData);
-          })
-          .catch((error) => {
-            console.error('Error updating user document: ', error);
-          });
-      })
+      // .then(() => {
+      //   // Update the 'users' collection
+      //   firebase
+      //     .firestore()
+      //     .collection('users')
+      //     .doc(id.toString())
+      //     .update({ role: 'student_denied' })
+      //     .then(() => {
+      //       // Update the local state
+      //       const updatedData = applicationData.map((row) => {
+      //         if (row.id === id) {
+      //           return { ...row, status: 'Denied' };
+      //         }
+      //         return row;
+      //       });
+      //       setApplicationData(updatedData);
+      //     })
+      //     .catch((error) => {
+      //       console.error('Error updating user document: ', error);
+      //     });
+      // })
       .catch((error) => {
         console.error('Error updating application document: ', error);
       });
@@ -214,27 +311,27 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .collection('applications')
       .doc(id.toString())
       .update({ status: 'Approved' })
-      .then(() => {
-        // Update the 'users' collection
-        firebase
-          .firestore()
-          .collection('users')
-          .doc(id.toString())
-          .update({ role: 'student_accepted' })
-          .then(() => {
-            // Update the local state
-            const updatedData = applicationData.map((row) => {
-              if (row.id === id) {
-                return { ...row, status: 'Approved' };
-              }
-              return row;
-            });
-            setApplicationData(updatedData);
-          })
-          .catch((error) => {
-            console.error('Error updating user document: ', error);
-          });
-      })
+      // .then(() => {
+      //   // Update the 'users' collection
+      //   firebase
+      //     .firestore()
+      //     .collection('users')
+      //     .doc(id.toString())
+      //     .update({ role: 'student_accepted' })
+      //     .then(() => {
+      //       // Update the local state
+      //       const updatedData = applicationData.map((row) => {
+      //         if (row.id === id) {
+      //           return { ...row, status: 'Approved' };
+      //         }
+      //         return row;
+      //       });
+      //       setApplicationData(updatedData);
+      //     })
+      //     .catch((error) => {
+      //       console.error('Error updating user document: ', error);
+      //     });
+      // })
       .catch((error) => {
         console.error('Error updating application document: ', error);
       });
@@ -339,17 +436,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
     const availableHoursArray =
-      typeof newRow.available_hours === 'string' && newRow.available_hours
-        ? newRow.available_hours.split(',').map((hour) => hour.trim())
-        : oldRow.available_hours;
+      typeof newRow.availability === 'string' && newRow.availability
+        ? newRow.availability.split(',').map((hour) => hour.trim())
+        : oldRow.availability;
 
     const availableSemestersArray =
-      typeof newRow.available_semesters === 'string' &&
-      newRow.available_semesters
-        ? newRow.available_semesters
-            .split(',')
-            .map((semester) => semester.trim())
-        : oldRow.available_semesters;
+      typeof newRow.semesters === 'string' && newRow.semesters
+        ? newRow.semesters.split(',').map((semester) => semester.trim())
+        : oldRow.semesters;
 
     const coursesArray =
       typeof newRow.courses === 'string' && newRow.courses
@@ -358,8 +452,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     const updatedRow = {
       ...(newRow as Application),
-      available_hours: availableHoursArray,
-      available_semesters: availableSemestersArray,
+      availability: availableHoursArray,
+      semesters: availableSemestersArray,
       courses: coursesArray,
       isNew: false,
     };
@@ -455,7 +549,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             key="4"
             icon={<ThumbUpAltIcon />}
             label="Approve"
-            onClick={(event) => handleApproveClick(id)}
+            onClick={(event) => handleOpenAssignmentDialog(id)}
             color="success"
           />,
           <GridActionsCellItem
@@ -483,40 +577,22 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       },
     },
     {
+      field: 'fullname',
+      headerName: 'Full Name',
+      width: 150,
+      editable: false,
+      valueGetter: getFullName,
+    },
+    { field: 'uf_email', headerName: 'Email', width: 180, editable: true },
+    {
       field: 'id',
-      headerName: 'User ID',
+      headerName: 'UFID',
       width: 70,
       editable: true,
     },
-    { field: 'position', headerName: 'Position', width: 70, editable: true },
-    {
-      field: 'available_semesters',
-      headerName: 'Semester(s)',
-      width: 130,
-      editable: true,
-    },
-    {
-      field: 'available_hours',
-      headerName: 'Hours',
-      width: 100,
-      editable: true,
-    },
-    {
-      field: 'firstname',
-      headerName: 'First Name',
-      width: 130,
-      editable: true,
-    },
-    { field: 'lastname', headerName: 'Last Name', width: 130, editable: true },
-    { field: 'email', headerName: 'Email', width: 200, editable: true },
     { field: 'courses', headerName: 'Courses', width: 200, editable: true },
-    {
-      field: 'semesterstatus',
-      headerName: 'Academic Status',
-      width: 130,
-      editable: true,
-    },
-    { field: 'date', headerName: 'Date', width: 80, editable: true },
+    { field: 'position', headerName: 'Position', width: 70, editable: true },
+    { field: 'timestamp', headerName: 'Date', width: 80, editable: true },
     { field: 'status', headerName: 'App Status', width: 100, editable: true },
   ];
 
@@ -556,7 +632,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       },
       {
         field: 'id',
-        headerName: 'User ID',
+        headerName: 'UFID',
         width: 70,
         editable: false,
       },
@@ -574,16 +650,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         editable: false,
       },
       {
-        field: 'firstname',
-        headerName: 'First Name',
-        width: 130,
+        field: 'fullname',
+        headerName: 'Full Name',
+        width: 150,
         editable: false,
-      },
-      {
-        field: 'lastname',
-        headerName: 'Last Name',
-        width: 130,
-        editable: false,
+        valueGetter: getFullName,
       },
       { field: 'email', headerName: 'Email', width: 200, editable: false },
       { field: 'courses', headerName: 'Courses', width: 200, editable: false },
@@ -640,12 +711,46 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           {/* Display the application data of the selected user */}
           {selectedUserGrid && (
             <div>
-              <p>User ID: {selectedUserGrid}</p>
-              {/* Display the user's application data in a different format */}
-              <UnderDevelopment />
+              <AppView uid={selectedUserGrid as string} />
             </div>
           )}
         </DialogContent>
+      </Dialog>
+
+      <Dialog open={openAssignmentDialog} onClose={handleCloseAssignmentDialog}>
+        <DialogTitle>Course Assignment</DialogTitle>
+        <form onSubmit={handleSubmitAssignment}>
+          <DialogContent>
+            <DialogContentText>
+              Please enter one or more class numbers to which the student shall
+              be assigned.
+            </DialogContentText>
+            <TextField
+              sx={{ paddingLeft: '25%', paddingRight: '25%' }}
+              fullWidth
+              defaultValue={selectedUserGrid?.valueOf()}
+              InputProps={{ readOnly: true }}
+              margin="normal"
+              variant="filled"
+              helperText="User ID of the student to be assigned."
+            />
+            <TextField
+              autoFocus
+              required
+              margin="dense"
+              id="class-codes"
+              label="Class Code(s)"
+              name="class-codes"
+              type="text"
+              fullWidth
+              variant="standard"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>
+            <Button type="submit">Submit</Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </Box>
   );
