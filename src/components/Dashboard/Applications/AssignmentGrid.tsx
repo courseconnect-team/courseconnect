@@ -376,7 +376,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     {
       field: 'class_codes',
       headerName: 'Class Codes',
-      width: 250,
+      width: 150,
+      editable: true,
+    },
+    {
+      field: 'hours',
+      headerName: 'Hours',
+      width: 100,
       editable: true,
     },
     { field: 'date', headerName: 'Date Approved', width: 120, editable: true },

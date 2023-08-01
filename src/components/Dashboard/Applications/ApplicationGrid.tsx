@@ -25,6 +25,7 @@ import {
   GridToolbarColumnsButton,
   GridValueGetterParams,
 } from '@mui/x-data-grid';
+import HourSelect from '@/components/FormUtil/HourSelect';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { query, where, collection, getDocs } from 'firebase/firestore';
@@ -142,6 +143,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .split(',')
       .map((classCode) => classCode.trim());
 
+    // get the hours as a string
+    const hoursToWork = formData.get('hours-radio-group') as string;
+
     // get the current date in month/day/year format
     const current = new Date();
     const current_date = `${
@@ -152,6 +156,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       date: current_date as string,
       student_uid: student_uid as string,
       class_codes: classCodeArray,
+      hours: hoursToWork,
     };
 
     // Create the document within the "assignments" collection
@@ -745,6 +750,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               fullWidth
               variant="standard"
             />
+            <HourSelect />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>
