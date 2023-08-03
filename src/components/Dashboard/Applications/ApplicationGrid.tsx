@@ -12,6 +12,7 @@ import {
   GridRowModesModel,
   GridRowModes,
   DataGrid,
+  GridCellParams,
   GridColDef,
   GridActionsCellItem,
   GridEventListener,
@@ -581,6 +582,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         ];
       },
     },
+    { field: 'status', headerName: 'Status', width: 100, editable: true },
     {
       field: 'fullname',
       headerName: 'Full Name',
@@ -598,7 +600,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     { field: 'courses', headerName: 'Courses', width: 200, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'timestamp', headerName: 'Date', width: 80, editable: true },
-    { field: 'status', headerName: 'App Status', width: 100, editable: true },
   ];
 
   if (userRole === 'faculty') {
@@ -690,6 +691,18 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         '& .textPrimary': {
           color: 'text.primary',
         },
+        '& .todo': {
+          backgroundColor: '#b3ad00',
+          color: '#ffffff',
+        },
+        '& .approved': {
+          backgroundColor: '#248000',
+          color: '#ffffff',
+        },
+        '& .denied': {
+          backgroundColor: '#9c1e1e',
+          color: '#ffffff',
+        },
       }}
     >
       <DataGrid
@@ -708,6 +721,16 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         }}
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
+        }}
+        getCellClassName={(params: GridCellParams<any, any, string>) => {
+          if (params.field != 'status') {
+            return '';
+          } else if (params.value === 'submitted') {
+            return 'todo';
+          } else if (params.value === 'Approved') {
+            return 'approved';
+          }
+          return 'denied';
         }}
       />
       <Dialog open={open} onClose={handleClose}>
