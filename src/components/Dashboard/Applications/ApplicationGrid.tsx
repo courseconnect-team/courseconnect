@@ -138,6 +138,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         console.error('Error updating application document: ', error);
       });
 
+    // get the name
+    const student_name = formData.get('student-name') as string;
+
     // get class codes as array
     const classCodeString = formData.get('class-codes') as string;
     const classCodeArray = classCodeString
@@ -155,9 +158,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     const assignmentObject = {
       date: current_date as string,
+      name: student_name as string,
       student_uid: student_uid as string,
       class_codes: classCodeArray,
       hours: hoursToWork,
+      onbase_submitted: 'No' as string,
     };
 
     // Create the document within the "assignments" collection
@@ -582,11 +587,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         ];
       },
     },
-    { field: 'status', headerName: 'Status', width: 100, editable: true },
     {
       field: 'fullname',
       headerName: 'Full Name',
-      width: 150,
+      width: 180,
       editable: false,
       valueGetter: getFullName,
     },
@@ -600,6 +604,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     { field: 'courses', headerName: 'Courses', width: 200, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'timestamp', headerName: 'Date', width: 80, editable: true },
+    { field: 'status', headerName: 'Status', width: 100, editable: true },
   ];
 
   if (userRole === 'faculty') {
@@ -713,6 +718,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        onProcessRowUpdateError={(error) =>
+          console.error('Error processing row update: ', error)
+        }
         slots={{
           toolbar: EditToolbar,
         }}
@@ -725,12 +733,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         getCellClassName={(params: GridCellParams<any, any, string>) => {
           if (params.field != 'status') {
             return '';
-          } else if (params.value === 'submitted') {
+          } else if (params.value === 'Review') {
             return 'todo';
           } else if (params.value === 'Approved') {
             return 'approved';
+          } else if (params.value === 'Denied') {
+            return 'denied';
           }
-          return 'denied';
+          return '';
         }}
       />
       <Dialog open={open} onClose={handleClose}>
@@ -774,6 +784,17 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               variant="standard"
             />
             <HourSelect />
+            <TextField
+              required
+              margin="dense"
+              id="student-name"
+              label="Student Name"
+              name="student-name"
+              type="text"
+              fullWidth
+              variant="standard"
+              helperText="Please enter the student's full name to confirm this assignment."
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>

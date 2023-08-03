@@ -115,7 +115,7 @@ export default function Application() {
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
       date: current_date,
-      status: 'Submitted',
+      status: 'Review',
     };
 
     // console.log(applicationData); // FOR DEBUGGING ONLY!

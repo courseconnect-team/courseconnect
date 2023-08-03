@@ -6,11 +6,11 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import {
   GridRowModesModel,
   GridRowModes,
   DataGrid,
+  GridCellParams,
   GridColDef,
   GridActionsCellItem,
   GridEventListener,
@@ -39,9 +39,9 @@ import UnderDevelopment from '@/components/UnderDevelopment';
 
 interface Assignment {
   id: string;
-  approver_name: string;
-  approver_role: string;
-  approver_uid: string;
+  name: string;
+  hours: string;
+  classcode: string;
   date: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
@@ -370,13 +370,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     {
       field: 'id',
       headerName: 'Approved UFID',
-      width: 150,
+      width: 130,
       editable: true,
     },
     {
-      field: 'class_codes',
-      headerName: 'Class Codes',
-      width: 150,
+      field: 'name',
+      headerName: 'Name',
+      width: 180,
       editable: true,
     },
     {
@@ -385,7 +385,19 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 100,
       editable: true,
     },
-    { field: 'date', headerName: 'Date Approved', width: 120, editable: true },
+    {
+      field: 'class_codes',
+      headerName: 'Class Codes',
+      width: 150,
+      editable: true,
+    },
+    { field: 'date', headerName: 'Date Approved', width: 110, editable: true },
+    {
+      field: 'onbase_submitted',
+      headerName: 'Onbase Submitted',
+      width: 150,
+      editable: true,
+    },
   ];
 
   return (
@@ -399,6 +411,14 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         '& .textPrimary': {
           color: 'text.primary',
         },
+        '& .approved': {
+          backgroundColor: '#248000',
+          color: '#ffffff',
+        },
+        '& .denied': {
+          backgroundColor: '#9c1e1e',
+          color: '#ffffff',
+        },
       }}
     >
       <DataGrid
@@ -409,6 +429,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        onProcessRowUpdateError={(error) =>
+          console.error('Error processing row update: ', error)
+        }
         slots={{
           toolbar: EditToolbar,
         }}
@@ -417,6 +440,14 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         }}
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
+        }}
+        getCellClassName={(params: GridCellParams<any, any, string>) => {
+          if (params.field != 'onbase_submitted') {
+            return '';
+          } else if (params.value === 'Yes' || params.value === 'yes') {
+            return 'approved';
+          }
+          return 'denied';
         }}
       />
       <Dialog open={open} onClose={handleClose}>
