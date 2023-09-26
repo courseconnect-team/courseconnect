@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -15,6 +16,7 @@ import RoleSelect from '../FormUtil/RoleSelect';
 
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
+import { user } from 'firebase-functions/v1/auth';
 
 export default function SignUpForm() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -33,43 +35,59 @@ export default function SignUpForm() {
       uid: '',
     };
 
-    const uid_from_signup = await handleSignUp(
-      userData.firstname + ' ' + userData.lastname,
-      userData.email,
-      userData.password,
-      userData.ufid
-    );
-    userData.uid = uid_from_signup;
 
-    if (userData.uid === '-1' || userData.uid === '') {
-      // error: user not created
-      console.log('ERROR: User not created');
-      // display some kind of snackbar or toast saying UFID is already in use
+    if (userData.firstname === '') {
+      toast.error('Invalid First Name!');
+    } else if (userData.lastname == '') {
+      toast.error('Invalid Last Name!');
+    } else if (userData.password === '') {
+      toast.error('Please Enter a Password!');
+    } else if (userData.password.length < 6) {
+      toast.error('Please Enter a Password That is at Least 6 Characters!');
+    } else if (userData.ufid == '') {
+      toast.error('Please Enter a UFID!');
+    } else if (/^[0-9]+$/.test(userData.ufid)) {
+      toast.error('UFID Should Only Contain Numbers!');
     } else {
-      // user created successfully
-      console.log('SUCCESS: User created successfully');
 
-      // use fetch to send the user data to the server
-      // this goes to a cloud function which creates a document based on
-      // the data from the form, identified by the user's firebase auth uid
-      const response = await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(userData),
-        }
+      const uid_from_signup = await handleSignUp(
+        userData.firstname + ' ' + userData.lastname,
+        userData.email,
+        userData.password,
+        userData.ufid
       );
+      userData.uid = uid_from_signup;
 
-      if (response.ok) {
-        console.log('SUCCESS: User data sent to server successfully');
-        // then, sign in the user
-        handleSignIn(userData.email, userData.password);
+      if (userData.uid === '-1' || userData.uid === '') {
+        toast.error('This UFID is Already in Use!');
+
+        // error: user not created
+        // display some kind of snackbar or toast saying UFID is already in use
+      } else if (userData.uid === '-2' || userData.uid === '-4' || userData.uid == '-3') {
+        toast.error('Please Enter a Valid Email Adress!');
       } else {
-        console.log('ERROR: User data failed to send to server');
-        // display some kind of snackbar or toast saying data failed to send to server
+        // use fetch to send the user data to the server
+        // this goes to a cloud function which creates a document based on
+        // the data from the form, identified by the user's firebase auth uid
+        const response = await fetch(
+          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+          }
+        );
+
+        if (response.ok) {
+          console.log('SUCCESS: User data sent to server successfully');
+          // then, sign in the user
+          handleSignIn(userData.email, userData.password);
+        } else {
+          console.log('ERROR: User data failed to send to server');
+          // display some kind of snackbar or toast saying data failed to send to server
+        }
       }
     }
   };
