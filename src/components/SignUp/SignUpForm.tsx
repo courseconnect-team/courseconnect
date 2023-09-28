@@ -15,12 +15,9 @@ import Container from '@mui/material/Container';
 import DepartmentSelect from '../FormUtil/DepartmentSelect';
 import RoleSelect from '../FormUtil/RoleSelect';
 import LinearProgress from '@mui/material/LinearProgress';
-import CircularProgress from '@mui/material/CircularProgress';
-
-
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
-import { user } from 'firebase-functions/v1/auth';
+
 export default function SignUpForm() {
   const [loading, setLoading] = useState(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -40,21 +37,26 @@ export default function SignUpForm() {
       uid: '',
     };
 
-
+    // add the following:
     if (userData.firstname === '') {
-      toast.error('Invalid First Name!');
+      toast.error('Invalid first name!');
+    } else if (/[0-9]/.test(userData.firstname)) {
+      toast.error('First name should only contain letters!');
     } else if (userData.lastname == '') {
-      toast.error('Invalid Last Name!');
+      toast.error('Invalid last name!');
+    } else if (/[0-9]/.test(userData.lastname)) {
+      toast.error('Last name should only contain letters!');
     } else if (userData.password === '') {
-      toast.error('Please Enter a Password!');
+      toast.error('Please enter a password!');
     } else if (userData.password.length < 6) {
-      toast.error('Please Enter a Password That is at Least 6 Characters!');
+      // make password requirements stronger: 8-4 rule
+      // https://www.thegeekstuff.com/2008/06/the-ultimate-guide-for-creating-strong-passwords/
+      toast.error('Please enter a password that is at least 6 characters!');
     } else if (userData.ufid == '') {
-      toast.error('Please Enter a UFID!');
+      toast.error('Please enter your UFID!');
     } else if (/^[0-9]+$/.test(userData.ufid)) {
-      toast.error('UFID Should Only Contain Numbers!');
+      toast.error('UFID should only contain numbers!');
     } else {
-
       const uid_from_signup = await handleSignUp(
         userData.firstname + ' ' + userData.lastname,
         userData.email,
@@ -68,7 +70,11 @@ export default function SignUpForm() {
 
         // error: user not created
         // display some kind of snackbar or toast saying UFID is already in use
-      } else if (userData.uid === '-2' || userData.uid === '-4' || userData.uid == '-3') {
+      } else if (
+        userData.uid === '-2' ||
+        userData.uid === '-4' ||
+        userData.uid == '-3'
+      ) {
         toast.error('Please Enter a Valid Email Adress!');
       } else {
         // use fetch to send the user data to the server
@@ -110,7 +116,6 @@ export default function SignUpForm() {
           alignItems: 'center',
         }}
       >
-
         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
           <AccountCircleIcon />
         </Avatar>
@@ -201,6 +206,5 @@ export default function SignUpForm() {
         </Box>
       </Box>
     </Container>
-
   );
 }
