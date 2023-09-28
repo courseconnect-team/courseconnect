@@ -24,13 +24,21 @@ export default async function handleSignUp(
 
   var errorTag: string = '';
 
+
   try {
     await createUserWithEmailAndPassword(auth, email, password).catch(
       (error) => {
         console.log(error);
-        errorTag = '-2';
+        if (error.message.includes('already in use')) {
+          errorTag = '-5';
+        } else {
+          errorTag = '-2';
+        }
       }
     );
+    if (errorTag != '') {
+      return errorTag;
+    }
     await sendEmailVerification(auth.currentUser as User).catch((error) => {
       console.log(error);
       errorTag = '-3';
@@ -38,10 +46,10 @@ export default async function handleSignUp(
     await updateProfile(auth.currentUser as User, { displayName: name }).catch(
       (error) => {
         console.log(error);
+
         errorTag = '-4';
       }
     );
-
     if (errorTag === '') {
       console.log('User created successfully!!!');
       return auth.currentUser?.uid as string;
@@ -49,6 +57,7 @@ export default async function handleSignUp(
       return errorTag;
     }
   } catch (error) {
+    console.log(errorTag);
     console.log('Error creating user: ', error);
   }
 

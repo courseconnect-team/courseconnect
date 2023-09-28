@@ -44,8 +44,8 @@ export default function SignUpForm() {
       toast.error('First name should only contain letters!');
     } else if (userData.lastname == '') {
       toast.error('Invalid last name!');
-    } else if (/[0-9]/.test(userData.lastname)) {
-      toast.error('Last name should only contain letters!');
+    } else if (!/^[0-9]+$/.test(userData.ufid) || userData.ufid.length < 6) {
+      toast.error('UFID should only contain numbers with no spaces or dashes!');
     } else if (userData.password === '') {
       toast.error('Please enter a password!');
     } else if (userData.password.length < 6) {
@@ -54,8 +54,6 @@ export default function SignUpForm() {
       toast.error('Please enter a password that is at least 6 characters!');
     } else if (userData.ufid == '') {
       toast.error('Please enter your UFID!');
-    } else if (/^[0-9]+$/.test(userData.ufid)) {
-      toast.error('UFID should only contain numbers!');
     } else {
       const uid_from_signup = await handleSignUp(
         userData.firstname + ' ' + userData.lastname,
@@ -64,6 +62,7 @@ export default function SignUpForm() {
         userData.ufid
       );
       userData.uid = uid_from_signup;
+      console.log(userData.uid);
 
       if (userData.uid === '-1' || userData.uid === '') {
         toast.error('This UFID is Already in Use!');
@@ -76,6 +75,8 @@ export default function SignUpForm() {
         userData.uid == '-3'
       ) {
         toast.error('Please Enter a Valid Email Adress!');
+      } else if (userData.uid == '-5') {
+        toast.error('Email adress is already in use by another account!');
       } else {
         // use fetch to send the user data to the server
         // this goes to a cloud function which creates a document based on
