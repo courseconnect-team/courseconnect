@@ -10,13 +10,25 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import LinearProgress from '@mui/material/LinearProgress';
 import handleSignIn from '../../firebase/auth/auth_signin_password';
+import toast, { Toaster } from 'react-hot-toast';
+import { useState } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function SignIn() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  var res;
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    handleSignIn(data.get('email') as string, data.get('password') as string);
+    res = await handleSignIn(data.get('email') as string, data.get('password') as string);
+    console.log(res);
+
+    if (!res) {
+      setLoading(false);
+    }
   };
 
   return (
@@ -37,6 +49,7 @@ export default function SignIn() {
           Sign in
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          {loading ? <LinearProgress color="warning" /> : null}
           <TextField
             margin="normal"
             required
@@ -64,6 +77,7 @@ export default function SignIn() {
             sx={{ mt: 3, mb: 2 }}
           >
             Sign In
+
           </Button>
           <Grid container>
             <Grid item xs>
@@ -79,6 +93,7 @@ export default function SignIn() {
           </Grid>
         </Box>
       </Box>
+
     </Container>
   );
 }

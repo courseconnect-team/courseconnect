@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -13,13 +14,17 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import DepartmentSelect from '../FormUtil/DepartmentSelect';
 import RoleSelect from '../FormUtil/RoleSelect';
+import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
 import { user } from 'firebase-functions/v1/auth';
-
 export default function SignUpForm() {
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);
     event.preventDefault();
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
@@ -90,6 +95,8 @@ export default function SignUpForm() {
         }
       }
     }
+
+    setLoading(false);
   };
 
   return (
@@ -103,13 +110,17 @@ export default function SignUpForm() {
           alignItems: 'center',
         }}
       >
+
         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
           <AccountCircleIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
+
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          {loading ? <LinearProgress color="warning" /> : null}
+          <br />
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -179,6 +190,7 @@ export default function SignUpForm() {
           >
             Sign Up
           </Button>
+
           <Grid container justifyContent="flex-end">
             <Grid item>
               <Link href="/" variant="body2">
@@ -189,5 +201,6 @@ export default function SignUpForm() {
         </Box>
       </Box>
     </Container>
+
   );
 }
