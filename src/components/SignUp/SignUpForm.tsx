@@ -19,6 +19,41 @@ import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
 
 export default function SignUpForm() {
+  function isStrongPassword(password: string): boolean {
+    // Check if the password is at least 8 characters long
+    if (password.length < 8) {
+      toast.error('Password should contain at least 8 letters!');
+      return false;
+    }
+
+    const uppercaseRegex = /[A-Z]/;
+    const lowercaseRegex = /[a-z]/;
+    const numberRegex = /[0-9]/;
+    const specialCharacterRegex = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/;
+
+    if (!uppercaseRegex.test(password)) {
+      toast.error('Password should contain at least one uppercase letter!');
+      return false;
+    }
+    if (!lowercaseRegex.test(password)) {
+      toast.error('Password should contain at least one lowercase letter!')
+
+      return false;
+    }
+    if (!numberRegex.test(password)) {
+      toast.error('Password should contain at least one number!')
+
+      return false;
+    }
+    if (!specialCharacterRegex.test(password)) {
+      toast.error('Password should contain at least one special case character!')
+
+      return false;
+    }
+
+    return true;
+  }
+
   const [loading, setLoading] = useState(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
@@ -48,10 +83,9 @@ export default function SignUpForm() {
       toast.error('UFID should only contain numbers with no spaces or dashes!');
     } else if (userData.password === '') {
       toast.error('Please enter a password!');
-    } else if (userData.password.length < 6) {
-      // make password requirements stronger: 8-4 rule
-      // https://www.thegeekstuff.com/2008/06/the-ultimate-guide-for-creating-strong-passwords/
-      toast.error('Please enter a password that is at least 6 characters!');
+    } else if (!isStrongPassword(userData.password)) {
+      console.log("invalid password");
+
     } else if (userData.ufid == '') {
       toast.error('Please enter your UFID!');
     } else {

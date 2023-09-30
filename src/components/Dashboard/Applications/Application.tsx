@@ -21,6 +21,7 @@ import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
 import AdditionalSemesterPrompt from '@/components/FormUtil/AddtlSemesterPrompt';
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
+import { toast } from 'react-hot-toast';
 
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
@@ -37,9 +38,8 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${
-    current.getMonth() + 1
-  }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -118,6 +118,10 @@ export default function Application() {
       status: 'Submitted',
     };
 
+    if (!applicationData.email.includes('ufl')) {
+      toast.error('Please enter a valid ufl email!');
+      return;
+    }
     // console.log(applicationData); // FOR DEBUGGING ONLY!
 
     // use fetch to send the application data to the server
@@ -228,6 +232,7 @@ export default function Application() {
                 label="UFID"
                 name="ufid"
                 autoComplete="ufid"
+                type="number"
                 helperText="No dashes or spaces."
               />
             </Grid>
