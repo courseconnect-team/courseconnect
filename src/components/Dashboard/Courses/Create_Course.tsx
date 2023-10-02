@@ -44,7 +44,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     const professorsNameString = formData.get('professor-names') as string;
     const professorNameList = professorsNameString
       .split(',')
-      .map((professorEmail) => professorEmail.trim()); // confusing naming??
+      .map((professorName) => professorName.trim());
 
     const professorsEmailString = formData.get('professor-emails') as string;
     const professorEmailList = professorsEmailString
@@ -68,7 +68,9 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     var testRegex = /^[a-zA-Z0-9]+$/;
     var numberRegex = /^[0-9]+$/;
     if (!testRegex.test(courseData.code)) {
-      toast.error("Course code should only consist of number or letters (no spaces)!")
+      toast.error(
+        'Course code should only consist of number or letters (no spaces)!'
+      );
       return;
     } else if (courseData.code === '') {
       toast.error('Please enter a course code!');
@@ -129,7 +131,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       console.log('ERROR: Course data failed to send to server');
       setLoading(false);
     }
-
   };
 
   return (
@@ -143,9 +144,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
         Create Course
       </Button>
       <Dialog open={open} onClose={handleClose}>
-
-        <DialogTitle>
-          Create a Course</DialogTitle>
+        <DialogTitle>Create a Course</DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
             <DialogContentText>
@@ -304,7 +303,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
           </DialogActions>
         </form>
       </Dialog>
-
     </div>
   );
 };
