@@ -71,6 +71,7 @@ export default function SignUpForm() {
       ufid: formData.get('ufid') as string,
       uid: '',
     };
+    console.log("Role " + userData.role);
 
     // add the following:
     if (userData.firstname === '') {
@@ -81,6 +82,10 @@ export default function SignUpForm() {
       toast.error('Invalid last name!');
     } else if (!/^[0-9]+$/.test(userData.ufid) || userData.ufid.length < 6) {
       toast.error('UFID should only contain numbers with no spaces or dashes!');
+    } else if (userData.role === null) {
+      toast.error('Please select a role!');
+    } else if (userData.department === '') {
+      toast.error('Please select a department!')
     } else if (userData.password === '') {
       toast.error('Please enter a password!');
     } else if (!isStrongPassword(userData.password)) {
