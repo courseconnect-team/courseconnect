@@ -15,10 +15,19 @@ import handleSignIn from '../../firebase/auth/auth_signin_password';
 import toast, { Toaster } from 'react-hot-toast';
 import { useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 export default function SignIn() {
   var res;
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
     event.preventDefault();
@@ -28,11 +37,18 @@ export default function SignIn() {
 
     if (!res) {
       setLoading(false);
+    } else {
+      setSuccess(true);
     }
   };
 
   return (
     <Container component="main" maxWidth="xs">
+      <Snackbar open={success} autoHideDuration={3000}>
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Sign in successful!
+        </Alert>
+      </Snackbar>
       <CssBaseline />
       <Box
         sx={{

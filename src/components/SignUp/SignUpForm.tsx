@@ -17,8 +17,17 @@ import RoleSelect from '../FormUtil/RoleSelect';
 import LinearProgress from '@mui/material/LinearProgress';
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+
 
 export default function SignUpForm() {
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
   function isStrongPassword(password: string): boolean {
     // Check if the password is at least 8 characters long
     if (password.length < 8) {
@@ -55,6 +64,7 @@ export default function SignUpForm() {
   }
 
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
     event.preventDefault();
@@ -120,6 +130,7 @@ export default function SignUpForm() {
         // use fetch to send the user data to the server
         // this goes to a cloud function which creates a document based on
         // the data from the form, identified by the user's firebase auth uid
+
         const response = await fetch(
           'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm',
           {
@@ -132,6 +143,7 @@ export default function SignUpForm() {
         );
 
         if (response.ok) {
+          setSuccess(true);
           console.log('SUCCESS: User data sent to server successfully');
           // then, sign in the user
           handleSignIn(userData.email, userData.password);
@@ -147,6 +159,11 @@ export default function SignUpForm() {
 
   return (
     <Container component="main" maxWidth="xs">
+      <Snackbar open={success} autoHideDuration={3000}>
+        <Alert severity="info" sx={{ width: '100%' }}>
+          Signup successful!
+        </Alert>
+      </Snackbar>
       <CssBaseline />
       <Box
         sx={{

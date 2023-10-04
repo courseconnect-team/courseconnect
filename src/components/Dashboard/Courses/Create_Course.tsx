@@ -12,15 +12,19 @@ import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import LinearProgress from '@mui/material/LinearProgress';
 import { CircularProgress } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 interface CreateCourseDialogProps {
   open: boolean;
   setOpen: (value: boolean) => void;
+  setSuccess: (value: boolean) => void;
   setCourseData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
 }
 
 const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
   open,
   setOpen,
+  setSuccess,
   setCourseData,
 }) => {
   const handleClickOpen = () => {
@@ -28,9 +32,15 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
   };
 
   const handleClose = () => {
+    setSuccess(true);
     setOpen(false);
   };
-
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
   const [loading, setLoading] = useState(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
@@ -120,7 +130,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
 
     if (response.ok) {
       console.log('SUCCESS: Course data sent to server successfully');
-
       // Update the course data with the new row
       setCourseData((oldRows) => [...oldRows, courseData]);
 
@@ -129,6 +138,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       setLoading(false);
     } else {
       console.log('ERROR: Course data failed to send to server');
+      toast.error("Course data failed to send to server!");
       setLoading(false);
     }
   };

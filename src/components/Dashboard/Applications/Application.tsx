@@ -23,6 +23,8 @@ import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { toast } from 'react-hot-toast';
 import { LinearProgress } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 import { useState } from 'react';
 // note that the application needs to be able to be connected to a specific faculty member
@@ -204,9 +206,28 @@ export default function Application() {
       setLoading(false);
     }
   };
+  const [success, setSuccess] = React.useState(false);
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
 
+  const handleSuccess = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSuccess(false);
+  };
   return (
     <Container component="main" maxWidth="md">
+      <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Application submitted successfully!
+        </Alert>
+      </Snackbar>
       {loading ? <LinearProgress color="warning" /> : null}
       <CssBaseline />
       <Box

@@ -7,6 +7,8 @@ import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import CreateCourseDialog from './Create_Course';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import {
   GridRowModesModel,
   GridRowModes,
@@ -51,6 +53,8 @@ interface CourseGridProps {
 export default function CourseGrid(props: CourseGridProps) {
   const { userRole } = props;
   const { user } = useAuth();
+  const [success, setSuccess] = React.useState(false);
+
   const [courseData, setCourseData] = React.useState<Course[]>([]);
   // fetching course data from firestore.
   const userEmail = user?.email;
@@ -62,10 +66,10 @@ export default function CourseGrid(props: CourseGridProps) {
       coursesRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Course)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Course)
         );
         setCourseData(data);
       });
@@ -79,10 +83,10 @@ export default function CourseGrid(props: CourseGridProps) {
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
             (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-              } as Course)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Course)
           );
           setCourseData(data);
         });
@@ -96,10 +100,10 @@ export default function CourseGrid(props: CourseGridProps) {
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
             (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-              } as Course)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Course)
           );
           setCourseData(data);
         });
@@ -151,6 +155,7 @@ export default function CourseGrid(props: CourseGridProps) {
         <CreateCourseDialog
           open={open}
           setOpen={setOpen}
+          setSuccess={setSuccess}
           setCourseData={setCourseData}
         />
         <GridToolbarExport />
@@ -486,9 +491,28 @@ export default function CourseGrid(props: CourseGridProps) {
       },
     ];
   }
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
+  const handleSuccess = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSuccess(false);
+  };
 
   return (
     <>
+      <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Created course successfully!
+        </Alert>
+      </Snackbar>
       <Box
         sx={{
           height: 600,
