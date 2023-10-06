@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
@@ -33,9 +34,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  LinearProgress,
   TextField,
 } from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
+
+
 
 interface Assignment {
   id: string;
@@ -52,6 +56,7 @@ interface AssignmentGridProps {
 }
 
 export default function AssignmentGrid(props: AssignmentGridProps) {
+  const [loading, setLoading] = useState(false);
   const { userRole } = props;
   const [assignmentData, setAssignmentData] = React.useState<Assignment[]>([]);
 
@@ -111,10 +116,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Assignment)
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as Assignment)
       );
       setAssignmentData(data);
     });
@@ -139,6 +144,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   const handleSubmitAssignment = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
+    setLoading(true);
     event.preventDefault();
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
@@ -193,6 +199,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     await userRef.update({ role: 'student_assigned' });
 
     handleCloseAssignmentDialog();
+    setLoading(false);
   };
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -200,6 +207,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
+    setLoading(true);
     const updatedRow = assignmentData.find((row) => row.id === id);
     if (updatedRow) {
       firebase
@@ -212,16 +220,20 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             ...rowModesModel,
             [id]: { mode: GridRowModes.View },
           });
+          setLoading(false);
         })
         .catch((error) => {
+          setLoading(false);
           console.error('Error updating document: ', error);
         });
     } else {
+      setLoading(false);
       console.error('No matching user data found for id: ', id);
     }
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
+    setLoading(true);
     firebase
       .firestore()
       .collection('assignments')
@@ -229,13 +241,16 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       .delete()
       .then(() => {
         setAssignmentData(assignmentData.filter((row) => row.id !== id));
+        setLoading(false);
       })
       .catch((error) => {
+        setLoading(false);
         console.error('Error removing document: ', error);
       });
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
+    setLoading(true);
     const editedRow = assignmentData.find((row) => row.id === id);
     if (editedRow!.isNew) {
       firebase
@@ -245,8 +260,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         .delete()
         .then(() => {
           setAssignmentData(assignmentData.filter((row) => row.id !== id));
+          setLoading(false);
         })
         .catch((error) => {
+          setLoading(false);
           console.error('Error removing document: ', error);
         });
     } else {
@@ -254,10 +271,12 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         ...rowModesModel,
         [id]: { mode: GridRowModes.View, ignoreModifications: true },
       });
+      setLoading(false);
     }
   };
 
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
+    setLoading(true);
     const updatedRow = {
       ...(newRow as Assignment),
       isNew: false,
@@ -275,10 +294,12 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
                 row.id === newRow.id ? updatedRow : row
               )
             );
+            setLoading(false);
             return updatedRow;
           })
           .catch((error) => {
             console.error('Error adding document: ', error);
+            setLoading(false);
             throw error;
           });
       } else {
@@ -293,14 +314,17 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
                 row.id === newRow.id ? updatedRow : row
               )
             );
+            setLoading(false);
             return updatedRow;
           })
           .catch((error) => {
+            setLoading(false);
             console.error('Error updating document: ', error);
             throw error;
           });
       }
     } else {
+      setLoading(false);
       return Promise.reject(
         new Error('No matching user data found for id: ' + newRow.id)
       );
@@ -395,6 +419,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         },
       }}
     >
+
+
+      {loading ? <LinearProgress color='warning' /> : null}
       <DataGrid
         rows={assignmentData}
         columns={columns}

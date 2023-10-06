@@ -282,31 +282,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .collection('applications')
       .doc(id.toString())
       .update({ status: 'Denied' })
-      // .then(() => {
-      //   // Update the 'users' collection
-      //   firebase
-      //     .firestore()
-      //     .collection('users')
-      //     .doc(id.toString())
-      //     .update({ role: 'student_denied' })
-      //     .then(() => {
-      //       // Update the local state
-      //       const updatedData = applicationData.map((row) => {
-      //         if (row.id === id) {
-      //           return { ...row, status: 'Denied' };
-      //         }
-      //         return row;
-      //       });
-      //       setApplicationData(updatedData);
-      //     })
-      //     .catch((error) => {
-      //       console.error('Error updating user document: ', error);
-      //     });
-      // })
+      .then(() => {
+        setLoading(false);
+      })
       .catch((error) => {
+        setLoading(false);
         console.error('Error updating application document: ', error);
       });
-    setLoading(false);
+
   };
 
   const handleApproveClick = (id: GridRowId) => {
@@ -317,28 +300,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .collection('applications')
       .doc(id.toString())
       .update({ status: 'Approved' })
-      // .then(() => {
-      //   // Update the 'users' collection
-      //   firebase
-      //     .firestore()
-      //     .collection('users')
-      //     .doc(id.toString())
-      //     .update({ role: 'student_accepted' })
-      //     .then(() => {
-      //       // Update the local state
-      //       const updatedData = applicationData.map((row) => {
-      //         if (row.id === id) {
-      //           return { ...row, status: 'Approved' };
-      //         }
-      //         return row;
-      //       });
-      //       setApplicationData(updatedData);
-      //     })
-      //     .catch((error) => {
-      //       console.error('Error updating user document: ', error);
-      //     });
-      // })
+
       .catch((error) => {
+        setLoading(false);
         console.error('Error updating application document: ', error);
       });
 
@@ -372,11 +336,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .collection('assignments')
       .doc(assignmentObject.student_uid)
       .set(assignmentObject)
+      .then(() => {
+        setLoading(false);
+      })
       .catch((error: any) => {
+        setLoading(false);
         console.error('Error writing assignment document: ', error);
       });
 
-    setLoading(false);
   };
 
   const handleEditClick = (id: GridRowId) => () => {
