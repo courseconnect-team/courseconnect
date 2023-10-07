@@ -12,6 +12,7 @@ import Courses from '@/components/Dashboard/Courses/Courses';
 import Applications from '@/components/Dashboard/Applications/Applications';
 import Application from '@/components/Dashboard/Applications/Application';
 import ShowApplicationStatus from '@/components/Dashboard/Applications/AppStatus';
+import { Toaster } from 'react-hot-toast';
 
 // user information reference: https://firebase.google.com/docs/auth/web/manage-users
 
@@ -27,6 +28,7 @@ export default function Dashboard() {
   if ((user && user.emailVerified) || (user && role === 'admin')) {
     return (
       <>
+        <Toaster />
         {activeComponent === 'welcome' && (
           <DashboardWelcome user={user} userRole={role as string} />
         )}

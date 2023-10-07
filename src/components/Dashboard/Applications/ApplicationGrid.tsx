@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
@@ -38,6 +39,7 @@ import {
   Button,
   TextField,
   DialogActions,
+  LinearProgress
 } from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
 import AppView from './AppView';
@@ -100,6 +102,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   ) => {
     event.preventDefault();
     // extract the form data from the current event
+    setLoading(true)
     const formData = new FormData(event.currentTarget);
 
     // get student's user id
@@ -144,9 +147,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${current.getMonth() + 1
+      }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -165,6 +167,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       });
 
     handleCloseAssignmentDialog();
+    setLoading(false);
   };
 
   // toolbar
@@ -207,22 +210,22 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
 
   // fetching application data from firestore
-
+  const [loading, setLoading] = useState(false);
   React.useEffect(() => {
     const applicationsRef = firebase.firestore().collection('applications');
 
     if (userRole === 'admin') {
+
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Application)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Application)
         );
         setApplicationData(data);
       });
-
       // Clean up the subscription on unmount
       return () => unsubscribe();
     } else if (userRole === 'faculty') {
@@ -247,10 +250,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       applicationsRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Application)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Application)
         );
         setApplicationData(data);
       });
@@ -272,67 +275,34 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   // approve/deny click handlers
   const handleDenyClick = (id: GridRowId) => {
+    setLoading(true);
     // Update the 'applications' collection
     firebase
       .firestore()
       .collection('applications')
       .doc(id.toString())
       .update({ status: 'Denied' })
-      // .then(() => {
-      //   // Update the 'users' collection
-      //   firebase
-      //     .firestore()
-      //     .collection('users')
-      //     .doc(id.toString())
-      //     .update({ role: 'student_denied' })
-      //     .then(() => {
-      //       // Update the local state
-      //       const updatedData = applicationData.map((row) => {
-      //         if (row.id === id) {
-      //           return { ...row, status: 'Denied' };
-      //         }
-      //         return row;
-      //       });
-      //       setApplicationData(updatedData);
-      //     })
-      //     .catch((error) => {
-      //       console.error('Error updating user document: ', error);
-      //     });
-      // })
+      .then(() => {
+        setLoading(false);
+      })
       .catch((error) => {
+        setLoading(false);
         console.error('Error updating application document: ', error);
       });
+
   };
 
   const handleApproveClick = (id: GridRowId) => {
+    setLoading(true);
     // Update the 'applications' collection
     firebase
       .firestore()
       .collection('applications')
       .doc(id.toString())
       .update({ status: 'Approved' })
-      // .then(() => {
-      //   // Update the 'users' collection
-      //   firebase
-      //     .firestore()
-      //     .collection('users')
-      //     .doc(id.toString())
-      //     .update({ role: 'student_accepted' })
-      //     .then(() => {
-      //       // Update the local state
-      //       const updatedData = applicationData.map((row) => {
-      //         if (row.id === id) {
-      //           return { ...row, status: 'Approved' };
-      //         }
-      //         return row;
-      //       });
-      //       setApplicationData(updatedData);
-      //     })
-      //     .catch((error) => {
-      //       console.error('Error updating user document: ', error);
-      //     });
-      // })
+
       .catch((error) => {
+        setLoading(false);
         console.error('Error updating application document: ', error);
       });
 
@@ -349,9 +319,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${current.getMonth() + 1
+      }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -367,9 +336,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .collection('assignments')
       .doc(assignmentObject.student_uid)
       .set(assignmentObject)
+      .then(() => {
+        setLoading(false);
+      })
       .catch((error: any) => {
+        setLoading(false);
         console.error('Error writing assignment document: ', error);
       });
+
   };
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -377,6 +351,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
+    setLoading(true);
     const updatedRow = applicationData.find((row) => row.id === id);
     if (updatedRow) {
       firebase
@@ -386,28 +361,35 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .update(updatedRow)
         .then(() => {
           setRowModesModel({
+
             ...rowModesModel,
             [id]: { mode: GridRowModes.View },
           });
+          setLoading(false);
         })
         .catch((error) => {
+          setLoading(false);
           console.error('Error updating document: ', error);
         });
     } else {
       console.error('No matching user data found for id: ', id);
     }
+
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
+    setLoading(true);
     firebase
       .firestore()
       .collection('applications')
       .doc(id.toString())
       .delete()
       .then(() => {
+        setLoading(false);
         setApplicationData(applicationData.filter((row) => row.id !== id));
       })
       .catch((error) => {
+        setLoading(false);
         console.error('Error removing document: ', error);
       });
   };
@@ -435,6 +417,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
 
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
+    setLoading(true);
     const availableHoursArray =
       typeof newRow.availability === 'string' && newRow.availability
         ? newRow.availability.split(',').map((hour) => hour.trim())
@@ -470,9 +453,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 row.id === newRow.id ? updatedRow : row
               )
             );
+            setLoading(false);
             return updatedRow;
           })
           .catch((error) => {
+            setLoading(false);
             console.error('Error adding document: ', error);
             throw error;
           });
@@ -488,14 +473,17 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 row.id === newRow.id ? updatedRow : row
               )
             );
+            setLoading(false);
             return updatedRow;
           })
           .catch((error) => {
+            setLoading(false);
             console.error('Error updating document: ', error);
             throw error;
           });
       }
     } else {
+      setLoading(false);
       return Promise.reject(
         new Error('No matching user data found for id: ' + newRow.id)
       );
@@ -687,6 +675,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         },
       }}
     >
+      {loading ? <LinearProgress color="warning" /> : null}
       <DataGrid
         rows={applicationData}
         columns={columns}

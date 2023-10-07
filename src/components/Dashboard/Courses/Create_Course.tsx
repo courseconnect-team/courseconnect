@@ -8,16 +8,23 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import AddIcon from '@mui/icons-material/Add';
 import { GridRowsProp } from '@mui/x-data-grid';
-
+import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import LinearProgress from '@mui/material/LinearProgress';
+import { CircularProgress } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 interface CreateCourseDialogProps {
   open: boolean;
   setOpen: (value: boolean) => void;
+  setSuccess: (value: boolean) => void;
   setCourseData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
 }
 
 const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
   open,
   setOpen,
+  setSuccess,
   setCourseData,
 }) => {
   const handleClickOpen = () => {
@@ -27,8 +34,18 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
   const handleClose = () => {
     setOpen(false);
   };
-
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);
+
+    console.log(loading);
+
     event.preventDefault();
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
@@ -36,7 +53,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     const professorsNameString = formData.get('professor-names') as string;
     const professorNameList = professorsNameString
       .split(',')
-      .map((professorEmail) => professorEmail.trim());
+      .map((professorName) => professorName.trim());
 
     const professorsEmailString = formData.get('professor-emails') as string;
     const professorEmailList = professorsEmailString
@@ -56,6 +73,33 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       enrollment_cap: formData.get('enrollment-cap') as string,
       num_enrolled: formData.get('num-enrolled') as string,
     };
+
+    var testRegex = /^[a-zA-Z0-9]+$/;
+    var numberRegex = /^[0-9]+$/;
+    if (!testRegex.test(courseData.code)) {
+      toast.error(
+        'Course code should only consist of number or letters (no spaces)!'
+      );
+      return;
+    } else if (courseData.code === '') {
+      toast.error('Please enter a course code!');
+      return;
+    } else if (courseData.title == '') {
+      toast.error('Please enter a course title!');
+      return;
+    } else if (courseData.id.length != 5 || !numberRegex.test(courseData.id)) {
+      toast.error('Please enter a valid class number!');
+      return;
+    } else if (courseData.professor_names.length == 0) {
+      toast.error('Please enter professor names!');
+      return;
+    } else if (courseData.professor_emails.length == 0) {
+      toast.error('Please enter professor emails!');
+      return;
+    } else if (courseData.credits === '') {
+      toast.error('Please enter the credit amount!');
+      return;
+    }
 
     // console.log(courseData); // FOR DEBUGGING ONLY!
 
@@ -85,14 +129,16 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
 
     if (response.ok) {
       console.log('SUCCESS: Course data sent to server successfully');
-
       // Update the course data with the new row
       setCourseData((oldRows) => [...oldRows, courseData]);
-
+      setSuccess(true);
       // close the dialog
       handleClose();
+      setLoading(false);
     } else {
       console.log('ERROR: Course data failed to send to server');
+      toast.error("Course data failed to send to server!");
+      setLoading(false);
     }
   };
 
@@ -209,6 +255,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
               id="course-credits"
               name="course-credits"
               label="Number of Credits"
+              type="number"
               fullWidth
               variant="standard"
               helperText={
@@ -259,6 +306,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
             />
           </DialogContent>
           <DialogActions>
+            {loading ? <CircularProgress size={20} color="warning" /> : null}
             <Button onClick={handleClose}>Cancel</Button>
             <Button type="submit">Create</Button>
           </DialogActions>

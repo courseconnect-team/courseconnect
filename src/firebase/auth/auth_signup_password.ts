@@ -22,42 +22,44 @@ export default async function handleSignUp(
     ufid: ufid,
   };
 
-  // const response = await fetch(
-  //   'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/checkIfIDInDatabase',
-  //   {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify(userIDObject),
-  //   }
-  // );
-  // if (response.ok) {
-  //   console.log('SUCCESS: UFID does not exist in database.');
-  // } else {
-  //   console.log('ERROR: Inputted UFID already exists in database.');
-  //   return '-1';
-  // }
+  var errorTag: string = '';
+
 
   try {
     await createUserWithEmailAndPassword(auth, email, password).catch(
       (error) => {
         console.log(error);
+        if (error.message.includes('already in use')) {
+          errorTag = '-5';
+        } else {
+          errorTag = '-2';
+        }
       }
     );
+    if (errorTag != '') {
+      return errorTag;
+    }
     await sendEmailVerification(auth.currentUser as User).catch((error) => {
       console.log(error);
+      errorTag = '-3';
     });
     await updateProfile(auth.currentUser as User, { displayName: name }).catch(
       (error) => {
         console.log(error);
+
+        errorTag = '-4';
       }
     );
-    console.log('User created successfully!');
-    return auth.currentUser?.uid as string;
+    if (errorTag === '') {
+      console.log('User created successfully!!!');
+      return auth.currentUser?.uid as string;
+    } else {
+      return errorTag;
+    }
   } catch (error) {
+    console.log(errorTag);
     console.log('Error creating user: ', error);
   }
 
-  return '-1';
+  return errorTag;
 }
