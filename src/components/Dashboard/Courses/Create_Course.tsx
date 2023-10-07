@@ -32,7 +32,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
   };
 
   const handleClose = () => {
-    setSuccess(true);
     setOpen(false);
   };
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
@@ -132,7 +131,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       console.log('SUCCESS: Course data sent to server successfully');
       // Update the course data with the new row
       setCourseData((oldRows) => [...oldRows, courseData]);
-
+      setSuccess(true);
       // close the dialog
       handleClose();
       setLoading(false);

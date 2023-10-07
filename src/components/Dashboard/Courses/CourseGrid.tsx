@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
@@ -28,7 +29,7 @@ import {
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
-import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, LinearProgress } from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
 
 interface Course {
@@ -55,6 +56,7 @@ export default function CourseGrid(props: CourseGridProps) {
   const { user } = useAuth();
   const [success, setSuccess] = React.useState(false);
 
+  const [loading, setLoading] = useState(false);
   const [courseData, setCourseData] = React.useState<Course[]>([]);
   // fetching course data from firestore.
   const userEmail = user?.email;
@@ -179,10 +181,13 @@ export default function CourseGrid(props: CourseGridProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
+    setLoading(true);
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+    setLoading(false);
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
+    setLoading(true);
     const updatedRow = courseData.find((row) => row.id === id);
     if (updatedRow) {
       firebase
@@ -195,16 +200,21 @@ export default function CourseGrid(props: CourseGridProps) {
             ...rowModesModel,
             [id]: { mode: GridRowModes.View },
           });
+          setLoading(false);
         })
         .catch((error) => {
+          setLoading(false);
           console.error('Error updating document: ', error);
         });
     } else {
+      setLoading(false);
       console.error('No matching course data found for id: ', id);
     }
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
+    setLoading(true);
+
     firebase
       .firestore()
       .collection('courses')
@@ -212,13 +222,16 @@ export default function CourseGrid(props: CourseGridProps) {
       .delete()
       .then(() => {
         setCourseData(courseData.filter((row) => row.id !== id));
+        setLoading(false);
       })
       .catch((error) => {
+        setLoading(false);
         console.error('Error removing document: ', error);
       });
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
+    setLoading(true);
     const editedRow = courseData.find((row) => row.id === id);
     if (editedRow!.isNew) {
       firebase
@@ -228,8 +241,11 @@ export default function CourseGrid(props: CourseGridProps) {
         .delete()
         .then(() => {
           setCourseData(courseData.filter((row) => row.id !== id));
+          setLoading(false);
+
         })
         .catch((error) => {
+          setLoading(false);
           console.error('Error removing document: ', error);
         });
     } else {
@@ -237,10 +253,12 @@ export default function CourseGrid(props: CourseGridProps) {
         ...rowModesModel,
         [id]: { mode: GridRowModes.View, ignoreModifications: true },
       });
+      setLoading(false);
     }
   };
 
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
+    setLoading(true);
     const professorEmailsArray =
       typeof newRow.professor_emails === 'string' && newRow.professor_emails
         ? newRow.professor_emails.split(',').map((p_email) => p_email.trim())
@@ -280,9 +298,11 @@ export default function CourseGrid(props: CourseGridProps) {
             setCourseData(
               courseData.map((row) => (row.id === newRow.id ? updatedRow : row))
             );
+            setLoading(false);
             return updatedRow;
           })
           .catch((error) => {
+            setLoading(false);
             console.error('Error adding document: ', error);
             throw error;
           });
@@ -296,14 +316,17 @@ export default function CourseGrid(props: CourseGridProps) {
             setCourseData(
               courseData.map((row) => (row.id === newRow.id ? updatedRow : row))
             );
+            setLoading(false);
             return updatedRow;
           })
           .catch((error) => {
+            setLoading(false);
             console.error('Error updating document: ', error);
             throw error;
           });
       }
     } else {
+      setLoading(false);
       return Promise.reject(
         new Error('No matching course data found for id: ' + newRow.id)
       );
@@ -525,6 +548,7 @@ export default function CourseGrid(props: CourseGridProps) {
           },
         }}
       >
+        {loading ? <LinearProgress color='warning' /> : null}
         <DataGrid
           rows={courseData}
           columns={columns}
@@ -546,6 +570,7 @@ export default function CourseGrid(props: CourseGridProps) {
             pagination: { paginationModel: { pageSize: 25 } },
           }}
         />
+
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>{'Course Data'}</DialogTitle>
           <DialogContent>
