@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { Emailer } from '@/util/emailer';
 import toast, { Toaster } from 'react-hot-toast';
 import { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
@@ -20,11 +21,10 @@ import handleSignIn from '@/firebase/auth/auth_signin_password';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
-
 export default function SignUpForm() {
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
-    ref,
+    ref
   ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
@@ -45,17 +45,19 @@ export default function SignUpForm() {
       return false;
     }
     if (!lowercaseRegex.test(password)) {
-      toast.error('Password should contain at least one lowercase letter!')
+      toast.error('Password should contain at least one lowercase letter!');
 
       return false;
     }
     if (!numberRegex.test(password)) {
-      toast.error('Password should contain at least one number!')
+      toast.error('Password should contain at least one number!');
 
       return false;
     }
     if (!specialCharacterRegex.test(password)) {
-      toast.error('Password should contain at least one special case character!')
+      toast.error(
+        'Password should contain at least one special case character!'
+      );
 
       return false;
     }
@@ -81,7 +83,7 @@ export default function SignUpForm() {
       ufid: formData.get('ufid') as string,
       uid: '',
     };
-    console.log("Role " + userData.role);
+    console.log('Role ' + userData.role);
 
     // add the following:
     if (userData.firstname === '') {
@@ -95,12 +97,11 @@ export default function SignUpForm() {
     } else if (userData.role === null) {
       toast.error('Please select a role!');
     } else if (userData.department === '') {
-      toast.error('Please select a department!')
+      toast.error('Please select a department!');
     } else if (userData.password === '') {
       toast.error('Please enter a password!');
     } else if (!isStrongPassword(userData.password)) {
-      console.log("invalid password");
-
+      console.log('invalid password');
     } else if (userData.ufid == '') {
       toast.error('Please enter your UFID!');
     } else {
@@ -145,6 +146,16 @@ export default function SignUpForm() {
         if (response.ok) {
           setSuccess(true);
           console.log('SUCCESS: User data sent to server successfully');
+
+          // Create a new instance of Emailer
+          const emailer = new Emailer();
+
+          // Call notifyUserForSignup method
+          emailer.notifyUserForSignup(
+            userData.email,
+            userData.firstname + ' ' + userData.lastname
+          );
+
           // then, sign in the user
           handleSignIn(userData.email, userData.password);
         } else {

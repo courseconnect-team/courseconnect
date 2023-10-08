@@ -20,9 +20,10 @@
     "@types/react-dom": "18.2.4",
     "autoprefixer": "10.4.14",
     "eslint-config-next": "13.4.3",
-    "firebase": "^9.22.2",
+    "firebase": "^9.23.0",
     "firebase-functions": "^4.4.1",
     "next": "13.4.3",
+    "nodemailer": "^6.9.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-firebase-hooks": "^5.1.1",
@@ -31,6 +32,7 @@
     "typescript": "5.0.4"
   },
   "devDependencies": {
+    "@types/nodemailer": "^6.4.11",
     "encoding": "^0.1.13",
     "eslint": "^8.41.0",
     "eslint-config-prettier": "^8.8.0",
