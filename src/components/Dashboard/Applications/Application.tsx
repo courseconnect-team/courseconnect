@@ -21,7 +21,12 @@ import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
 import AdditionalSemesterPrompt from '@/components/FormUtil/AddtlSemesterPrompt';
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
+import { toast } from 'react-hot-toast';
+import { LinearProgress } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
+import { useState } from 'react';
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -32,6 +37,7 @@ import { useAuth } from '@/firebase/auth/auth_context';
 
 export default function Application() {
   // get the current user's uid
+
   const { user } = useAuth();
   const userId = user.uid;
 
@@ -48,8 +54,9 @@ export default function Application() {
   const handleAdditionalPromptChange = (newValue: string) => {
     setAdditionalPromptValue(newValue);
   };
-
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);
     event.preventDefault();
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
@@ -74,15 +81,9 @@ export default function Application() {
     }
 
     // extract semester checkbox's values
-    const semesterCheckbox_fall_2023 =
-      formData.get('semesterCheckbox_fall_2023') === 'on';
     const semesterCheckbox_spring_2024 =
       formData.get('semesterCheckbox_spring_2024') === 'on';
-
     const semesterArray: string[] = [];
-    if (semesterCheckbox_fall_2023) {
-      semesterArray.push('Fall 2023');
-    }
     if (semesterCheckbox_spring_2024) {
       semesterArray.push('Spring 2024');
     }
@@ -92,7 +93,13 @@ export default function Application() {
 
     const coursesArray = coursesString
       .split(',')
-      .map((professorEmail) => professorEmail.trim());
+      .map((course) => course.trim());
+
+    // get class numbers as array
+    const classNumbersString = formData.get('class-number-prompt') as string;
+    const classNumbersArray = classNumbersString
+      .split(',')
+      .map((classnum) => classnum.trim());
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
@@ -112,42 +119,143 @@ export default function Application() {
       available_hours: availabilityArray as string[],
       available_semesters: semesterArray as string[],
       courses: coursesArray as string[],
+      classnumbers: classNumbersArray as string[],
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
       date: current_date,
       status: 'Review',
     };
 
-    // console.log(applicationData); // FOR DEBUGGING ONLY!
-
-    // use fetch to send the application data to the server
-    // this goes to a cloud function which creates a document based on
-    // the data from the form, identified by the user's firebase auth uid
-    const response = await fetch(
-      'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(applicationData),
-      }
-    );
-
-    if (response.ok) {
-      console.log('SUCCESS: Application data sent to server successfully');
-      // now, update the role of the user to student_applied
-      await UpdateRole(userId, 'student_applied');
-      // then, refresh the page somehow to reflect the state changing
-      // so the form goes away and the user can see the status of their application
-      location.reload();
+    if (!applicationData.email.includes('ufl')) {
+      toast.error('Please enter a valid ufl email!');
+      setLoading(false);
+      return;
+    } else if (applicationData.firstname === '') {
+      toast.error('Please enter a valid first name!');
+      setLoading(false);
+      return;
+    } else if (applicationData.lastname === '') {
+      toast.error('Please enter a valid last name!');
+      setLoading(false);
+      return;
+    } else if (applicationData.phonenumber === '') {
+      toast.error('Please enter a valid phone number!');
+      setLoading(false);
+    } else if (
+      applicationData.degree === null ||
+      applicationData.degree === ''
+    ) {
+      toast.error('Please select a degree!');
+      setLoading(false);
+      return;
+    } else if (
+      applicationData.department === null ||
+      applicationData.department === ''
+    ) {
+      toast.error('Please select a department!');
+      setLoading(false);
+      return;
+    } else if (
+      applicationData.semesterstatus === null ||
+      applicationData.semesterstatus === ''
+    ) {
+      toast.error('Please select a semester status!');
+      setLoading(false);
+      return;
+    } else if (
+      applicationData.englishproficiency === null ||
+      applicationData.englishproficiency === ''
+    ) {
+      toast.error('Please select your english proficiency level!');
+      setLoading(false);
+      return;
+    } else if (
+      applicationData.nationality === null ||
+      applicationData.nationality === ''
+    ) {
+      toast.error('Please select your nationality!');
+      setLoading(false);
+      return;
+    } else if (
+      applicationData.position === null ||
+      applicationData.position === ''
+    ) {
+      toast.error('Please enter a position!');
+      setLoading(false);
+      return;
+    } else if (applicationData.available_hours.length == 0) {
+      toast.error('Please enter your available hours!');
+      setLoading(false);
+      return;
+    } else if (applicationData.available_semesters.length == 0) {
+      toast.error('Please enter your available semesters!');
+      setLoading(false);
+      return;
+    } else if (applicationData.courses.length == 0) {
+      toast.error('Please enter your course(s)!');
+      setLoading(false);
+      return;
+    } else if (applicationData.classnumbers.length == 0) {
+      toast.error('Please enter your class number(s)!');
+      setLoading(false);
+      return;
     } else {
-      console.log('ERROR: Application data failed to send to server');
+      // console.log(applicationData); // FOR DEBUGGING ONLY!
+
+      // use fetch to send the application data to the server
+      // this goes to a cloud function which creates a document based on
+      // the data from the form, identified by the user's firebase auth uid
+      const response = await fetch(
+        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(applicationData),
+        }
+      );
+
+      if (response.ok) {
+        console.log('SUCCESS: Application data sent to server successfully');
+        // now, update the role of the user to student_applied
+        await UpdateRole(userId, 'student_applied');
+        // then, refresh the page somehow to reflect the state changing
+        // so the form goes away and the user can see the status of their application
+        location.reload();
+      } else {
+        toast.error('Application data failed to send to server!');
+        console.log('ERROR: Application data failed to send to server');
+      }
+      setLoading(false);
     }
   };
+  const [success, setSuccess] = React.useState(false);
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
 
+  const handleSuccess = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSuccess(false);
+  };
   return (
     <Container component="main" maxWidth="md">
+      <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Application submitted successfully!
+        </Alert>
+      </Snackbar>
+      {loading ? <LinearProgress color="warning" /> : null}
       <CssBaseline />
       <Box
         sx={{
@@ -228,6 +336,7 @@ export default function Application() {
                 label="UFID"
                 name="ufid"
                 autoComplete="ufid"
+                type="number"
                 helperText="No dashes or spaces."
               />
             </Grid>
@@ -290,8 +399,19 @@ export default function Application() {
             </Grid>
             <Grid item xs={12}>
               <Typography>
-                Please list the course(s) for which you are applying, separated
-                by commas.
+                Please list the course(s) and class number(s) for which you are
+                applying, separated by commas.
+              </Typography>
+              <Typography variant="subtitle2">
+                View the schedule of ECE department courses for this upcoming
+                semester{' '}
+                <a
+                  href="https://one.uf.edu/soc/?category=%22CWSP%22&term=%222241%22&dept=%2219050000%22"
+                  target="_blank"
+                >
+                  here
+                </a>
+                .
               </Typography>
               <TextField
                 required
@@ -303,6 +423,17 @@ export default function Application() {
                 rows={1}
                 variant="filled"
                 helperText="Example: COP3502, COP3503, COP3504"
+              />
+              <TextField
+                required
+                fullWidth
+                id="class-number-prompt"
+                name="class-number-prompt"
+                label="Class Number(s)"
+                multiline
+                rows={1}
+                variant="filled"
+                helperText="Example: 11450, 11451"
               />
             </Grid>
             <Grid item xs={12}>

@@ -1,10 +1,11 @@
 import SignInForm from '@/components/SignIn/SignInForm';
 import scss from './Home.module.scss';
-
+import toast, { Toaster } from 'react-hot-toast';
 export default function Home() {
   return (
     <>
       <main className={scss.main}>
+        <Toaster />
         <h1 style={{ textAlign: 'center' }}>Welcome to Course Connect!</h1>
         <p style={{ fontStyle: 'italic', textAlign: 'center' }}>
           Please note that while our core features are complete, we are still 🚧

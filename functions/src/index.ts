@@ -84,6 +84,7 @@ export const processApplicationForm = functions.https.onRequest(
         available_hours: request.body.available_hours,
         available_semesters: request.body.available_semesters,
         courses: request.body.courses,
+        classnumbers: request.body.classnumbers,
         qualifications: request.body.qualifications,
         uid: request.body.uid,
         date: request.body.date,
@@ -243,23 +244,3 @@ export const deleteUserFromID = functions.https.onRequest(
     }
   }
 );
-
-// export const checkIfIDInDatabase = functions.https.onRequest(
-//   (request, response) => {
-//     corsHandler(request, response, async () => {
-//       // Your existing function code.
-//       const userObject = {
-//         school_id: request.body.ufid,
-//       };
-
-//       const usersRef = db.collection('users');
-//       const snapshot = usersRef.where('ufid', '==', userObject.school_id).get();
-
-//       if (!snapshot.empty) {
-//         console.log('User with same school ID already exists!');
-//         response.status(500).send('User with same school ID already exists!');
-//       }
-//       response.status(200).send('No user with that school ID found!');
-//     });
-//   }
-// );

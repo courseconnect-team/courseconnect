@@ -1,5 +1,6 @@
 import Container from '@mui/material/Container';
 import UnderDevelopment from '@/components/UnderDevelopment';
+import { Toaster } from 'react-hot-toast';
 
 interface DashboardProps {
   user: any;
@@ -11,6 +12,7 @@ export default function DashboardWelcome(props: DashboardProps) {
 
   return (
     <>
+      <Toaster />
       <Container maxWidth="lg">
         <h1>
           Welcome, {userRole} {user?.email}!

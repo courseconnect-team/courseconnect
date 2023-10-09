@@ -1,4 +1,5 @@
 import SubmitAppDialog from './ApplicationDialog';
+import UnderDevelopment from '@/components/UnderDevelopment';
 /*
 there are multiple states represented here:
   1. student has applied (student_applied)
@@ -22,6 +23,7 @@ export default function ShowApplicationStatus(props: AppStatusProps) {
     return (
       <>
         <h1>Your application has been received.</h1>
+        <UnderDevelopment />
         <h2>It is under review.</h2>
       </>
     );
@@ -29,6 +31,7 @@ export default function ShowApplicationStatus(props: AppStatusProps) {
     return (
       <>
         <h1>Your application has been denied.</h1>
+        <UnderDevelopment />
         <h2>You can reapply below:</h2>
         <SubmitAppDialog />
       </>
@@ -37,6 +40,7 @@ export default function ShowApplicationStatus(props: AppStatusProps) {
     return (
       <>
         <h1>Your application has been accepted!</h1>
+        <UnderDevelopment />
         <h2>You shall be assigned a course soon.</h2>
       </>
     );
