@@ -43,8 +43,9 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${
+    current.getMonth() + 1
+  }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -80,15 +81,9 @@ export default function Application() {
     }
 
     // extract semester checkbox's values
-    const semesterCheckbox_fall_2023 =
-      formData.get('semesterCheckbox_fall_2023') === 'on';
     const semesterCheckbox_spring_2024 =
       formData.get('semesterCheckbox_spring_2024') === 'on';
-
     const semesterArray: string[] = [];
-    if (semesterCheckbox_fall_2023) {
-      semesterArray.push('Fall 2023');
-    }
     if (semesterCheckbox_spring_2024) {
       semesterArray.push('Spring 2024');
     }
@@ -98,7 +93,13 @@ export default function Application() {
 
     const coursesArray = coursesString
       .split(',')
-      .map((professorEmail) => professorEmail.trim());
+      .map((course) => course.trim());
+
+    // get class numbers as array
+    const classNumbersString = formData.get('class-number-prompt') as string;
+    const classNumbersArray = classNumbersString
+      .split(',')
+      .map((classnum) => classnum.trim());
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
@@ -118,6 +119,7 @@ export default function Application() {
       available_hours: availabilityArray as string[],
       available_semesters: semesterArray as string[],
       courses: coursesArray as string[],
+      classnumbers: classNumbersArray as string[],
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
       date: current_date,
@@ -139,27 +141,45 @@ export default function Application() {
     } else if (applicationData.phonenumber === '') {
       toast.error('Please enter a valid phone number!');
       setLoading(false);
-    } else if (applicationData.degree === null || applicationData.degree === '') {
+    } else if (
+      applicationData.degree === null ||
+      applicationData.degree === ''
+    ) {
       toast.error('Please select a degree!');
       setLoading(false);
       return;
-    } else if (applicationData.department === null || applicationData.department === '') {
+    } else if (
+      applicationData.department === null ||
+      applicationData.department === ''
+    ) {
       toast.error('Please select a department!');
       setLoading(false);
       return;
-    } else if (applicationData.semesterstatus === null || applicationData.semesterstatus === '') {
+    } else if (
+      applicationData.semesterstatus === null ||
+      applicationData.semesterstatus === ''
+    ) {
       toast.error('Please select a semester status!');
       setLoading(false);
       return;
-    } else if (applicationData.englishproficiency === null || applicationData.englishproficiency === '') {
+    } else if (
+      applicationData.englishproficiency === null ||
+      applicationData.englishproficiency === ''
+    ) {
       toast.error('Please select your english proficiency level!');
       setLoading(false);
       return;
-    } else if (applicationData.nationality === null || applicationData.nationality === '') {
+    } else if (
+      applicationData.nationality === null ||
+      applicationData.nationality === ''
+    ) {
       toast.error('Please select your nationality!');
       setLoading(false);
       return;
-    } else if (applicationData.position === null || applicationData.position === '') {
+    } else if (
+      applicationData.position === null ||
+      applicationData.position === ''
+    ) {
       toast.error('Please enter a position!');
       setLoading(false);
       return;
@@ -172,7 +192,11 @@ export default function Application() {
       setLoading(false);
       return;
     } else if (applicationData.courses.length == 0) {
-      toast.error('Please enter your courses!');
+      toast.error('Please enter your course(s)!');
+      setLoading(false);
+      return;
+    } else if (applicationData.classnumbers.length == 0) {
+      toast.error('Please enter your class number(s)!');
       setLoading(false);
       return;
     } else {
@@ -200,7 +224,7 @@ export default function Application() {
         // so the form goes away and the user can see the status of their application
         location.reload();
       } else {
-        toast.error('Application data failed to send to server!')
+        toast.error('Application data failed to send to server!');
         console.log('ERROR: Application data failed to send to server');
       }
       setLoading(false);
@@ -209,12 +233,15 @@ export default function Application() {
   const [success, setSuccess] = React.useState(false);
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
-    ref,
+    ref
   ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
 
-  const handleSuccess = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleSuccess = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
     if (reason === 'clickaway') {
       return;
     }
@@ -372,8 +399,19 @@ export default function Application() {
             </Grid>
             <Grid item xs={12}>
               <Typography>
-                Please list the course(s) for which you are applying, separated
-                by commas.
+                Please list the course(s) and class number(s) for which you are
+                applying, separated by commas.
+              </Typography>
+              <Typography variant="subtitle2">
+                View the schedule of ECE department courses for this upcoming
+                semester{' '}
+                <a
+                  href="https://one.uf.edu/soc/?category=%22CWSP%22&term=%222241%22&dept=%2219050000%22"
+                  target="_blank"
+                >
+                  here
+                </a>
+                .
               </Typography>
               <TextField
                 required
@@ -385,6 +423,17 @@ export default function Application() {
                 rows={1}
                 variant="filled"
                 helperText="Example: COP3502, COP3503, COP3504"
+              />
+              <TextField
+                required
+                fullWidth
+                id="class-number-prompt"
+                name="class-number-prompt"
+                label="Class Number(s)"
+                multiline
+                rows={1}
+                variant="filled"
+                helperText="Example: 11450, 11451"
               />
             </Grid>
             <Grid item xs={12}>
