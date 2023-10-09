@@ -1,0 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap");
+body {
+  margin: 0;
+  line-height: normal;
+}
+:root {
+  /* fonts */
+  --font-sf-pro-display: "SF Pro Display";
+  --font-poppins: Poppins;
+
+  /* font sizes */
+  --font-size-lg: 18px;
+  --font-size-base: 16px;
+  --font-size-mini: 15px;
+  --font-size-36xl: 55px;
+  --font-size-5xl: 24px;
+  --font-size-xl: 20px;
+
+  /* Colors */
+  --color-white: #fff;
+  --color-black: #000;
+  --color-darkblue: #562eba;
+  --color-dimgray-100: #6c6c6c;
+  --color-dimgray-200: #4d4d4d;
+
+  /* Border radiuses */
+  --br-3xs: 10px;
+  --br-4xs: 9px;
+  --br-21xl: 40px;
+}

@@ -1,4 +1,5 @@
 import SignInForm from '@/components/SignIn/SignInForm';
+import LoginLowFiWireframe from '@/components/Wireframes/LoginScreen/LoginLowFiWireframe';
 import scss from './Home.module.scss';
 import toast, { Toaster } from 'react-hot-toast';
 export default function Home() {
@@ -11,7 +12,8 @@ export default function Home() {
           Please note that while our core features are complete, we are still 🚧
           under development 🚧.
         </p>
-        <SignInForm />
+        <LoginLowFiWireframe />
+        {/* <SignInForm /> */}
       </main>
     </>
   );
