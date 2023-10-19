@@ -1,4 +1,5 @@
 import SignInForm from '@/components/SignIn/SignInForm';
+import LoginLowFiWireframe from '@/components/Wireframes/LoginScreen/LoginLowFiWireframe';
 import scss from './Home.module.scss';
 import toast, { Toaster } from 'react-hot-toast';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';

@@ -25,6 +25,7 @@ import {
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { LinearProgress } from '@mui/material';
 
 interface User {
   id: string;
@@ -305,6 +306,7 @@ export default function UserGrid(props: UserGridProps) {
         columns={columns}
         slots={{
           toolbar: EditToolbar,
+          loadingOverlay: LinearProgress,
         }}
         slotProps={{
           toolbar: { setUserData, setRowModesModel },

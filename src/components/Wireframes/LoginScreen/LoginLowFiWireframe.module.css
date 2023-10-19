@@ -1,0 +1,291 @@
+.colorBlockFrame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1440px;
+    height: 458px;
+    overflow: hidden;
+  }
+  .connectingBrightMinds {
+    margin: 0;
+  }
+  .blankLine {
+    margin: 0;
+    font-weight: 300;
+    font-family: var(--font-poppins);
+  }
+  .connectingBrightMindsContainer {
+    position: absolute;
+    top: 124px;
+    left: 7px;
+    display: inline-block;
+    width: 394px;
+    height: 30px;
+  }
+  .signInTo1 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-weight: 500;
+  }
+  .courseConnect {
+    top: 48px;
+    left: 0;
+    font-size: 60px;
+    display: inline-block;
+  }
+  .courseConnect,
+  .signInTitle,
+  .signInTo {
+    position: absolute;
+    width: 549px;
+  }
+  .signInTo {
+    top: 0;
+    left: 0;
+    height: 120px;
+    font-size: 40px;
+  }
+  .signInTitle {
+    top: 141px;
+    left: 73px;
+    height: 154px;
+  }
+  .ifYouDont,
+  .youCanRegisterContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    width: 308px;
+  }
+  .youCanRegisterContainer {
+    top: 30px;
+    cursor: pointer;
+  }
+  .registerHereText {
+    position: absolute;
+    top: 351px;
+    left: 80px;
+    width: 308px;
+    height: 54px;
+  }
+  .loginLowFiWireframeChild {
+    position: absolute;
+    top: 402.5px;
+    left: 149.5px;
+    border-top: 1px solid var(--color-white);
+    box-sizing: border-box;
+    width: 127px;
+    height: 1px;
+  }
+  .logInCardChild {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--br-21xl);
+    background-color: var(--color-white);
+    box-shadow: 0 4px 35px rgba(0, 0, 0, 0.08);
+  }
+  .courseConnect1 {
+    color: var(--color-darkblue);
+  }
+  .signIn,
+  .welcomeToCourseContainer {
+    position: absolute;
+    top: 7.02%;
+    left: 8.16%;
+    font-size: var(--font-size-5xl);
+  }
+  .signIn {
+    top: 12.28%;
+    font-size: var(--font-size-36xl);
+    font-weight: 500;
+  }
+  .enterEmailAddress,
+  .usernameInput {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .usernameInput {
+    height: 100%;
+    width: 100%;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--br-4xs);
+    background-color: var(--color-white);
+  }
+  .emailAddress,
+  .emailInput {
+    position: absolute;
+    top: 31.58%;
+    left: 5.32%;
+  }
+  .emailInput {
+    height: 62.64%;
+    width: 100%;
+    top: 37.36%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    font-size: var(--font-size-mini);
+    color: var(--color-dimgray-100);
+  }
+  .emailAddressInput,
+  .passwordInput {
+    position: absolute;
+    height: 14.51%;
+    width: 83.67%;
+    top: 32.54%;
+    right: 8.16%;
+    bottom: 52.95%;
+    left: 8.16%;
+  }
+  .passwordInput {
+    top: 52.79%;
+    bottom: 32.7%;
+  }
+  .forgotPassword {
+    position: absolute;
+    top: 69.7%;
+    left: 71.8%;
+    font-size: var(--font-size-mini);
+    color: var(--color-dimgray-200);
+  }
+  .signInButtonChild {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--br-3xs);
+    background-color: var(--color-darkblue);
+    box-shadow: 0 4px 19px rgba(119, 147, 65, 0.3);
+  }
+  .signIn1 {
+    position: absolute;
+    width: 12.42%;
+    top: 27.78%;
+    left: 43.9%;
+    font-weight: 500;
+    display: inline-block;
+  }
+  .signInButton {
+    position: absolute;
+    height: 8.61%;
+    width: 83.67%;
+    top: 79.9%;
+    right: 8.16%;
+    bottom: 11.48%;
+    left: 8.16%;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    color: var(--color-white);
+  }
+  .logInCard {
+    position: absolute;
+    top: 150px;
+    left: 801px;
+    width: 539px;
+    height: 627px;
+    font-size: var(--font-size-lg);
+    color: var(--color-black);
+  }
+  .eceLogoPng21 {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+    object-fit: cover;
+  }
+  .eceLogoPng2 {
+    position: absolute;
+    top: 23px;
+    left: 27px;
+    width: 68px;
+    height: 49px;
+  }
+  .signInButtonItem {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--br-3xs);
+    background-color: var(--color-white);
+  }
+  .login {
+    position: absolute;
+    height: 48.65%;
+    width: 84.44%;
+    top: 24.32%;
+    left: 8.15%;
+    display: inline-block;
+  }
+  .signInButton1 {
+    position: absolute;
+    height: 100.54%;
+    width: 67.16%;
+    top: 0;
+    right: -15.92%;
+    bottom: -0.54%;
+    left: 48.76%;
+  }
+  .about,
+  .logInButton {
+    position: absolute;
+    left: 0;
+  }
+  .about {
+    height: 100%;
+    width: 100%;
+    top: 0;
+    display: inline-block;
+  }
+  .logInButton {
+    height: 48.91%;
+    width: 27.36%;
+    top: 24.46%;
+    right: 72.64%;
+    bottom: 26.63%;
+    cursor: pointer;
+    text-align: left;
+    color: var(--color-white);
+  }
+  .topNavBar {
+    position: absolute;
+    top: 27px;
+    left: 1167px;
+    width: 201px;
+    height: 36.8px;
+    text-align: center;
+    font-size: var(--font-size-lg);
+    color: var(--color-black);
+  }
+  .loginLowFiWireframe {
+    position: relative;
+    background-color: var(--color-white);
+    width: 100%;
+    height: 900px;
+    overflow: hidden;
+    text-align: left;
+    font-size: var(--font-size-xl);
+    color: var(--color-white);
+    font-family: var(--font-sf-pro-display);
+  }
+  
