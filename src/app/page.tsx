@@ -1,18 +1,59 @@
 import SignInForm from '@/components/SignIn/SignInForm';
 import scss from './Home.module.scss';
 import toast, { Toaster } from 'react-hot-toast';
+import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
+
+import { TopNavBar } from '@/components/TopNavBar/TopNavBar';
+import { LogInCard } from '@/components/LogInCard/LogInCard';
+import './style.css';
+import Link from 'next/link';
 export default function Home() {
   return (
     <>
-      <main className={scss.main}>
-        <Toaster />
-        <h1 style={{ textAlign: 'center' }}>Welcome to Course Connect!</h1>
-        <p style={{ fontStyle: 'italic', textAlign: 'center' }}>
-          Please note that while our core features are complete, we are still 🚧
-          under development 🚧.
-        </p>
-        <SignInForm />
-      </main>
+      <Toaster />
+      <div className="login-low-fi">
+        <div className="div-2">
+          <div className="overlap-2">
+            <img
+              className="color-block-frame"
+              alt="Color block frame"
+              src="https://c.animaapp.com/tY2yC3Jd/img/color-block-frame.png"
+            />
+            <div className="sign-in-title">
+              <p className="connecting-bright">
+                <span className="text-wrapper-8">
+                  Connecting Bright Minds for a Brighter Future
+                  <br />
+                </span>
+                <span className="text-wrapper-9">
+                  <br />
+                </span>
+              </p>
+              <div className="sign-in-to">
+                <div className="text-wrapper-10">Sign in to</div>
+                <div className="text-wrapper-11">Course Connect</div>
+              </div>
+            </div>
+            <div className="register-here-text">
+              <p className="p">If you don’t have an account</p>
+              <p className="you-can-register">
+                <span className="text-wrapper-8">You can </span>
+                <Link href="/signup" className="text-wrapper-12"> {"Register here!"} </Link>
+              </p>
+            </div>
+
+            <LogInCard className="log-in-card-instance" />
+          </div>
+          <EceLogoPng className="ece-logo-png-2" />
+          <TopNavBar
+            className="top-nav-bar-instance"
+            divClassName="design-component-instance-node"
+            divClassNameOverride="top-nav-bar-3"
+            logInButtonClassName="top-nav-bar-2"
+          />
+          <EceLogoPng className="ece-logo-png-2" />
+        </div>
+      </div>
     </>
   );
 }

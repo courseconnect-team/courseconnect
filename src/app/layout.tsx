@@ -8,7 +8,7 @@ import lightTheme from './theme/lightTheme';
 import Header from '@/components/Header/Header';
 
 const ColorModeContext = React.createContext({
-  toggleColorMode: () => {},
+  toggleColorMode: () => { },
 });
 
 export default function RootLayout({

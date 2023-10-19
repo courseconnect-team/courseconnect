@@ -161,7 +161,7 @@ export default function SignUpForm() {
     <Container component="main" maxWidth="xs">
       <Snackbar open={success} autoHideDuration={3000}>
         <Alert severity="info" sx={{ width: '100%' }}>
-          Signup successful!
+          Signup successfull!
         </Alert>
       </Snackbar>
       <CssBaseline />
