@@ -5,6 +5,7 @@ Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcN
 
 import React from "react";
 import "./style.css";
+import Link from "next/link";
 
 export const TopNavBar = ({
   className,
@@ -14,14 +15,20 @@ export const TopNavBar = ({
 }) => {
   return (
     <div className={`top-nav-bar ${className}`}>
-      <button className="div-wrapper">
-        <div className="overlap-group-2">
-          <div className={`text-wrapper-6 ${divClassName}`}>Login</div>
+      <Link href="/">
+        <button className="div-wrapper">
+          <div className="overlap-group-2">
+            <div className={`text-wrapper-6 ${divClassName}`}>Home</div>
+          </div>
+        </button>
+      </Link>
+
+      <Link href="/about">
+
+        <div className={`log-in-button`}>
+          <div className={`text-wrapper-7 ${divClassNameOverride}`}>About</div>
         </div>
-      </button>
-      <div className={`log-in-button`}>
-        <div className={`text-wrapper-7 ${divClassNameOverride}`}>About</div>
-      </div>
+      </Link>
     </div>
   );
 };
