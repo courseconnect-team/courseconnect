@@ -21,12 +21,16 @@ import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
 import AdditionalSemesterPrompt from '@/components/FormUtil/AddtlSemesterPrompt';
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
-import { toast } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import { LinearProgress } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 import { useState } from 'react';
+import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
+import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
+
+import "./style.css";
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -222,213 +226,233 @@ export default function Application() {
     setSuccess(false);
   };
   return (
-    <Container component="main" maxWidth="md">
-      <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>
-        <Alert severity="success" sx={{ width: '100%' }}>
-          Application submitted successfully!
-        </Alert>
-      </Snackbar>
-      {loading ? <LinearProgress color="warning" /> : null}
-      <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-          <EditNoteIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          TA/UPI/Grader Application
-        </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit}>
-          <Typography align="center" component="h2" variant="h6" sx={{ m: 1 }}>
-            Personal Information
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                autoComplete="given-name"
-                name="firstName"
-                variant="filled"
-                required
-                fullWidth
-                id="firstName"
-                label="First Name"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                variant="filled"
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="family-name"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                variant="filled"
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                helperText="Enter your UF email address. Example: gator@ufl.edu"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                variant="filled"
-                name="phone-number"
-                label="Phone Number"
-                type="tel"
-                id="phone-number"
-                autoComplete="phone-number"
-                helperText="Enter your phone number. Example: 123-456-7890"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <DepartmentSelect />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                variant="filled"
-                id="ufid"
-                label="UFID"
-                name="ufid"
-                autoComplete="ufid"
-                type="number"
-                helperText="No dashes or spaces."
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <SemesterStatusSelect
-                component={AdditionalSemesterPrompt}
-                onValueChange={handleAdditionalPromptChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <DegreeSelect />
-            </Grid>
-          </Grid>
-          <Typography align="center" component="h2" variant="h6" sx={{ m: 1 }}>
-            Demographic Information
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Typography>
-                Please select your nationality, based on country of origin.{' '}
-                <br />
-                Federal laws prohibit discrimination based on a person&apos;s
-                national origin, race, color, religion, disability, sex, and
-                familial status. This question is asked to confirm the
-                demographic basis for the applicant&apos;s proficiency in
-                English.
-              </Typography>
-              <NationalitySelect onNationalityChange={setNationality} />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography sx={{ paddingBottom: 2 }}>
-                Please select your proficiency in English.
-              </Typography>
-              <ProficiencySelect />
-            </Grid>
-          </Grid>
-          <Typography align="center" component="h2" variant="h6" sx={{ m: 1 }}>
-            Position Information
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Typography>
-                Please select the position for which you are interested in
-                applying.
-              </Typography>
-              <PositionSelect />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>
-                Please select the semester(s) for which you are applying.
-              </Typography>
-              <SemesterCheckbox name="semesterCheckbox" />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>
-                Please select one or more options describing the number of hours
-                per week you will be available.
-              </Typography>
-              <AvailabilityCheckbox name="availabilityCheckbox" />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>
-                Please list the course(s) for which you are applying, separated
-                by commas.
-              </Typography>
-              <TextField
-                required
-                fullWidth
-                id="course-prompt"
-                name="course-prompt"
-                label="Course(s)"
-                multiline
-                rows={1}
-                variant="filled"
-                helperText="Example: COP3502, COP3503, COP3504"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>
-                Please provide your most recently calculated cumulative UF GPA.
-              </Typography>
-              <GPA_Select />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>
-                Please describe your qualifications for the position and
-                course(s) for which you are applying. <br />
-                <em>
-                  If you have been a TA, UPI, or grader before, please mention
-                  the course(s) and teacher(s) for which you worked.
-                </em>{' '}
-                <br /> <br />
-                Write about any relevant experience, such as teaching, tutoring,
-                grading, or coursework. <br />
-              </Typography>
-              <TextField
-                required
-                fullWidth
-                id="qualifications-prompt"
-                name="qualifications-prompt"
-                label="I am qualified because..."
-                multiline
-                rows={8}
-                variant="filled"
-              />
-            </Grid>
-            <Grid item xs={12}></Grid>
-          </Grid>
+    <>
+      <Toaster />
+      <div className="student-landing-page">
+        <div className="overlap-wrapper">
+          <div className="overlap">
+            <div className="overlap-2">
+              <div className="color-block-frame">
+                <div className="overlap-group-2">
+                  <div className="color-block" />
+                  <img className="GRADIENTS" alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                  <div className="glass-card" />
+                </div>
+              </div>
+              <EceLogoPng className="ece-logo-png-2" />
+              <TopNavBarSigned className="top-nav-bar-signed-in" />
+              <div className="text-wrapper-8">Application</div>
+            </div>
+            <Container className="container" component="main" maxWidth="md">
+              <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>
+                <Alert severity="success" sx={{ width: '100%' }}>
+                  Application submitted successfully!
+                </Alert>
+              </Snackbar>
+              {loading ? <LinearProgress color="warning" /> : null}
+              <CssBaseline />
+              <Box
+                sx={{
+                  marginTop: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography component="h1" variant="h5">
+                  TA/UPI/Grader Application
+                </Typography>
+                <Box component="form" noValidate onSubmit={handleSubmit}>
+                  <Typography align="center" component="h2" variant="h6" sx={{ marginTop: 10, m: 1 }}>
+                    Personal Information
+                  </Typography>
+                  <Grid container spacing={2} sx={{ marginTop: 40 }}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        autoComplete="given-name"
+                        name="firstName"
+                        variant="filled"
+                        required
+                        fullWidth
+                        id="firstName"
+                        label="First Name"
+                        autoFocus
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        variant="filled"
+                        id="lastName"
+                        label="Last Name"
+                        name="lastName"
+                        autoComplete="family-name"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        variant="filled"
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        helperText="Enter your UF email address. Example: gator@ufl.edu"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        variant="filled"
+                        name="phone-number"
+                        label="Phone Number"
+                        type="tel"
+                        id="phone-number"
+                        autoComplete="phone-number"
+                        helperText="Enter your phone number. Example: 123-456-7890"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <DepartmentSelect />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        required
+                        fullWidth
+                        variant="filled"
+                        id="ufid"
+                        label="UFID"
+                        name="ufid"
+                        autoComplete="ufid"
+                        type="number"
+                        helperText="No dashes or spaces."
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <SemesterStatusSelect
+                        component={AdditionalSemesterPrompt}
+                        onValueChange={handleAdditionalPromptChange}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <DegreeSelect />
+                    </Grid>
+                  </Grid>
+                  <Typography align="center" component="h2" variant="h6" sx={{ m: 1 }}>
+                    Demographic Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Typography>
+                        Please select your nationality, based on country of origin.{' '}
+                        <br />
+                        Federal laws prohibit discrimination based on a person&apos;s
+                        national origin, race, color, religion, disability, sex, and
+                        familial status. This question is asked to confirm the
+                        demographic basis for the applicant&apos;s proficiency in
+                        English.
+                      </Typography>
+                      <NationalitySelect onNationalityChange={setNationality} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography sx={{ paddingBottom: 2 }}>
+                        Please select your proficiency in English.
+                      </Typography>
+                      <ProficiencySelect />
+                    </Grid>
+                  </Grid>
+                  <Typography align="center" component="h2" variant="h6" sx={{ m: 1 }}>
+                    Position Information
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Typography>
+                        Please select the position for which you are interested in
+                        applying.
+                      </Typography>
+                      <PositionSelect />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography>
+                        Please select the semester(s) for which you are applying.
+                      </Typography>
+                      <SemesterCheckbox name="semesterCheckbox" />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography>
+                        Please select one or more options describing the number of hours
+                        per week you will be available.
+                      </Typography>
+                      <AvailabilityCheckbox name="availabilityCheckbox" />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography>
+                        Please list the course(s) for which you are applying, separated
+                        by commas.
+                      </Typography>
+                      <TextField
+                        required
+                        fullWidth
+                        id="course-prompt"
+                        name="course-prompt"
+                        label="Course(s)"
+                        multiline
+                        rows={1}
+                        variant="filled"
+                        helperText="Example: COP3502, COP3503, COP3504"
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography>
+                        Please provide your most recently calculated cumulative UF GPA.
+                      </Typography>
+                      <GPA_Select />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography>
+                        Please describe your qualifications for the position and
+                        course(s) for which you are applying. <br />
+                        <em>
+                          If you have been a TA, UPI, or grader before, please mention
+                          the course(s) and teacher(s) for which you worked.
+                        </em>{' '}
+                        <br /> <br />
+                        Write about any relevant experience, such as teaching, tutoring,
+                        grading, or coursework. <br />
+                      </Typography>
+                      <TextField
+                        required
+                        fullWidth
+                        id="qualifications-prompt"
+                        name="qualifications-prompt"
+                        label="I am qualified because..."
+                        multiline
+                        rows={8}
+                        variant="filled"
+                      />
+                    </Grid>
+                    <Grid item xs={12}></Grid>
+                  </Grid>
 
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Submit
-          </Button>
-        </Box>
-      </Box>
-    </Container>
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
+                  >
+                    Submit
+                  </Button>
+                </Box>
+              </Box>
+            </Container>
+
+          </div>
+        </div>
+      </div>
+    </>
+
   );
 }

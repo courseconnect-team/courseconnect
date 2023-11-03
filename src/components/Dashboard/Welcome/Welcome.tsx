@@ -35,7 +35,7 @@ export default function DashboardWelcome(props: DashboardProps) {
               <TopNavBarSigned className="top-nav-bar-signed-in" />
               <div className="text-wrapper-8">Home</div>
             </div>
-            <Link href="/">
+            <Link href="/Profile">
               <Profile className="profile-instance" profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
             </Link>
             <Link href="/apply">

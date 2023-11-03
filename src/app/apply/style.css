@@ -1,19 +1,17 @@
 .student-landing-page {
-  background-color: #ffffff;
   display: flex;
   flex-direction: row;
   justify-content: center;
   width: 100%;
 }
 
+
 .student-landing-page .overlap-wrapper {
-  background-color: #ffffff;
   height: 1024px;
   width: 100%;
 }
 
 .student-landing-page .overlap {
-  background-color: #f9f9f9;
   height: 1024px;
   position: relative;
   width: 100%;
