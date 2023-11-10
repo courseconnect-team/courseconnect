@@ -205,8 +205,8 @@ export const SignUpCard = ({ className }: { className: any }) => {
                 }}
                 value={role}
               >
-                <FormControlLabel value="Student" control={<Radio />} label="Student" />
-                <FormControlLabel value="Faculty" control={<Radio />} label="Staff" />
+                <FormControlLabel value="student_applying" control={<Radio />} label="Student" />
+                <FormControlLabel value="faculty" control={<Radio />} label="Staff" />
               </RadioGroup>
             </FormControl>
           </div>
