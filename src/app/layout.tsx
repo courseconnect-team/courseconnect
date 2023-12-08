@@ -65,7 +65,7 @@ export default function RootLayout({
           >
             <AuthProvider>
               <CssBaseline />
-              <Header ColorModeContext={ColorModeContext} />
+              {/*<Header ColorModeContext={ColorModeContext} />*/}
               {children}
             </AuthProvider>
           </ThemeProvider>

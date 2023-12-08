@@ -66,12 +66,15 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <div className="text-wrapper-8">Home</div>
               </div>
               <Link href="/Profile">
-                <Profile className="profile-instance" profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+                <Profile className="profile-instance2" profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+              </Link>
+              <Link href="/status">
+                <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className="apply-instance2" />
               </Link>
               <Link href="/apply">
-                <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className="apply-instance" />
-              </Link>
 
+                <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className="status-instance" />
+              </Link>
             </div>
 
           }

@@ -8,7 +8,7 @@ import './style.css';
 import Link from 'next/link';
 import { SignUpCard } from '@/components/SignUpCard/SignUpCard';
 import { Card } from '@/components/Card/Card'
-export default function SignUpPage() {
+export default function About() {
   return (
     <>
       <Toaster />

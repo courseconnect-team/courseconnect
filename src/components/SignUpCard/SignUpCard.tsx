@@ -195,7 +195,6 @@ export const SignUpCard = ({ className }: { className: any }) => {
           <div className="role-input">
             <div className="text-wrapper-4">Role</div>
             <FormControl>
-              <br />
               <RadioGroup
                 row
                 aria-labelledby="demo-row-radio-buttons-group-label"
@@ -204,6 +203,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   setRole(event.target.value);
                 }}
                 value={role}
+                style={{ marginTop: "30px" }}
               >
                 <FormControlLabel value="student_applying" control={<Radio />} label="Student" />
                 <FormControlLabel value="faculty" control={<Radio />} label="Staff" />

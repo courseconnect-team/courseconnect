@@ -1,19 +1,17 @@
 .student-landing-page {
-  background-color: #ffffff;
   display: flex;
   flex-direction: row;
   justify-content: center;
   width: 100%;
 }
 
+
 .student-landing-page .overlap-wrapper {
-  background-color: #ffffff;
   height: 1024px;
   width: 100%;
 }
 
 .student-landing-page .overlap {
-  background-color: #f9f9f9;
   height: 1024px;
   position: relative;
   width: 100%;
@@ -37,7 +35,6 @@
 }
 
 .student-landing-page .overlap-group-2 {
-  height: 458px;
   left: -5px;
   position: relative;
   width: 100%;
@@ -115,19 +112,3 @@
   top: 640px !important;
 }
 
-.student-landing-page .profile-instance2 {
-  left: 58% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-.student-landing-page .apply-instance2 {
-  left: 44% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
-.student-landing-page .status-instance {
-  left: 30% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
