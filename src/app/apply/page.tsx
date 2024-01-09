@@ -30,7 +30,7 @@ import { useState } from 'react';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 
-import "./style.css";
+import styles from "./style.module.css";
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -228,20 +228,20 @@ export default function Application() {
   return (
     <>
       <Toaster />
-      <div className="student-landing-page">
-        <div className="overlap-wrapper">
-          <div className="overlap">
-            <div className="overlap-2">
-              <div className="color-block-frame">
-                <div className="overlap-group-2">
-                  <div className="color-block" />
-                  <img className="GRADIENTS" alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
-                  <div className="glass-card" />
+      <div className={styles.studentlandingpage}>
+        <div className={styles.overlapwrapper}>
+          <div className={styles.overlap}>
+            <div className={styles.overlap2}>
+              <div className={styles.colorblockframe}>
+                <div className={styles.overlapgroup2}>
+                  <div className={styles.colorblock} />
+                  <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                  <div className={styles.glasscard} />
                 </div>
               </div>
-              <EceLogoPng className="ece-logo-png-2" />
-              <TopNavBarSigned className="top-nav-bar-signed-in" />
-              <div className="text-wrapper-8">Application</div>
+              <EceLogoPng className={styles.ecelogopng2} />
+              <TopNavBarSigned className={styles.topnavbarsignedin} />
+              <div className={styles.textwrapper8}>Application</div>
             </div>
             <Container className="container" component="main" maxWidth="md">
               <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>

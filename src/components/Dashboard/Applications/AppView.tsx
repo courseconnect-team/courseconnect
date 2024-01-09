@@ -29,7 +29,6 @@ export default function AppView({ uid }: AppViewProps) {
         console.log('Error getting document:', error);
       });
   }, [uid, docRef]); // Only re-run the effect if uid changes
-
   return (
     <Box sx={{ minWidth: 120 }}>
       {docData && (

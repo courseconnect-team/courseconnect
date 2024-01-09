@@ -31,6 +31,9 @@ import 'firebase/firestore';
 import { query, where, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserName from '@/firebase/util/GetUserName';
+import { alpha, styled } from '@mui/material/styles';
+import { gridClasses } from '@mui/x-data-grid';
+
 import {
   Dialog,
   DialogContent,
@@ -188,9 +191,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     return (
       <GridToolbarContainer>
-        <GridToolbarExport />
-        <GridToolbarFilterButton />
-        <GridToolbarColumnsButton />
+        <GridToolbarExport style={{ color: '#562EBA' }} />
+        <GridToolbarFilterButton style={{ color: '#562EBA' }} />
+        <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
       </GridToolbarContainer>
     );
   }
@@ -567,20 +570,20 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     {
       field: 'fullname',
       headerName: 'Full Name',
-      width: 150,
+      width: 200,
       editable: false,
       valueGetter: getFullName,
     },
-    { field: 'uf_email', headerName: 'Email', width: 180, editable: true },
+    { field: 'uf_email', headerName: 'Email', width: 250, editable: true },
     {
       field: 'id',
       headerName: 'UFID',
-      width: 70,
+      width: 100,
       editable: true,
     },
-    { field: 'courses', headerName: 'Courses', width: 200, editable: true },
+    { field: 'courses', headerName: 'Courses', width: 220, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
-    { field: 'timestamp', headerName: 'Date', width: 80, editable: true },
+    { field: 'timestamp', headerName: 'Date', width: 180, editable: true },
     { field: 'status', headerName: 'App Status', width: 100, editable: true },
   ];
 
@@ -621,7 +624,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       {
         field: 'id',
         headerName: 'UFID',
-        width: 70,
+        width: 100,
         editable: false,
       },
       { field: 'position', headerName: 'Position', width: 70, editable: false },
@@ -661,6 +664,40 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       },
     ];
   }
+  const ODD_OPACITY = 0.2;
+
+  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [`& .${gridClasses.row}.even`]: {
+      backgroundColor: '#562EBA1F',
+      '&:hover, &.Mui-hovered': {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        '@media (hover: none)': {
+          backgroundColor: 'transparent',
+        },
+      },
+      '&.Mui-selected': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY + theme.palette.action.selectedOpacity,
+        ),
+        '&:hover, &.Mui-hovered': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY +
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity,
+          ),
+          // Reset on touch devices, it doesn't add specificity
+          '@media (hover: none)': {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY + theme.palette.action.selectedOpacity,
+            ),
+          },
+        },
+      },
+    },
+  }));
 
   return (
     <Box
@@ -676,7 +713,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       }}
     >
       {loading ? <LinearProgress color="warning" /> : null}
-      <DataGrid
+      <StripedDataGrid
         rows={applicationData}
         columns={columns}
         editMode="row"
@@ -693,6 +730,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
         }}
+        getRowClassName={(params) =>
+          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+        }
+        sx={{ borderRadius: '16px' }}
       />
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{'User Application'}</DialogTitle>

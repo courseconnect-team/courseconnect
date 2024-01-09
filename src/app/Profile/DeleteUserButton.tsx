@@ -45,20 +45,19 @@ const DeleteUserDialog: React.FC<CreateCourseDialogProps> = ({
   return (
     <div>
       <Button
-        size="small"
+        size="large"
         variant="text"
         startIcon={<PersonRemoveIcon />}
         onClick={handleClickOpen}
+
       >
         Delete Account
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Create a Course</DialogTitle>
+        <DialogTitle>Delete Account</DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
             <DialogContentText>
-              To create a course manually, please enter the course information
-              in the form below.
             </DialogContentText>
             <TextField
               margin="dense"

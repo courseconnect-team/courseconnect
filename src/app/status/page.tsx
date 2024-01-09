@@ -161,16 +161,16 @@ export default function Status() {
                 <Box sx={{ mt: 50, mb: 2 }}>
 
                   {role == 'student_applied' && <ApplicationStatusCard
-                    text="Teacher Assistant"
-                    course="COP3052"
+                    text="TA/UPI"
+                    course="All courses"
                   />}
                   {role == 'student_denied' && <ApplicationStatusCardDenied
-                    text="Teacher Assistant"
-                    course="COP3053"
+                    text="TA/UPI"
+                    course="All courses"
                   />}
                   {role == 'student_accepted' && <ApplicationStatusCardAccepted
-                    text="Teacher Assistant"
-                    course="COP3053"
+                    text="TA/UPI"
+                    course=""
                   />}
 
                 </Box>

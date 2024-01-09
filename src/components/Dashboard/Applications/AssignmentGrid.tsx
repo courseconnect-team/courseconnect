@@ -26,6 +26,10 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { alpha, styled } from '@mui/material/styles';
+import { gridClasses } from '@mui/x-data-grid';
+
+
 import { getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import {
   Button,
@@ -38,6 +42,7 @@ import {
   TextField,
 } from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
+import AssignView from './AssignView';
 
 
 
@@ -78,9 +83,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
     return (
       <GridToolbarContainer>
-        <GridToolbarExport />
-        <GridToolbarFilterButton />
-        <GridToolbarColumnsButton />
+        <GridToolbarExport style={{ color: '#562EBA' }} />
+        <GridToolbarFilterButton style={{ color: '#562EBA' }} />
+        <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
       </GridToolbarContainer>
     );
   }
@@ -405,6 +410,41 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
     { field: 'date', headerName: 'Date Approved', width: 120, editable: true },
   ];
+  const ODD_OPACITY = 0.2;
+
+  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [`& .${gridClasses.row}.even`]: {
+      backgroundColor: '#562EBA1F',
+      '&:hover, &.Mui-hovered': {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        '@media (hover: none)': {
+          backgroundColor: 'transparent',
+        },
+      },
+      '&.Mui-selected': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY + theme.palette.action.selectedOpacity,
+        ),
+        '&:hover, &.Mui-hovered': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY +
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity,
+          ),
+          // Reset on touch devices, it doesn't add specificity
+          '@media (hover: none)': {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY + theme.palette.action.selectedOpacity,
+            ),
+          },
+        },
+      },
+    },
+  }));
+
 
   return (
     <Box
@@ -422,7 +462,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
 
       {loading ? <LinearProgress color='warning' /> : null}
-      <DataGrid
+      <StripedDataGrid
         rows={assignmentData}
         columns={columns}
         editMode="row"
@@ -439,6 +479,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
         }}
+        getRowClassName={(params) =>
+          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+        }
+        sx={{ borderRadius: '16px' }}
       />
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{'Approved Application'}</DialogTitle>
@@ -446,9 +490,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           {/* Display the application data of the selected user */}
           {selectedUserGrid && (
             <div>
-              <p>User ID: {selectedUserGrid}</p>
               {/* Display the user's application data in a different format */}
-              <UnderDevelopment />
+              <AssignView uid={selectedUserGrid as string} />
             </div>
           )}
         </DialogContent>

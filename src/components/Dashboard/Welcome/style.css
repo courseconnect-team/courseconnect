@@ -131,3 +131,30 @@
   position: absolute !important;
   top: 640px !important;
 }
+
+.student-landing-page .courses {
+  left: 15% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .users {
+  left: 30% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.student-landing-page .applications {
+  left: 45% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .scheduling {
+  left: 60%!important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .stats {
+  left: 75%!important;
+  position: absolute !important;
+  top: 640px !important;
+}
