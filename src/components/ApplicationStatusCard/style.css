@@ -49,7 +49,7 @@
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 21px;
   font-weight: 400;
-  left: 0;
+  left: 20;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
@@ -99,7 +99,7 @@
 
 .status-card2 .inner-content-2 {
   height: 29px;
-  left: 304px;
+  left: 354px;
   position: absolute;
   top: 66px;
   width: 197px;
@@ -119,7 +119,7 @@
 
 .status-card2 .application-button {
   height: 43px;
-  left: 404px;
+  left: 454px;
   position: absolute;
   top: 60px;
   width: 226px;

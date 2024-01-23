@@ -34,7 +34,7 @@ import GetUserUfid from '@/firebase/util/GetUserUfid';
 import { ApplicationStatusCardDenied } from '@/components/ApplicationStatusCardDenied/ApplicationStatusCardDenied';
 
 import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCardAccepted/ApplicationStatusCardAccepted';
-import "./style.css";
+import styles from "./style.module.css";
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { query, where, collection, getDocs } from 'firebase/firestore';
@@ -131,22 +131,22 @@ export default function Status() {
   return (
     <>
       <Toaster />
-      <div className="student-landing-page">
-        <div className="overlap-wrapper">
-          <div className="overlap">
-            <div className="overlap-2">
-              <div className="color-block-frame">
-                <div className="overlap-group-2">
-                  <div className="color-block" />
-                  <img className="GRADIENTS" alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
-                  <div className="glass-card" />
+      <div className={styles.studentlandingpage}>
+        <div className={styles.overlapwrapper}>
+          <div className={styles.overlap}>
+            <div className={styles.overlap2}>
+              <div className={styles.colorblockframe}>
+                <div className={styles.overlapgroup2}>
+                  <div className={styles.colorblock} />
+                  <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                  <div className={styles.glasscard} />
                 </div>
               </div>
-              <EceLogoPng className="ece-logo-png-2" />
-              <TopNavBarSigned className="top-nav-bar-signed-in" />
-              <div className="text-wrapper-8">Status</div>
+              <EceLogoPng className={styles.ecelogopng2} />
+              <TopNavBarSigned className={styles.topnavbarsignedin} />
+              <div className={styles.textwrapper8}>Status</div>
             </div>
-            <Container className="container" component="main" maxWidth="md">
+            <Container className={styles.container} component="main" maxWidth="md">
 
               <CssBaseline />
               <Box

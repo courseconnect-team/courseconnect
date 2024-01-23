@@ -40,11 +40,6 @@ export default function AppView({ uid }: AppViewProps) {
             {docData.name}
           </Typography>
 
-          <Typography variant="h6">UFID:</Typography>
-          <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.student_uid}
-          </Typography>
-
           <Typography variant="h6">Class Codes:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
             {docData.class_codes}

@@ -14,6 +14,8 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 const auth = admin.auth();
+db.settings({ ignoreUndefinedProperties: true });
+
 // const corsHandler = cors({ origin: true });
 
 export const processSignUpForm = functions.https.onRequest(
@@ -79,7 +81,7 @@ export const processApplicationForm = functions.https.onRequest(
         semesterstatus: request.body.semesterstatus,
         additionalprompt: request.body.additionalprompt,
         nationality: request.body.nationality,
-        englishproficiency: request.body.englishproficiency,
+        englishproficiency: "NA",
         position: request.body.position,
         available_hours: request.body.available_hours,
         available_semesters: request.body.available_semesters,
@@ -88,7 +90,11 @@ export const processApplicationForm = functions.https.onRequest(
         uid: request.body.uid,
         date: request.body.date,
         status: request.body.status,
+        resume_link: request.body.resume_link,
+        classnumbers: "NA",
       };
+
+
 
       // Create the document within the "applications" collection
       db.collection('applications')
@@ -99,7 +105,6 @@ export const processApplicationForm = functions.https.onRequest(
         })
         .catch((error: any) => {
           response
-            .status(500)
             .send('Error creating application: ' + error.message);
         });
     }

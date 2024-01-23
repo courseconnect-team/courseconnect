@@ -397,9 +397,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       },
     },
     {
-      field: 'id',
-      headerName: 'Approved UFID',
-      width: 150,
+      field: 'name',
+      headerName: 'Name',
+      width: 200,
       editable: true,
     },
     {

@@ -10,7 +10,7 @@ export const TopNavBarSigned = ({ className }) => {
         <div className="text-wrapper-3">About</div>
       </Link>
 
-      <Link href="/">
+      <Link href="/dashboard">
         <div className="text-wrapper-4">Home</div>
       </Link>
 

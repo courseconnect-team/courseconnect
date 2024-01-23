@@ -1,4 +1,4 @@
-.student-landing-page {
+.studentlandingpage {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -6,18 +6,18 @@
 }
 
 
-.student-landing-page .overlap-wrapper {
+.studentlandingpage .overlapwrapper {
   height: 1024px;
   width: 100%;
 }
 
-.student-landing-page .overlap {
+.studentlandingpage .overlap {
   height: 1024px;
   position: relative;
   width: 100%;
 }
 
-.student-landing-page .overlap-2 {
+.studentlandingpage .overlap2 {
   height: 545px;
   left: 0;
   position: absolute;
@@ -25,7 +25,7 @@
   width: 100%;
 }
 
-.student-landing-page .color-block-frame {
+.studentlandingpage .colorblockframe {
   height: 350px;
   left: 0;
   overflow: hidden;
@@ -34,13 +34,13 @@
   width: 100%;
 }
 
-.student-landing-page .overlap-group-2 {
+.studentlandingpage .overlapgroup2 {
   left: -5px;
   position: relative;
   width: 100%;
 }
 
-.student-landing-page .color-block {
+.studentlandingpage .colorblock {
   background-color: #001776;
   height: 458px;
   left: 5px;
@@ -49,7 +49,7 @@
   width: 100%;
 }
 
-.student-landing-page .GRADIENTS {
+.studentlandingpage .GRADIENTS {
   height: 350px;
   left: 5px;
   position: absolute;
@@ -57,7 +57,7 @@
   width: 100%;
 }
 
-.student-landing-page .glass-card {
+.studentlandingpage .glasscard {
   -webkit-backdrop-filter: blur(200px) brightness(100%);
   backdrop-filter: blur(200px) brightness(100%);
   background-blend-mode: luminosity;
@@ -69,25 +69,25 @@
   width: 101%;
 }
 
-.student-landing-page .ece-logo-png-2 {
+.studentlandingpage .ecelogopng2 {
   left: 27px !important;
   position: absolute !important;
   top: 23px !important;
 }
 
-.student-landing-page .full-name-and-bio-instance {
+.studentlandingpage .fullnameandbioinstance {
   left: 38% !important;
   position: absolute !important;
   top: 250px !important;
 }
 
-.student-landing-page .top-nav-bar-signed-in {
+.studentlandingpage .topnavbarsignedin {
   left: 80% !important;
   position: absolute !important;
   top: 27px !important;
 }
 
-.student-landing-page .text-wrapper-8 {
+.studentlandingpage .textwrapper8 {
   color: #ffffff;
   font-family: "SF Pro Display-Medium", Helvetica;
   font-size: 50px;
@@ -100,13 +100,13 @@
   width: 133px;
 }
 
-.student-landing-page .profile-instance {
+.studentlandingpage .profileinstance {
   left: 52% !important;
   position: absolute !important;
   top: 640px !important;
 }
 
-.student-landing-page .apply-instance {
+.studentlandingpage .applyinstance {
   left: 38% !important;
   position: absolute !important;
   top: 640px !important;

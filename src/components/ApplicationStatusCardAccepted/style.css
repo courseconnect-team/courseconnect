@@ -49,7 +49,7 @@
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 21px;
   font-weight: 400;
-  left: 0;
+  left: 40px;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
@@ -108,18 +108,19 @@
 .status-card3 .text-wrapper-9 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
-  font-size: 24px;
+  font-size: 15px;
   font-weight: 400;
   left: 100px;
+  width: 100%;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
-  top: 10px;
+  top: 80px;
 }
 
 .status-card3 .application-button {
   height: 43px;
-  left: 404px;
+  left: 424px;
   position: absolute;
   top: 60px;
   width: 226px;
