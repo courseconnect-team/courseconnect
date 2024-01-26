@@ -329,12 +329,10 @@ export default function Application() {
                         helperText="Enter your phone number. Example: 123-456-7890"
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={22} sm={116} justifyContent="center" alignItems="center">
                       <DepartmentSelect />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
 
-                    </Grid>
                     <Grid item xs={12} sm={6}>
                       <SemesterStatusSelect
                         component={AdditionalSemesterPrompt}
@@ -448,7 +446,7 @@ export default function Application() {
 
           </div>
         </div>
-      </div>
+      </div >
     </>
 
   );

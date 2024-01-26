@@ -1,17 +1,21 @@
+
+
 .sectionaboutus {
   height: 557px;
-  left: 50px;
-  position: absolute;
+  margin-top: 700px;
+  margin-left: -400px;
   top: 770px;
+  position: sticky;
+
   width: 1310px;
 }
 
 .aboutus {
   height: 36px;
-  left: 56px;
-  position: absolute;
+  position: relative;
   top: 0;
-  width: 1208px;
+padding: 0; margin: 0; 
+  left: -38px;
 }
 
 .img {
@@ -65,6 +69,7 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  margin-bottom: 200px;
 }
 
 .loginlowfi .div2 {
@@ -72,6 +77,8 @@
   height: 100%;
   position: absolute;
   width: 100%;
+padding: 0; margin: 0; 
+  overflow-x: hidden;
 }
 
 .loginlowfi .overlap2 {
@@ -80,6 +87,7 @@
   position: absolute;
   top: 0;
   width: 100%;
+padding: 0; margin: 0; 
 }
 
 .loginlowfi .colorblockframe {

@@ -286,8 +286,7 @@ export default function UserGrid(props: UserGridProps) {
       editable: true,
     },
     { field: 'role', headerName: 'Role', width: 150, editable: true },
-    { field: 'ufid', headerName: 'UFID', width: 130, editable: true },
-    { field: 'id', headerName: 'User ID', width: 190, editable: true },
+    { field: 'id', headerName: 'User ID', width: 290, editable: true },
   ];
   const ODD_OPACITY = 0.2;
 

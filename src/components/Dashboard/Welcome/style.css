@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  position: absolute;
   width: 100%;
 }
 
@@ -15,7 +16,7 @@
 .student-landing-page .overlap {
   background-color: #f9f9f9;
   height: 1024px;
-  position: relative;
+  position: absolute;
   width: 100%;
 }
 
@@ -39,7 +40,7 @@
 .student-landing-page .overlap-group-2 {
   height: 458px;
   left: -5px;
-  position: relative;
+  position: absolute;
   width: 100%;
 }
 
@@ -95,12 +96,15 @@
   font-family: "SF Pro Display-Medium", Helvetica;
   font-size: 50px;
   font-weight: 500;
-  left: 45%;
   letter-spacing: 0;
   line-height: normal;
-  position: absolute;
-  top: 114px;
-  width: 133px;
+  top: 164px;
+      position:absolute;
+    top: 50%;
+    left: 48%;
+    transform: translateY(-50%);
+    transform: translateX(-50%);
+  top: 150px;
 }
 
 .student-landing-page .profile-instance {

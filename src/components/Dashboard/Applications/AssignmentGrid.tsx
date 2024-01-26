@@ -345,7 +345,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 200,
+      width: 290,
+
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -372,27 +373,43 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         }
 
         return [
-          <GridActionsCellItem
-            key="3"
-            icon={<ZoomInIcon />}
-            label="View"
+          <Button
+            variant="outlined"
+            color='inherit'
+            size="small"
+            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
+            startIcon={
+              <ZoomInIcon />
+            }
             onClick={(event) => handleClickOpenGrid(id)}
-            color="primary"
-          />,
-          <GridActionsCellItem
-            key="6"
-            icon={<EditIcon />}
-            label="Edit"
+          >
+            View
+          </Button>,
+          <Button
+            variant="outlined"
+            color='inherit'
+            size="small"
+            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
+            startIcon={
+              <EditIcon />
+            }
             onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="7"
-            icon={<DeleteIcon />}
-            label="Delete"
+          >
+            Edit
+          </Button>,
+          <Button
+            variant="outlined"
+            color='primary'
+            size="small"
+            style={{ marginRight: "20px", height: "25px", textTransform: "none" }}
+            startIcon={
+              <DeleteIcon />
+            }
             onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
+          >
+            Delete
+          </Button>,
+
         ];
       },
     },

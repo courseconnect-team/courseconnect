@@ -3,18 +3,22 @@
   flex-direction: row;
   justify-content: center;
   width: 100%;
+  position: absolute;
 }
 
 
 .studentlandingpage .overlapwrapper {
   height: 1024px;
   width: 100%;
+
+  position: absolute;
 }
 
 .studentlandingpage .overlap {
   height: 1024px;
-  position: relative;
   width: 100%;
+
+  position: absolute;
 }
 
 .studentlandingpage .overlap2 {
@@ -23,6 +27,7 @@
   position: absolute;
   top: 0;
   width: 100%;
+  
 }
 
 .studentlandingpage .colorblockframe {
@@ -36,8 +41,9 @@
 
 .studentlandingpage .overlapgroup2 {
   left: -5px;
-  position: relative;
   width: 100%;
+
+  position: absolute;
 }
 
 .studentlandingpage .colorblock {
@@ -83,8 +89,9 @@
 
 .studentlandingpage .topnavbarsignedin {
   left: 80% !important;
-  position: absolute !important;
   top: 27px !important;
+
+  position: absolute;
 }
 
 .studentlandingpage .textwrapper8 {
@@ -92,11 +99,16 @@
   font-family: "SF Pro Display-Medium", Helvetica;
   font-size: 50px;
   font-weight: 500;
-  left: 32%;
   letter-spacing: 0;
   line-height: normal;
-  position: absolute;
   top: 164px;
+  justify-content: center;
+      position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%);
+    transform: translateX(-50%);
+  top: 150px;
 }
 
 .studentlandingpage .profileinstance {

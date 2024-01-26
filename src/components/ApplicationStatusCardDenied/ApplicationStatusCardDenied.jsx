@@ -14,14 +14,14 @@ export const ApplicationStatusCardDenied = ({ text, course }) => {
         </div>
         <div className="overlap-2">
           <div className="div-wrapper">
-            <div style={{ color: "#6c6c6c", marginTop: "30px", marginLeft: "90px" }}>All Courses</div>
+            <div style={{ color: "#6c6c6c", marginTop: "5px", marginLeft: "-99px" }}>{course}</div>
           </div>
           <div className="rectangle" />
         </div>
       </div>
       <div className="inner-content-2">
         <div className="text-wrapper-7">Status:</div>
-        <div className="text-wrapper-9">Unfortunately all your applications have been denied. Please reapply using the application form.</div>
+        <div className="text-wrapper-9">Please reapply using the application form.</div>
       </div>
       <div className="application-button">
         <div className="overlap-group-2">

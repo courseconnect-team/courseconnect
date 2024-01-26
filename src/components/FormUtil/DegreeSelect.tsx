@@ -29,9 +29,7 @@ export default function DegreeSelect() {
         <FormControlLabel value="MS" control={<Radio />} label="MS" />
         <FormControlLabel value="PhD" control={<Radio />} label="PhD" />
       </RadioGroup>
-      <FormHelperText id="degree-radio-group-helper-text" sx={{ ml: '0' }}>
-        Select the degree you are currently pursuing.
-      </FormHelperText>
+
     </FormControl>
   );
 }

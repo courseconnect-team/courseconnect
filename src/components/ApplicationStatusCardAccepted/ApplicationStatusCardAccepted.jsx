@@ -14,7 +14,7 @@ export const ApplicationStatusCardAccepted = ({ text, course }) => {
         </div>
         <div className="overlap-2">
           <div className="div-wrapper">
-            <div style={{ color: "#6c6c6c", marginTop: "30px", marginLeft: "90px" }}>{course}</div>
+            <div style={{ color: "#6c6c6c", marginTop: "5px", marginLeft: "-99px" }}>{course}</div>
           </div>
           <div className="rectangle" />
         </div>

@@ -44,6 +44,8 @@ import {
   DialogActions,
   LinearProgress
 } from '@mui/material';
+import { purple } from '@mui/material/colors';
+
 import UnderDevelopment from '@/components/UnderDevelopment';
 import AppView from './AppView';
 
@@ -502,7 +504,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 200,
+      width: 370,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -529,13 +531,43 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         }
 
         return [
-          <GridActionsCellItem
-            key="3"
-            icon={<ZoomInIcon />}
-            label="View"
+          <Button
+            variant="outlined"
+            color='inherit'
+            size="small"
+            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
+            startIcon={
+              <ZoomInIcon />
+            }
             onClick={(event) => handleClickOpenGrid(id)}
-            color="primary"
-          />,
+          >
+            View
+          </Button>,
+          <Button
+            variant="outlined"
+            color='inherit'
+            size="small"
+            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
+            startIcon={
+              <EditIcon />
+            }
+            onClick={handleEditClick(id)}
+          >
+            Edit
+          </Button>,
+
+          <Button
+            variant="outlined"
+            color='primary'
+            size="small"
+            style={{ marginRight: "20px", height: "25px", textTransform: "none" }}
+            startIcon={
+              <DeleteIcon />
+            }
+            onClick={handleDeleteClick(id)}
+          >
+            Delete
+          </Button>,
           <GridActionsCellItem
             key="4"
             icon={<ThumbUpAltIcon />}
@@ -549,20 +581,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             label="Deny"
             onClick={(event) => handleDenyClick(id)}
             color="error"
-          />,
-          <GridActionsCellItem
-            key="6"
-            icon={<EditIcon />}
-            label="Edit"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="7"
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
           />,
         ];
       },
@@ -581,7 +599,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       width: 100,
       editable: true,
     },
-    { field: 'courses', headerName: 'Courses', width: 220, editable: true },
+    { field: 'courses', headerName: 'Courses', width: 190, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'timestamp', headerName: 'Date', width: 180, editable: true },
     { field: 'status', headerName: 'App Status', width: 100, editable: true },
