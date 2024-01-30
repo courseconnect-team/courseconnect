@@ -102,9 +102,10 @@ export default function Application() {
     // get courses as array
     const coursesString = formData.get('course-prompt') as string;
 
-    const coursesArray = coursesString
+    let coursesArray = coursesString
       .split(',')
-      .map((professorEmail) => professorEmail.trim());
+      .map((professorEmail) => professorEmail.trim())
+      .map((professorEmail) => professorEmail.replace(/\s/g, ''));
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
@@ -162,10 +163,6 @@ export default function Application() {
       return;
     } else if (applicationData.resume_link === null || applicationData.resume_link === '') {
       toast.error('Please provide a resume link!');
-      setLoading(false);
-      return;
-    } else if (applicationData.nationality === null || applicationData.nationality === '') {
-      toast.error('Please select your nationality!');
       setLoading(false);
       return;
     } else if (applicationData.position === null || applicationData.position === '') {
