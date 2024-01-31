@@ -1,0 +1,68 @@
+.applicantCardApprove1{
+    position: relative;
+    margin: 0 28px 0 40px;
+    display: flex;
+    align-items: center;
+    
+    text-align: left;
+    font-size: 24px;
+    color: #000;
+    font-family: 'SF Pro Display';
+    border-radius: 20px;
+    box-shadow: 0px 2px 20px 4px rgba(0, 0, 0, 0.25);
+    justify-content: space-between;
+  }
+  
+  .ellipse {
+    position: absolute;
+    height: 71px;
+    width: 71px;
+    margin: 17px 0 19px 32px;
+    border-radius: 50%;
+    background-color: rgba(158, 158, 158, 0.58);
+    border: 2px solid #4d4d4d;
+    box-sizing: border-box;
+  }
+  .name {
+    margin: 17px 0 61px 133px;
+  }
+  .ufid {
+    position: absolute;
+    margin: 46px 0 42px 133px;
+    font-size: 16px;
+    color: #9e9e9e;
+  }
+  
+  .thumbsContainer1{
+      display: flex;
+      align-items: center;
+      margin-right: 40px;
+  }
+  
+ 
+  
+  .approved1 {
+    font-size: 24px;
+    font-weight: 500;
+    font-family: 'SF Pro Display';
+    color: #22884c;
+    text-align: left;
+    display: inline-block;
+    width: 80px;
+  }
+
+  .applicantStatus3{
+    border-radius: 10px;
+    background-color:rgba(34, 136, 76, 0.12);
+    border: 2px solid #22884c;
+    box-sizing: border-box;
+    padding: 14px 50px 14px 30px;
+    
+  }
+
+
+
+
+  
+  /* Add any other styles as needed */
+  

@@ -1,0 +1,10 @@
+.ece-logo-png {
+  background-image: url(https://c.animaapp.com/tY2yC3Jd/img/ece-logo-png-2-2@2x.png);
+  background-position: 50% 50%;
+  position: relative;
+  background-size: cover;
+  height: 49px;
+  width: 68px;
+  position: fixed;
+}
+

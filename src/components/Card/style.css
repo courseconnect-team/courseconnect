@@ -1,0 +1,55 @@
+.card {
+  background-color: #ffffff;
+  border: 3px solid;
+  border-color: #000000;
+  border-radius: 27px;
+  box-shadow: 0px 2px 20px 4px #00000040;
+  height: 585px;
+  position: relative;
+  width: 398px;
+}
+
+.card .inner-content {
+  height: 303px;
+  left: 25px;
+  position: absolute;
+  top: 182px;
+  width: 354px;
+}
+
+.card .as-a-student-course {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  left: 2px;
+  letter-spacing: 0.3px;
+  line-height: 21px;
+  position: absolute;
+  top: 106px;
+  width: 348px;
+}
+
+.card .student {
+  color: #000000;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 32px;
+  font-weight: 700;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 50px;
+  width: 244px;
+}
+
+.rectangle {
+  left: 20px;
+  top: 12px;
+  width: 350px;
+  height: 200px;
+  position: absolute;
+}
+
+
+

@@ -1,0 +1,216 @@
+.login-low-fi {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.login-low-fi .div-2 {
+  background-color: #ffffff;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+
+}
+
+.login-low-fi .overlap-2 {
+  height: 777px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.login-low-fi .color-block-frame {
+  height: 458px;
+  left: 0;
+  position: relative;
+  top: 0;
+  width: 100%;
+}
+
+.login-low-fi .sign-in-title {
+  height: 154px;
+  left: 73px;
+  position: absolute;
+  top: 141px;
+  width: 100%;
+}
+
+.login-low-fi .connecting-bright {
+  color: #ffffff;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  left: 7px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 124px;
+  width: 100%;
+}
+
+.login-low-fi .text-wrapper-8 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.login-low-fi .text-wrapper-9 {
+  font-family: "Poppins", Helvetica;
+  font-weight: 300;
+}
+
+.login-low-fi .sign-in-to {
+  height: 120px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 553px;
+}
+
+.login-low-fi .text-wrapper-10 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 40px;
+  font-weight: 500;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.login-low-fi .text-wrapper-11 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 60px;
+  font-weight: 700;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 48px;
+  width: 549px;
+}
+
+.login-low-fi .register-here-text {
+  height: 54px;
+  left: 80px;
+  position: absolute;
+  top: 351px;
+  width: 312px;
+
+}
+
+.login-low-fi .p {
+  color: #ffffff;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  width: 308px;
+}
+
+.login-low-fi .you-can-register {
+  color: #ffffff;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 30px;
+  width: 308px;
+}
+
+.login-low-fi .text-wrapper-12 {
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-weight: 300;
+  text-decoration: underline;
+  color: white;
+
+}
+
+.login-low-fi .line {
+  height: 1px;
+  left: 150px;
+  object-fit: cover;
+  position: absolute;
+  top: 402px;
+  width: 126px;
+}
+
+.login-low-fi .log-in-card-instance {
+  left: 100px !important;
+  position: absolute !important;
+  top: 10px !important;
+}
+
+.login-low-fi .overlap-wrapper {
+  all: unset;
+  box-sizing: border-box;
+  height: 37px;
+  left: 1265px;
+  position: absolute;
+  top: 27px;
+  width: 137px;
+}
+
+.login-low-fi .overlap-3 {
+  background-color: #ffffff;
+  border-radius: 10px;
+  height: 37px;
+  position: relative;
+  width: 135px;
+}
+
+.login-low-fi .text-wrapper-13 {
+  color: #000000;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 18px;
+  font-weight: 700;
+  left: 11px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 9px;
+  white-space: nowrap;
+  width: 114px;
+}
+
+.login-low-fi .ece-logo-png-2 {
+  left: 27px !important;
+  position: absolute !important;
+  top: 23px !important;
+}
+
+.login-low-fi .top-nav-bar-instance {
+  left: 82% !important;
+  position: absolute !important;
+  top: 27px !important;
+  width: 100% !important;
+}
+
+.login-low-fi .design-component-instance-node {
+  left: 10px !important;
+  width: 105px !important;
+}
+
+.login-low-fi .top-nav-bar-2 {
+  width: 100% !important;
+}
+
+.login-low-fi .top-nav-bar-3 {
+  width: 100% !important;
+}
+

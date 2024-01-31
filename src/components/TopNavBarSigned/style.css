@@ -1,0 +1,66 @@
+.top-nav-bar-signed {
+  height: 37px;
+  position: relative;
+  width: 279px;
+}
+
+.top-nav-bar-signed .text-wrapper-3 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 18px;
+  font-weight: 700;
+  left: 100px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 8px;
+  white-space: nowrap;
+  width: 53px;
+}
+
+.top-nav-bar-signed .text-wrapper-4 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 18px;
+  font-weight: 700;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 8px;
+  white-space: nowrap;
+  width: 51px;
+}
+
+.top-nav-bar-signed .logout-button {
+  all: unset;
+  box-sizing: border-box;
+  height: 37px;
+  left: 207px;
+  position: absolute;
+  top: 0;
+  width: 117px;
+}
+
+.top-nav-bar-signed .overlap-group {
+  background-color: #ffffff;
+  border-radius: 10px;
+  height: 37px;
+  position: relative;
+  width: 115px;
+}
+
+.top-nav-bar-signed .text-wrapper-5 {
+  color: #000000;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 18px;
+  font-weight: 700;
+  left: 28px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 9px;
+  white-space: nowrap;
+  width: 59px;
+}
+
