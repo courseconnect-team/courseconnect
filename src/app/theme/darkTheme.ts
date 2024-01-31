@@ -2,7 +2,7 @@ import { ThemeOptions } from '@mui/material';
 // https://brandcenter.ufl.edu/colors/
 const darkTheme: ThemeOptions = {
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
       main: '#7695ff',
     },

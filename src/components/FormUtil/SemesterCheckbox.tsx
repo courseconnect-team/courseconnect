@@ -35,6 +35,16 @@ export default function SemesterCheckbox({ name }: CheckboxProps) {
           <FormControlLabel
             control={
               <Checkbox
+                checked={fall_2023}
+                onChange={handleChange}
+                name={`${name}_fall_2023`}
+              />
+            }
+            label="Fall 2023"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
                 checked={spring_2024}
                 onChange={handleChange}
                 name={`${name}_spring_2024`}

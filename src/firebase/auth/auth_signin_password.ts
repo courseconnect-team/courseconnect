@@ -5,6 +5,8 @@ const auth = firebase.auth();
 var tag: boolean = true;
 
 async function handleSignIn(email: string, password: string): Promise<boolean> {
+  console.log("YEET");
+
   await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in
