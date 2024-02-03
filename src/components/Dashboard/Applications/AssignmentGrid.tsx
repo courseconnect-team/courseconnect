@@ -7,11 +7,11 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import {
   GridRowModesModel,
   GridRowModes,
   DataGrid,
+  GridCellParams,
   GridColDef,
   GridActionsCellItem,
   GridEventListener,
@@ -48,9 +48,9 @@ import AssignView from './AssignView';
 
 interface Assignment {
   id: string;
-  approver_name: string;
-  approver_role: string;
-  approver_uid: string;
+  name: string;
+  hours: string;
+  classcode: string;
   date: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
@@ -413,10 +413,16 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         ];
       },
     },
-    {
+     {
       field: 'name',
       headerName: 'Name',
-      width: 200,
+      width: 190,
+      editable: true,
+    },
+    {
+      field: 'hours',
+      headerName: 'Hours',
+      width: 100,
       editable: true,
     },
     {
@@ -474,6 +480,14 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         '& .textPrimary': {
           color: 'text.primary',
         },
+        '& .approved': {
+          backgroundColor: '#248000',
+          color: '#ffffff',
+        },
+        '& .denied': {
+          backgroundColor: '#9c1e1e',
+          color: '#ffffff',
+        },
       }}
     >
 
@@ -487,6 +501,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        onProcessRowUpdateError={(error) =>
+          console.error('Error processing row update: ', error)
+        }
         slots={{
           toolbar: EditToolbar,
         }}

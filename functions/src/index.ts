@@ -86,6 +86,7 @@ export const processApplicationForm = functions.https.onRequest(
         available_hours: request.body.available_hours,
         available_semesters: request.body.available_semesters,
         courses: request.body.courses,
+        classnumbers: request.body.classnumbers,
         qualifications: request.body.qualifications,
         uid: request.body.uid,
         date: request.body.date,
@@ -248,4 +249,3 @@ export const deleteUserFromID = functions.https.onRequest(
     }
   }
 );
-
