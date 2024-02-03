@@ -29,7 +29,6 @@ export default function AppView({ uid }: AppViewProps) {
         console.log('Error getting document:', error);
       });
   }, [uid, docRef]); // Only re-run the effect if uid changes
-
   return (
     <Box sx={{ minWidth: 120 }}>
       {docData && (
@@ -59,11 +58,6 @@ export default function AppView({ uid }: AppViewProps) {
             {docData.phone}
           </Typography>
 
-          <Typography variant="h6">UFID:</Typography>
-          <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.ufid}
-          </Typography>
-
           <Typography variant="h6">Department:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
             {docData.dept}
@@ -79,34 +73,6 @@ export default function AppView({ uid }: AppViewProps) {
             {docData.upcoming_sem_status}
           </Typography>
 
-          <Typography variant="h6">Nationality:</Typography>
-          <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.nationality}
-          </Typography>
-
-          {docData.eng_prof_test ? (
-            <Typography variant="h6">English Proficiency Test:</Typography>
-          ) : null}
-          {docData.eng_prof_test ? (
-            <Typography variant="body1" style={{ marginBottom: '10px' }}>
-              {docData.eng_prof_test}
-            </Typography>
-          ) : null}
-
-          {docData.eng_prof_test ? (
-            <Typography variant="h6">English Proficiency Proof:</Typography>
-          ) : null}
-          {docData.eng_prof_proof && (
-            <Typography variant="body1" style={{ marginBottom: '10px' }}>
-              <a
-                href={docData.eng_prof_proof}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {docData.eng_prof_proof}
-              </a>
-            </Typography>
-          )}
 
           <Typography variant="h6">Position:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>

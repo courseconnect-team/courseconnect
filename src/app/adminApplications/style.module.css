@@ -1,0 +1,125 @@
+.studentlandingpage {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  position: absolute;
+}
+
+
+.studentlandingpage .overlapwrapper {
+  height: 1024px;
+  width: 100%;
+
+  position: absolute;
+}
+
+.studentlandingpage .overlap {
+  height: 1024px;
+  width: 100%;
+
+  position: absolute;
+}
+
+.studentlandingpage .overlap2 {
+  height: 545px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  
+}
+
+.studentlandingpage .colorblockframe {
+  height: 350px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .overlapgroup2 {
+  left: -5px;
+  width: 100%;
+
+  position: absolute;
+}
+
+.studentlandingpage .colorblock {
+  background-color: #001776;
+  height: 458px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .GRADIENTS {
+  height: 350px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .glasscard {
+  -webkit-backdrop-filter: blur(200px) brightness(100%);
+  backdrop-filter: blur(200px) brightness(100%);
+  background-blend-mode: luminosity;
+  background-color: #00000024;
+  height: 458px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 101%;
+}
+
+.studentlandingpage .ecelogopng2 {
+  left: 27px !important;
+  position: absolute !important;
+  top: 23px !important;
+}
+
+.studentlandingpage .fullnameandbioinstance {
+  left: 38% !important;
+  position: absolute !important;
+  top: 250px !important;
+}
+
+.studentlandingpage .topnavbarsignedin {
+  left: 80% !important;
+  top: 27px !important;
+
+  position: absolute;
+}
+
+.studentlandingpage .textwrapper8 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 50px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: normal;
+  top: 164px;
+  justify-content: center;
+      position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%);
+    transform: translateX(-50%);
+  top: 150px;
+}
+
+.studentlandingpage .profileinstance {
+  left: 52% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.studentlandingpage .applyinstance {
+  left: 38% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+

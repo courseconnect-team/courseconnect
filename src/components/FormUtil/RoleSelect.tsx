@@ -14,9 +14,6 @@ export default function RoleSelect() {
 
   return (
     <FormControl>
-      <FormLabel required id="role-radio-group-label">
-        Role
-      </FormLabel>
       <RadioGroup
         row
         aria-labelledby="role-radio-group-label"

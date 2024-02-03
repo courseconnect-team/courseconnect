@@ -1,0 +1,155 @@
+.status-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0px 2px 20px 4px #00000040;
+  height: 252px;
+  position: relative;
+  width: 716px;
+}
+
+.status-card .overlap {
+  height: 186px;
+  left: 34px;
+  position: absolute;
+  top: 12px;
+  width: 204px;
+}
+
+.status-card .inner-content {
+  height: 38px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 159px;
+}
+
+.status-card .text-wrapper-6 {
+  color: black;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 32px;
+  font-weight: 500;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.status-card .coarse-assistant-wrapper {
+  height: 29px;
+  left: 0;
+  position: absolute;
+  top: 54px;
+  width: 172px;
+}
+
+.status-card .text-wrapper-7 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 21px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 10px;
+}
+
+.status-card .overlap-2 {
+
+  color: black;
+  height: 100px;
+  left: 100px;
+  position: absolute;
+  top: 0;
+  width: 104px;
+}
+
+.status-card .div-wrapper {
+
+  color: black;
+  height: 19px;
+  left: 0;
+  position: absolute;
+  top: 88px;
+}
+
+.text-wrapper-8 {
+  color: black;
+  font-size: 16px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.status-card .rectangle {
+  background-color: #9d9d9d;
+  height: 2px;
+  left: 90px;
+  position: absolute;
+  top: 112px;
+  transform: rotate(90deg);
+  width: 206px;
+}
+
+.status-card .inner-content-2 {
+  height: 29px;
+  left: 354px;
+  position: absolute;
+  top: 66px;
+  width: 197px;
+}
+
+.status-card .text-wrapper-9 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 19px;
+  font-weight: 400;
+  left: 10px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 80px;
+  width: 300px;
+}
+
+.status-card .application-button {
+  height: 43px;
+  left: 454px;
+  position: absolute;
+  top: 60px;
+  width: 226px;
+  margin-top: 10px;
+
+
+}
+
+.status-card .overlap-group-2 {
+  background-color: #f200491f;
+  border: 1px solid;
+  border-color: #f20049;
+  border-radius: 10px;
+  height: 43px;
+  position: relative;
+  width: 224px;
+}
+
+.status-card .text-wrapper-10 {
+  color: #f20049;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 15px;
+  font-weight: 500;
+  left: 25px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 11px;
+  width: 182px;
+}
+

@@ -21,11 +21,13 @@ import {
   GridRowModel,
   GridRowEditStopReasons,
   useGridApiContext,
+  gridClasses
 } from '@mui/x-data-grid';
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { LinearProgress } from '@mui/material';
+import { alpha, styled } from '@mui/material/styles';
 
 interface User {
   id: string;
@@ -56,9 +58,9 @@ function EditToolbar(props: EditToolbarProps) {
   return (
     <GridToolbarContainer>
       {/* Include your Dialog component here and pass the open state and setOpen function as props */}
-      <GridToolbarExport />
-      <GridToolbarFilterButton />
-      <GridToolbarColumnsButton />
+      <GridToolbarExport style={{ color: '#562EBA' }} />
+      <GridToolbarFilterButton style={{ color: '#562EBA' }} />
+      <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
     </GridToolbarContainer>
   );
 }
@@ -76,10 +78,10 @@ export default function UserGrid(props: UserGridProps) {
     usersRef.get().then((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as User)
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as User)
       );
       setUserData(data);
     });
@@ -234,7 +236,7 @@ export default function UserGrid(props: UserGridProps) {
               icon={<SaveIcon />}
               label="Save"
               sx={{
-                color: 'primary.main',
+                color: '#562EBA',
               }}
               onClick={handleSaveClick(id)}
             />,
@@ -268,26 +270,58 @@ export default function UserGrid(props: UserGridProps) {
         ];
       },
     },
-    { field: 'id', headerName: 'User ID', width: 70, editable: true },
     {
       field: 'firstname',
       headerName: 'First Name',
-      width: 100,
+      width: 150,
       editable: true,
     },
-    { field: 'lastname', headerName: 'Last Name', width: 100, editable: true },
-    { field: 'email', headerName: 'Email', width: 200, editable: true },
-    { field: 'password', headerName: 'Password', width: 100, editable: true },
+    { field: 'lastname', headerName: 'Last Name', width: 150, editable: true },
+    { field: 'email', headerName: 'Email', width: 250, editable: true },
+    { field: 'password', headerName: 'Password', width: 200, editable: true },
     {
       field: 'department',
       headerName: 'Department',
       width: 130,
       editable: true,
     },
-    { field: 'role', headerName: 'Role', width: 130, editable: true },
-    { field: 'ufid', headerName: 'UFID', width: 130, editable: true },
+    { field: 'role', headerName: 'Role', width: 150, editable: true },
+    { field: 'id', headerName: 'User ID', width: 290, editable: true },
   ];
+  const ODD_OPACITY = 0.2;
 
+  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [`& .${gridClasses.row}.even`]: {
+      backgroundColor: '#562EBA1F',
+      '&:hover, &.Mui-hovered': {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        '@media (hover: none)': {
+          backgroundColor: 'transparent',
+        },
+      },
+      '&.Mui-selected': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY + theme.palette.action.selectedOpacity,
+        ),
+        '&:hover, &.Mui-hovered': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY +
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity,
+          ),
+          // Reset on touch devices, it doesn't add specificity
+          '@media (hover: none)': {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY + theme.palette.action.selectedOpacity,
+            ),
+          },
+        },
+      },
+    },
+  }));
   return (
     <Box
       sx={{
@@ -301,7 +335,7 @@ export default function UserGrid(props: UserGridProps) {
         },
       }}
     >
-      <DataGrid
+      <StripedDataGrid
         rows={userData}
         columns={columns}
         slots={{
@@ -319,6 +353,10 @@ export default function UserGrid(props: UserGridProps) {
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
         }}
+        getRowClassName={(params) =>
+          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+        }
+        sx={{ borderRadius: '16px' }}
       />
     </Box>
   );

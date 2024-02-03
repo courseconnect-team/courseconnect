@@ -1,0 +1,219 @@
+.loginlowfi {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
+  overflow-x: hidden;
+}
+
+.loginlowfi .div2 {
+  background-color: #ffffff;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+
+  overflow-x: hidden;
+}
+
+.loginlowfi .overlap2 {
+  height: 777px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.loginlowfi .colorblockframe {
+  height: 458px;
+  left: 0;
+  position: relative;
+  top: 0;
+  width: 100%;
+}
+
+.loginlowfi .signintitle {
+  height: 154px;
+  left: 73px;
+  position: absolute;
+  top: 141px;
+  width: 100%;
+}
+
+.loginlowfi .connectingbright {
+  color: #ffffff;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  left: 7px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 124px;
+  width: 100%;
+}
+
+.loginlowfi .textwrapper8 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.loginlowfi .textwrapper9 {
+  font-family: "Poppins", Helvetica;
+  font-weight: 300;
+}
+
+.loginlowfi .signinto {
+  height: 120px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 553px;
+}
+
+.loginlowfi .textwrapper10 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 40px;
+  font-weight: 500;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.loginlowfi .textwrapper11 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 60px;
+  font-weight: 700;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 48px;
+  width: 549px;
+}
+
+.loginlowfi .registerheretext {
+  height: 54px;
+  left: 80px;
+  position: absolute;
+  top: 351px;
+  width: 312px;
+
+}
+
+.loginlowfi .p {
+  color: #ffffff;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  width: 308px;
+}
+
+.loginlowfi .youcanregister {
+  color: #ffffff;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 30px;
+  width: 308px;
+}
+
+.loginlowfi .textwrapper12 {
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-weight: 300;
+  text-decoration: underline;
+  color: white;
+
+}
+
+.loginlowfi .line {
+  height: 1px;
+  left: 150px;
+  object-fit: cover;
+  position: absolute;
+  top: 402px;
+  width: 126px;
+}
+
+.loginlowfi .logincardinstance {
+  left: 55% !important;
+  position: absolute !important;
+  top: 150px !important;
+}
+
+.loginlowfi .overlapwrapper {
+  all: unset;
+  box-sizing: border-box;
+  height: 37px;
+  left: 1265px;
+  position: absolute;
+  top: 27px;
+  width: 137px;
+}
+
+.loginlowfi .overlap3 {
+  background-color: #ffffff;
+  border-radius: 10px;
+  height: 37px;
+  position: relative;
+  width: 135px;
+}
+
+.loginlowfi .textwrapper13 {
+  color: #000000;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 18px;
+  font-weight: 700;
+  left: 11px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  text-align: center;
+  top: 9px;
+  white-space: nowrap;
+  width: 114px;
+}
+
+.loginlowfi .ecelogopng2 {
+  left: 27px !important;
+  position: absolute !important;
+  top: 23px !important;
+}
+
+.loginlowfi .topnavbarinstance {
+  left: 82% !important;
+  position: absolute !important;
+  top: 27px !important;
+  width: 100% !important;
+}
+
+.loginlowfi .designcomponentinstancenode {
+  left: 10px !important;
+  width: 105px !important;
+}
+
+.loginlowfi .topnavbar2 {
+  width: 100% !important;
+}
+
+.loginlowfi .topnavbar3 {
+  width: 100% !important;
+}
+

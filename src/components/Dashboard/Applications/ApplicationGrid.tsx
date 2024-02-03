@@ -33,6 +33,9 @@ import 'firebase/firestore';
 import { query, where, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserName from '@/firebase/util/GetUserName';
+import { alpha, styled } from '@mui/material/styles';
+import { gridClasses } from '@mui/x-data-grid';
+
 import {
   Dialog,
   DialogContent,
@@ -43,6 +46,8 @@ import {
   DialogActions,
   LinearProgress
 } from '@mui/material';
+import { purple } from '@mui/material/colors';
+
 import UnderDevelopment from '@/components/UnderDevelopment';
 import AppView from './AppView';
 
@@ -199,9 +204,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     return (
       <GridToolbarContainer>
-        <GridToolbarExport />
-        <GridToolbarFilterButton />
-        <GridToolbarColumnsButton />
+        <GridToolbarExport style={{ color: '#562EBA' }} />
+        <GridToolbarFilterButton style={{ color: '#562EBA' }} />
+        <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
       </GridToolbarContainer>
     );
   }
@@ -510,7 +515,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 200,
+      width: 370,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -537,13 +542,43 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         }
 
         return [
-          <GridActionsCellItem
-            key="3"
-            icon={<ZoomInIcon />}
-            label="View"
+          <Button
+            variant="outlined"
+            color='inherit'
+            size="small"
+            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
+            startIcon={
+              <ZoomInIcon />
+            }
             onClick={(event) => handleClickOpenGrid(id)}
-            color="primary"
-          />,
+          >
+            View
+          </Button>,
+          <Button
+            variant="outlined"
+            color='inherit'
+            size="small"
+            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
+            startIcon={
+              <EditIcon />
+            }
+            onClick={handleEditClick(id)}
+          >
+            Edit
+          </Button>,
+
+          <Button
+            variant="outlined"
+            color='primary'
+            size="small"
+            style={{ marginRight: "20px", height: "25px", textTransform: "none" }}
+            startIcon={
+              <DeleteIcon />
+            }
+            onClick={handleDeleteClick(id)}
+          >
+            Delete
+          </Button>,
           <GridActionsCellItem
             key="4"
             icon={<ThumbUpAltIcon />}
@@ -558,41 +593,27 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             onClick={(event) => handleDenyClick(id)}
             color="error"
           />,
-          <GridActionsCellItem
-            key="6"
-            icon={<EditIcon />}
-            label="Edit"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="7"
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
         ];
       },
     },
     {
       field: 'fullname',
       headerName: 'Full Name',
-      width: 180,
+      width: 200,
       editable: false,
       valueGetter: getFullName,
     },
-    { field: 'uf_email', headerName: 'Email', width: 180, editable: true },
+    { field: 'uf_email', headerName: 'Email', width: 250, editable: true },
     {
-      field: 'id',
-      headerName: 'UFID',
-      width: 70,
+      field: 'degree',
+      headerName: 'Degree',
+      width: 100,
       editable: true,
     },
-    { field: 'courses', headerName: 'Courses', width: 200, editable: true },
+    { field: 'courses', headerName: 'Courses', width: 190, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
-    { field: 'timestamp', headerName: 'Date', width: 80, editable: true },
-    { field: 'status', headerName: 'Status', width: 100, editable: true },
+    { field: 'timestamp', headerName: 'Date', width: 180, editable: true },
+    { field: 'status', headerName: 'App Status', width: 100, editable: true },
   ];
 
   if (userRole === 'faculty') {
@@ -632,7 +653,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       {
         field: 'id',
         headerName: 'UFID',
-        width: 70,
+        width: 100,
         editable: false,
       },
       { field: 'position', headerName: 'Position', width: 70, editable: false },
@@ -672,6 +693,40 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       },
     ];
   }
+  const ODD_OPACITY = 0.2;
+
+  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [`& .${gridClasses.row}.even`]: {
+      backgroundColor: '#562EBA1F',
+      '&:hover, &.Mui-hovered': {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        '@media (hover: none)': {
+          backgroundColor: 'transparent',
+        },
+      },
+      '&.Mui-selected': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY + theme.palette.action.selectedOpacity,
+        ),
+        '&:hover, &.Mui-hovered': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY +
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity,
+          ),
+          // Reset on touch devices, it doesn't add specificity
+          '@media (hover: none)': {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY + theme.palette.action.selectedOpacity,
+            ),
+          },
+        },
+      },
+    },
+  }));
 
   return (
     <Box
@@ -699,7 +754,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       }}
     >
       {loading ? <LinearProgress color="warning" /> : null}
-      <DataGrid
+      <StripedDataGrid
         rows={applicationData}
         columns={columns}
         editMode="row"
@@ -719,18 +774,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
         }}
-        getCellClassName={(params: GridCellParams<any, any, string>) => {
-          if (params.field != 'status') {
-            return '';
-          } else if (params.value === 'Review') {
-            return 'todo';
-          } else if (params.value === 'Approved') {
-            return 'approved';
-          } else if (params.value === 'Denied') {
-            return 'denied';
-          }
-          return '';
-        }}
+        getRowClassName={(params) =>
+          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+        }
+        sx={{ borderRadius: '16px' }}
       />
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>{'User Application'}</DialogTitle>

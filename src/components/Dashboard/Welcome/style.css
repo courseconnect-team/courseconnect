@@ -1,0 +1,164 @@
+.student-landing-page {
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+}
+
+.student-landing-page .overlap-wrapper {
+  background-color: #ffffff;
+  height: 1024px;
+  width: 100%;
+}
+
+.student-landing-page .overlap {
+  background-color: #f9f9f9;
+  height: 1024px;
+  position: absolute;
+  width: 100%;
+}
+
+.student-landing-page .overlap-2 {
+  height: 545px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.student-landing-page .color-block-frame {
+  height: 350px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.student-landing-page .overlap-group-2 {
+  height: 458px;
+  left: -5px;
+  position: absolute;
+  width: 100%;
+}
+
+.student-landing-page .color-block {
+  background-color: #001776;
+  height: 458px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.student-landing-page .GRADIENTS {
+  height: 350px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.student-landing-page .glass-card {
+  -webkit-backdrop-filter: blur(200px) brightness(100%);
+  backdrop-filter: blur(200px) brightness(100%);
+  background-blend-mode: luminosity;
+  background-color: #00000024;
+  height: 458px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 101%;
+}
+
+.student-landing-page .ece-logo-png-2 {
+  left: 27px !important;
+  position: absolute !important;
+  top: 23px !important;
+}
+
+.student-landing-page .full-name-and-bio-instance {
+  left: 38% !important;
+  position: absolute !important;
+  top: 250px !important;
+}
+
+.student-landing-page .top-nav-bar-signed-in {
+  left: 80% !important;
+  position: absolute !important;
+  top: 27px !important;
+}
+
+.student-landing-page .text-wrapper-8 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 50px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: normal;
+  top: 164px;
+      position:absolute;
+    top: 50%;
+    left: 48%;
+    transform: translateY(-50%);
+    transform: translateX(-50%);
+  top: 150px;
+}
+
+.student-landing-page .profile-instance {
+  left: 52% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.student-landing-page .apply-instance {
+  left: 38% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.student-landing-page .profile-instance2 {
+  left: 58% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .apply-instance2 {
+  left: 44% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.student-landing-page .status-instance {
+  left: 30% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.student-landing-page .courses {
+  left: 15% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .users {
+  left: 30% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.student-landing-page .applications {
+  left: 45% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .scheduling {
+  left: 60%!important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .stats {
+  left: 75%!important;
+  position: absolute !important;
+  top: 640px !important;
+}
