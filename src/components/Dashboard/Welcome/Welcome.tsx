@@ -2,7 +2,6 @@ import Container from '@mui/material/Container';
 import UnderDevelopment from '@/components/UnderDevelopment';
 import { Toaster } from 'react-hot-toast';
 import { ApplyCard } from "@/components/ApplyCard/ApplyCard";
-
 import { StatusCard } from "@/components/StatusCard/StatusCard";
 import { EceLogoPng } from "@/components/EceLogoPng/EceLogoPng";
 import { DashboardCard } from "@/components/DashboardCard/DashboardCard";

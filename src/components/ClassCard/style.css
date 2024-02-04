@@ -1,0 +1,23 @@
+.class-card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0px 2px 20px 4px #00000040;
+    height: 107px;
+    position: relative;
+    width: 252px;
+  }
+  
+  .class-card .text-wrapper {
+    color: #000000;
+    font-family: "SF Pro Display-Bold", Helvetica;
+    font-size: 32px;
+    font-weight: 700;
+    left: 3px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    text-align: center;
+    top: 34px;
+    width: 246px;
+  }
+  

@@ -1,0 +1,91 @@
+/* components/HeaderCard/style.css */
+.header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+.header .overlap-wrapper {
+  height: 380px;
+  width: 100%;
+}
+
+.header .overlap {
+  position: relative;
+  width: 100%;
+}
+
+.header .overlap-2 {
+  position: relative;
+  width: 100%;
+}
+
+.header .color-block-frame {
+  height: 350px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.header .overlap-group-2 {
+  left: -5px;
+  position: relative;
+  width: 100%;
+}
+
+.header .color-block {
+  background-color: #001776;
+  height: 458px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.header .GRADIENTS {
+  height: 350px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.header .glass-card {
+  -webkit-backdrop-filter: blur(200px) brightness(100%);
+  backdrop-filter: blur(200px) brightness(100%);
+  background-blend-mode: luminosity;
+  background-color: #00000024;
+  height: 458px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 101%;
+}
+
+.header .ece-logo-png-2 {
+  position: absolute;
+  top: 23px;
+  left: 27px;
+}
+
+.header .top-nav-bar-signed-in {
+  left: 80%;
+  position: absolute !important;
+  top: 27px !important;
+}
+
+.header .text-wrapper-10 {
+  color: #ffffff;
+  font-family: 'SF Pro Display-Medium', Helvetica;
+  font-size: 50px;
+  font-weight: 500;
+  left: 45%;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 114px;
+  width: 133px;
+}

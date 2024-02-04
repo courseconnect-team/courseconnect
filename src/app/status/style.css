@@ -1,0 +1,114 @@
+.student-landing-page {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+
+.student-landing-page .overlap-wrapper {
+  height: 1024px;
+  width: 100%;
+}
+
+.student-landing-page .overlap {
+  height: 1024px;
+  position: relative;
+  width: 100%;
+}
+
+.student-landing-page .overlap-2 {
+  height: 545px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.student-landing-page .color-block-frame {
+  height: 350px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.student-landing-page .overlap-group-2 {
+  left: -5px;
+  position: relative;
+  width: 100%;
+}
+
+.student-landing-page .color-block {
+  background-color: #001776;
+  height: 458px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.student-landing-page .GRADIENTS {
+  height: 350px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.student-landing-page .glass-card {
+  -webkit-backdrop-filter: blur(200px) brightness(100%);
+  backdrop-filter: blur(200px) brightness(100%);
+  background-blend-mode: luminosity;
+  background-color: #00000024;
+  height: 458px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 101%;
+}
+
+.student-landing-page .ece-logo-png-2 {
+  left: 27px !important;
+  position: absolute !important;
+  top: 23px !important;
+}
+
+.student-landing-page .full-name-and-bio-instance {
+  left: 38% !important;
+  position: absolute !important;
+  top: 250px !important;
+}
+
+.student-landing-page .top-nav-bar-signed-in {
+  left: 80% !important;
+  position: absolute !important;
+  top: 27px !important;
+}
+
+.student-landing-page .text-wrapper-8 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 50px;
+  font-weight: 500;
+  left: 45%;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 114px;
+  width: 133px;
+}
+
+.student-landing-page .profile-instance {
+  left: 52% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.student-landing-page .apply-instance {
+  left: 38% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+

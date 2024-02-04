@@ -32,7 +32,6 @@ import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 
 import styles from "./style.module.css";
 import { useRouter } from 'next/navigation'
-
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -133,7 +132,6 @@ export default function Application() {
     };
     console.log(applicationData);
 
-
     if (!applicationData.email.includes('ufl')) {
       toast.error('Please enter a valid ufl email!');
       setLoading(false);
@@ -208,7 +206,6 @@ export default function Application() {
         router.push("/")
       } else {
         console.log(response);
-
         toast.error('Application data failed to send to server!')
         console.log('ERROR: Application data failed to send to server');
       }
@@ -278,7 +275,6 @@ export default function Application() {
 
 
                     <Grid item xs={12} sm={6}>
-
                       <TextField
                         autoComplete="given-name"
                         name="firstName"
@@ -329,7 +325,6 @@ export default function Application() {
                     <Grid item xs={22} sm={116} justifyContent="center" alignItems="center">
                       <DepartmentSelect />
                     </Grid>
-
                     <Grid item xs={12} sm={6}>
                       <SemesterStatusSelect
                         component={AdditionalSemesterPrompt}

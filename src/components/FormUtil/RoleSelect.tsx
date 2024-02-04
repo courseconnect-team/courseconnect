@@ -26,6 +26,7 @@ export default function RoleSelect() {
           control={<Radio />}
           label="Student"
         />
+        <FormControlLabel value="faculty" control={<Radio />} label="Faculty" />
       </RadioGroup>
     </FormControl>
   );

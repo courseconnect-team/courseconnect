@@ -95,11 +95,13 @@
   top: 112px;
   transform: rotate(90deg);
   width: 206px;
+
 }
 
 .status-card3 .inner-content-2 {
   height: 29px;
   left: 354px;
+
   position: absolute;
   top: 66px;
   width: 197px;

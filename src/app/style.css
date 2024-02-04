@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
-  overflow-x: hidden;
 }
 
 .login-low-fi .div-2 {
@@ -11,7 +10,7 @@
   height: 100%;
   position: absolute;
   width: 100%;
-  overflow-x: hidden;
+
 }
 
 .login-low-fi .overlap-2 {
@@ -151,9 +150,9 @@
 }
 
 .login-low-fi .log-in-card-instance {
-  left: 100px !important;
+  left: 55% !important;
   position: absolute !important;
-  top: 10px !important;
+  top: 150px !important;
 }
 
 .login-low-fi .overlap-wrapper {

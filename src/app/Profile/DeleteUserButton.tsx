@@ -7,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import PersonRemoveOutlinedIcon from '@mui/icons-material/PersonRemoveOutlined';
 import { HandleDeleteUser } from '@/firebase/auth/auth_delete_prompt';
 
 interface CreateCourseDialogProps {
@@ -46,41 +47,27 @@ const DeleteUserDialog: React.FC<CreateCourseDialogProps> = ({
     <div>
       <Button
         size="large"
-        variant="text"
-        startIcon={<PersonRemoveIcon />}
+        variant="contained"
+        startIcon={<PersonRemoveOutlinedIcon />}
         onClick={handleClickOpen}
-
+        style = {{ backgroundColor: '#5736ac', color: '#ffffff', borderRadius: "10px", height:"53px", width:"180px", textTransform:"none"}}
       >
-        Delete Account
+       Delete Account
       </Button>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Delete Account</DialogTitle>
+
+      <Dialog style = {{borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow:"0px 2px 20px 4px #00000040", borderRadius: "20px", border:"2px solid"}}open={open} onClose={handleClose} >
+        <DialogTitle style = {{ textAlign: "center", fontSize: "36px", fontWeight: "500", fontFamily: "SF Pro Display-Medium" }}>Delete Account</DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
-            <DialogContentText>
+            <DialogContentText style = {{marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign:"center", fontSize: "24px"}}>
+              Are you sure you want to delete account?
             </DialogContentText>
-            <TextField
-              margin="dense"
-              id="email-reverify"
-              name="email-reverify"
-              label="Email"
-              type="text"
-              fullWidth
-              variant="standard"
-            />
-            <TextField
-              margin="dense"
-              id="password-reverify"
-              name="password-reverify"
-              label="Password"
-              type="password"
-              fullWidth
-              variant="standard"
-            />
+          
+            
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit">Delete Account</Button>
+          <DialogActions style ={{marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap:"93px"}}>
+            <Button variant="outlined" style ={{marginLeft: "110px", borderRadius:"10px", height: '43px', width: '120px', textTransform:"none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac'}} onClick={handleClose}>Cancel</Button>
+            <Button variant="contained" style ={{ marginRight: "110px", borderRadius:"10px", height: '43px', width: '120px', textTransform:"none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff'}}type="submit">Delete</Button>
           </DialogActions>
         </form>
       </Dialog>
