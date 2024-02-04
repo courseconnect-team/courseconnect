@@ -1,0 +1,149 @@
+.log-in-card {
+  background-color: #ffffff;
+  border-radius: 40px;
+  box-shadow: 0px 4px 35px #00000014;
+  height: 627px;
+  position: relative;
+  width: 539px;
+}
+
+.log-in-card .welcome-to-course {
+  color: transparent;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 24px;
+  font-weight: 400;
+  left: 44px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 43px;
+}
+
+.log-in-card .text-wrapper {
+  color: #000000;
+}
+
+.log-in-card .span {
+  color: #562eba;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-weight: 700;
+}
+
+.log-in-card .div {
+  color: #000000;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 55px;
+  font-weight: 500;
+  left: 44px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 76px;
+  white-space: nowrap;
+}
+
+.log-in-card .email-address-input {
+  height: 91px;
+  left: 44px;
+  position: absolute;
+  top: 204px;
+  width: 453px;
+}
+
+.log-in-card .text-wrapper-2 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.log-in-card .overlap-group-wrapper {
+  height: 57px;
+  left: 0;
+  position: absolute;
+  top: 34px;
+  width: 453px;
+}
+
+.log-in-card .overlap-group {
+  background-color: #ffffff;
+  border-radius: 9px;
+  height: 57px;
+  position: relative;
+  width: 451px;
+}
+
+.log-in-card .text-wrapper-3 {
+  color: #6c6c6c;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  left: 24px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 18px;
+  white-space: nowrap;
+}
+
+.log-in-card .password-input {
+  height: 91px;
+  left: 44px;
+  position: absolute;
+  top: 331px;
+  width: 453px;
+}
+
+.log-in-card .text-wrapper-4 {
+  color: #4c4c4c;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  left: 387px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 436px;
+  white-space: nowrap;
+}
+
+.log-in-card .sign-in-button {
+  height: 54px;
+  left: 44px;
+  position: absolute;
+  top: 501px;
+  width: 453px;
+}
+
+.log-in-card .overlap {
+  background-color: #562eba;
+  border-radius: 10px;
+  box-shadow: 0px 4px 19px #7793414c;
+  height: 54px;
+  position: relative;
+  width: 451px;
+}
+
+.log-in-card .text-wrapper-5 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 16px;
+  font-weight: 500;
+  left: 198px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 15px;
+  width: 56px;
+}
+
+  div.vspace1em {
+        clear: both;
+        height: 1em;
+    }

@@ -13,7 +13,6 @@ import {
   GridRowModesModel,
   GridRowModes,
   DataGrid,
-  GridCellParams,
   GridColDef,
   GridActionsCellItem,
   GridEventListener,
@@ -27,7 +26,6 @@ import {
   GridToolbarColumnsButton,
   GridValueGetterParams,
 } from '@mui/x-data-grid';
-import HourSelect from '@/components/FormUtil/HourSelect';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { query, where, collection, getDocs } from 'firebase/firestore';
@@ -141,17 +139,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         console.error('Error updating application document: ', error);
       });
 
-    // get the name
-    const student_name = formData.get('student-name') as string;
-
     // get class codes as array
     const classCodeString = formData.get('class-codes') as string;
     const classCodeArray = classCodeString
       .split(',')
       .map((classCode) => classCode.trim());
-
-    // get the hours as a string
-    const hoursToWork = formData.get('hours-radio-group') as string;
 
     // get the current date in month/day/year format
     const current = new Date();
@@ -160,11 +152,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     const assignmentObject = {
       date: current_date as string,
-      name: student_name as string,
       student_uid: student_uid as string,
       class_codes: classCodeArray,
-      hours: hoursToWork,
-      onbase_submitted: 'No' as string,
     };
 
     // Create the document within the "assignments" collection
@@ -578,7 +567,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     {
       field: 'fullname',
       headerName: 'Full Name',
-      width: 180,
+      width: 150,
       editable: false,
       valueGetter: getFullName,
     },
@@ -592,7 +581,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     { field: 'courses', headerName: 'Courses', width: 200, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'timestamp', headerName: 'Date', width: 80, editable: true },
-    { field: 'status', headerName: 'Status', width: 100, editable: true },
+    { field: 'status', headerName: 'App Status', width: 100, editable: true },
   ];
 
   if (userRole === 'faculty') {
@@ -684,18 +673,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         '& .textPrimary': {
           color: 'text.primary',
         },
-        '& .todo': {
-          backgroundColor: '#b3ad00',
-          color: '#ffffff',
-        },
-        '& .approved': {
-          backgroundColor: '#248000',
-          color: '#ffffff',
-        },
-        '& .denied': {
-          backgroundColor: '#9c1e1e',
-          color: '#ffffff',
-        },
       }}
     >
       {loading ? <LinearProgress color="warning" /> : null}
@@ -707,9 +684,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
-        onProcessRowUpdateError={(error) =>
-          console.error('Error processing row update: ', error)
-        }
         slots={{
           toolbar: EditToolbar,
         }}
@@ -718,18 +692,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         }}
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
-        }}
-        getCellClassName={(params: GridCellParams<any, any, string>) => {
-          if (params.field != 'status') {
-            return '';
-          } else if (params.value === 'Review') {
-            return 'todo';
-          } else if (params.value === 'Approved') {
-            return 'approved';
-          } else if (params.value === 'Denied') {
-            return 'denied';
-          }
-          return '';
         }}
       />
       <Dialog open={open} onClose={handleClose}>
@@ -771,18 +733,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type="text"
               fullWidth
               variant="standard"
-            />
-            <HourSelect />
-            <TextField
-              required
-              margin="dense"
-              id="student-name"
-              label="Student Name"
-              name="student-name"
-              type="text"
-              fullWidth
-              variant="standard"
-              helperText="Please enter the student's full name to confirm this assignment."
             />
           </DialogContent>
           <DialogActions>

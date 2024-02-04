@@ -44,11 +44,11 @@ export default function Dashboard() {
         {activeComponent === 'application_status' && (
           <ShowApplicationStatus user={user} userRole={role as string} />
         )}
-
-        <BottomMenu
+        
+        {/*<BottomMenu
           user_role={role as string}
           onComponentChange={handleComponentChange}
-        />
+        />*/}
       </>
     );
   } else if (user && !user.emailVerified) {
