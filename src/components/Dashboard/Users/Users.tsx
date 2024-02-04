@@ -9,8 +9,7 @@ export default function Users(props: UsersProps) {
   const { userRole } = props;
   return (
     <>
-      <Container maxWidth="lg">
-        <h1>Users</h1>
+      <Container maxWidth="xl">
         <UserGrid userRole={userRole} />
       </Container>
     </>

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import "./style.css";
 
-export const Profile = ({className, profile = "https://c.animaapp.com/vYQBTcnO/img/profile-1@2x.png" }) => {
+export const Profile = ({ className, profile = "https://c.animaapp.com/vYQBTcnO/img/profile-1@2x.png" }) => {
   return (
     <div className={`profile ${className}`}>
       <div className="inner-content">

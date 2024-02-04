@@ -2,7 +2,7 @@
   background-color: #ffffff;
   border-radius: 20px;
   box-shadow: 0px 2px 20px 4px #00000040;
-  height: 222px;
+  height: 252px;
   position: relative;
   width: 716px;
 }
@@ -75,7 +75,7 @@
   top: 88px;
 }
 
-.status-card3 .text-wrapper-8 {
+.text-wrapper-8 {
   color: black;
   font-size: 16px;
   font-weight: 400;
@@ -90,16 +90,18 @@
 .status-card3 .rectangle {
   background-color: #9d9d9d;
   height: 2px;
-  left: 100px;
+  left: 90px;
   position: absolute;
-  top: 92px;
+  top: 112px;
   transform: rotate(90deg);
-  width: 186px;
+  width: 206px;
+
 }
 
 .status-card3 .inner-content-2 {
   height: 29px;
-  left: 304px;
+  left: 354px;
+
   position: absolute;
   top: 66px;
   width: 197px;
@@ -108,18 +110,19 @@
 .status-card3 .text-wrapper-9 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
-  font-size: 24px;
+  font-size: 19px;
   font-weight: 400;
-  left: 100px;
+  left: 10px;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
-  top: 10px;
+  top: 80px;
+  width: 300px;
 }
 
 .status-card3 .application-button {
   height: 43px;
-  left: 404px;
+  left: 434px;
   position: absolute;
   top: 60px;
   width: 226px;
@@ -133,7 +136,7 @@
   border-radius: 10px;
   height: 43px;
   position: relative;
-  width: 2px;
+  width: 224px;
 }
 
 .status-card3 .text-wrapper-10 {

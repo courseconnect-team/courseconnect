@@ -15,7 +15,7 @@ export const TopNavBar = ({
 }) => {
   return (
     <div className={`top-nav-bar ${className}`}>
-      <Link href="/">
+      <Link href="/dashboard">
         <button className="div-wrapper">
           <div className="overlap-group-2">
             <div className={`text-wrapper-6 ${divClassName}`}>Home</div>

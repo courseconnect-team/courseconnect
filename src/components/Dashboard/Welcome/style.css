@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  position: absolute;
   width: 100%;
 }
 
@@ -15,7 +16,7 @@
 .student-landing-page .overlap {
   background-color: #f9f9f9;
   height: 1024px;
-  position: relative;
+  position: absolute;
   width: 100%;
 }
 
@@ -39,7 +40,7 @@
 .student-landing-page .overlap-group-2 {
   height: 458px;
   left: -5px;
-  position: relative;
+  position: absolute;
   width: 100%;
 }
 
@@ -95,12 +96,15 @@
   font-family: "SF Pro Display-Medium", Helvetica;
   font-size: 50px;
   font-weight: 500;
-  left: 45%;
   letter-spacing: 0;
   line-height: normal;
-  position: absolute;
-  top: 114px;
-  width: 133px;
+  top: 164px;
+      position:absolute;
+    top: 50%;
+    left: 48%;
+    transform: translateY(-50%);
+    transform: translateX(-50%);
+  top: 150px;
 }
 
 .student-landing-page .profile-instance {
@@ -132,14 +136,29 @@
   top: 640px !important;
 }
 
-.student-landing-page .applications-instance {
+.student-landing-page .courses {
+  left: 15% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .users {
   left: 30% !important;
   position: absolute !important;
   top: 640px !important;
 }
-.student-landing-page .course-instance {
-  left: 44% !important;
+
+.student-landing-page .applications {
+  left: 45% !important;
   position: absolute !important;
   top: 640px !important;
 }
-
+.student-landing-page .scheduling {
+  left: 60%!important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.student-landing-page .stats {
+  left: 75%!important;
+  position: absolute !important;
+  top: 640px !important;
+}

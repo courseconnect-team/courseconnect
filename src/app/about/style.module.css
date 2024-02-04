@@ -1,44 +1,114 @@
-.login-low-fi {
+
+
+.sectionaboutus {
+  height: 557px;
+  margin-top: 700px;
+  margin-left: -400px;
+  top: 770px;
+  position: sticky;
+
+  width: 1310px;
+}
+
+.aboutus {
+  height: 36px;
+  position: relative;
+  top: 0;
+padding: 0; margin: 0; 
+  left: -38px;
+}
+
+.img {
+  height: 5px;
+  left: 80%;
+  position: absolute;
+  top: 13px;
+  width: 450px;
+}
+
+.img2 {
+  position: absolute;
+  top: 13px;
+  left: 20%;
+}
+
+.studentcard {
+  left: 80px !important;
+  position: absolute !important;
+  top: 70px !important;
+}
+
+.facultycard2 {
+  left: 660px !important;
+  position: absolute !important;
+  top: 70px !important;
+}
+
+.administratorcard2 {
+  left: 1260px !important;
+  position: absolute !important;
+  top: 70px !important;
+}
+
+.textwrapper6 {
+  color: #000000;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 30px;
+  font-weight: 500;
+  left: 64%;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+
+.loginlowfi {
   background-color: #ffffff;
   display: flex;
   flex-direction: row;
   justify-content: center;
-  overflow-x: hidden;
+  margin-bottom: 200px;
 }
 
-.login-low-fi .div-2 {
+.loginlowfi .div2 {
   background-color: #ffffff;
   height: 100%;
   position: absolute;
   width: 100%;
+padding: 0; margin: 0; 
   overflow-x: hidden;
 }
 
-.login-low-fi .overlap-2 {
+.loginlowfi .overlap2 {
   height: 777px;
   left: 0;
   position: absolute;
   top: 0;
   width: 100%;
+padding: 0; margin: 0; 
 }
 
-.login-low-fi .color-block-frame {
+.loginlowfi .colorblockframe {
   height: 458px;
   left: 0;
   position: relative;
   top: 0;
   width: 100%;
+
+  height: 80%;
 }
 
-.login-low-fi .sign-in-title {
+.loginlowfi .signintitle {
   height: 154px;
-  left: 73px;
+  left: 20%;
   position: absolute;
   top: 141px;
   width: 100%;
 }
 
-.login-low-fi .connecting-bright {
+.loginlowfi .connectingbright {
   color: #ffffff;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 20px;
@@ -51,20 +121,20 @@
   width: 100%;
 }
 
-.login-low-fi .text-wrapper-8 {
+.loginlowfi .textwrapper8 {
   color: #ffffff;
   font-family: "SF Pro Display-Regular", Helvetica;
-  font-size: 20px;
+  font-size: 25px;
   font-weight: 400;
   letter-spacing: 0;
 }
 
-.login-low-fi .text-wrapper-9 {
+.loginlowfi .textwrapper9 {
   font-family: "Poppins", Helvetica;
   font-weight: 300;
 }
 
-.login-low-fi .sign-in-to {
+.loginlowfi .signinto {
   height: 120px;
   left: 0;
   position: absolute;
@@ -72,10 +142,10 @@
   width: 553px;
 }
 
-.login-low-fi .text-wrapper-10 {
+.loginlowfi .textwrapper10 {
   color: #ffffff;
   font-family: "SF Pro Display-Medium", Helvetica;
-  font-size: 40px;
+  font-size: 45px;
   font-weight: 500;
   left: 0;
   letter-spacing: 0;
@@ -83,12 +153,13 @@
   position: absolute;
   top: 0;
   white-space: nowrap;
+  padding-bottom: 80px;
 }
 
-.login-low-fi .text-wrapper-11 {
+.loginlowfi .textwrapper11 {
   color: #ffffff;
   font-family: "SF Pro Display-Bold", Helvetica;
-  font-size: 60px;
+  font-size: 70px;
   font-weight: 700;
   left: 0;
   letter-spacing: 0;
@@ -98,16 +169,16 @@
   width: 549px;
 }
 
-.login-low-fi .register-here-text {
+.loginlowfi .registerheretext {
   height: 54px;
-  left: 80px;
+  left: 20%;
   position: absolute;
-  top: 351px;
+  top: 401px;
   width: 312px;
-
+  
 }
 
-.login-low-fi .p {
+.loginlowfi .p {
   color: #ffffff;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 20px;
@@ -117,10 +188,10 @@
   line-height: normal;
   position: absolute;
   top: 0;
-  width: 308px;
+  width: 1100px;
 }
 
-.login-low-fi .you-can-register {
+.loginlowfi .youcanregister {
   color: #ffffff;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 20px;
@@ -133,7 +204,7 @@
   width: 308px;
 }
 
-.login-low-fi .text-wrapper-12 {
+.loginlowfi .textwrapper12 {
   font-family: "SF Pro Display-Bold", Helvetica;
   font-weight: 300;
   text-decoration: underline;
@@ -141,7 +212,7 @@
 
 }
 
-.login-low-fi .line {
+.loginlowfi .line {
   height: 1px;
   left: 150px;
   object-fit: cover;
@@ -150,13 +221,13 @@
   width: 126px;
 }
 
-.login-low-fi .log-in-card-instance {
+.loginlowfi .logincardinstance {
   left: 100px !important;
   position: absolute !important;
   top: 10px !important;
 }
 
-.login-low-fi .overlap-wrapper {
+.loginlowfi .overlapwrapper {
   all: unset;
   box-sizing: border-box;
   height: 37px;
@@ -166,7 +237,7 @@
   width: 137px;
 }
 
-.login-low-fi .overlap-3 {
+.loginlowfi .overlap3 {
   background-color: #ffffff;
   border-radius: 10px;
   height: 37px;
@@ -174,7 +245,7 @@
   width: 135px;
 }
 
-.login-low-fi .text-wrapper-13 {
+.loginlowfi .textwrapper13 {
   color: #000000;
   font-family: "SF Pro Display-Bold", Helvetica;
   font-size: 18px;
@@ -189,29 +260,29 @@
   width: 114px;
 }
 
-.login-low-fi .ece-logo-png-2 {
+.loginlowfi .ecelogopng2 {
   left: 27px !important;
   position: absolute !important;
   top: 23px !important;
 }
 
-.login-low-fi .top-nav-bar-instance {
+.loginlowfi .topnavbarinstance {
   left: 82% !important;
   position: absolute !important;
   top: 27px !important;
   width: 100% !important;
 }
 
-.login-low-fi .design-component-instance-node {
+.loginlowfi .designcomponentinstancenode {
   left: 10px !important;
   width: 105px !important;
 }
 
-.login-low-fi .top-nav-bar-2 {
+.loginlowfi .topnavbar2 {
   width: 100% !important;
 }
 
-.login-low-fi .top-nav-bar-3 {
+.loginlowfi .topnavbar3 {
   width: 100% !important;
 }
 

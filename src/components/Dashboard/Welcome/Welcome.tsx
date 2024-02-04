@@ -2,14 +2,13 @@ import Container from '@mui/material/Container';
 import UnderDevelopment from '@/components/UnderDevelopment';
 import { Toaster } from 'react-hot-toast';
 import { ApplyCard } from "@/components/ApplyCard/ApplyCard";
-import  {ApplicationsCard} from "@/components/ApplicationsCard/ApplicationsCard";
 import { StatusCard } from "@/components/StatusCard/StatusCard";
 import { EceLogoPng } from "@/components/EceLogoPng/EceLogoPng";
+import { DashboardCard } from "@/components/DashboardCard/DashboardCard";
 import { Bio } from "@/components/Bio/Bio";
 import { Profile } from "@/components/Profile/Profile";
 import { TopNavBarSigned } from "@/components/TopNavBarSigned/TopNavBarSigned";
 import "./style.css";
-import {CourseCard} from "@/components/CourseCard/CourseCard";
 import Link from 'next/link';
 interface DashboardProps {
   user: any;
@@ -67,16 +66,21 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <div className="text-wrapper-8">Home</div>
               </div>
               <Link href="/Profile">
-                <Profile className="profile-instance" profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+                <Profile className="profile-instance2" profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+              </Link>
+              <Link href="/status">
+                <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className="apply-instance2" />
               </Link>
               <Link href="/apply">
-                <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className="apply-instance" />
-              </Link>
 
+                <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className="status-instance" />
+              </Link>
             </div>
 
           }
-          {(userRole == "faculty") &&
+
+
+          {(userRole == "admin") &&
             <div className="overlap">
               <div className="overlap-2">
                 <div className="color-block-frame">
@@ -91,18 +95,21 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <TopNavBarSigned className="top-nav-bar-signed-in" />
                 <div className="text-wrapper-8">Home</div>
               </div>
-              <Link href="/Profile">
-                <Profile className="profile-instance2" profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+              <Link href="/users">
+                <DashboardCard className="users" image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png" text="Users" />
               </Link>
-             
-              <Link href="/Applications">
-                <ApplicationsCard className = "applications-instance" applications="https://c.animaapp.com/ebG6M1rL/img/apply.svg"/>
+              <Link href="/underDevelopment">
+                <DashboardCard className="courses" image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png" text="Courses" />
               </Link>
-
-              <Link href="/Courses">
-                  <CourseCard className = "course-instance" course = "https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png"/>
+              <Link href="/adminApplications">
+                <DashboardCard className="applications" image="https://c.animaapp.com/PWgYNV8T/img/apply-1@2x.png" text="Assign" />
               </Link>
-
+              <Link href="/underDevelopment">
+                <DashboardCard className="scheduling" image="https://c.animaapp.com/PWgYNV8T/img/calendar-clock@2x.png" text="Scheduling" />
+              </Link>
+              <Link href="/underDevelopment">
+                <DashboardCard className="stats" image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png" text="Faculty Stats" />
+              </Link>
             </div>
 
           }

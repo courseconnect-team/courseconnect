@@ -30,7 +30,8 @@ import { useState } from 'react';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 
-import "./style.css";
+import styles from "./style.module.css";
+import { useRouter } from 'next/navigation'
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -41,7 +42,7 @@ import "./style.css";
 
 export default function Application() {
   // get the current user's uid
-
+  const router = useRouter()
   const { user } = useAuth();
   const userId = user.uid;
 
@@ -100,16 +101,17 @@ export default function Application() {
     // get courses as array
     const coursesString = formData.get('course-prompt') as string;
 
-    const coursesArray = coursesString
+    let coursesArray = coursesString
       .split(',')
-      .map((professorEmail) => professorEmail.trim());
+      .map((professorEmail) => professorEmail.trim())
+      .map((professorEmail) => professorEmail.replace(/\s/g, ''));
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
       firstname: formData.get('firstName') as string,
       lastname: formData.get('lastName') as string,
       email: formData.get('email') as string,
-      ufid: formData.get('ufid') as string,
+      ufid: "NA",
       phonenumber: formData.get('phone-number') as string,
       gpa: formData.get('gpa-select') as string,
       department: formData.get('department-select') as string,
@@ -117,7 +119,7 @@ export default function Application() {
       semesterstatus: formData.get('semstatus-radio-group') as string,
       additionalprompt: additionalPromptValue,
       nationality: nationality as string,
-      englishproficiency: formData.get('proficiency-select') as string,
+      englishproficiency: "NA",
       position: formData.get('positions-radio-group') as string,
       available_hours: availabilityArray as string[],
       available_semesters: semesterArray as string[],
@@ -126,7 +128,9 @@ export default function Application() {
       uid: userId,
       date: current_date,
       status: 'Submitted',
+      resume_link: formData.get('resumeLink') as string,
     };
+    console.log(applicationData);
 
     if (!applicationData.email.includes('ufl')) {
       toast.error('Please enter a valid ufl email!');
@@ -155,12 +159,8 @@ export default function Application() {
       toast.error('Please select a semester status!');
       setLoading(false);
       return;
-    } else if (applicationData.englishproficiency === null || applicationData.englishproficiency === '') {
-      toast.error('Please select your english proficiency level!');
-      setLoading(false);
-      return;
-    } else if (applicationData.nationality === null || applicationData.nationality === '') {
-      toast.error('Please select your nationality!');
+    } else if (applicationData.resume_link === null || applicationData.resume_link === '') {
+      toast.error('Please provide a resume link!');
       setLoading(false);
       return;
     } else if (applicationData.position === null || applicationData.position === '') {
@@ -202,8 +202,10 @@ export default function Application() {
         await UpdateRole(userId, 'student_applied');
         // then, refresh the page somehow to reflect the state changing
         // so the form goes away and the user can see the status of their application
-        location.reload();
+
+        router.push("/")
       } else {
+        console.log(response);
         toast.error('Application data failed to send to server!')
         console.log('ERROR: Application data failed to send to server');
       }
@@ -228,20 +230,20 @@ export default function Application() {
   return (
     <>
       <Toaster />
-      <div className="student-landing-page">
-        <div className="overlap-wrapper">
-          <div className="overlap">
-            <div className="overlap-2">
-              <div className="color-block-frame">
-                <div className="overlap-group-2">
-                  <div className="color-block" />
-                  <img className="GRADIENTS" alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
-                  <div className="glass-card" />
+      <div className={styles.studentlandingpage}>
+        <div className={styles.overlapwrapper}>
+          <div className={styles.overlap}>
+            <div className={styles.overlap2}>
+              <div className={styles.colorblockframe}>
+                <div className={styles.overlapgroup2}>
+                  <div className={styles.colorblock} />
+                  <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                  <div className={styles.glasscard} />
                 </div>
               </div>
-              <EceLogoPng className="ece-logo-png-2" />
-              <TopNavBarSigned className="top-nav-bar-signed-in" />
-              <div className="text-wrapper-8">Application</div>
+              <EceLogoPng className={styles.ecelogopng2} />
+              <TopNavBarSigned className={styles.topnavbarsignedin} />
+              <div className={styles.textwrapper8}>Application</div>
             </div>
             <Container className="container" component="main" maxWidth="md">
               <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>
@@ -262,11 +264,16 @@ export default function Application() {
                 <Typography component="h1" variant="h5">
                   TA/UPI/Grader Application
                 </Typography>
-                <Box component="form" noValidate onSubmit={handleSubmit}>
-                  <Typography align="center" component="h2" variant="h6" sx={{ marginTop: 10, m: 1 }}>
-                    Personal Information
-                  </Typography>
-                  <Grid container spacing={2} sx={{ marginTop: 40 }}>
+                <Box component="form" noValidate onSubmit={handleSubmit} >
+                  <Grid item xs={12} sm={6} sx={{ marginTop: 45 }}>
+                    <Typography align="center" component="h2" variant="h6">
+                      Personal Information
+                    </Typography>
+                  </Grid>
+                  <br />
+                  <Grid container spacing={2} sx={{ marginTop: 0 }}>
+
+
                     <Grid item xs={12} sm={6}>
                       <TextField
                         autoComplete="given-name"
@@ -315,21 +322,8 @@ export default function Application() {
                         helperText="Enter your phone number. Example: 123-456-7890"
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={22} sm={116} justifyContent="center" alignItems="center">
                       <DepartmentSelect />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        variant="filled"
-                        id="ufid"
-                        label="UFID"
-                        name="ufid"
-                        autoComplete="ufid"
-                        type="number"
-                        helperText="No dashes or spaces."
-                      />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <SemesterStatusSelect
@@ -341,32 +335,12 @@ export default function Application() {
                       <DegreeSelect />
                     </Grid>
                   </Grid>
-                  <Typography align="center" component="h2" variant="h6" sx={{ m: 1 }}>
-                    Demographic Information
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Typography>
-                        Please select your nationality, based on country of origin.{' '}
-                        <br />
-                        Federal laws prohibit discrimination based on a person&apos;s
-                        national origin, race, color, religion, disability, sex, and
-                        familial status. This question is asked to confirm the
-                        demographic basis for the applicant&apos;s proficiency in
-                        English.
-                      </Typography>
-                      <NationalitySelect onNationalityChange={setNationality} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography sx={{ paddingBottom: 2 }}>
-                        Please select your proficiency in English.
-                      </Typography>
-                      <ProficiencySelect />
-                    </Grid>
-                  </Grid>
+
+                  <br />
                   <Typography align="center" component="h2" variant="h6" sx={{ m: 1 }}>
                     Position Information
                   </Typography>
+                  <br />
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Typography>
@@ -412,6 +386,19 @@ export default function Application() {
                       <GPA_Select />
                     </Grid>
                     <Grid item xs={12}>
+                      <Typography sx={{ paddingBottom: 2 }}>
+                        Please upload a google drive link to your resume.
+                      </Typography>
+                      <TextField
+                        required
+                        fullWidth
+                        variant="filled"
+                        id="resumeLink"
+                        label="Resume Link"
+                        name="resumeLink"
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
                       <Typography>
                         Please describe your qualifications for the position and
                         course(s) for which you are applying. <br />
@@ -451,7 +438,7 @@ export default function Application() {
 
           </div>
         </div>
-      </div>
+      </div >
     </>
 
   );

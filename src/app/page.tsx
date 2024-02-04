@@ -6,53 +6,52 @@ import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 
 import { TopNavBar } from '@/components/TopNavBar/TopNavBar';
 import { LogInCard } from '@/components/LogInCard/LogInCard';
-import './style.css';
+import styles from "./style.module.css";
 import Link from 'next/link';
 export default function Home() {
   return (
     <>
       <Toaster />
-      <div className="login-low-fi">
-        <div className="div-2">
-          <div className="overlap-2">
+      <div className={styles.loginlowfi}>
+        <div className={styles.div2}>
+          <div className={styles.overlap2}>
             <img
-              className="color-block-frame"
+              className={styles.colorblockframe}
               alt="Color block frame"
               src="https://c.animaapp.com/tY2yC3Jd/img/color-block-frame.png"
             />
-            <div className="sign-in-title">
-              <p className="connecting-bright">
-                <span className="text-wrapper-8">
+            <div className={styles.signintitle}>
+              <p className={styles.connectingbright}>
+                <span className={styles.textwrapper8}>
                   Connecting Bright Minds for a Brighter Future
                   <br />
                 </span>
-                <span className="text-wrapper-9">
+                <span className={styles.textwrapper9}>
                   <br />
                 </span>
               </p>
-              <div className="sign-in-to">
-                <div className="text-wrapper-10">Sign in to</div>
-                <div className="text-wrapper-11">Course Connect</div>
+              <div className={styles.signinto}>
+                <div className={styles.textwrapper10}>Sign in to</div>
+                <div className={styles.textwrapper11}>Course Connect</div>
               </div>
             </div>
-            <div className="register-here-text">
-              <p className="p">If you don’t have an account</p>
-              <p className="you-can-register">
-                <span className="text-wrapper-8">You can </span>
-                <Link href="/signup" className="text-wrapper-12"> {"Register here!"} </Link>
+            <div className={styles.registerheretext}>
+              <p className={styles.p}>If you don’t have an account</p>
+              <p className={styles.youcanregister}>
+                <span className={styles.textwrapper8}>You can </span>
+                <Link href="/signup" className={styles.textwrapper12}> {"Register here!"} </Link>
               </p>
             </div>
 
-            <LogInCard className="log-in-card-instance" />
+            <LogInCard className={styles.logincardinstance} />
           </div>
-          <EceLogoPng className="ece-logo-png-2" />
+          <EceLogoPng className={styles.ecelogopng2} />
           <TopNavBar
-            className="top-nav-bar-instance"
-            divClassName="design-component-instance-node"
-            divClassNameOverride="top-nav-bar-3"
-            logInButtonClassName="top-nav-bar-2"
+            className={styles.topnavbarinstance}
+            divClassName={styles.designcomponentinstancenode}
+            divClassNameOverride={styles.topnavbar3}
+            logInButtonClassName={styles.topnavbar2}
           />
-          <EceLogoPng className="ece-logo-png-2" />
         </div>
       </div>
     </>
