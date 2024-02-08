@@ -36,7 +36,11 @@ interface pageProps {
 const CoursePage: FC<pageProps> = ({ params }) => {
   const db = firebase.firestore();
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
-  const [openDenyDialog, setOpenDenyDialog] = useState(false);  const [expandedStates, setExpandedStates] = useState<{
+  const [openDenyDialog, setOpenDenyDialog] = useState(false);  
+  const [openReviewDialog, setOpenReviewDialog] = useState(false);  
+  const [currentStu, setCurrentStu] = useState("null");  
+
+  const [expandedStates, setExpandedStates] = useState<{
     [id: string]: boolean;
   }>({});
 
@@ -201,23 +205,59 @@ const CoursePage: FC<pageProps> = ({ params }) => {
               openDeny = {openDenyDialog}
               setOpenApproveDialog={setOpenApproveDialog}
               setOpenDenyDialog={setOpenDenyDialog}
+              currentStu = {currentStu}
+              setCurrentStu = {setCurrentStu}
             />
           )}
 
           {selection === 'Approved' &&
             (
               <ApplicantCardApprove
-                uf_email={ta.uf_email}
-                firstname={ta.firstname}
-                lastname={ta.lastname}
+              id={ta.id}
+              number={ta.number}
+              position={ta.position}
+              semester={ta.semester}
+              availability={ta.availability}
+              department={ta.department}
+              degree={ta.degree}
+              collegestatus={ta.collegestatus}
+              qualifications={ta.qualifications}
+              expanded={expandedStates[ta.id] || false}
+              onExpandToggle={() => handleExpandToggle(ta.id)}
+              uf_email={ta.uf_email}
+              firstname={ta.firstname}
+              lastname={ta.lastname}
+              resume ={ta.resume}
+              plan ={ta.plan}
+              openReview = {openReviewDialog}
+              setOpenReviewDialog={setOpenReviewDialog}
+              currentStu = {currentStu}
+              setCurrentStu = {setCurrentStu}
               />
             )}
 
           {selection === 'Denied' && (
             <ApplicantCardDeny
-              uf_email={ta.uf_email}
-              firstname={ta.firstname}
-              lastname={ta.lastname}
+            id={ta.id}
+            number={ta.number}
+            position={ta.position}
+            semester={ta.semester}
+            availability={ta.availability}
+            department={ta.department}
+            degree={ta.degree}
+            collegestatus={ta.collegestatus}
+            qualifications={ta.qualifications}
+            expanded={expandedStates[ta.id] || false}
+            onExpandToggle={() => handleExpandToggle(ta.id)}
+            uf_email={ta.uf_email}
+            firstname={ta.firstname}
+            lastname={ta.lastname}
+            resume ={ta.resume}
+            plan ={ta.plan}
+            openReview = {openReviewDialog}
+            setOpenReviewDialog={setOpenReviewDialog}
+            currentStu = {currentStu}
+            setCurrentStu = {setCurrentStu}
             />
           )}
         </div>
