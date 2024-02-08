@@ -3,7 +3,6 @@
     margin: 0 28px 0 40px;
     display: flex;
     align-items: center;
-    
     text-align: left;
     font-size: 24px;
     color: #000;
@@ -11,6 +10,11 @@
     border-radius: 20px;
     box-shadow: 0px 2px 20px 4px rgba(0, 0, 0, 0.25);
     justify-content: space-between;
+  }
+
+  .applicantStatus3:hover{
+    cursor: pointer;
+
   }
   
   .ellipse {
@@ -34,9 +38,10 @@
   }
   
   .thumbsContainer1{
-      display: flex;
+    position: absolute;
+    right: 20px;
       align-items: center;
-      margin-right: 40px;
+      margin: 24px 0 26px 0;
   }
   
  

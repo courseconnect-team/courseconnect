@@ -47,8 +47,10 @@
 .thumbsContainer {
   position: absolute;
   right: 20px;
-    align-items: center;
-    margin: 24px 0 26px 0;
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  margin: 24px 0 26px 0;
 }
 
 .thumbsUpIcon {

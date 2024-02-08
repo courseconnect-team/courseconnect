@@ -23,7 +23,9 @@
     transition: background-color 0.3s ease;
     margin-left: 2px;
   }
-   
+   .courseNavBarItem:hover{
+    cursor:pointer;
+   }
   .courseNavBarItem.selected {
     background-color: #562eba;
     
