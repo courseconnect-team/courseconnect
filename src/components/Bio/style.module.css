@@ -1,10 +1,10 @@
-.full-name-and-bio {
+.fullnameandbio {
   height: 295px;
   position: relative;
   width: 408px;
 }
 
-.full-name-and-bio .ellipse {
+.fullnameandbio .ellipse {
   background-color: #9d9d9d;
   border: 5px solid;
   border-color: #ffffff;
@@ -16,7 +16,7 @@
   width: 200px;
 }
 
-.full-name-and-bio .text-wrapper {
+.fullnameandbio .textwrapper {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 48px;
@@ -29,7 +29,7 @@
   white-space: nowrap;
 }
 
-.full-name-and-bio .div {
+.fullnameandbio .div {
   color: #6c6c6c;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 24px;
@@ -41,7 +41,7 @@
   top: 265px;
 }
 
-.full-name-and-bio .text-wrapper-2 {
+.fullnameandbio .textwrapper2 {
   color: #6c6c6c;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 14px;

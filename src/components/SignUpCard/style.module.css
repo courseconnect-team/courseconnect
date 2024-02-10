@@ -3,7 +3,7 @@
   width: 539px;
 }
 
-.box .log-in-card {
+.box .logincard {
   height: 799px;
   position: absolute;
   width: 543px;
@@ -21,7 +21,7 @@
   width: 539px;
 }
 
-.box .welcome-to-course {
+.box .welcometocourse {
   color: transparent;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 24px;
@@ -35,7 +35,7 @@
   width: 302px;
 }
 
-.box .text-wrapper {
+.box .textwrapper {
   color: #000000;
 }
 
@@ -59,7 +59,7 @@
   width: 179px;
 }
 
-.box .firstname-input {
+.box .firstnameinput {
   height: 89px;
   left: 44px;
   position: absolute;
@@ -67,7 +67,7 @@
   width: 195px;
 }
 
-.box .text-wrapper-2 {
+.box .textwrapper2 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 18px;
@@ -81,7 +81,7 @@
   width: 90px;
 }
 
-.box .overlap-group-wrapper {
+.box .overlapgroupwrapper {
   height: 56px;
   left: 0;
   position: absolute;
@@ -89,7 +89,7 @@
   width: 195px;
 }
 
-.box .overlap-group {
+.box .overlapgroup {
   background-color: #ffffff;
   border-radius: 9px;
   height: 56px;
@@ -97,7 +97,7 @@
   width: 193px;
 }
 
-.box .text-wrapper-3 {
+.box .textwrapper3 {
   color: #6d6d6d;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 15px;
@@ -111,7 +111,7 @@
   width: 188px;
 }
 
-.box .role-input {
+.box .roleinput {
   height: 56px;
   left: 44px;
   position: absolute;
@@ -119,7 +119,7 @@
   width: 195px;
 }
 
-.box .text-wrapper-4 {
+.box .textwrapper4 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 18px;
@@ -149,7 +149,7 @@
   width: 22px;
 }
 
-.box .text-wrapper-5 {
+.box .textwrapper5 {
   color: #6d6d6d;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 15px;
@@ -163,7 +163,7 @@
   width: 50px;
 }
 
-.box .text-wrapper-6 {
+.box .textwrapper6 {
   color: #6d6d6d;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 15px;
@@ -177,7 +177,7 @@
   width: 46px;
 }
 
-.box .department-input {
+.box .departmentinput {
   height: 89px;
   left: 44px;
   position: absolute;
@@ -185,13 +185,13 @@
   width: 193px;
 }
 
-.box .department-dropdown {
+.box .departmentdropdown {
   height: 89px;
   position: relative;
   width: 197px;
 }
 
-.box .text-wrapper-7 {
+.box .textwrapper7 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 18px;
@@ -205,7 +205,7 @@
   width: 99px;
 }
 
-.box .overlap-group-2 {
+.box .overlapgroup2 {
   background-color: #ffffff;
   border-radius: 9px;
   height: 56px;
@@ -215,7 +215,7 @@
   width: 193px;
 }
 
-.box .text-wrapper-8 {
+.box .textwrapper8 {
   color: #6d6d6d;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 15px;
@@ -229,7 +229,7 @@
   width: 75px;
 }
 
-.box .arrow-drop-down {
+.box .arrowdropdown {
   height: 23px;
   left: 161px;
   position: absolute;
@@ -237,7 +237,7 @@
   width: 24px;
 }
 
-.box .lastname-input {
+.box .lastnameinput {
   height: 89px;
   left: 270px;
   position: absolute;
@@ -245,7 +245,7 @@
   width: 195px;
 }
 
-.box .UFID-input {
+.box .UFIDinput {
   height: 89px;
   left: 302px;
   position: absolute;
@@ -253,7 +253,7 @@
   width: 195px;
 }
 
-.box .text-wrapper-9 {
+.box .textwrapper9 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 18px;
@@ -267,7 +267,7 @@
   width: 200px;
 }
 
-.box .text-wrapper-10 {
+.box .textwrapper10 {
   color: #6d6d6d;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 15px;
@@ -281,7 +281,7 @@
   width: 150px;
 }
 
-.box .email-address-input {
+.box .emailaddressinput {
   height: 89px;
   left: 44px;
   position: absolute;
@@ -289,7 +289,7 @@
   width: 453px;
 }
 
-.box .text-wrapper-11 {
+.box .textwrapper11 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 18px;
@@ -303,7 +303,7 @@
   width: 147px;
 }
 
-.box .div-wrapper {
+.box .divwrapper {
   height: 56px;
   left: 0;
   position: absolute;
@@ -311,7 +311,7 @@
   width: 453px;
 }
 
-.box .overlap-group-3 {
+.box .overlapgroup3 {
   background-color: #ffffff;
   border-radius: 9px;
   height: 56px;
@@ -319,7 +319,7 @@
   width: 451px;
 }
 
-.box .text-wrapper-12 {
+.box .textwrapper12 {
   color: #6d6d6d;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 15px;
@@ -333,7 +333,7 @@
   width: 88px;
 }
 
-.box .password-input {
+.box .passwordinput {
   height: 187px;
   left: 44px;
   position: absolute;
@@ -341,7 +341,7 @@
   width: 455px;
 }
 
-.box .text-wrapper-13 {
+.box .textwrapper13 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 18px;
@@ -355,7 +355,7 @@
   width: 117px;
 }
 
-.box .text-wrapper-14 {
+.box .textwrapper14 {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 18px;
@@ -369,7 +369,7 @@
   width: 138px;
 }
 
-.box .text-wrapper-15 {
+.box .textwrapper15 {
   color: #6d6d6d;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 15px;
@@ -391,7 +391,7 @@
   width: 453px;
 }
 
-.box .sign-in-button {
+.box .signinbutton {
   all: unset;
   box-sizing: border-box;
   height: 53px;
@@ -401,7 +401,7 @@
   width: 453px;
 }
 
-.box .overlap-2 {
+.box .overlap2 {
   background-color: #562eba;
   border-radius: 10px;
   box-shadow: 0px 4px 19px #7793414c;
@@ -410,7 +410,7 @@
   width: 451px;
 }
 
-.box .text-wrapper-16 {
+.box .textwrapper16 {
   color: #ffffff;
   font-family: "SF Pro Display-Medium", Helvetica;
   font-size: 16px;

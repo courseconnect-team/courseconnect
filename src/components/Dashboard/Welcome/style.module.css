@@ -1,4 +1,4 @@
-.student-landing-page {
+.studentlandingpage {
   background-color: #ffffff;
   display: flex;
   flex-direction: row;
@@ -7,20 +7,20 @@
   width: 100%;
 }
 
-.student-landing-page .overlap-wrapper {
+.studentlandingpage .overlapwrapper {
   background-color: #ffffff;
   height: 1024px;
   width: 100%;
 }
 
-.student-landing-page .overlap {
+.studentlandingpage .overlap {
   background-color: #f9f9f9;
   height: 1024px;
   position: absolute;
   width: 100%;
 }
 
-.student-landing-page .overlap-2 {
+.studentlandingpage .overlap2 {
   height: 545px;
   left: 0;
   position: absolute;
@@ -28,7 +28,7 @@
   width: 100%;
 }
 
-.student-landing-page .color-block-frame {
+.studentlandingpage .colorblockframe {
   height: 350px;
   left: 0;
   overflow: hidden;
@@ -37,14 +37,14 @@
   width: 100%;
 }
 
-.student-landing-page .overlap-group-2 {
+.studentlandingpage .overlapgroup2 {
   height: 458px;
   left: -5px;
   position: absolute;
   width: 100%;
 }
 
-.student-landing-page .color-block {
+.studentlandingpage .colorblock {
   background-color: #001776;
   height: 458px;
   left: 5px;
@@ -53,7 +53,7 @@
   width: 100%;
 }
 
-.student-landing-page .GRADIENTS {
+.studentlandingpage .GRADIENTS {
   height: 350px;
   left: 5px;
   position: absolute;
@@ -61,7 +61,7 @@
   width: 100%;
 }
 
-.student-landing-page .glass-card {
+.studentlandingpage .glasscard {
   -webkit-backdrop-filter: blur(200px) brightness(100%);
   backdrop-filter: blur(200px) brightness(100%);
   background-blend-mode: luminosity;
@@ -73,25 +73,25 @@
   width: 101%;
 }
 
-.student-landing-page .ece-logo-png-2 {
+.studentlandingpage .ecelogopng2 {
   left: 27px !important;
   position: absolute !important;
   top: 23px !important;
 }
 
-.student-landing-page .full-name-and-bio-instance {
+.studentlandingpage .fullnameandbioinstance {
   left: 38% !important;
   position: absolute !important;
   top: 250px !important;
 }
 
-.student-landing-page .top-nav-bar-signed-in {
+.studentlandingpage .topnavbarsignedin {
   left: 80% !important;
   position: absolute !important;
   top: 27px !important;
 }
 
-.student-landing-page .text-wrapper-8 {
+.studentlandingpage .textwrapper8 {
   color: #ffffff;
   font-family: "SF Pro Display-Medium", Helvetica;
   font-size: 50px;
@@ -107,57 +107,57 @@
   top: 150px;
 }
 
-.student-landing-page .profile-instance {
+.studentlandingpage .profileinstance {
   left: 52% !important;
   position: absolute !important;
   top: 640px !important;
 }
 
-.student-landing-page .apply-instance {
+.studentlandingpage .applyinstance {
   left: 38% !important;
   position: absolute !important;
   top: 640px !important;
 }
 
-.student-landing-page .profile-instance2 {
+.studentlandingpage .profileinstance2 {
   left: 58% !important;
   position: absolute !important;
   top: 640px !important;
 }
-.student-landing-page .apply-instance2 {
+.studentlandingpage .applyinstance2 {
   left: 44% !important;
   position: absolute !important;
   top: 640px !important;
 }
 
-.student-landing-page .status-instance {
+.studentlandingpage .statusinstance {
   left: 30% !important;
   position: absolute !important;
   top: 640px !important;
 }
 
-.student-landing-page .courses {
+.studentlandingpage .courses {
   left: 15% !important;
   position: absolute !important;
   top: 640px !important;
 }
-.student-landing-page .users {
+.studentlandingpage .users {
   left: 30% !important;
   position: absolute !important;
   top: 640px !important;
 }
 
-.student-landing-page .applications {
+.studentlandingpage .applications {
   left: 45% !important;
   position: absolute !important;
   top: 640px !important;
 }
-.student-landing-page .scheduling {
+.studentlandingpage .scheduling {
   left: 60%!important;
   position: absolute !important;
   top: 640px !important;
 }
-.student-landing-page .stats {
+.studentlandingpage .stats {
   left: 75%!important;
   position: absolute !important;
   top: 640px !important;

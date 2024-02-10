@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
 import { useState } from "react";
-import "./style.css";
 import { FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, Snackbar, TextField } from "@mui/material";
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
 
+import styles from "./style.module.css";
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { toast } from "react-hot-toast";
 export const SignUpCard = ({ className }: { className: any }) => {
@@ -155,27 +155,27 @@ export const SignUpCard = ({ className }: { className: any }) => {
 
 
   return (
-    <div className="box">
+    <div className={styles.box}>
       <Snackbar open={success} autoHideDuration={3000}>
         <Alert severity="info" sx={{ width: '100%' }}>
           Signup successfull!
         </Alert>
       </Snackbar>
-      <div className="log-in-card">
-        <div className="overlap">
-          <div className="welcome-to-course">
-            <span className="text-wrapper">Welcome to </span>
-            <span className="span">Course Connect</span>
+      <div className={styles.logincard}>
+        <div className={styles.overlap}>
+          <div className={styles.welcometocourse}>
+            <span className={styles.textwrapper}>Welcome to </span>
+            <span className={styles.span}>Course Connect</span>
           </div>
-          <div className="div">Sign up</div>
-          <div className="firstname-input">
-            <div className="text-wrapper-2">Name</div>
-            <div className="overlap-group-wrapper">
-              <div className="overlap-group">
+          <div className={styles.div}>Sign up</div>
+          <div className={styles.firstnameinput}>
+            <div className={styles.textwrapper2}>Name</div>
+            <div className={styles.overlapgroupwrapper}>
+              <div className={styles.overlapgroup}>
                 <TextField variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className="text-wrapper-3" placeholder="First Name"
+                  }} className={styles.textwrapper3} placeholder="First Name"
                   margin="none"
                   required
                   fullWidth
@@ -192,8 +192,8 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </div>
             </div>
           </div>
-          <div className="role-input">
-            <div className="text-wrapper-4">Role</div>
+          <div className={styles.roleinput}>
+            <div className={styles.textwrapper4}>Role</div>
             <FormControl>
               <RadioGroup
                 row
@@ -210,10 +210,10 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </RadioGroup>
             </FormControl>
           </div>
-          <div className="department-input">
-            <div className="department-dropdown">
-              <div className="text-wrapper-7">Department</div>
-              <div className="overlap-group-2">
+          <div className={styles.departmentinput}>
+            <div className={styles.departmentdropdown}>
+              <div className={styles.textwrapper7}>Department</div>
+              <div className={styles.overlapgroup2}>
                 <TextField
                   sx={{ boxShadow: 'none', '.MuiOutlinedInput-notchedOutline': { border: 0 } }}
                   value={department}
@@ -225,7 +225,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
                     setDepartment(event.target.value);
                     setLabel("");
                   }}
-                  className="text-wrapper-9"
+                  className={styles.textwrapper9}
                 >
                   <MenuItem value={'ECE'}>ECE</MenuItem>
                   <MenuItem value={'CISE'}>CISE</MenuItem>
@@ -241,14 +241,14 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </div>
             </div>
           </div>
-          <div className="lastname-input">
-            <div className="text-wrapper-2">Last Name</div>
-            <div className="overlap-group-wrapper">
-              <div className="overlap-group">
+          <div className={styles.lastnameinput}>
+            <div className={styles.textwrapper2}>Last Name</div>
+            <div className={styles.overlapgroupwrapper}>
+              <div className={styles.overlapgroup}>
                 <TextField variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className="text-wrapper-3" placeholder="Last Name"
+                  }} className={styles.textwrapper3} placeholder="Last Name"
                   margin="none"
                   required
                   fullWidth
@@ -262,14 +262,14 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </div>
             </div>
           </div>
-          <div className="UFID-input">
-            <div className="text-wrapper-9">UFID</div>
-            <div className="overlap-group-wrapper">
-              <div className="overlap-group">
+          <div className={styles.UFIDinput}>
+            <div className={styles.textwrapper9}>UFID</div>
+            <div className={styles.overlapgroupwrapper}>
+              <div className={styles.overlapgroup}>
                 <TextField variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className="text-wrapper-10" placeholder="UFID"
+                  }} className={styles.textwrapper10} placeholder="UFID"
                   margin="none"
                   required
                   fullWidth
@@ -284,14 +284,14 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </div>
             </div>
           </div>
-          <div className="email-address-input">
-            <div className="text-wrapper-11">Enter email address</div>
-            <div className="div-wrapper">
-              <div className="overlap-group-3">
+          <div className={styles.emailaddressinput}>
+            <div className={styles.textwrapper11}>Enter email address</div>
+            <div className={styles.divwrapper}>
+              <div className={styles.overlapgroup3}>
                 <TextField variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className="text-wrapper-3" placeholder="Email"
+                  }} className={styles.textwrapper3} placeholder="Email"
                   margin="none"
                   required
                   fullWidth
@@ -305,15 +305,15 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </div>
             </div>
           </div>
-          <div className="password-input">
-            <div className="text-wrapper-13">Enter password</div>
-            <div className="text-wrapper-14">Confirm password</div>
-            <div className="div-wrapper">
-              <div className="overlap-group-3">
+          <div className={styles.passwordinput}>
+            <div className={styles.textwrapper13}>Enter password</div>
+            <div className={styles.textwrapper14}>Confirm password</div>
+            <div className={styles.divwrapper}>
+              <div className={styles.overlapgroup3}>
                 <TextField variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className="text-wrapper-15" placeholder="Password"
+                  }} className={styles.textwrapper15} placeholder="Password"
                   margin="none"
                   required
                   size="small"
@@ -327,12 +327,12 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   autoComplete="current-password" />
               </div>
             </div>
-            <div className="confirmpassword">
-              <div className="overlap-group-3">
+            <div className={styles.confirmpassword}>
+              <div className={styles.overlapgroup3}>
                 <TextField variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className="text-wrapper-15" placeholder="Confirm"
+                  }} className={styles.textwrapper15} placeholder="Confirm"
                   margin="none"
                   required
                   size="small"
@@ -347,10 +347,10 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </div>
             </div>
           </div>
-          <div className="sign-in-button">
+          <div className={styles.signinbutton}>
             <br />
-            <button onClick={(e) => handleSubmit(e)} className="overlap-2">
-              <div className="text-wrapper-16">Sign up</div>
+            <button onClick={(e) => handleSubmit(e)} className={styles.overlap2}>
+              <div className={styles.textwrapper16}>Sign up</div>
             </button>
           </div>
         </div>

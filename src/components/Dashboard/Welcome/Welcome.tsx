@@ -8,7 +8,7 @@ import { DashboardCard } from "@/components/DashboardCard/DashboardCard";
 import { Bio } from "@/components/Bio/Bio";
 import { Profile } from "@/components/Profile/Profile";
 import { TopNavBarSigned } from "@/components/TopNavBarSigned/TopNavBarSigned";
-import "./style.css";
+import styles from "./style.module.css";
 import Link from 'next/link';
 interface DashboardProps {
   user: any;
@@ -21,59 +21,59 @@ export default function DashboardWelcome(props: DashboardProps) {
   return (
     <>
       <Toaster />
-      <div className="student-landing-page">
-        <div className="overlap-wrapper">
+      <div className={styles.studentlandingpage}>
+        <div className={styles.overlapwrapper}>
 
           {(userRole == "student_applying" || userRole == "Student") &&
-            <div className="overlap">
-              <div className="overlap-2">
-                <div className="color-block-frame">
-                  <div className="overlap-group-2">
-                    <div className="color-block" />
-                    <img className="GRADIENTS" alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
-                    <div className="glass-card" />
+            <div className={styles.overlap}>
+              <div className={styles.overlap2}>
+                <div className={styles.colorblockframe}>
+                  <div className={styles.overlapgroup2}>
+                    <div className={styles.colorblock} />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                    <div className={styles.glasscard} />
                   </div>
                 </div>
-                <EceLogoPng className="ece-logo-png-2" />
-                <Bio user={user} className="full-name-and-bio-instance" />
-                <TopNavBarSigned className="top-nav-bar-signed-in" />
-                <div className="text-wrapper-8">Home</div>
+                <EceLogoPng className={styles.ecelogopng2} />
+                <Bio user={user} className={styles.fullnameandbioinstance} />
+                <TopNavBarSigned className={styles.topnavbarsignedin} />
+                <div className={styles.textwrapper8}>Home</div>
               </div>
               <Link href="/Profile">
-                <Profile className="profile-instance" profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+                <Profile className={styles.profileinstance} profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
               </Link>
               <Link href="/apply">
 
-                <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className="apply-instance" />
+                <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className={styles.applyinstance} />
               </Link>
 
             </div>
           }
 
           {(userRole == "student_applied" || userRole == 'student_accepted' || userRole == "student_denied") &&
-            <div className="overlap">
-              <div className="overlap-2">
-                <div className="color-block-frame">
-                  <div className="overlap-group-2">
-                    <div className="color-block" />
-                    <img className="GRADIENTS" alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
-                    <div className="glass-card" />
+            <div className={styles.overlap}>
+              <div className={styles.overlap2}>
+                <div className={styles.colorblockframe}>
+                  <div className={styles.overlapgroup2}>
+                    <div className={styles.colorblock} />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                    <div className={styles.glasscard} />
                   </div>
                 </div>
-                <EceLogoPng className="ece-logo-png-2" />
-                <Bio user={user} className="full-name-and-bio-instance" />
-                <TopNavBarSigned className="top-nav-bar-signed-in" />
-                <div className="text-wrapper-8">Home</div>
+                <EceLogoPng className={styles.ecelogopng2} />
+                <Bio user={user} className={styles.fullnameandbioinstance} />
+                <TopNavBarSigned className={styles.topnavbarsignedin} />
+                <div className={styles.textwrapper8}>Home</div>
               </div>
               <Link href="/Profile">
-                <Profile className="profile-instance2" profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+                <Profile className={styles.profileinstance2} profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
               </Link>
               <Link href="/status">
-                <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className="apply-instance2" />
+                <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className={styles.applyinstance2} />
               </Link>
               <Link href="/apply">
 
-                <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className="status-instance" />
+                <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className={styles.statusinstance} />
               </Link>
             </div>
 
@@ -81,40 +81,40 @@ export default function DashboardWelcome(props: DashboardProps) {
 
 
           {(userRole == "admin") &&
-            <div className="overlap">
-              <div className="overlap-2">
-                <div className="color-block-frame">
-                  <div className="overlap-group-2">
-                    <div className="color-block" />
-                    <img className="GRADIENTS" alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
-                    <div className="glass-card" />
+            <div className={styles.overlap}>
+              <div className={styles.overlap2}>
+                <div className={styles.colorblockframe}>
+                  <div className={styles.overlapgroup2}>
+                    <div className={styles.colorblock} />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                    <div className={styles.glasscard} />
                   </div>
                 </div>
-                <EceLogoPng className="ece-logo-png-2" />
-                <Bio user={user} className="full-name-and-bio-instance" />
-                <TopNavBarSigned className="top-nav-bar-signed-in" />
-                <div className="text-wrapper-8">Home</div>
+                <EceLogoPng className={styles.ecelogopng2} />
+                <Bio user={user} className={styles.fullnameandbioinstance} />
+                <TopNavBarSigned className={styles.topnavbarsignedin} />
+                <div className={styles.textwrapper8}>Home</div>
               </div>
               <Link href="/users">
-                <DashboardCard className="users" image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png" text="Users" />
+                <DashboardCard className={styles.users} image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png" text="Users" />
               </Link>
               <Link href="/underDevelopment">
-                <DashboardCard className="courses" image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png" text="Courses" />
+                <DashboardCard className={styles.courses} image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png" text="Courses" />
               </Link>
               <Link href="/adminApplications">
-                <DashboardCard className="applications" image="https://c.animaapp.com/PWgYNV8T/img/apply-1@2x.png" text="Assign" />
+                <DashboardCard className={styles.applications} image="https://c.animaapp.com/PWgYNV8T/img/apply-1@2x.png" text="Assign" />
               </Link>
               <Link href="/underDevelopment">
-                <DashboardCard className="scheduling" image="https://c.animaapp.com/PWgYNV8T/img/calendar-clock@2x.png" text="Scheduling" />
+                <DashboardCard className={styles.scheduling} image="https://c.animaapp.com/PWgYNV8T/img/calendar-clock@2x.png" text="Scheduling" />
               </Link>
               <Link href="/underDevelopment">
-                <DashboardCard className="stats" image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png" text="Faculty Stats" />
+                <DashboardCard className={styles.stats} image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png" text="Faculty Stats" />
               </Link>
-            </div>
+            </div >
 
           }
-        </div>
-      </div>
+        </div >
+      </div >
     </>
   );
 }

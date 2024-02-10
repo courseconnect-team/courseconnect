@@ -6,7 +6,7 @@ export const StatusCard = ({ className, apply = "https://c.animaapp.com/vYQBTcnO
   return (
     <div className={`apply ${className}`}>
       <div className="inner-content-2">
-        <img className="img-2" alt="Apply" src={apply} />
+        <img className="img-3" alt="Apply" src={apply} />
         <div className="text-wrapper-7">Status</div>
       </div>
     </div>
