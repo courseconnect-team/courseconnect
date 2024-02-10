@@ -33,6 +33,8 @@ interface ApplicantCardProps {
   openDeny: boolean;
   setOpenApproveDialog: (value: boolean) => void;
   setOpenDenyDialog: (value: boolean) => void;
+  currentStu: string;
+  setCurrentStu: (value: string) => void;
 }
 
 const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
@@ -56,24 +58,34 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   openDeny,
   setOpenApproveDialog,
   setOpenDenyDialog,
+  currentStu,
+  setCurrentStu
+  
 }) => {
 
   const db = firebase.firestore();
   const handleApproveSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+   
     try {
-      const statusRef = db.collection('applications').doc(id);
+      const statusRef = db.collection('applications').doc(currentStu);
       await statusRef.update({ status: 'Approved' });
       console.log('Application approved successfully');
+      window.location.reload();
+
     } catch (error) {
       console.error('Error approving application:', error);
     }
   };
   
   const handleDenySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     try {
-      const statusRef = db.collection('applications').doc(id);
+      const statusRef = db.collection('applications').doc(currentStu);
       await statusRef.update({ status: 'Denied' });
       console.log('Application denied successfully');
+      window.location.reload();
+
     } catch (error) {
       console.error('Error denying application:', error);
     }
@@ -90,13 +102,16 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
   const onThumbUpClick = useCallback(() => {
     setOpenApproveDialog(true);
+    setCurrentStu(id);
   }, []);
 
   const onThumbDownIconClick = useCallback(() => {
     setOpenDenyDialog(true);
+    setCurrentStu(id);
   }, []);
 
   const renderApproveDialog = () => (
+    
     <Dialog
       style={{
         borderImage:
@@ -320,6 +335,8 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               <div className="name">
                 {firstname} {lastname}
               </div>
+              {renderApproveDialog()}
+              {renderDenyDialog()}
               <div style={{ position: 'absolute' }}>
                 <div className="email1">{uf_email}</div>
                 <div className="number">{number}</div>
@@ -330,9 +347,9 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                   className="thumbsUpIcon"
                   style={{
                     fontSize: '41px',
+                    
                   }}
                 />
-                {renderApproveDialog()}
                 <ThumbDownOffAltIcon
                   onClick={onThumbDownIconClick}
                   className="thumbsDownIcon"
