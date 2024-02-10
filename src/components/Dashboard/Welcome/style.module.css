@@ -1,5 +1,4 @@
 .studentlandingpage {
-  background-color: #ffffff;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -8,13 +7,11 @@
 }
 
 .studentlandingpage .overlapwrapper {
-  background-color: #ffffff;
   height: 1024px;
   width: 100%;
 }
 
 .studentlandingpage .overlap {
-  background-color: #f9f9f9;
   height: 1024px;
   position: absolute;
   width: 100%;
@@ -65,7 +62,6 @@
   -webkit-backdrop-filter: blur(200px) brightness(100%);
   backdrop-filter: blur(200px) brightness(100%);
   background-blend-mode: luminosity;
-  background-color: #00000024;
   height: 458px;
   left: 0;
   position: absolute;

@@ -374,6 +374,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
         return [
           <Button
+            key="3"
             variant="outlined"
             color='inherit'
             size="small"
@@ -386,6 +387,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             View
           </Button>,
           <Button
+            key="4"
             variant="outlined"
             color='inherit'
             size="small"
@@ -398,6 +400,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             Edit
           </Button>,
           <Button
+            key="5"
             variant="outlined"
             color='primary'
             size="small"
@@ -413,7 +416,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         ];
       },
     },
-     {
+    {
       field: 'name',
       headerName: 'Name',
       width: 190,

@@ -40,8 +40,8 @@ import styles from "./style.module.css";
 import 'firebase/firestore';
 import Applications from '@/components/Dashboard/Applications/Applications';
 
-export default function adminApplications() {
-  const { user } = useAuth();
+export default function AdminApplications() {
+  let { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
   const [activeComponent, setActiveComponent] = React.useState('welcome');
 

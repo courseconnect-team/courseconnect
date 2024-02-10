@@ -532,6 +532,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
         return [
           <Button
+            key="3"
             variant="outlined"
             color='inherit'
             size="small"
@@ -544,6 +545,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             View
           </Button>,
           <Button
+            key="8"
             variant="outlined"
             color='inherit'
             size="small"
@@ -557,6 +559,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           </Button>,
 
           <Button
+            key="7"
             variant="outlined"
             color='primary'
             size="small"

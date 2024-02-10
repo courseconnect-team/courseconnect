@@ -39,7 +39,7 @@ import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCar
 import styles from "./style.module.css";
 import 'firebase/firestore';
 
-export default function users() {
+export default function User() {
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
   const [activeComponent, setActiveComponent] = React.useState('welcome');
