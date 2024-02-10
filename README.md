@@ -140,7 +140,7 @@ Use the following steps to test your changes in a production-ready build.
 
 ## List of Dependencies
 
-Below is a complete list of all dependencies (npm packages) used in this project as of May 22nd, 2023:
+Below is a complete list of all dependencies (npm packages) used in this project as of May 22nd, 2023.
 
 - @emotion/react@11.11.0
 - @emotion/styled@11.11.0
