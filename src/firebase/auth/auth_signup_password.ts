@@ -12,15 +12,11 @@ export default async function handleSignUp(
   name: string,
   email: string,
   password: string,
-  ufid: string
 ): Promise<string> {
   // use fetch to send the user data to the server
   // this goes to a cloud function which creates a document based on
   // the data from the form, identified by the user's firebase auth uid
 
-  const userIDObject = {
-    ufid: ufid,
-  };
 
   var errorTag: string = '';
 

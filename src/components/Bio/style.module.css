@@ -1,7 +1,8 @@
 .fullnameandbio {
   height: 295px;
-  position: relative;
+  position: absolute;
   width: 408px;
+
 }
 
 .fullnameandbio .ellipse {
@@ -21,10 +22,11 @@
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 48px;
   font-weight: 400;
-  left: 0;
+  margin: auto;
+  text-align: center;
   letter-spacing: 0;
   line-height: normal;
-  position: absolute;
+  position: relative;
   top: 208px;
   white-space: nowrap;
 }
@@ -34,11 +36,11 @@
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 24px;
   font-weight: 400;
-  left: 75px;
+  text-align: center;
   letter-spacing: 0;
   line-height: normal;
-  position: absolute;
-  top: 265px;
+  position: relative;
+  top: 225px;
 }
 
 .fullnameandbio .textwrapper2 {

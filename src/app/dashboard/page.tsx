@@ -13,6 +13,7 @@ import Applications from '@/components/Dashboard/Applications/Applications';
 import Application from '@/components/Dashboard/Applications/Application';
 import ShowApplicationStatus from '@/components/Dashboard/Applications/AppStatus';
 import { Toaster } from 'react-hot-toast';
+import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 
 // user information reference: https://firebase.google.com/docs/auth/web/manage-users
 
@@ -25,37 +26,10 @@ export default function Dashboard() {
     setActiveComponent(componentName);
   };
 
-  if ((user && user.emailVerified) || (user && role === 'admin')) {
-    return (
-      <>
-        <Toaster />
-        {activeComponent === 'welcome' && (
-          <DashboardWelcome user={user} userRole={role as string} />
-        )}
-        {activeComponent === 'profile' && (
-          <Profile user={user} userRole={role as string} />
-        )}
-        {activeComponent === 'users' && <Users userRole={role as string} />}
-        {activeComponent === 'courses' && <Courses userRole={role as string} />}
-        {activeComponent === 'applications' && (
-          <Applications userRole={role as string} />
-        )}
-        {activeComponent === 'application' && <Application />}
-        {activeComponent === 'application_status' && (
-          <ShowApplicationStatus user={user} userRole={role as string} />
-        )}
-        {/*<BottomMenu
-          user_role={role as string}
-          onComponentChange={handleComponentChange}
-        />*/}
-      </>
-    );
-  } else if (user && !user.emailVerified) {
-    return (
-      <>
-        <h1>Email Verification Required</h1>
-        <p>Please check your email for a verification link.</p>
-      </>
-    );
-  }
+  return (
+    <>
+      <Toaster />
+      <DashboardWelcome user={user} userRole={role as string} emailVerified={user.emailVerified} />
+    </>
+  );
 }

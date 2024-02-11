@@ -13,18 +13,43 @@ import Link from 'next/link';
 interface DashboardProps {
   user: any;
   userRole: string;
+  emailVerified: any;
 }
 
 export default function DashboardWelcome(props: DashboardProps) {
-  const { userRole, user } = props;
+  const { userRole, user, emailVerified } = props;
   console.log(userRole)
   return (
     <>
       <Toaster />
       <div className={styles.studentlandingpage}>
         <div className={styles.overlapwrapper}>
+          {(!emailVerified) && userRole != "admin" &&
+            <div className={styles.overlap}>
+              <div className={styles.overlap2}>
+                <div className={styles.colorblockframe}>
+                  <div className={styles.overlapgroup2}>
+                    <div className={styles.colorblock} />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                    <div className={styles.glasscard} />
+                  </div>
+                </div>
+                <EceLogoPng className={styles.ecelogopng2} />
+                <Bio user={user} className={styles.fullnameandbioinstance} />
+                <TopNavBarSigned className={styles.topnavbarsignedin} />
+                <div className={styles.textwrapper8}>Home</div>
+                <div style={{ marginTop: "650px", marginLeft: "40%" }}>
+                  <h1 >Email Verification Required</h1>
+                  <p>Please check your email for a verification link.</p>
+                </div>
+              </div>
 
-          {(userRole == "student_applying" || userRole == "Student") &&
+
+
+            </div>
+
+          }
+          {(userRole == "student_applying" || userRole == "Student") && emailVerified &&
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>
@@ -50,7 +75,7 @@ export default function DashboardWelcome(props: DashboardProps) {
             </div>
           }
 
-          {(userRole == "student_applied" || userRole == 'student_accepted' || userRole == "student_denied") &&
+          {(userRole == "student_applied" || userRole == 'student_accepted' || userRole == "student_denied") && emailVerified &&
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>

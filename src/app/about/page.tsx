@@ -1,3 +1,5 @@
+
+'use client';
 import SignInForm from '@/components/SignIn/SignInForm';
 import scss from './Home.module.scss';
 import toast, { Toaster } from 'react-hot-toast';
@@ -8,7 +10,12 @@ import styles from "./style.module.css";
 import Link from 'next/link';
 import { SignUpCard } from '@/components/SignUpCard/SignUpCard';
 import { Card } from '@/components/Card/Card'
+
+import { useAuth } from '@/firebase/auth/auth_context';
+import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 export default function About() {
+
+  const { user } = useAuth();
   return (
     <>
       <Toaster />
@@ -41,12 +48,21 @@ export default function About() {
 
           </div>
           <EceLogoPng className={styles.ecelogopng2} />
-          <TopNavBar
-            className={styles.topnavbarinstance}
-            divClassName={styles.designcomponentinstancenode}
-            divClassNameOverride={styles.topnavbar3}
-            logInButtonClassName={styles.topnavbar2}
-          />
+          {!user &&
+            <TopNavBar
+              className={styles.topnavbarinstance}
+              divClassName={styles.designcomponentinstancenode}
+              divClassNameOverride={styles.topnavbar3}
+              logInButtonClassName={styles.topnavbar2}
+            />
+          }
+          {
+            user &&
+            <TopNavBarSigned
+              className={styles.topnavbarinstance}
+            />
+
+          }
           <EceLogoPng className={styles.ecelogopng2} />
         </div>
         <div className={styles.sectionaboutus}>
@@ -83,7 +99,3 @@ export default function About() {
   );
 }
 
-export const metadata = {
-  title: 'Course Connect',
-  description: 'Hiring management for students, faculty, and administrators.',
-};

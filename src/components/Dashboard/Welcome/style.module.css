@@ -77,8 +77,8 @@
 
 .studentlandingpage .fullnameandbioinstance {
   left: 38% !important;
-  position: absolute !important;
   top: 250px !important;
+  position: absolute;
 }
 
 .studentlandingpage .topnavbarsignedin {

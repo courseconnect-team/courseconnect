@@ -85,10 +85,6 @@ export const SignUpCard = ({ className }: { className: any }) => {
       toast.error('First name should only contain letters!');
     } else if (userData.lastname == '') {
       toast.error('Please enter a last name!');
-    } else if (userData.ufid == '') {
-      toast.error('Please enter your UFID!');
-    } else if (!/^[0-9]+$/.test(userData.ufid) || userData.ufid.length < 6) {
-      toast.error('UFID should only contain numbers with no spaces or dashes!');
     } else if (userData.role === null || userData.role === "") {
       toast.error('Please select a role!');
     } else if (userData.department === '') {
@@ -104,7 +100,6 @@ export const SignUpCard = ({ className }: { className: any }) => {
         userData.firstname + ' ' + userData.lastname,
         userData.email,
         userData.password,
-        userData.ufid
       );
       userData.uid = uid_from_signup;
       console.log(userData.uid);
@@ -262,28 +257,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </div>
             </div>
           </div>
-          <div className={styles.UFIDinput}>
-            <div className={styles.textwrapper9}>UFID</div>
-            <div className={styles.overlapgroupwrapper}>
-              <div className={styles.overlapgroup}>
-                <TextField variant="standard"
-                  InputProps={{
-                    disableUnderline: true,
-                  }} className={styles.textwrapper10} placeholder="UFID"
-                  margin="none"
-                  required
-                  fullWidth
-                  type="number"
-                  size="small"
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setUFID(event.target.value);
-                  }}
-                  id="ufid"
-                  name="ufid"
-                  autoFocus />
-              </div>
-            </div>
-          </div>
+
           <div className={styles.emailaddressinput}>
             <div className={styles.textwrapper11}>Enter email address</div>
             <div className={styles.divwrapper}>
