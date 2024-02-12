@@ -9,7 +9,11 @@ import { Bio } from "@/components/Bio/Bio";
 import { Profile } from "@/components/Profile/Profile";
 import { TopNavBarSigned } from "@/components/TopNavBarSigned/TopNavBarSigned";
 import styles from "./style.module.css";
+import { ApplicationsCard } from "@/components/ApplicationsCard/ApplicationsCard";
+import { CourseCard } from "@/components/CourseCard/CourseCard";
 import Link from 'next/link';
+import "./style.css";
+
 interface DashboardProps {
   user: any;
   userRole: string;
@@ -104,6 +108,32 @@ export default function DashboardWelcome(props: DashboardProps) {
 
           }
 
+          {(userRole == "faculty") && emailVerified &&
+            <div className={styles.overlap}>
+              <div className={styles.overlap2}>
+                <div className={styles.colorblockframe}>
+                  <div className={styles.overlapgroup2}>
+                    <div className={styles.colorblock} />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                    <div className={styles.glasscard} />
+                  </div>
+                </div>
+                <EceLogoPng className={styles.ecelogopng2} />
+                <Bio user={user} className={styles.fullnameandbioinstance} />
+                <TopNavBarSigned className={styles.topnavbarsignedin} />
+                <div className={styles.textwrapper8}>Home</div>
+              </div>
+              <Link href="/Profile">
+                <Profile className={styles.profileinstance2} profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+              </Link>
+              <Link href="/Applications">
+                <ApplicationsCard className={styles.applicationsinstance} applications="https://c.animaapp.com/ebG6M1rL/img/apply.svg" />
+              </Link>
+              <Link href="/Courses">
+                <CourseCard className={styles.courseinstance} course="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png" />
+              </Link>
+            </div>
+          }
 
           {(userRole == "admin") &&
             <div className={styles.overlap}>
@@ -138,6 +168,7 @@ export default function DashboardWelcome(props: DashboardProps) {
             </div >
 
           }
+
         </div >
       </div >
     </>
