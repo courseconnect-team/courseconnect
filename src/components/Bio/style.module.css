@@ -11,12 +11,18 @@
   border-color: #ffffff;
   border-radius: 100px;
   height: 200px;
-  left: 95px;
+  left: 150px;
   position: absolute;
   top: 0;
   width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
+.fullnameandbio .initial {
+  color:#ffffff;
+  font-size: 100px;
+}
 .fullnameandbio .textwrapper {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;

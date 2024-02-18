@@ -10,11 +10,9 @@
     border-radius: 20px;
     box-shadow: 0px 2px 20px 4px rgba(0, 0, 0, 0.25);
     justify-content: space-between;
-  }
-.applicantStatus:hover{
     cursor: pointer;
-
   }
+
   
   .ellipse {
     position: absolute;
@@ -25,6 +23,12 @@
     background-color: rgba(158, 158, 158, 0.58);
     border: 2px solid #4d4d4d;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .initials {
+    color:#ffffff;
   }
   .name {
     margin: 17px 0 61px 133px;
@@ -40,8 +44,9 @@
   .thumbsContainer4 {
     position: absolute;
     right: 20px;
-      align-items: center;
-      margin: 24px 0 26px 0;
+    align-items: center;
+   
+    margin: 24px 0 26px 0;
   }
   
   
@@ -60,7 +65,7 @@
     background-color: rgba(211, 39, 39, 0.12);
     border: 2px solid #d32727;
     box-sizing: border-box;
-    padding: 14px 39px 14px 39px;
+    padding: 14px 39px 14px 43px;
     
   }
   

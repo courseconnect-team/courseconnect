@@ -100,12 +100,16 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
     setOpenDenyDialog(false);
   };
 
-  const onThumbUpClick = useCallback(() => {
+  const onThumbUpClick = useCallback((event:any) => {
+    event?.stopPropagation()
+
     setOpenApproveDialog(true);
     setCurrentStu(id);
   }, []);
 
-  const onThumbDownIconClick = useCallback(() => {
+  const onThumbDownIconClick = useCallback((event:any) => {
+    event?.stopPropagation()
+
     setOpenDenyDialog(true);
     setCurrentStu(id);
   }, []);
@@ -278,11 +282,16 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   };
 
   return (
-    <div className="applicantCardApprovedeny1">
+    <>
+    {renderApproveDialog()}
+    {renderDenyDialog()}
+    <div className="applicantCardApprovedeny1" onClick={handleCardClick}>
       {!expanded && (
         <>
           <div>
-            <div className="ellipse" />
+            <div className="ellipse">
+            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
+            </div>
             <div
               style={{
                 display: 'flex',
@@ -304,7 +313,6 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                 fontSize: '41px',
               }}
             />
-            {renderApproveDialog()}
             <ThumbDownOffAltIcon
               onClick={onThumbDownIconClick}
               className="thumbsDownIcon"
@@ -312,8 +320,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                 fontSize: '41px',
               }}
             />
-            {renderDenyDialog()}
-            <div className="applicantStatus23"onClick={handleCardClick}>
+            <div className="applicantStatus23">
               <div className="review23">
                 Review
               </div>
@@ -325,7 +332,9 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       {expanded && (
         <div>
           <div>
-            <div className="ellipse" />
+            <div className="ellipse" >
+            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
+            </div>
             <div
               style={{
                 display: 'flex',
@@ -335,8 +344,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               <div className="name">
                 {firstname} {lastname}
               </div>
-              {renderApproveDialog()}
-              {renderDenyDialog()}
+           
               <div style={{ position: 'absolute' }}>
                 <div className="email1">{uf_email}</div>
                 <div className="number">{number}</div>
@@ -357,8 +365,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                     fontSize: '41px',
                   }}
                 />
-                {renderDenyDialog()}
-                <div className="applicantStatus23"onClick={handleCardClick} >
+                <div className="applicantStatus23">
                   <div className="review23" >
                     Review
                   </div>
@@ -430,7 +437,9 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
           </div>
         </div>
       )}
+
     </div>
+    </>
   );
 };
 

@@ -16,7 +16,13 @@
   border-radius: 100px;
   height: 200px;
   width: 190px;
- 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.initials {
+  color:#ffffff;
+  font-size: 100px;
 }
 
 .full-name-and-bio .text-wrapper {
