@@ -36,9 +36,9 @@ interface pageProps {
 const CoursePage: FC<pageProps> = ({ params }) => {
   const db = firebase.firestore();
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
-  const [openDenyDialog, setOpenDenyDialog] = useState(false);  
-  const [openReviewDialog, setOpenReviewDialog] = useState(false);  
-  const [currentStu, setCurrentStu] = useState("null");  
+  const [openDenyDialog, setOpenDenyDialog] = useState(false);
+  const [openReviewDialog, setOpenReviewDialog] = useState(false);
+  const [currentStu, setCurrentStu] = useState("null");
 
   const [expandedStates, setExpandedStates] = useState<{
     [id: string]: boolean;
@@ -66,7 +66,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       collegestatus: string;
       qualifications: string;
       resume: string;
-      plan:string;
+      plan: string;
     }[]
   >([]);
 
@@ -85,7 +85,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       collegestatus: string;
       qualifications: string;
       resume: string;
-      plan:string;
+      plan: string;
     }[]
   >([]);
 
@@ -104,7 +104,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       collegestatus: string;
       qualifications: string;
       resume: string;
-      plan:string;
+      plan: string;
     }[]
   >([]);
 
@@ -114,16 +114,42 @@ const CoursePage: FC<pageProps> = ({ params }) => {
     setSelection(select);
   };
 
-  const getDataByPositionAndStatus = async (position: string, status:string) => {
+  const getDataByPositionAndStatus = async (position: string, status: string) => {
     try {
+      let getQueryParams = query => {
+        return query
+          ? (/^[?#]/.test(query) ? query.slice(1) : query)
+            .split('&')
+            .reduce((params, param) => {
+              let [key, value] = param.split('=');
+              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+              return params;
+            }, {}
+            )
+          : {}
+      };
+      const { data } = getQueryParams(window.location.search);
+      console.log(data);
+
       const snapshot = await db
         .collection('applications')
-        .where('courses', 'array-contains', params.className)
-        .where('status', '==', status)
+        .where(`courses.${data}`, ">=", "")
         .where('position', '==', position)
         .get();
 
-      return snapshot.docs.map((doc) => ({
+      return snapshot.docs.filter(function(doc) {
+        console.log(doc.data());
+
+        if (doc.data().courses[data] == "applied" && selection == "Review") {
+          return true;
+        } else if (doc.data().courses[data] == "accepted" && selection == "Approved") {
+          return true;
+        } else if (doc.data().courses[data] == "denied" && selection == "Denied") {
+          return true;
+        } else {
+          return false;
+        }
+      }).map((doc) => ({
         id: doc.id,
         uf_email: doc.data().uf_email,
         firstname: doc.data().firstname,
@@ -137,7 +163,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
         collegestatus: doc.data().upcoming_sem_status,
         qualifications: doc.data().qualifications,
         resume: doc.data().resume_link,
-        plan:doc.data().grad_plans
+        plan: doc.data().grad_plans
       }));
     } catch (error) {
       console.error(`Error getting ${params.className} applicants: `, error);
@@ -199,20 +225,45 @@ const CoursePage: FC<pageProps> = ({ params }) => {
               uf_email={ta.uf_email}
               firstname={ta.firstname}
               lastname={ta.lastname}
-              resume ={ta.resume}
-              plan ={ta.plan}
-              openApprove = {openApproveDialog}
-              openDeny = {openDenyDialog}
+              resume={ta.resume}
+              plan={ta.plan}
+              openApprove={openApproveDialog}
+              openDeny={openDenyDialog}
               setOpenApproveDialog={setOpenApproveDialog}
               setOpenDenyDialog={setOpenDenyDialog}
-              currentStu = {currentStu}
-              setCurrentStu = {setCurrentStu}
+              currentStu={currentStu}
+              setCurrentStu={setCurrentStu}
             />
           )}
 
           {selection === 'Approved' &&
             (
               <ApplicantCardApprove
+                id={ta.id}
+                number={ta.number}
+                position={ta.position}
+                semester={ta.semester}
+                availability={ta.availability}
+                department={ta.department}
+                degree={ta.degree}
+                collegestatus={ta.collegestatus}
+                qualifications={ta.qualifications}
+                expanded={expandedStates[ta.id] || false}
+                onExpandToggle={() => handleExpandToggle(ta.id)}
+                uf_email={ta.uf_email}
+                firstname={ta.firstname}
+                lastname={ta.lastname}
+                resume={ta.resume}
+                plan={ta.plan}
+                openReview={openReviewDialog}
+                setOpenReviewDialog={setOpenReviewDialog}
+                currentStu={currentStu}
+                setCurrentStu={setCurrentStu}
+              />
+            )}
+
+          {selection === 'Denied' && (
+            <ApplicantCardDeny
               id={ta.id}
               number={ta.number}
               position={ta.position}
@@ -227,37 +278,12 @@ const CoursePage: FC<pageProps> = ({ params }) => {
               uf_email={ta.uf_email}
               firstname={ta.firstname}
               lastname={ta.lastname}
-              resume ={ta.resume}
-              plan ={ta.plan}
-              openReview = {openReviewDialog}
+              resume={ta.resume}
+              plan={ta.plan}
+              openReview={openReviewDialog}
               setOpenReviewDialog={setOpenReviewDialog}
-              currentStu = {currentStu}
-              setCurrentStu = {setCurrentStu}
-              />
-            )}
-
-          {selection === 'Denied' && (
-            <ApplicantCardDeny
-            id={ta.id}
-            number={ta.number}
-            position={ta.position}
-            semester={ta.semester}
-            availability={ta.availability}
-            department={ta.department}
-            degree={ta.degree}
-            collegestatus={ta.collegestatus}
-            qualifications={ta.qualifications}
-            expanded={expandedStates[ta.id] || false}
-            onExpandToggle={() => handleExpandToggle(ta.id)}
-            uf_email={ta.uf_email}
-            firstname={ta.firstname}
-            lastname={ta.lastname}
-            resume ={ta.resume}
-            plan ={ta.plan}
-            openReview = {openReviewDialog}
-            setOpenReviewDialog={setOpenReviewDialog}
-            currentStu = {currentStu}
-            setCurrentStu = {setCurrentStu}
+              currentStu={currentStu}
+              setCurrentStu={setCurrentStu}
             />
           )}
         </div>

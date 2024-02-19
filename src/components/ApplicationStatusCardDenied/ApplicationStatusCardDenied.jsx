@@ -7,7 +7,7 @@ export const ApplicationStatusCardDenied = ({ text, course }) => {
     <div className={`status-card`}>
       <div className="overlap">
         <div className="inner-content">
-          <div className="text-wrapper-6">Applications</div>
+          <div className="text-wrapper-6">Application</div>
         </div>
         <div className={`coarse-assistant-wrapper`}>
           <div className="text-wrapper-7">TA/UPI</div>
@@ -21,11 +21,10 @@ export const ApplicationStatusCardDenied = ({ text, course }) => {
       </div>
       <div className="inner-content-2">
         <div className="text-wrapper-7">Status:</div>
-        <div className="text-wrapper-9">Please reapply using the application form.</div>
       </div>
       <div className="application-button">
         <div className="overlap-group-2">
-          <div className="text-wrapper-10">Applications Denied</div>
+          <div className="text-wrapper-10">Application Denied</div>
         </div>
       </div>
     </div>

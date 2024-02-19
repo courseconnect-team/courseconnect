@@ -37,9 +37,10 @@ import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCar
 import styles from "./style.module.css";
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { query, where, collection, getDocs } from 'firebase/firestore';
+import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 import GetUserName from '@/firebase/util/GetUserName';
 import { log } from 'console';
+import { firestore } from 'firebase-functions/v1';
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -79,55 +80,31 @@ export default function Status() {
     isNew?: boolean;
     mode?: 'edit' | 'view' | undefined;
   }
+  const db = firebase.firestore();
   const { user } = useAuth();
   const userId = user.uid;
   const [role, loading, error] = GetUserRole(user?.uid);
-  const [ufid, load, err] = GetUserUfid(user?.uid);
   const [applicationData, setApplicationData] = React.useState<Application[]>(
     []
   );
   const [applications, setApplications] = React.useState([]);
+  const [courses, setCourses] = useState(null);
+
   React.useEffect(() => {
-    const applicationsRef = firebase.firestore().collection('applications');
-
-    if (role === 'student_applied') {
-      applicationsRef.get().then(function(querySnapshot) {
-        querySnapshot.forEach(function(doc) {
-          //console.log(doc.id, " => ", doc.data());
-          //console.log(doc.data().courses);
-          if (doc.data().ufid == ufid) {
-            console.log(doc.data().courses)
-          }
-        });
+    async function fetch() {
+      const statusRef = db.collection('applications').doc(userId);
+      await getDoc(statusRef).then(doc => {
+        setCourses(doc.data().courses);
+        console.log(courses);
       });
 
-
-
-      // the faculty member can only see applications that specify the same class as they have
-      // get the courses that the application specifies
-      // find the courses that the faculty member teaches
-      // if there is an intersection, then the faculty member can see the application
-
-      // find courses that the faculty member teaches
-
-
-      // now we have every course that the faculty member teaches
-      // we need the course code from each of them
-      // then we can compare them to the courses that the application specifies
-      // if there is an intersection, then the faculty member can see the application
-
-      applicationsRef.get().then((querySnapshot) => {
-        const data = querySnapshot.docs.map(
-          (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Application)
-        );
-        setApplicationData(data);
-      });
+      return;
     }
-  }, [role, user?.email]);
+    if (!courses) {
+      fetch()
+    }
+  }, [courses]);
+
   return (
     <>
       <Toaster />
@@ -160,18 +137,37 @@ export default function Status() {
 
                 <Box sx={{ mt: 50, mb: 2 }}>
 
-                  {role == 'student_applied' && <ApplicationStatusCard
-                    text="TA/UPI"
-                    course="All courses"
-                  />}
-                  {role == 'student_denied' && <ApplicationStatusCardDenied
-                    text="TA/UPI"
-                    course="All courses"
-                  />}
-                  {role == 'student_accepted' && <ApplicationStatusCardAccepted
-                    text="TA/UPI"
-                    course=""
-                  />}
+                  {courses &&
+                    Object.entries(courses).map(([key, value]) => (
+                      <div key={key}>
+                        {value == "applied" &&
+                          <ApplicationStatusCard
+                            text="TA/UPI"
+                            course={key}
+                          />
+
+                        }
+                        {value == "denied" &&
+                          <ApplicationStatusCardDenied
+                            text="TA/UPI"
+                            course={key}
+                          />
+
+                        }
+                        {value == "accepted" &&
+                          <ApplicationStatusCardAccepted
+                            text="TA/UPI"
+                            course={key}
+                          />
+
+                        }
+
+                        <br />
+                      </div>
+
+
+                    ))}
+
 
                 </Box>
               </Box>
@@ -179,7 +175,7 @@ export default function Status() {
 
           </div>
         </div>
-      </div>
+      </div >
     </>
 
   );

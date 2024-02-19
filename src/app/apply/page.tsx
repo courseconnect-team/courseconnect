@@ -106,6 +106,11 @@ export default function Application() {
       .map((professorEmail) => professorEmail.trim())
       .map((professorEmail) => professorEmail.replace(/\s/g, ''));
 
+    let coursesMap: { [key: string]: string } = {}
+    for (let i = 0; i < coursesArray.length; i++) {
+      coursesMap[coursesArray[i]] = "applied";
+    }
+
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
       firstname: formData.get('firstName') as string,
@@ -123,7 +128,7 @@ export default function Application() {
       position: formData.get('positions-radio-group') as string,
       available_hours: availabilityArray as string[],
       available_semesters: semesterArray as string[],
-      courses: coursesArray as string[],
+      courses: coursesMap,
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
       date: current_date,
@@ -175,7 +180,7 @@ export default function Application() {
       toast.error('Please enter your available semesters!');
       setLoading(false);
       return;
-    } else if (applicationData.courses.length == 0) {
+    } else if (coursesArray.length == 0) {
       toast.error('Please enter your courses!');
       setLoading(false);
       return;

@@ -10,6 +10,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 
+import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
   id: string;
   uf_email: string;
@@ -61,7 +62,24 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
 
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      await statusRef.update({ status: 'Review' });
+      let doc = await getDoc(statusRef);
+      let coursesMap = doc.data().courses;
+      let getQueryParams = query => {
+        return query
+          ? (/^[?#]/.test(query) ? query.slice(1) : query)
+            .split('&')
+            .reduce((params, param) => {
+              let [key, value] = param.split('=');
+              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+              return params;
+            }, {}
+            )
+          : {}
+      };
+      const { data } = getQueryParams(window.location.search);
+      coursesMap[data] = "applied"
+      console.log(coursesMap);
+      await statusRef.update({ courses: coursesMap });
       console.log('Application moved successfully');
       window.location.reload();
     } catch (error) {
@@ -203,7 +221,7 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
               <div style={{ position: 'absolute' }}>
                 <div className="email1">{uf_email}</div>
                 <div className="number">{number}</div>
-              </div>     
+              </div>
             </div>
           </div>
 
@@ -215,110 +233,110 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
               flexWrap: 'wrap',
             }}
           >
-              <div style={{ display: 'flex', gap: '61px' }}>
-                <div className="label50">Applying for:</div>
-                <div>{position}</div>
-              </div>
-              <div style={{ display: 'flex', gap: '61px' }}>
-                <div className="label50">Semester(s):</div>
-                <div>{semester}</div>
-              </div>
-              <div style={{ display: 'flex', gap: '75px' }}>
-                <div className="label50">Availability:</div>
-                <div className="availability1">{availability}</div>
+            <div style={{ display: 'flex', gap: '61px' }}>
+              <div className="label50">Applying for:</div>
+              <div>{position}</div>
+            </div>
+            <div style={{ display: 'flex', gap: '61px' }}>
+              <div className="label50">Semester(s):</div>
+              <div>{semester}</div>
+            </div>
+            <div style={{ display: 'flex', gap: '75px' }}>
+              <div className="label50">Availability:</div>
+              <div className="availability1">{availability}</div>
+            </div>
+
+            <br></br>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row', // Keep it as 'row' for a horizontal row layout
+                gap: '144px', // Adjust the gap as needed
+                marginBottom: '31px',
+              }}
+            >
+              <div>
+                <div className="label50">Department:</div>
+                <div
+                  style={{ textAlign: 'center' }}
+                  className="availability1"
+                >
+                  {department}
+                </div>
               </div>
 
-              <br></br>
+              <div>
+                <div className="label50">Degree:</div>
+                <div
+                  style={{ textAlign: 'center' }}
+                  className="availability1"
+                >
+                  {degree}
+                </div>
+              </div>
+
+              <div>
+                <div className="label50">Upcoming semester status:</div>
+                <div
+                  style={{ textAlign: 'center' }}
+                  className="availability1"
+                >
+                  {collegestatus}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '10px' }} className="label50">
+              Qualifications:
+            </div>
+            <div className="availability1" style={{ marginBottom: '31px' }}>
+              {qualifications}
+            </div>
+            <div style={{ marginBottom: '10px' }} className="label50">
+              Graduate Plan:
+            </div>
+            <div className="availability1" style={{ marginBottom: '31px' }}>
+              {plan}
+            </div>
+            <div style={{ marginBottom: '10px' }} className="label50">
+              Resume Link:
+            </div>
+            {resume ? (
+              <a style={{ marginBottom: '104px' }} href={resume}>
+                {resume}
+              </a>
+            ) : (
               <div
                 style={{
-                  display: 'flex',
-                  flexDirection: 'row', // Keep it as 'row' for a horizontal row layout
-                  gap: '144px', // Adjust the gap as needed
-                  marginBottom: '31px',
+                  marginBottom: '104px',
+                  fontSize: '20px',
+                  color: '#9e9e9e',
                 }}
               >
-                <div>
-                  <div className="label50">Department:</div>
-                  <div
-                    style={{ textAlign: 'center' }}
-                    className="availability1"
-                  >
-                    {department}
-                  </div>
-                </div>
+                Resume Missing
+              </div>
+            )}
+          </div>
+          <Button
+            variant="outlined"
+            style={{
 
-                <div>
-                  <div className="label50">Degree:</div>
-                  <div
-                    style={{ textAlign: 'center' }}
-                    className="availability1"
-                  >
-                    {degree}
-                  </div>
-                </div>
+              borderRadius: '10px',
 
-                <div>
-                  <div className="label50">Upcoming semester status:</div>
-                  <div
-                    style={{ textAlign: 'center' }}
-                    className="availability1"
-                  >
-                    {collegestatus}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '10px' }} className="label50">
-                Qualifications:
-              </div>
-              <div className="availability1" style={{ marginBottom: '31px' }}>
-                {qualifications}
-              </div>
-              <div style={{ marginBottom: '10px' }} className="label50">
-                Graduate Plan:
-              </div>
-              <div className="availability1" style={{ marginBottom: '31px' }}>
-                {plan}
-              </div>
-              <div style={{ marginBottom: '10px' }} className="label50">
-                Resume Link:
-              </div>
-              {resume ? (
-                <a style={{ marginBottom: '104px' }} href={resume}>
-                  {resume}
-                </a>
-              ) : (
-                <div
-                  style={{
-                    marginBottom: '104px',
-                    fontSize: '20px',
-                    color: '#9e9e9e',
-                  }}
-                >
-                  Resume Missing
-                </div>
-              )}
-            </div>
-            <Button
-              variant="outlined"
-              style={{
-                
-                borderRadius: '10px',
-              
-                position:'absolute',
-                right: '20px',
-                bottom:'24px',
-                height: '43px',
-                width: '192px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                borderColor: '#5736ac',
-                color: '#5736ac',
-              }}
-              onClick={handleOpenReview}
-            >
-              Move to in Review
-            </Button>
+              position: 'absolute',
+              right: '20px',
+              bottom: '24px',
+              height: '43px',
+              width: '192px',
+              textTransform: 'none',
+              fontFamily: 'SF Pro Display-Bold , Helvetica',
+              borderColor: '#5736ac',
+              color: '#5736ac',
+            }}
+            onClick={handleOpenReview}
+          >
+            Move to in Review
+          </Button>
         </div>
       )}
     </div>

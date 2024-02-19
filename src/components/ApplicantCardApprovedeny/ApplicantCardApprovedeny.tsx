@@ -12,8 +12,9 @@ import { wrap } from 'module';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 
+import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
-  id:string;
+  id: string;
   uf_email: string;
   firstname: string;
   lastname: string;
@@ -60,16 +61,33 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   setOpenDenyDialog,
   currentStu,
   setCurrentStu
-  
+
 }) => {
 
   const db = firebase.firestore();
   const handleApproveSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-   
+
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      await statusRef.update({ status: 'Approved' });
+      let doc = await getDoc(statusRef);
+      let coursesMap = doc.data().courses;
+      let getQueryParams = query => {
+        return query
+          ? (/^[?#]/.test(query) ? query.slice(1) : query)
+            .split('&')
+            .reduce((params, param) => {
+              let [key, value] = param.split('=');
+              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+              return params;
+            }, {}
+            )
+          : {}
+      };
+      const { data } = getQueryParams(window.location.search);
+      coursesMap[data] = "accepted"
+      console.log(coursesMap);
+      await statusRef.update({ courses: coursesMap });
       console.log('Application approved successfully');
       window.location.reload();
 
@@ -77,12 +95,29 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       console.error('Error approving application:', error);
     }
   };
-  
+
   const handleDenySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      await statusRef.update({ status: 'Denied' });
+      let doc = await getDoc(statusRef);
+      let coursesMap = doc.data().courses;
+      let getQueryParams = query => {
+        return query
+          ? (/^[?#]/.test(query) ? query.slice(1) : query)
+            .split('&')
+            .reduce((params, param) => {
+              let [key, value] = param.split('=');
+              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+              return params;
+            }, {}
+            )
+          : {}
+      };
+      const { data } = getQueryParams(window.location.search);
+      coursesMap[data] = "denied"
+      console.log(coursesMap);
+      await statusRef.update({ courses: coursesMap });
       console.log('Application denied successfully');
       window.location.reload();
 
@@ -111,7 +146,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   }, []);
 
   const renderApproveDialog = () => (
-    
+
     <Dialog
       style={{
         borderImage:
@@ -183,13 +218,13 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               backgroundColor: '#5736ac',
               color: '#ffffff',
             }}
-            type = "submit"
-            
+            type="submit"
+
           >
             Approve
           </Button>
         </DialogActions>
-        </form>
+      </form>
     </Dialog>
   );
   const renderDenyDialog = () => (
@@ -313,7 +348,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               }}
             />
             {renderDenyDialog()}
-            <div className="applicantStatus23"onClick={handleCardClick}>
+            <div className="applicantStatus23" onClick={handleCardClick}>
               <div className="review23">
                 Review
               </div>
@@ -347,7 +382,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                   className="thumbsUpIcon"
                   style={{
                     fontSize: '41px',
-                    
+
                   }}
                 />
                 <ThumbDownOffAltIcon
@@ -358,7 +393,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                   }}
                 />
                 {renderDenyDialog()}
-                <div className="applicantStatus23"onClick={handleCardClick} >
+                <div className="applicantStatus23" onClick={handleCardClick} >
                   <div className="review23" >
                     Review
                   </div>
@@ -377,17 +412,17 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
             }}
           >
 
-            <div style = {{display:'flex', gap:'61px'}}>
-            <div className="label50">Applying for:</div>
-            <div >{position}</div>
+            <div style={{ display: 'flex', gap: '61px' }}>
+              <div className="label50">Applying for:</div>
+              <div >{position}</div>
             </div>
-            <div style = {{display:'flex', gap:'61px'}}>
-            <div className="label50">Semester(s):</div>
-            <div>{semester}</div>
+            <div style={{ display: 'flex', gap: '61px' }}>
+              <div className="label50">Semester(s):</div>
+              <div>{semester}</div>
             </div>
-            <div style = {{display:'flex', gap:'75px'}}>
-            <div className="label50">Availability:</div>
-            <div className="availability1">{availability}</div>
+            <div style={{ display: 'flex', gap: '75px' }}>
+              <div className="label50">Availability:</div>
+              <div className="availability1">{availability}</div>
             </div>
 
             <br></br>
@@ -401,29 +436,29 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
             >
               <div>
                 <div className="label50">Department:</div>
-                <div style = {{textAlign: "center"}} className="availability1">{department}</div>
+                <div style={{ textAlign: "center" }} className="availability1">{department}</div>
               </div>
 
               <div>
                 <div className="label50">Degree:</div>
-                <div style = {{textAlign: "center"}} className="availability1">{degree}</div>
+                <div style={{ textAlign: "center" }} className="availability1">{degree}</div>
               </div>
 
               <div>
                 <div className="label50">Upcoming semester status:</div>
-                <div style = {{textAlign: "center"}} className="availability1">{collegestatus}</div>
+                <div style={{ textAlign: "center" }} className="availability1">{collegestatus}</div>
               </div>
             </div>
 
-            <div style = {{marginBottom: '10px'}}className="label50">Qualifications:</div>
+            <div style={{ marginBottom: '10px' }} className="label50">Qualifications:</div>
             <div className="availability1" style={{ marginBottom: '31px' }}>
               {qualifications}
             </div>
-            <div style = {{marginBottom: '10px'}} className="label50">Graduate Plan:</div>
+            <div style={{ marginBottom: '10px' }} className="label50">Graduate Plan:</div>
             <div className="availability1" style={{ marginBottom: '31px' }}>
               {plan}
             </div>
-            <div style = {{marginBottom: '10px'}} className="label50">Resume Link:</div>
+            <div style={{ marginBottom: '10px' }} className="label50">Resume Link:</div>
             <a style={{ marginBottom: '104px' }} href={resume}>
               {resume}
             </a>
