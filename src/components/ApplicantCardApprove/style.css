@@ -10,13 +10,12 @@
     border-radius: 20px;
     box-shadow: 0px 2px 20px 4px rgba(0, 0, 0, 0.25);
     justify-content: space-between;
-  }
-
-  .applicantStatus3:hover{
     cursor: pointer;
 
   }
-  
+
+
+ 
   .ellipse {
     position: absolute;
     height: 71px;
@@ -26,6 +25,12 @@
     background-color: rgba(158, 158, 158, 0.58);
     border: 2px solid #4d4d4d;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .initial {
+    color:#ffffff;
   }
   .name {
     margin: 17px 0 61px 133px;
@@ -40,8 +45,9 @@
   .thumbsContainer1{
     position: absolute;
     right: 20px;
-      align-items: center;
-      margin: 24px 0 26px 0;
+    align-items: center;
+    margin: 24px 0 26px 0;
+    justify-content: center;
   }
   
  
@@ -61,7 +67,7 @@
     background-color:rgba(34, 136, 76, 0.12);
     border: 2px solid #22884c;
     box-sizing: border-box;
-    padding: 14px 50px 14px 30px;
+    padding: 14px 55px 14px 30px;
     
   }
 

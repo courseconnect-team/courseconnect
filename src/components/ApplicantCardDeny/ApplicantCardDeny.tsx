@@ -91,7 +91,8 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
     setOpenReviewDialog(false);
   };
 
-  const handleOpenReview = useCallback(() => {
+  const handleOpenReview = useCallback((event:any) => {
+    event?.stopPropagation()
     setOpenReviewDialog(true);
     setCurrentStu(id);
   }, []);
@@ -181,11 +182,15 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
   };
 
   return (
-    <div className="applicantCardDeny1">
+    <>
+  {renderReviewDialog()}
+    <div className="applicantCardDeny1" onClick={handleCardClick}>
       {!expanded && (
         <>
           <div>
-            <div className="ellipse" />
+          <div className="ellipse">
+            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
+            </div>
             <div className="ufid">Email: {uf_email}</div>
             <div className="name">
               {firstname} {lastname}
@@ -193,7 +198,7 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
           </div>
 
           <div className="thumbsContainer4">
-            <div className="applicantStatus" onClick={handleCardClick}>
+            <div className="applicantStatus">
               <div className="deny">Denied</div>
             </div>
           </div>
@@ -202,7 +207,9 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
       {expanded && (
         <div>
           <div>
-            <div className="ellipse" />
+          <div className="ellipse">
+            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
+            </div>
             <div
               style={{
                 display: 'flex',
@@ -212,9 +219,9 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
               <div className="name">
                 {firstname} {lastname}
               </div>
-              {renderReviewDialog()}
+            
               <div className="thumbsContainer4">
-                <div className="applicantStatus" onClick={handleCardClick}>
+                <div className="applicantStatus">
                   <div className="deny">Denied</div>
                 </div>
               </div>
@@ -340,6 +347,7 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
         </div>
       )}
     </div>
+    </>
   );
 };
 

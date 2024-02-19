@@ -50,7 +50,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       [id]: !prevExpandedStates[id],
     }));
   };
-
+ 
   const [taData, setTaData] = useState<
     {
       id: string;
@@ -112,6 +112,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
 
   const toggleSelection = (select: string): void => {
     setSelection(select);
+    setExpandedStates({})
   };
 
   const getDataByPositionAndStatus = async (position: string, status: string) => {

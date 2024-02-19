@@ -89,7 +89,9 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
     setOpenReviewDialog(false);
   };
 
-  const handleOpenReview = useCallback(() => {
+  const handleOpenReview = useCallback((event:any) => {
+    event?.stopPropagation()
+
     setOpenReviewDialog(true);
     setCurrentStu(id);
   }, []);
@@ -179,19 +181,24 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
   };
 
   return (
-    <div className="applicantCardApprove1">
+  <>
+  {renderReviewDialog()}
+    <div className="applicantCardApprove1"  onClick={handleCardClick} >
       {!expanded && (
         <>
-          <div>
-            <div className="ellipse" />
+          <div >
+          <div className="ellipse">
+            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
+            </div>
             <div className="ufid">Email: {uf_email}</div>
             <div className="name">
               {firstname} {lastname}
             </div>
           </div>
+          
 
           <div className="thumbsContainer1">
-            <div className="applicantStatus3" onClick={handleCardClick}>
+            <div className="applicantStatus3" >
               <div className="approved1">Approved</div>
             </div>
           </div>
@@ -201,7 +208,9 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
       {expanded && (
         <div>
           <div>
-            <div className="ellipse" />
+          <div className="ellipse">
+            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
+            </div>
             <div
               style={{
                 display: 'flex',
@@ -211,9 +220,9 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
               <div className="name">
                 {firstname} {lastname}
               </div>
-              {renderReviewDialog()}
+             
               <div className="thumbsContainer1">
-                <div className="applicantStatus3" onClick={handleCardClick}>
+                <div className="applicantStatus3" >
                   <div className="approved1">Approved</div>
                 </div>
               </div>
@@ -341,6 +350,7 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
         </div>
       )}
     </div>
+    </>
   );
 };
 
