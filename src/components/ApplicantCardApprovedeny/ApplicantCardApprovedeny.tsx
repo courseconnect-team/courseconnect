@@ -28,6 +28,7 @@ interface ApplicantCardProps {
   qualifications: string;
   resume: string;
   plan: string;
+  gpa: string;
   expanded: boolean;
   onExpandToggle: any;
   openApprove: boolean;
@@ -53,6 +54,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   qualifications,
   resume,
   plan,
+  gpa,
   expanded,
   onExpandToggle,
   openApprove,
@@ -425,11 +427,11 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                 <div >{position}</div>
               </div>
               <div style={{ display: 'flex', gap: '61px' }}>
-                <div className="label50">Semester(s):</div>
+                <div className="label50">Available Semester(s):</div>
                 <div>{semester}</div>
               </div>
               <div style={{ display: 'flex', gap: '75px' }}>
-                <div className="label50">Availability:</div>
+                <div className="label50">Available Hours Per Week:</div>
                 <div className="availability1">{availability}</div>
               </div>
 
@@ -453,8 +455,8 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                 </div>
 
                 <div>
-                  <div className="label50">Upcoming semester status:</div>
-                  <div style={{ textAlign: "center" }} className="availability1">{collegestatus}</div>
+                  <div className="label50">GPA:</div>
+                  <div style={{ textAlign: "center" }} className="availability1">{gpa}</div>
                 </div>
               </div>
 
@@ -462,10 +464,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               <div className="availability1" style={{ marginBottom: '31px' }}>
                 {qualifications}
               </div>
-              <div style={{ marginBottom: '10px' }} className="label50">Graduate Plan:</div>
-              <div className="availability1" style={{ marginBottom: '31px' }}>
-                {plan}
-              </div>
+
               <div style={{ marginBottom: '10px' }} className="label50">Resume Link:</div>
               <a style={{ marginBottom: '104px' }} href={resume}>
                 {resume}

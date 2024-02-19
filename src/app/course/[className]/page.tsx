@@ -50,7 +50,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       [id]: !prevExpandedStates[id],
     }));
   };
- 
+
   const [taData, setTaData] = useState<
     {
       id: string;
@@ -67,6 +67,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       qualifications: string;
       resume: string;
       plan: string;
+      gpa: string;
     }[]
   >([]);
 
@@ -86,6 +87,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       qualifications: string;
       resume: string;
       plan: string;
+      gpa: string;
     }[]
   >([]);
 
@@ -105,6 +107,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       qualifications: string;
       resume: string;
       plan: string;
+      gpa: string;
     }[]
   >([]);
 
@@ -139,9 +142,10 @@ const CoursePage: FC<pageProps> = ({ params }) => {
         .get();
 
       return snapshot.docs.filter(function(doc) {
-        console.log(doc.data());
 
         if (doc.data().courses[data] == "applied" && selection == "Review") {
+
+          console.log(doc.data());
           return true;
         } else if (doc.data().courses[data] == "accepted" && selection == "Approved") {
           return true;
@@ -151,20 +155,22 @@ const CoursePage: FC<pageProps> = ({ params }) => {
           return false;
         }
       }).map((doc) => ({
+
         id: doc.id,
-        uf_email: doc.data().uf_email,
+        uf_email: doc.data().email,
         firstname: doc.data().firstname,
         lastname: doc.data().lastname,
-        number: doc.data().phone,
+        number: doc.data().phonenumber,
         position: doc.data().position,
-        semester: doc.data().semesters,
-        availability: doc.data().availability,
-        department: doc.data().dept,
+        semester: doc.data().available_semesters,
+        availability: doc.data().available_hours,
+        department: doc.data().department,
         degree: doc.data().degree,
-        collegestatus: doc.data().upcoming_sem_status,
+        collegestatus: doc.data().semesterstatus,
         qualifications: doc.data().qualifications,
         resume: doc.data().resume_link,
-        plan: doc.data().grad_plans
+        plan: doc.data().grad_plans,
+        gpa: doc.data().gpa,
       }));
     } catch (error) {
       console.error(`Error getting ${params.className} applicants: `, error);
@@ -205,6 +211,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       qualifications: string;
       resume: string;
       plan: string;
+      gpa: string;
     }[]
   ) => {
     return data.map((ta) => {
@@ -228,6 +235,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
               lastname={ta.lastname}
               resume={ta.resume}
               plan={ta.plan}
+              gpa={ta.gpa}
               openApprove={openApproveDialog}
               openDeny={openDenyDialog}
               setOpenApproveDialog={setOpenApproveDialog}
@@ -256,6 +264,8 @@ const CoursePage: FC<pageProps> = ({ params }) => {
                 lastname={ta.lastname}
                 resume={ta.resume}
                 plan={ta.plan}
+
+                gpa={ta.gpa}
                 openReview={openReviewDialog}
                 setOpenReviewDialog={setOpenReviewDialog}
                 currentStu={currentStu}
@@ -281,6 +291,8 @@ const CoursePage: FC<pageProps> = ({ params }) => {
               lastname={ta.lastname}
               resume={ta.resume}
               plan={ta.plan}
+
+              gpa={ta.gpa}
               openReview={openReviewDialog}
               setOpenReviewDialog={setOpenReviewDialog}
               currentStu={currentStu}
