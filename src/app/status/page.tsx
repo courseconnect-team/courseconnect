@@ -100,7 +100,7 @@ export default function Status() {
         if (doc.data() != null && doc.data() != undefined) {
 
           console.log(doc.data());
-          setAssignment(doc.data().course_codes)
+          setAssignment(doc.data().class_codes)
         }
       });
 
