@@ -10,7 +10,7 @@ export const ApplicationStatusCardDenied = ({ text, course }) => {
           <div className="text-wrapper-6">Application</div>
         </div>
         <div className={`coarse-assistant-wrapper`}>
-          <div className="text-wrapper-7">TA/UPI</div>
+          <div className="text-wrapper-7">{text}</div>
         </div>
         <div className="overlap-2">
           <div className="div-wrapper">

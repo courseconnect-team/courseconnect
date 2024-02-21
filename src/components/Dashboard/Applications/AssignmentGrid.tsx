@@ -54,6 +54,7 @@ interface Assignment {
   date: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
+
 }
 
 interface AssignmentGridProps {
@@ -423,6 +424,18 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
     },
     {
+      field: 'email',
+      headerName: 'Email',
+      width: 210,
+      editable: true,
+    },
+    {
+      field: 'semesters',
+      headerName: 'Available Semesters',
+      width: 210,
+      editable: true,
+    },
+    {
       field: 'hours',
       headerName: 'Hours',
       width: 100,
@@ -430,11 +443,14 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
     {
       field: 'class_codes',
-      headerName: 'Class Codes',
-      width: 250,
+      headerName: 'Assigned Class Code',
+      width: 180,
       editable: true,
     },
-    { field: 'date', headerName: 'Date Approved', width: 120, editable: true },
+    { field: 'date', headerName: 'Date Approved', width: 170, editable: true },
+
+    { field: 'position', headerName: 'Position', width: 100, editable: true },
+
   ];
   const ODD_OPACITY = 0.2;
 

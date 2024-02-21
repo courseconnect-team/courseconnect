@@ -89,20 +89,37 @@ export default function Status() {
   );
   const [applications, setApplications] = React.useState([]);
   const [courses, setCourses] = useState(null);
+  const [adminDenied, setAdminDenied] = useState(false);
+
+  const [assignment, setAssignment] = useState(null);
 
   React.useEffect(() => {
     async function fetch() {
+      const statusRef2 = db.collection('assignments').doc(userId);
+      await getDoc(statusRef2).then(doc => {
+        if (doc.data() != null && doc.data() != undefined) {
+
+          console.log(doc.data());
+          setAssignment(doc.data().course_codes)
+        }
+      });
+
       const statusRef = db.collection('applications').doc(userId);
       await getDoc(statusRef).then(doc => {
-        setCourses(doc.data().courses);
-        console.log(courses);
+        if (doc.data() != null && doc.data() != undefined) {
+          setAdminDenied(doc.data().status == "Admin_denied")
+          setCourses(doc.data().courses);
+        }
       });
+
 
       return;
     }
     if (!courses) {
       fetch()
+
     }
+
   }, [courses]);
 
   return (
@@ -136,27 +153,49 @@ export default function Status() {
               >
 
                 <Box sx={{ mt: 50, mb: 2 }}>
+                  {courses && adminDenied &&
+                    Object.entries(courses).map(([key, value]) => (
+                      <div key={key}>
 
-                  {courses &&
+                        <ApplicationStatusCardDenied
+                          text="TA/UPI/Grader"
+                          course={key}
+                        />
+
+
+                        <br />
+                      </div>
+
+
+                    ))}
+
+                  {assignment && !adminDenied &&
+                    <ApplicationStatusCardAccepted
+                      text="TA/UPI/Grader"
+                      course={assignment}
+                    />
+                  }
+
+                  {courses && !assignment && !adminDenied &&
                     Object.entries(courses).map(([key, value]) => (
                       <div key={key}>
                         {value == "applied" &&
                           <ApplicationStatusCard
-                            text="TA/UPI"
+                            text="TA/UPI/Grader"
                             course={key}
                           />
 
                         }
                         {value == "denied" &&
                           <ApplicationStatusCardDenied
-                            text="TA/UPI"
+                            text="TA/UPI/Grader"
                             course={key}
                           />
 
                         }
                         {value == "accepted" &&
-                          <ApplicationStatusCardAccepted
-                            text="TA/UPI"
+                          <ApplicationStatusCard
+                            text="TA/UPI/Grader"
                             course={key}
                           />
 

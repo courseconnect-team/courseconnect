@@ -40,6 +40,10 @@ export default function AppView({ uid }: AppViewProps) {
             {docData.name}
           </Typography>
 
+          <Typography variant="h6">Email:</Typography>
+          <Typography variant="body1" style={{ marginBottom: '10px' }}>
+            {docData.email}
+          </Typography>
           <Typography variant="h6">Class Codes:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
             {docData.class_codes}
@@ -47,6 +51,16 @@ export default function AppView({ uid }: AppViewProps) {
           <Typography variant="h6">Hours of Availability:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
             {docData.hours}
+          </Typography>
+
+
+          <Typography variant="h6">Available Semesters:</Typography>
+          <Typography variant="body1" style={{ marginBottom: '10px' }}>
+            {docData.semesters}
+          </Typography>
+          <Typography variant="h6">Position Type:</Typography>
+          <Typography variant="body1" style={{ marginBottom: '10px' }}>
+            {docData.position}
           </Typography>
 
         </>

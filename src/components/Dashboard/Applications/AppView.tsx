@@ -20,6 +20,8 @@ export default function AppView({ uid }: AppViewProps) {
       .get()
       .then((doc) => {
         if (doc.exists) {
+          console.log(doc.data());
+
           setDocData(doc.data());
         } else {
           console.log('No such document!');
@@ -35,7 +37,7 @@ export default function AppView({ uid }: AppViewProps) {
         <>
           <Typography variant="h6">Timestamp:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.timestamp}
+            {docData.date}
           </Typography>
 
           <Typography variant="h6">First Name:</Typography>
@@ -50,17 +52,17 @@ export default function AppView({ uid }: AppViewProps) {
 
           <Typography variant="h6">UF Email:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.uf_email}
+            {docData.email}
           </Typography>
 
           <Typography variant="h6">Phone:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.phone}
+            {docData.phonenumber}
           </Typography>
 
           <Typography variant="h6">Department:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.dept}
+            {docData.department}
           </Typography>
 
           <Typography variant="h6">Degree:</Typography>
@@ -70,7 +72,7 @@ export default function AppView({ uid }: AppViewProps) {
 
           <Typography variant="h6">Upcoming Semester Status:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.upcoming_sem_status}
+            {docData.semesterstatus}
           </Typography>
 
 
@@ -81,17 +83,18 @@ export default function AppView({ uid }: AppViewProps) {
 
           <Typography variant="h6">Semesters:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.semesters}
+            {docData.available_semesters}
           </Typography>
 
           <Typography variant="h6">Availability:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.availability}
+            {docData.available_hours}
           </Typography>
 
           <Typography variant="h6">Courses:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.courses}
+            {Object.entries(docData.courses).filter(([key, value]) => (value == "accepted")).map(([key, value]) => (key))
+            }
           </Typography>
 
           <Typography variant="h6">Qualifications:</Typography>
@@ -101,7 +104,7 @@ export default function AppView({ uid }: AppViewProps) {
 
           <Typography variant="h6">Graduate Plans:</Typography>
           <Typography variant="body1" style={{ marginBottom: '10px' }}>
-            {docData.grad_plans}
+            {docData.additionalprompt}
           </Typography>
 
           {docData.fee_waiver ? (
