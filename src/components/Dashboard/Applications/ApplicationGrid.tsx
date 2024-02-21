@@ -812,7 +812,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               >
                 {codes.map((code) => {
                   return (
-                    <FormControlLabel
+                    <FormControlLabel key={code}
                       value={code}
                       control={<Radio />}
                       label={code}
