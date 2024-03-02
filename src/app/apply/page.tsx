@@ -86,16 +86,16 @@ export default function Application() {
 
     // extract semester checkbox's values
     const semesterCheckbox_fall_2023 =
-      formData.get('semesterCheckbox_fall_2023') === 'on';
+      formData.get('semesterCheckbox_fall_2024') === 'on';
     const semesterCheckbox_spring_2024 =
-      formData.get('semesterCheckbox_spring_2024') === 'on';
+      formData.get('semesterCheckbox_spring_2025') === 'on';
 
     const semesterArray: string[] = [];
     if (semesterCheckbox_fall_2023) {
-      semesterArray.push('Fall 2023');
+      semesterArray.push('Fall 2024');
     }
     if (semesterCheckbox_spring_2024) {
-      semesterArray.push('Spring 2024');
+      semesterArray.push('Spring 2025');
     }
 
     // get courses as array
