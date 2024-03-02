@@ -26,7 +26,7 @@ import {
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { LinearProgress } from '@mui/material';
+import { LinearProgress, Button } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 
 interface User {
@@ -224,7 +224,7 @@ export default function UserGrid(props: UserGridProps) {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 100,
+      width: 200,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -252,21 +252,33 @@ export default function UserGrid(props: UserGridProps) {
         }
 
         return [
-          <GridActionsCellItem
-            key="3"
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
+          <Button
+            key="8"
+            variant="outlined"
+            color='inherit'
+            size="small"
+            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
+            startIcon={
+              <EditIcon />
+            }
             onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="4"
-            icon={<DeleteIcon />}
-            label="Delete"
+          >
+            Edit
+          </Button>,
+
+          <Button
+            key="7"
+            variant="outlined"
+            color='primary'
+            size="small"
+            style={{ marginRight: "20px", height: "25px", textTransform: "none" }}
+            startIcon={
+              <DeleteIcon />
+            }
             onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
+          >
+            Delete
+          </Button>,
         ];
       },
     },
