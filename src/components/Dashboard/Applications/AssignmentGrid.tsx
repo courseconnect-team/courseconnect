@@ -93,6 +93,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
   // pop-up view setup
   const [open, setOpen] = React.useState(false);
+  const [delDia, setDelDia] = React.useState(false);
+  const [delId, setDelId] = React.useState();
   const [selectedUserGrid, setSelectedUserGrid] =
     React.useState<GridRowId | null>(null);
 
@@ -104,7 +106,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   const handleClose = () => {
     setOpen(false);
   };
-
+  const handleDeleteDiagClose = () => {
+    setDelDia(false);
+  }
   // assignment dialog pop-up view setup
   const [openAssignmentDialog, setOpenAssignmentDialog] = React.useState(false);
   const handleOpenAssignmentDialog = (id: GridRowId) => {
@@ -238,7 +242,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     }
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
+  const handleDeleteClick = (id: GridRowId) => {
     setLoading(true);
     firebase
       .firestore()
@@ -253,6 +257,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         setLoading(false);
         console.error('Error removing document: ', error);
       });
+  };
+  const handleDel = (id: GridRowId) => () => {
+    setDelId(id);
+    setDelDia(true);
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -280,7 +288,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       setLoading(false);
     }
   };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(delId.toString());
+    handleDeleteClick(delId);
+    setDelDia(false)
 
+  }
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
     setLoading(true);
     const updatedRow = {
@@ -409,7 +423,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             startIcon={
               <DeleteIcon />
             }
-            onClick={handleDeleteClick(id)}
+            onClick={handleDel(id)}
           >
             Delete
           </Button>,
@@ -537,6 +551,26 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             </div>
           )}
         </DialogContent>
+      </Dialog>
+
+      <Dialog style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
+      }} open={delDia} onClose={handleDeleteDiagClose} >
+        <DialogTitle style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>Delete Applicant</DialogTitle>
+        <form onSubmit={e => handleSubmit(e)}>
+          <DialogContent>
+            <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "24px", color: "black" }}>
+              Are you sure you want to delete this applicant?
+            </DialogContentText>
+
+
+          </DialogContent>
+          <DialogActions style={{ marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap: "93px" }}>
+            <Button variant="outlined" style={{ fontSize: "17px", marginLeft: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac', borderWidth: "3px" }} onClick={handleDeleteDiagClose}>Cancel</Button>
+
+            <Button variant="contained" style={{ fontSize: "17px", marginRight: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff' }} type="submit">Delete</Button>
+          </DialogActions>
+        </form>
       </Dialog>
 
       <Dialog open={openAssignmentDialog} onClose={handleCloseAssignmentDialog}>
