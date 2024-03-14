@@ -23,6 +23,14 @@ import {
   useGridApiContext,
   gridClasses
 } from '@mui/x-data-grid';
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+} from '@mui/material';
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -72,6 +80,9 @@ interface UserGridProps {
 export default function UserGrid(props: UserGridProps) {
   const { userRole } = props;
   const [userData, setUserData] = React.useState<User[]>([]);
+  const [open, setOpen] = React.useState(false);
+  const [delDia, setDelDia] = React.useState(false);
+  const [delId, setDelId] = React.useState();
 
   React.useEffect(() => {
     const usersRef = firebase.firestore().collection('users');
@@ -86,7 +97,10 @@ export default function UserGrid(props: UserGridProps) {
       setUserData(data);
     });
   }, []);
+  const handleDeleteDiagClose = () => {
 
+    setDelDia(false);
+  }
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
@@ -125,8 +139,11 @@ export default function UserGrid(props: UserGridProps) {
       console.error('No matching user data found for id: ', id);
     }
   };
-
-  const handleDeleteClick = (id: GridRowId) => () => {
+  const handleDel = (id: GridRowId) => () => {
+    setDelId(id);
+    setDelDia(true);
+  };
+  const handleDeleteClick = (id: GridRowId) => {
     firebase
       .firestore()
       .collection('users')
@@ -141,6 +158,13 @@ export default function UserGrid(props: UserGridProps) {
       });
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(delId.toString());
+    handleDeleteClick(delId);
+    setDelDia(false)
+
+  }
   function CustomToolbar() {
     const apiRef = useGridApiContext();
 
@@ -275,7 +299,7 @@ export default function UserGrid(props: UserGridProps) {
             startIcon={
               <DeleteIcon />
             }
-            onClick={handleDeleteClick(id)}
+            onClick={handleDel(id)}
           >
             Delete
           </Button>,
@@ -335,6 +359,7 @@ export default function UserGrid(props: UserGridProps) {
     },
   }));
   return (
+
     <Box
       sx={{
         height: 600,
@@ -347,6 +372,25 @@ export default function UserGrid(props: UserGridProps) {
         },
       }}
     >
+      <Dialog style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
+      }} open={delDia} onClose={handleDeleteDiagClose} >
+        <DialogTitle style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>Delete User</DialogTitle>
+        <form onSubmit={e => handleSubmit(e)}>
+          <DialogContent>
+            <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "24px", color: "black" }}>
+              Are you sure you want to delete this user?
+            </DialogContentText>
+
+
+          </DialogContent>
+          <DialogActions style={{ marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap: "93px" }}>
+            <Button variant="outlined" style={{ fontSize: "17px", marginLeft: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac', borderWidth: "3px" }} onClick={handleDeleteDiagClose}>Cancel</Button>
+
+            <Button variant="contained" style={{ fontSize: "17px", marginRight: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff' }} type="submit">Delete</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
       <StripedDataGrid
         rows={userData}
         columns={columns}
