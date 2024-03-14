@@ -100,23 +100,14 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
 
   const renderReviewDialog = () => (
     <Dialog
-      style={{
-        borderImage:
-          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-        boxShadow: '0px 2px 20px 4px #00000040',
-        borderRadius: '20px',
-        border: '2px solid',
+      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
       }}
       open={openReview}
       onClose={handleCloseReview}
     >
       <DialogTitle
-        style={{
-          textAlign: 'center',
-          fontSize: '36px',
-          fontWeight: '500',
-          fontFamily: 'SF Pro Display-Medium',
-        }}
+        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}
       >
         Review Applicant
       </DialogTitle>
@@ -337,7 +328,7 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
 
                 position: 'absolute',
                 right: '20px',
-                bottom: '24px',
+                bottom: '722px',
                 height: '43px',
                 width: '192px',
                 textTransform: 'none',

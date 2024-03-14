@@ -154,25 +154,14 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   const renderApproveDialog = () => (
 
     <Dialog
-      style={{
-        borderImage:
-          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-        boxShadow: '0px 2px 20px 4px #00000040',
-        borderRadius: '20px',
-        border: '2px solid',
+      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
       }}
       open={openApprove}
       onClose={handleCloseApprove}
     >
       <DialogTitle
-        style={{
-          textAlign: 'center',
-          fontSize: '36px',
-          fontWeight: '500',
-          fontFamily: 'SF Pro Display-Medium',
-        }}
-      >
-        Approve Applicant
+        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>        Approve Applicant
       </DialogTitle>
       <form onSubmit={handleApproveSubmit}>
         <DialogContent>
@@ -181,7 +170,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               marginTop: '35px',
               fontFamily: 'SF Pro Display-Medium, Helvetica',
               textAlign: 'center',
-              fontSize: '24px',
+              fontSize: '22px',
             }}
           >
             Are you sure you want to approve this applicant?
@@ -235,23 +224,14 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   );
   const renderDenyDialog = () => (
     <Dialog
-      style={{
-        borderImage:
-          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-        boxShadow: '0px 2px 20px 4px #00000040',
-        borderRadius: '20px',
-        border: '2px solid',
+      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
       }}
       open={openDeny}
       onClose={handleCloseDeny}
     >
       <DialogTitle
-        style={{
-          textAlign: 'center',
-          fontSize: '36px',
-          fontWeight: '500',
-          fontFamily: 'SF Pro Display-Medium',
-        }}
+        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}
       >
         Deny Applicant
       </DialogTitle>
