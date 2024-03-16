@@ -6,7 +6,7 @@
     text-align: left;
     font-size: 24px;
     color: #000;
-    font-family: 'SF Pro Display';
+  font-family: 'SF Pro Display' , Helvetica;
     border-radius: 20px;
     box-shadow: 0px 2px 20px 4px rgba(0, 0, 0, 0.25);
     justify-content: space-between;
@@ -15,6 +15,7 @@
 
   
   .ellipse {
+  font-family: 'SF Pro Display' , Helvetica;
     position: absolute;
     height: 71px;
     width: 71px;
@@ -28,13 +29,16 @@
     justify-content: center;
   }
   .initials {
+  font-family: 'SF Pro Display' , Helvetica;
     color:#ffffff;
   }
   .name {
+  font-family: 'SF Pro Display' , Helvetica;
     margin: 17px 0 61px 133px;
     white-space: nowrap;
   }
   .ufid {
+  font-family: 'SF Pro Display' , Helvetica;
     position: absolute;
     margin: 50px 0 42px 133px;
     font-size: 16px;
@@ -51,16 +55,16 @@
   
   
   .deny {
+  font-family: 'SF Pro Display' , Helvetica;
     font-size: 24px;
     font-weight: 500;
-    font-family: 'SF Pro Display';
     color: #d32727;
     text-align: left;
     display: inline-block;
     width: 80px;
   }
   .applicantStatus {
-   
+     font-family: 'SF Pro Display' , Helvetica;
     border-radius: 10px;
     background-color: rgba(211, 39, 39, 0.12);
     border: 2px solid #d32727;
