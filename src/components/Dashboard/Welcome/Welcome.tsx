@@ -11,6 +11,8 @@ import { TopNavBarSigned } from "@/components/TopNavBarSigned/TopNavBarSigned";
 import styles from "./style.module.css";
 import { ApplicationsCard } from "@/components/ApplicationsCard/ApplicationsCard";
 import { CourseCard } from "@/components/CourseCard/CourseCard";
+
+import { VerifyEmailCard } from "@/components/VerifyEmailCard/VerifyEmailCard";
 import Link from 'next/link';
 import "./style.css";
 
@@ -42,9 +44,8 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <Bio user={user} className={styles.fullnameandbioinstance} />
                 <TopNavBarSigned className={styles.topnavbarsignedin} />
                 <div className={styles.textwrapper8}>Home</div>
-                <div style={{ marginTop: "650px", marginLeft: "40%" }}>
-                  <h1 >Email Verification Required</h1>
-                  <p>Please check your email for a verification link.</p>
+                <div style={{ marginTop: "630px", marginLeft: "37%" }}>
+                  <VerifyEmailCard email={user.email} />
                 </div>
               </div>
 
