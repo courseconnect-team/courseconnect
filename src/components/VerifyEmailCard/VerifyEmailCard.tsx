@@ -24,7 +24,7 @@ export const VerifyEmailCard = ({ email }) => {
           <div className="text-wrapper-8">Please verify your email to continue... </div>
         </div>
         <div className={`coarse-assistant-wrapper3`}>
-          <div className="text-wrapper-9">Didn't get the verification email? </div>
+          <div className="text-wrapper-9">Didn&apos;t get the verification email? </div>
         </div>
         <div className="overlap-2">
           <div className="div-wrapper">
