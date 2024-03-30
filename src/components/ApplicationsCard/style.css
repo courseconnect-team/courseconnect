@@ -17,21 +17,21 @@
   .applications .text-wrapper-6{
     color: #000000;
     font-family: "SF Pro Display-Regular", Helvetica;
-    font-size: 32px;
-    font-weight: 400;
+    font-size: 20px;
     left: 0;
     letter-spacing: 0;
     line-height: normal;
     position: absolute;
-    top: 0;
+    top: 5px;
     white-space: nowrap;
+  margin-left: 30px;
   }
   
   .applications .img-3 {
     height: 74px;
     left: 40px;
     position: absolute;
-    top: 69px;
+    top: 59px;
     width: 86px;
   }
   

@@ -96,7 +96,7 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <div className={styles.textwrapper8}>Home</div>
               </div>
               <Link href="/Profile">
-                <Profile className={styles.profileinstance2} profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+                <DashboardCard className={styles.profileinstance2} text="Profile" image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
               </Link>
               <Link href="/status">
                 <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className={styles.applyinstance2} />
@@ -130,9 +130,7 @@ export default function DashboardWelcome(props: DashboardProps) {
               <Link href="/Applications">
                 <ApplicationsCard className={styles.applicationsinstance} applications="https://c.animaapp.com/ebG6M1rL/img/apply.svg" />
               </Link>
-              <Link href="/Courses">
-                <CourseCard className={styles.courseinstance} course="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png" />
-              </Link>
+              <DashboardCard className={styles.courseinstance} image="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png" text="Courses" clickable={true} />
             </div>
           }
 
@@ -154,18 +152,12 @@ export default function DashboardWelcome(props: DashboardProps) {
               <Link href="/users">
                 <DashboardCard className={styles.users} image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png" text="Users" />
               </Link>
-              <Link href="/underDevelopment">
-                <DashboardCard className={styles.courses} image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png" text="Courses" />
-              </Link>
+              <DashboardCard className={styles.courses} image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png" text="Courses" clickable={true} />
               <Link href="/adminApplications">
                 <DashboardCard className={styles.applications} image="https://c.animaapp.com/PWgYNV8T/img/apply-1@2x.png" text="Assign" />
               </Link>
-              <Link href="/underDevelopment">
-                <DashboardCard className={styles.scheduling} image="https://c.animaapp.com/PWgYNV8T/img/calendar-clock@2x.png" text="Scheduling" />
-              </Link>
-              <Link href="/underDevelopment">
-                <DashboardCard className={styles.stats} image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png" text="Faculty Stats" />
-              </Link>
+              <DashboardCard className={styles.scheduling} image="https://c.animaapp.com/PWgYNV8T/img/calendar-clock@2x.png" text="Scheduling" clickable={true} />
+              <DashboardCard className={styles.stats} image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png" text="Faculty Stats" clickable={true} />
             </div >
 
           }

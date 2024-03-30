@@ -15,16 +15,16 @@
 }
 
 .profile .text-wrapper-6 {
-  color: #000000;
-  font-family: "SF Pro Display-Regular", Helvetica;
-  font-size: 32px;
-  font-weight: 400;
-  left: 3px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  top: 0;
-  white-space: nowrap;
+    color: #000000;
+    font-family: "SF Pro Display-Regular", Helvetica;
+    font-size: 20px;
+    left: 0;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 5px;
+    white-space: nowrap;
+  margin-left: 20px;
 }
 
 .profile .img {
