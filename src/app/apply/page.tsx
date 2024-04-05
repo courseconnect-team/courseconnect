@@ -22,16 +22,39 @@ import AdditionalSemesterPrompt from '@/components/FormUtil/AddtlSemesterPrompt'
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Toaster, toast } from 'react-hot-toast';
-import { LinearProgress } from '@mui/material';
+import { FilledInput, LinearProgress } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import 'firebase/firestore';
 
+import firebase from '@/firebase/firebase_config';
 import { useState } from 'react';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
+import Chip from '@mui/material/Chip';
 
 import styles from "./style.module.css";
 import { useRouter } from 'next/navigation'
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import ListItemText from '@mui/material/ListItemText';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Checkbox from '@mui/material/Checkbox';
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -99,17 +122,18 @@ export default function Application() {
     }
 
     // get courses as array
-    const coursesString = formData.get('course-prompt') as string;
+    const coursesArray = personName;
+    console.log(coursesArray);
 
-    let coursesArray = coursesString
-      .split(',')
-      .map((professorEmail) => professorEmail.trim())
-      .map((professorEmail) => professorEmail.replace(/\s/g, ''));
 
     let coursesMap: { [key: string]: string } = {}
     for (let i = 0; i < coursesArray.length; i++) {
+      console.log("VAL " + coursesArray[i]);
+
       coursesMap[coursesArray[i]] = "applied";
     }
+    console.log("MAP " + coursesMap);
+
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
@@ -232,6 +256,42 @@ export default function Application() {
 
     setSuccess(false);
   };
+  const [personName, setPersonName] = React.useState<string[]>([]);
+
+  const handleChange = (event: SelectChangeEvent<typeof personName>) => {
+    const {
+      target: { value },
+    } = event;
+    setPersonName(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+    console.log(event.target.value);
+    console.log(personName);
+
+
+  };
+  const [names, setNames] = useState([]);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        let data = []
+        await firebase.firestore()
+          .collection('courses')
+          .get()
+          .then(snapshot => snapshot.docs.map(doc => (
+            data.push(doc.id)
+          )))
+
+        setNames(data);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <>
       <Toaster />
@@ -372,17 +432,38 @@ export default function Application() {
                         Please list the course(s) for which you are applying, separated
                         by commas.
                       </Typography>
-                      <TextField
-                        required
-                        fullWidth
-                        id="course-prompt"
-                        name="course-prompt"
-                        label="Course(s)"
-                        multiline
-                        rows={1}
-                        variant="filled"
-                        helperText="Example: COP3502, COP3503, COP3504"
-                      />
+
+                      <FormControl variant='filled' fullWidth>
+                        <InputLabel id="demo-multiple-checkbox-label" variant='filled'>Course(s)*</InputLabel>
+                        <Select
+
+                          variant='filled'
+                          labelId="demo-multiple-checkbox-label"
+                          id="course-prompt"
+                          name='course-prompt'
+                          multiple
+                          value={personName}
+                          onChange={handleChange}
+                          input={<FilledInput label="Tag" />}
+                          renderValue={(selected) => (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                              {selected.map((value) => (
+                                <Chip key={value} label={value} />
+                              ))}
+                            </Box>
+                          )}
+                          MenuProps={MenuProps}
+                          required
+                        >
+                          {names.map((name) => (
+                            <MenuItem key={name} value={name}>
+                              <Checkbox checked={personName.indexOf(name) > -1} />
+                              <ListItemText primary={name} />
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
                     </Grid>
                     <Grid item xs={12}>
                       <Typography>
