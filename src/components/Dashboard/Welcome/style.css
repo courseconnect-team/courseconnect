@@ -15,6 +15,9 @@
   height: 1024px;
   position: relative;
   width: 100%;
+  display:flex;
+ 
+  
 }
 .student-landing-page .overlap-2 {
   height: 545px;
@@ -22,6 +25,7 @@
   position: absolute;
   top: 0;
   width: 100%;
+
 }
 .student-landing-page .color-block-frame {
   height: 350px;
@@ -127,9 +131,11 @@
 }
 
 
-
-
-
+.profileinstance5{
+  left: 45% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
 
 
 

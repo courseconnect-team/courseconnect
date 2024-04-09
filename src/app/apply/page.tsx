@@ -39,7 +39,6 @@ import { useRouter } from 'next/navigation'
 // best to parse the existing courses and then have the user select
 // from a list of existing courses
 // ...yeah that's probably the best way to do it
-
 export default function Application() {
   // get the current user's uid
   const router = useRouter()
@@ -59,7 +58,41 @@ export default function Application() {
     setAdditionalPromptValue(newValue);
   };
   const [loading, setLoading] = useState(false);
+  
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+
+    const handleSendEmail = async () => {
+      try {        
+      
+        const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: 'applicationConfirmation',
+            data: {
+              user: {
+                name: user.displayName,
+                email: applicationData.email
+              },
+              position:applicationData.position,
+              classCode: applicationData.courses
+            }
+          })
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Email sent successfully:', data);
+        } else {
+          throw new Error('Failed to send email');
+        }
+      } catch (error) {
+        console.error('Error sending email:', error);
+      }
+    };
+    
     setLoading(true);
     event.preventDefault();
     // extract the form data from the current event
@@ -105,6 +138,8 @@ export default function Application() {
       .split(',')
       .map((professorEmail) => professorEmail.trim())
       .map((professorEmail) => professorEmail.replace(/\s/g, ''));
+
+ 
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
@@ -197,6 +232,7 @@ export default function Application() {
       );
 
       if (response.ok) {
+        handleSendEmail();
         console.log('SUCCESS: Application data sent to server successfully');
         // now, update the role of the user to student_applied
         await UpdateRole(userId, 'student_applied');
@@ -227,8 +263,10 @@ export default function Application() {
 
     setSuccess(false);
   };
+
   return (
     <>
+    
       <Toaster />
       <div className={styles.studentlandingpage}>
         <div className={styles.overlapwrapper}>
@@ -261,6 +299,7 @@ export default function Application() {
                   alignItems: 'center',
                 }}
               >
+          
                 <Typography component="h1" variant="h5">
                   TA/UPI/Grader Application
                 </Typography>
@@ -435,7 +474,7 @@ export default function Application() {
                 </Box>
               </Box>
             </Container>
-
+            
           </div>
         </div>
       </div >

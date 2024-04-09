@@ -26,9 +26,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
   }
   .initials {
     color:#ffffff;
+    font-weight: 400;
+    font-family: 'SF Pro Display';
   }
   .name {
     margin: 17px 0 61px 133px;

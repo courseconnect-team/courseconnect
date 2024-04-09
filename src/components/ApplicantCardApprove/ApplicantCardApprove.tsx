@@ -184,6 +184,7 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
               <div className="approved1">Approved</div>
             </div>
           </div>
+          
         </>
       )}
 
@@ -208,6 +209,25 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
                   <div className="approved1">Approved</div>
                 </div>
               </div>
+              <Button
+              variant="outlined"
+              style={{
+                
+                borderRadius: '10px',
+                position: "absolute",
+                right:"20px",
+                top: "112px",
+                height: '43px',
+                width: '192px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                borderColor: '#5736ac',
+                color: '#5736ac',
+              }}
+              onClick={handleOpenReview}
+            >
+              Move to in Review
+            </Button>
               <div style={{ position: 'absolute' }}>
                 <div className="email1">{uf_email}</div>
                 <div className="number">{number}</div>
@@ -309,26 +329,7 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
                 </div>
               )}
             </div>
-            <Button
-              variant="outlined"
-              style={{
-                
-                borderRadius: '10px',
-              
-                position:'absolute',
-                right: '20px',
-                bottom:'24px',
-                height: '43px',
-                width: '192px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                borderColor: '#5736ac',
-                color: '#5736ac',
-              }}
-              onClick={handleOpenReview}
-            >
-              Move to in Review
-            </Button>
+       
         </div>
       )}
     </div>

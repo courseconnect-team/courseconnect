@@ -3,8 +3,10 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import CancelIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
+
 import {
   GridRowModesModel,
   GridRowsProp,
@@ -23,41 +25,43 @@ import {
   useGridApiContext,
   gridClasses
 } from '@mui/x-data-grid';
+import {Button}from '@mui/material';
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { LinearProgress, Button } from '@mui/material';
+import { LinearProgress } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
-
+import CheckIcon from '@mui/icons-material/Check';
+import { ThumbDownOffAlt, ThumbUp, ThumbUpOffAlt } from '@mui/icons-material';
 interface User {
   id: string;
   firstname: string;
   lastname: string;
   email: string;
-  password: string;
   department: string;
   role: string;
-  ufid: string;
   isNew?: boolean;
+  fullname: string;
   mode?: 'edit' | 'view' | undefined;
 }
 
 interface EditToolbarProps {
-  setUserData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+  setApplicationData: (
+    newRows: (oldRows: GridRowsProp) => GridRowsProp
+  ) => void;
   setRowModesModel: (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel
   ) => void;
 }
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setUserData, setRowModesModel } = props;
+  const { setApplicationData, setRowModesModel } = props;
 
   // Add state to control the dialog open status
   const [open, setOpen] = React.useState(false);
 
   return (
     <GridToolbarContainer>
-      {/* Include your Dialog component here and pass the open state and setOpen function as props */}
       <GridToolbarExport style={{ color: '#562EBA' }} />
       <GridToolbarFilterButton style={{ color: '#562EBA' }} />
       <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
@@ -65,24 +69,26 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-interface UserGridProps {
+interface ApprovalGridProps {
   userRole: string;
 }
 
-export default function UserGrid(props: UserGridProps) {
+export default function ApprovalGrid(props: ApprovalGridProps) {
   const { userRole } = props;
   const [userData, setUserData] = React.useState<User[]>([]);
 
   React.useEffect(() => {
-    const usersRef = firebase.firestore().collection('users');
+    const usersRef = firebase.firestore().collection('users').where('role', '==', "unapproved");
     usersRef.get().then((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
         ({
           id: doc.id,
+          fullname: doc.data().firstname + " " + doc.data().lastname,
           ...doc.data(),
         } as User)
       );
+      
       setUserData(data);
     });
   }, []);
@@ -103,7 +109,7 @@ export default function UserGrid(props: UserGridProps) {
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
-
+  
   const handleSaveClick = (id: GridRowId) => () => {
     const updatedRow = userData.find((row) => row.id === id);
     if (updatedRow) {
@@ -112,6 +118,51 @@ export default function UserGrid(props: UserGridProps) {
         .collection('users')
         .doc(id.toString())
         .update(updatedRow)
+        .then(() => {
+          setRowModesModel({
+            ...rowModesModel,
+            [id]: { mode: GridRowModes.View },
+          });
+        })
+        .catch((error) => {
+          console.error('Error updating document: ', error);
+        });
+    } else {
+      console.error('No matching user data found for id: ', id);
+    }
+  };
+
+
+  const handleApproveClick = (id: GridRowId) => () => {
+    const updatedRow = userData.find((row) => row.id === id);
+    if (updatedRow) {
+      firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .update({role: 'faculty'})
+        .then(() => {
+          setRowModesModel({
+            ...rowModesModel,
+            [id]: { mode: GridRowModes.View },
+          });
+        })
+        .catch((error) => {
+          console.error('Error updating document: ', error);
+        });
+    } else {
+      console.error('No matching user data found for id: ', id);
+    }
+  };
+
+  const handleDenyClick = (id: GridRowId) => () => {
+    const updatedRow = userData.find((row) => row.id === id);
+    if (updatedRow) {
+      firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .update({role: 'denied'})
         .then(() => {
           setRowModesModel({
             ...rowModesModel,
@@ -141,15 +192,7 @@ export default function UserGrid(props: UserGridProps) {
       });
   };
 
-  function CustomToolbar() {
-    const apiRef = useGridApiContext();
-
-    return (
-      <GridToolbarContainer>
-        <GridToolbarExport />
-      </GridToolbarContainer>
-    );
-  }
+ 
 
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = userData.find((row) => row.id === id);
@@ -219,12 +262,12 @@ export default function UserGrid(props: UserGridProps) {
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef[] = [
+  let columns: GridColDef[] = [
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 200,
+      width: 280,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -236,7 +279,7 @@ export default function UserGrid(props: UserGridProps) {
               icon={<SaveIcon />}
               label="Save"
               sx={{
-                color: '#562EBA',
+                color: 'primary.main',
               }}
               onClick={handleSaveClick(id)}
             />,
@@ -244,7 +287,6 @@ export default function UserGrid(props: UserGridProps) {
               key="2"
               icon={<CancelIcon />}
               label="Cancel"
-              className="textPrimary"
               onClick={handleCancelClick(id)}
               color="inherit"
             />,
@@ -252,6 +294,7 @@ export default function UserGrid(props: UserGridProps) {
         }
 
         return [
+         
           <Button
             key="8"
             variant="outlined"
@@ -279,26 +322,55 @@ export default function UserGrid(props: UserGridProps) {
           >
             Delete
           </Button>,
+          <GridActionsCellItem
+            key="4"
+            icon={<ThumbUpOffAlt />}
+            label="Approve"
+            onClick={(event) => handleApproveClick(id)}
+            color="success"
+          />,
+          <GridActionsCellItem
+            key="5"
+            icon={<ThumbDownOffAlt />}
+            label="Deny"
+            onClick={(event) => handleDenyClick(id)}
+            color="error"
+          />,
         ];
       },
     },
     {
-      field: 'firstname',
-      headerName: 'First Name',
-      width: 150,
+      field: 'fullname',
+      headerName: 'Full Name',
+      width: 202,
       editable: true,
     },
-    { field: 'lastname', headerName: 'Last Name', width: 150, editable: true },
-    { field: 'email', headerName: 'Email', width: 250, editable: true },
-    { field: 'password', headerName: 'Password', width: 200, editable: true },
+    { field: 'email', headerName: 'Email', width: 215, editable: true },
     {
       field: 'department',
       headerName: 'Department',
+      width: 119,
+      editable: true,
+    },
+    {
+      field: 'courses',
+      headerName: 'Course Code',
+      width: 300,
+      editable: true,
+    },
+    {
+      field: 'semester',
+      headerName: 'Semester',
       width: 130,
       editable: true,
     },
-    { field: 'role', headerName: 'Role', width: 150, editable: true },
-    { field: 'id', headerName: 'User ID', width: 290, editable: true },
+    {
+      field: 'password',
+      headerName: 'Password',
+      width: 130,
+      editable: true,
+    },
+    { field: 'role', headerName: 'Role', width: 100, editable: true },
   ];
   const ODD_OPACITY = 0.2;
 
@@ -334,6 +406,8 @@ export default function UserGrid(props: UserGridProps) {
       },
     },
   }));
+
+  
   return (
     <Box
       sx={{

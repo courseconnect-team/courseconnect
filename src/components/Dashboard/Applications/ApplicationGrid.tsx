@@ -53,7 +53,7 @@ interface Application {
   id: string;
   additionalprompt: string;
   available_hours: string;
-  available_semesters: string;
+  semesters: string;
   courses: string;
   date: string;
   degree: string;
@@ -595,17 +595,23 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       editable: false,
       valueGetter: getFullName,
     },
-    { field: 'uf_email', headerName: 'Email', width: 250, editable: true },
+    { field: 'uf_email', headerName: 'Email', width: 230, editable: true },
     {
       field: 'degree',
       headerName: 'Degree',
       width: 100,
       editable: true,
     },
-    { field: 'courses', headerName: 'Courses', width: 190, editable: true },
+    {
+        field: 'semesters',
+        headerName: 'Semester(s)',
+        width: 200,
+        editable: false,
+      },
+    { field: 'courses', headerName: 'Courses', width: 250, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'timestamp', headerName: 'Date', width: 180, editable: true },
-    { field: 'status', headerName: 'App Status', width: 100, editable: true },
+    { field: 'status', headerName: 'App Status', width: 130, editable: true },
   ];
 
   if (userRole === 'faculty') {
@@ -650,7 +656,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       },
       { field: 'position', headerName: 'Position', width: 70, editable: false },
       {
-        field: 'available_semesters',
+        field: 'semesters',
         headerName: 'Semester(s)',
         width: 130,
         editable: false,
