@@ -12,7 +12,7 @@ import 'firebase/firestore';
 import ApplicantCardApprove from '@/components/ApplicantCardApprove/ApplicantCardApprove';
 import ApplicantCardDeny from '@/components/ApplicantCardDeny/ApplicantCardDeny';
 interface pageProps {
-  params: { className: string };
+  params: { className: string, semester:string};
 }
 
 // const [selectedItem, setSelectedItem] = useState('needsReview');
@@ -137,7 +137,10 @@ const CoursePage: FC<pageProps> = ({ params }) => {
 
       const snapshot = await db
         .collection('applications')
-        .where(`courses.${data}`, ">=", "")
+
+        .where('courses', 'array-contains', params.className)
+        // .where('semesters', 'array-contains', params.semester )
+        .where('status', '==', status)
         .where('position', '==', position)
         .get();
 
@@ -240,8 +243,11 @@ const CoursePage: FC<pageProps> = ({ params }) => {
               openDeny={openDenyDialog}
               setOpenApproveDialog={setOpenApproveDialog}
               setOpenDenyDialog={setOpenDenyDialog}
-              currentStu={currentStu}
-              setCurrentStu={setCurrentStu}
+
+              currentStu = {currentStu}
+              setCurrentStu = {setCurrentStu}
+              className = {params.className}
+
             />
           )}
 

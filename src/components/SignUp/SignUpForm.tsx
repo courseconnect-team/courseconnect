@@ -108,7 +108,6 @@ export default function SignUpForm() {
         userData.firstname + ' ' + userData.lastname,
         userData.email,
         userData.password,
-        userData.ufid
       );
       userData.uid = uid_from_signup;
       console.log(userData.uid);

@@ -201,7 +201,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
                 style={{ marginTop: "30px" }}
               >
                 <FormControlLabel value="student_applying" control={<Radio />} label="Student" />
-                <FormControlLabel value="faculty" control={<Radio />} label="Staff" />
+                <FormControlLabel value="unapproved" control={<Radio />} label="Staff" />
               </RadioGroup>
             </FormControl>
           </div>

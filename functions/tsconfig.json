@@ -11,5 +11,5 @@
   "compileOnSave": true,
   "include": [
     "src"
-  ]
+, "sendEmail/nodemailer.ts", "../src/app/api/email.js"  ]
 }

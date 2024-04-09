@@ -27,10 +27,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
   }
   .initials {
   font-family: 'SF Pro Display' , Helvetica;
     color:#ffffff;
+    font-weight: 400;
+    font-family: 'SF Pro Display';
   }
   .name {
   font-family: 'SF Pro Display' , Helvetica;
