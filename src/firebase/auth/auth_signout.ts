@@ -9,6 +9,7 @@ function handleSignOut() {
       // Sign-out successful.
       console.log('User signed out successfully!');
       window.location.href = '/';
+      return false;
     })
     .catch((error) => {
       // An error happened.

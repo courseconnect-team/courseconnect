@@ -299,9 +299,7 @@ export default function UserGrid(props: UserGridProps) {
             startIcon={
               <DeleteIcon />
             }
-
             onClick={handleDel(id)}
-
           >
             Delete
           </Button>,

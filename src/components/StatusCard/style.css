@@ -23,15 +23,13 @@
 }
 
 .apply .text-wrapper-7 {
+  height: 143px;
+  left: 14px;
+  top: 8px;
+  width: 88px;
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 400;
-  left: 0;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  top: 0;
-  white-space: nowrap;
 }
 

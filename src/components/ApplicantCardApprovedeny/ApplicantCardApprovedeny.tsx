@@ -12,8 +12,9 @@ import { wrap } from 'module';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 
+import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
-  id:string;
+  id: string;
   uf_email: string;
   firstname: string;
   lastname: string;
@@ -27,6 +28,7 @@ interface ApplicantCardProps {
   qualifications: string;
   resume: string;
   plan: string;
+  gpa: string;
   expanded: boolean;
   onExpandToggle: any;
   openApprove: boolean;
@@ -53,6 +55,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   qualifications,
   resume,
   plan,
+  gpa,
   expanded,
   onExpandToggle,
   openApprove,
@@ -60,9 +63,11 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   setOpenApproveDialog,
   setOpenDenyDialog,
   currentStu,
+
   setCurrentStu,
   className
   
+
 }) => {
 
   const handleSendEmail = async () => {
@@ -133,10 +138,27 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   const db = firebase.firestore();
   const handleApproveSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-   
+
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      await statusRef.update({ status: 'Approved' });
+      let doc = await getDoc(statusRef);
+      let coursesMap = doc.data().courses;
+      let getQueryParams = query => {
+        return query
+          ? (/^[?#]/.test(query) ? query.slice(1) : query)
+            .split('&')
+            .reduce((params, param) => {
+              let [key, value] = param.split('=');
+              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+              return params;
+            }, {}
+            )
+          : {}
+      };
+      const { data } = getQueryParams(window.location.search);
+      coursesMap[data] = "accepted"
+      console.log(coursesMap);
+      await statusRef.update({ courses: coursesMap });
       console.log('Application approved successfully');
       handleSendEmail();
       window.location.reload();
@@ -145,12 +167,29 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       console.error('Error approving application:', error);
     }
   };
-  
+
   const handleDenySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      await statusRef.update({ status: 'Denied' });
+      let doc = await getDoc(statusRef);
+      let coursesMap = doc.data().courses;
+      let getQueryParams = query => {
+        return query
+          ? (/^[?#]/.test(query) ? query.slice(1) : query)
+            .split('&')
+            .reduce((params, param) => {
+              let [key, value] = param.split('=');
+              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+              return params;
+            }, {}
+            )
+          : {}
+      };
+      const { data } = getQueryParams(window.location.search);
+      coursesMap[data] = "denied"
+      console.log(coursesMap);
+      await statusRef.update({ courses: coursesMap });
       console.log('Application denied successfully');
       handleDenyEmail();
       window.location.reload();
@@ -169,14 +208,14 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
     setOpenDenyDialog(false);
   };
 
-  const onThumbUpClick = useCallback((event:any) => {
+  const onThumbUpClick = useCallback((event: any) => {
     event?.stopPropagation()
 
     setOpenApproveDialog(true);
     setCurrentStu(id);
   }, []);
 
-  const onThumbDownIconClick = useCallback((event:any) => {
+  const onThumbDownIconClick = useCallback((event: any) => {
     event?.stopPropagation()
 
     setOpenDenyDialog(true);
@@ -184,27 +223,16 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   }, []);
 
   const renderApproveDialog = () => (
-    
+
     <Dialog
-      style={{
-        borderImage:
-          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-        boxShadow: '0px 2px 20px 4px #00000040',
-        borderRadius: '20px',
-        border: '2px solid',
+      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
       }}
       open={openApprove}
       onClose={handleCloseApprove}
     >
       <DialogTitle
-        style={{
-          textAlign: 'center',
-          fontSize: '36px',
-          fontWeight: '500',
-          fontFamily: 'SF Pro Display-Medium',
-        }}
-      >
-        Approve Applicant
+        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>        Approve Applicant
       </DialogTitle>
       <form onSubmit={handleApproveSubmit}>
         <DialogContent>
@@ -213,7 +241,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               marginTop: '35px',
               fontFamily: 'SF Pro Display-Medium, Helvetica',
               textAlign: 'center',
-              fontSize: '24px',
+              fontSize: '22px',
             }}
           >
             Are you sure you want to approve this applicant?
@@ -256,34 +284,25 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               backgroundColor: '#5736ac',
               color: '#ffffff',
             }}
-            type = "submit"
-            
+            type="submit"
+
           >
             Approve
           </Button>
         </DialogActions>
-        </form>
+      </form>
     </Dialog>
   );
   const renderDenyDialog = () => (
     <Dialog
-      style={{
-        borderImage:
-          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-        boxShadow: '0px 2px 20px 4px #00000040',
-        borderRadius: '20px',
-        border: '2px solid',
+      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
       }}
       open={openDeny}
       onClose={handleCloseDeny}
     >
       <DialogTitle
-        style={{
-          textAlign: 'center',
-          fontSize: '36px',
-          fontWeight: '500',
-          fontFamily: 'SF Pro Display-Medium',
-        }}
+        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}
       >
         Deny Applicant
       </DialogTitle>
@@ -352,162 +371,160 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
   return (
     <>
-    {renderApproveDialog()}
-    {renderDenyDialog()}
-    <div className="applicantCardApprovedeny1" onClick={handleCardClick}>
-      {!expanded && (
-        <>
-          <div>
-            <div className="ellipse">
-            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <div className="name">
-                {firstname} {lastname}
+      {renderApproveDialog()}
+      {renderDenyDialog()}
+      <div className="applicantCardApprovedeny1" onClick={handleCardClick}>
+        {!expanded && (
+          <>
+            <div>
+              <div className="ellipse">
+                <div className="initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase()}</div>
               </div>
-              <div className="email1">{uf_email}</div>
-            </div>
-          </div>
-
-          <div className="thumbsContainer">
-            <ThumbUpOffAltIcon
-              onClick={onThumbUpClick}
-              className="thumbsUpIcon"
-              style={{
-                fontSize: '41px',
-              }}
-            />
-            <ThumbDownOffAltIcon
-              onClick={onThumbDownIconClick}
-              className="thumbsDownIcon"
-              style={{
-                fontSize: '41px',
-              }}
-            />
-            <div className="applicantStatus23">
-              <div className="review23">
-                Review
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {expanded && (
-        <div>
-          <div>
-            <div className="ellipse" >
-            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <div className="name">
-                {firstname} {lastname}
-              </div>
-           
-              <div style={{ position: 'absolute' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <div className="name">
+                  {firstname} {lastname}
+                </div>
                 <div className="email1">{uf_email}</div>
-                <div className="number">{number}</div>
               </div>
-              <div className="thumbsContainer">
-                <ThumbUpOffAltIcon
-                  onClick={onThumbUpClick}
-                  className="thumbsUpIcon"
-                  style={{
-                    fontSize: '41px',
-                    
-                  }}
-                />
-                <ThumbDownOffAltIcon
-                  onClick={onThumbDownIconClick}
-                  className="thumbsDownIcon"
-                  style={{
-                    fontSize: '41px',
-                  }}
-                />
-                <div className="applicantStatus23">
-                  <div className="review23" >
-                    Review
+            </div>
+
+            <div className="thumbsContainer">
+              <ThumbUpOffAltIcon
+                onClick={onThumbUpClick}
+                className="thumbsUpIcon"
+                style={{
+                  fontSize: '41px',
+                }}
+              />
+              <ThumbDownOffAltIcon
+                onClick={onThumbDownIconClick}
+                className="thumbsDownIcon"
+                style={{
+                  fontSize: '41px',
+                }}
+              />
+
+              <div className="applicantStatus23">
+                <div className="review23">
+                  Review
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {expanded && (
+          <div>
+            <div>
+              <div className="ellipse" >
+                <div className="initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase()}</div>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <div className="name">
+                  {firstname} {lastname}
+                </div>
+
+                <div style={{ position: 'absolute' }}>
+                  <div className="email1">{uf_email}</div>
+                  <div className="number">{number}</div>
+                </div>
+                <div className="thumbsContainer">
+                  <ThumbUpOffAltIcon
+                    onClick={onThumbUpClick}
+                    className="thumbsUpIcon"
+                    style={{
+                      fontSize: '41px',
+
+                    }}
+                  />
+                  <ThumbDownOffAltIcon
+                    onClick={onThumbDownIconClick}
+                    className="thumbsDownIcon"
+                    style={{
+                      fontSize: '41px',
+                    }}
+                  />
+                  <div className="applicantStatus23">
+                    <div className="review23" >
+                      Review
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              marginLeft: '143px',
-              flexWrap: 'wrap',
-              marginRight: '139px',
-            }}
-          >
-
-            <div style = {{display:'flex', gap:'61px'}}>
-            <div className="label50">Applying for:</div>
-            <div >{position}</div>
-            </div>
-            <div style = {{display:'flex', gap:'61px'}}>
-            <div className="label50">Semester(s):</div>
-            <div>{semester}</div>
-            </div>
-            <div style = {{display:'flex', gap:'75px'}}>
-            <div className="label50">Availability:</div>
-            <div className="availability1">{availability}</div>
-            </div>
-
-            <br></br>
             <div
               style={{
                 display: 'flex',
-                flexDirection: 'row', // Keep it as 'row' for a horizontal row layout
-                gap: '144px', // Adjust the gap as needed
-                marginBottom: '31px',
+                flexDirection: 'column',
+                marginLeft: '143px',
+                flexWrap: 'wrap',
+                marginRight: '139px',
               }}
             >
-              <div>
-                <div className="label50">Department:</div>
-                <div style = {{textAlign: "center"}} className="availability1">{department}</div>
+
+              <div style={{ display: 'flex', gap: '61px' }}>
+                <div className="label50">Applying for:</div>
+                <div >{position}</div>
+              </div>
+              <div style={{ display: 'flex', gap: '61px' }}>
+                <div className="label50">Available Semester(s):</div>
+                <div>{semester}</div>
+              </div>
+              <div style={{ display: 'flex', gap: '75px' }}>
+                <div className="label50">Available Hours Per Week:</div>
+                <div className="availability1">{availability}</div>
               </div>
 
-              <div>
-                <div className="label50">Degree:</div>
-                <div style = {{textAlign: "center"}} className="availability1">{degree}</div>
+              <br></br>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row', // Keep it as 'row' for a horizontal row layout
+                  gap: '144px', // Adjust the gap as needed
+                  marginBottom: '31px',
+                }}
+              >
+                <div>
+                  <div className="label50">Department:</div>
+                  <div style={{ textAlign: "center" }} className="availability1">{department}</div>
+                </div>
+
+                <div>
+                  <div className="label50">Degree:</div>
+                  <div style={{ textAlign: "center" }} className="availability1">{degree}</div>
+                </div>
+
+                <div>
+                  <div className="label50">GPA:</div>
+                  <div style={{ textAlign: "center" }} className="availability1">{gpa}</div>
+                </div>
               </div>
 
-              <div>
-                <div className="label50">Upcoming semester status:</div>
-                <div style = {{textAlign: "center"}} className="availability1">{collegestatus}</div>
+              <div style={{ marginBottom: '10px' }} className="label50">Qualifications:</div>
+              <div className="availability1" style={{ marginBottom: '31px' }}>
+                {qualifications}
               </div>
-            </div>
 
-            <div style = {{marginBottom: '10px'}}className="label50">Qualifications:</div>
-            <div className="availability1" style={{ marginBottom: '31px' }}>
-              {qualifications}
+              <div style={{ marginBottom: '10px' }} className="label50">Resume Link:</div>
+              <a style={{ marginBottom: '104px' }} href={resume}>
+                {resume}
+              </a>
             </div>
-            <div style = {{marginBottom: '10px'}} className="label50">Graduate Plan:</div>
-            <div className="availability1" style={{ marginBottom: '31px' }}>
-              {plan}
-            </div>
-            <div style = {{marginBottom: '10px'}} className="label50">Resume Link:</div>
-            <a style={{ marginBottom: '104px' }} href={resume}>
-              {resume}
-            </a>
           </div>
-        </div>
-      )}
+        )}
 
-    </div>
+      </div>
     </>
   );
 };

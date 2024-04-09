@@ -9,6 +9,10 @@ import CancelIcon from '@mui/icons-material/Close';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
 import {
   GridRowModesModel,
   GridRowModes,
@@ -28,7 +32,7 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { query, where, collection, getDocs } from 'firebase/firestore';
+import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserName from '@/firebase/util/GetUserName';
 import { alpha, styled } from '@mui/material/styles';
@@ -53,8 +57,10 @@ interface Application {
   id: string;
   additionalprompt: string;
   available_hours: string;
-  semesters: string;
-  courses: string;
+
+  available_semesters: string;
+  courses: string[];
+
   date: string;
   degree: string;
   department: string;
@@ -91,10 +97,17 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const [applicationData, setApplicationData] = React.useState<Application[]>(
     []
   );
+  const [valueRadio, setValueRadio] = React.useState('');
 
+  const handleChangeRadio = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValueRadio((event.target as HTMLInputElement).value);
+  };
   // assignment dialog pop-up view setup
   const [openAssignmentDialog, setOpenAssignmentDialog] = React.useState(false);
-  const handleOpenAssignmentDialog = (id: GridRowId) => {
+  const handleOpenAssignmentDialog = async (id: GridRowId) => {
+    const statusRef = firebase.firestore().collection('applications').doc(id.toString());
+    const doc = await getDoc(statusRef);
+    setCodes(Object.entries(doc.data().courses).filter(([key, value]) => (value == "accepted")).map(([key, value]) => (key)))
     setSelectedUserGrid(id);
     setOpenAssignmentDialog(true);
   };
@@ -112,13 +125,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get student's user id
     const student_uid = selectedUserGrid as string;
-
+    const statusRef = firebase.firestore().collection('applications').doc(student_uid.toString());
+    const doc = await getDoc(statusRef);
     // update student's application to approved
     firebase
       .firestore()
       .collection('applications')
       .doc(student_uid.toString())
-      .update({ status: 'Approved' })
+      .update({ status: 'Admin_approved' })
       // .then(() => {
       //   // Update the 'users' collection
       //   firebase
@@ -144,11 +158,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         console.error('Error updating application document: ', error);
       });
 
-    // get class codes as array
-    const classCodeString = formData.get('class-codes') as string;
-    const classCodeArray = classCodeString
-      .split(',')
-      .map((classCode) => classCode.trim());
+
 
     // get the current date in month/day/year format
     const current = new Date();
@@ -158,7 +168,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     const assignmentObject = {
       date: current_date as string,
       student_uid: student_uid as string,
-      class_codes: classCodeArray,
+      class_codes: valueRadio,
+      email: doc.data().email,
+      name: (doc.data().firstname + " " + doc.data().lastname),
+      semesters: doc.data().available_semesters,
+      department: doc.data().department,
+      hours: doc.data().available_hours,
+      position: doc.data().position
+
     };
 
     // Create the document within the "assignments" collection
@@ -202,6 +219,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   // pop-up view setup
   const [open, setOpen] = React.useState(false);
+  const [delDia, setDelDia] = React.useState(false);
+  const [delId, setDelId] = React.useState();
+
+  const [codes, setCodes] = React.useState([]);
   const [selectedUserGrid, setSelectedUserGrid] =
     React.useState<GridRowId | null>(null);
 
@@ -214,6 +235,13 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setOpen(false);
   };
 
+  const handleDeleteDiagClose = () => {
+
+    setDelDia(false);
+  }
+
+
+
   // fetching application data from firestore
   const [loading, setLoading] = useState(false);
   React.useEffect(() => {
@@ -222,11 +250,20 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     if (userRole === 'admin') {
 
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
-        const data = querySnapshot.docs.map(
+        const data = querySnapshot.docs.filter(function(doc) {
+
+          if (doc.data().status != "Admin_approved" && doc.data().status != "Admin_denied") {
+            return true;
+          } else {
+            return false;
+          }
+        }).map(
           (doc) =>
+
           ({
             id: doc.id,
             ...doc.data(),
+            courses: Object.entries(doc.data().courses).filter(([key, value]) => (value == "accepted")).map(([key, value]) => (key))
           } as Application)
         );
         setApplicationData(data);
@@ -286,7 +323,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .firestore()
       .collection('applications')
       .doc(id.toString())
-      .update({ status: 'Denied' })
+      .update({ status: 'Admin_denied' })
       .then(() => {
         setLoading(false);
       })
@@ -382,7 +419,12 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
+  const handleDel = (id: GridRowId) => () => {
+    setDelId(id);
+    setDelDia(true);
+  };
+  const handleDeleteClick = (id: GridRowId) => {
+
     setLoading(true);
     firebase
       .firestore()
@@ -398,6 +440,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         console.error('Error removing document: ', error);
       });
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(delId.toString());
+    handleDeleteClick(delId);
+    setDelDia(false)
+
+  }
 
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = applicationData.find((row) => row.id === id);
@@ -567,7 +617,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             startIcon={
               <DeleteIcon />
             }
-            onClick={handleDeleteClick(id)}
+            onClick={handleDel(id)}
           >
             Delete
           </Button>,
@@ -595,13 +645,16 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       editable: false,
       valueGetter: getFullName,
     },
+
     { field: 'uf_email', headerName: 'Email', width: 230, editable: true },
+
     {
       field: 'degree',
       headerName: 'Degree',
       width: 100,
       editable: true,
     },
+
     {
         field: 'semesters',
         headerName: 'Semester(s)',
@@ -612,6 +665,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'timestamp', headerName: 'Date', width: 180, editable: true },
     { field: 'status', headerName: 'App Status', width: 130, editable: true },
+
   ];
 
   if (userRole === 'faculty') {
@@ -774,34 +828,60 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         </DialogContent>
       </Dialog>
 
+      <Dialog style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
+      }} open={delDia} onClose={handleDeleteDiagClose} >
+        <DialogTitle style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>Delete Applicant</DialogTitle>
+        <form onSubmit={e => handleSubmit(e)}>
+          <DialogContent>
+            <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "24px", color: "black" }}>
+              Are you sure you want to delete this applicant?
+            </DialogContentText>
+
+
+          </DialogContent>
+          <DialogActions style={{ marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap: "93px" }}>
+            <Button variant="outlined" style={{ fontSize: "17px", marginLeft: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac', borderWidth: "3px" }} onClick={handleDeleteDiagClose}>Cancel</Button>
+
+            <Button variant="contained" style={{ fontSize: "17px", marginRight: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff' }} type="submit">Delete</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+
       <Dialog open={openAssignmentDialog} onClose={handleCloseAssignmentDialog}>
         <DialogTitle>Course Assignment</DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
             <DialogContentText>
-              Please enter one or more course codes to which the student shall
+              Please select the course code to which the student shall
               be assigned.
             </DialogContentText>
-            <TextField
-              sx={{ paddingLeft: '25%', paddingRight: '25%' }}
-              fullWidth
-              defaultValue={selectedUserGrid?.valueOf()}
-              InputProps={{ readOnly: true }}
-              margin="normal"
-              variant="filled"
-              helperText="User ID of the student to be assigned."
-            />
-            <TextField
-              autoFocus
-              required
-              margin="dense"
-              id="class-codes"
-              label="Class Code(s)"
-              name="class-codes"
-              type="text"
-              fullWidth
-              variant="standard"
-            />
+            <br />
+
+            <FormControl required>
+              <RadioGroup
+                name="positions-radio-group"
+                value={valueRadio}
+                onChange={handleChangeRadio}
+                aria-required="true"
+              >
+                {codes.map((code) => {
+                  return (
+                    <FormControlLabel key={code}
+                      value={code}
+                      control={<Radio />}
+                      label={code}
+                    />
+
+                  )
+                })
+
+                }
+
+              </RadioGroup>
+            </FormControl>
+
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>

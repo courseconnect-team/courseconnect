@@ -10,6 +10,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 
+import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
   id: string;
   uf_email: string;
@@ -25,6 +26,7 @@ interface ApplicantCardProps {
   qualifications: string;
   resume: string;
   plan: string;
+  gpa,
   expanded: boolean;
   onExpandToggle: any;
   openReview: boolean;
@@ -48,6 +50,7 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
   qualifications,
   resume,
   plan,
+  gpa,
   expanded,
   onExpandToggle,
   openReview,
@@ -61,7 +64,24 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
 
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      await statusRef.update({ status: 'Review' });
+      let doc = await getDoc(statusRef);
+      let coursesMap = doc.data().courses;
+      let getQueryParams = query => {
+        return query
+          ? (/^[?#]/.test(query) ? query.slice(1) : query)
+            .split('&')
+            .reduce((params, param) => {
+              let [key, value] = param.split('=');
+              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+              return params;
+            }, {}
+            )
+          : {}
+      };
+      const { data } = getQueryParams(window.location.search);
+      coursesMap[data] = "applied"
+      console.log(coursesMap);
+      await statusRef.update({ courses: coursesMap });
       console.log('Application moved successfully');
       window.location.reload();
     } catch (error) {
@@ -73,7 +93,7 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
     setOpenReviewDialog(false);
   };
 
-  const handleOpenReview = useCallback((event:any) => {
+  const handleOpenReview = useCallback((event: any) => {
     event?.stopPropagation()
     setOpenReviewDialog(true);
     setCurrentStu(id);
@@ -81,23 +101,14 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
 
   const renderReviewDialog = () => (
     <Dialog
-      style={{
-        borderImage:
-          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-        boxShadow: '0px 2px 20px 4px #00000040',
-        borderRadius: '20px',
-        border: '2px solid',
+      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+        style: { borderRadius: 20 }
       }}
       open={openReview}
       onClose={handleCloseReview}
     >
       <DialogTitle
-        style={{
-          textAlign: 'center',
-          fontSize: '36px',
-          fontWeight: '500',
-          fontFamily: 'SF Pro Display-Medium',
-        }}
+        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}
       >
         Review Applicant
       </DialogTitle>
@@ -158,6 +169,7 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
         </DialogActions>
       </form>
     </Dialog>
+
   );
   const handleCardClick = () => {
     onExpandToggle();
@@ -165,39 +177,64 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
 
   return (
     <>
-  {renderReviewDialog()}
-    <div className="applicantCardDeny1" onClick={handleCardClick}>
-      {!expanded && (
-        <>
-          <div>
-          <div className="ellipse">
-            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
+      {renderReviewDialog()}
+      <div className="applicantCardDeny1" onClick={handleCardClick}>
+        {!expanded && (
+          <>
+            <div>
+              <div className="ellipse">
+                <div className="initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase()}</div>
+              </div>
+              <div className="ufid">Email: {uf_email}</div>
+              <div className="name">
+                {firstname} {lastname}
+              </div>
             </div>
-            <div className="ufid">Email: {uf_email}</div>
-            <div className="name">
-              {firstname} {lastname}
-            </div>
-          </div>
 
-          <div className="thumbsContainer4">
-            <div className="applicantStatus">
-              <div className="deny">Denied</div>
+            <div className="thumbsContainer4">
+              <div className="applicantStatus">
+                <div className="deny">Denied</div>
+              </div>
             </div>
-          </div>
-        </>
-      )}
-      {expanded && (
-        <div>
+          </>
+        )}
+        {expanded && (
           <div>
-          <div className="ellipse">
-            <div className = "initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase() }</div>
+            <div>
+              <div className="ellipse">
+                <div className="initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase()}</div>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <div className="name">
+                  {firstname} {lastname}
+                </div>
+
+                <div className="thumbsContainer4">
+                  <div className="applicantStatus">
+                    <div className="deny">Denied</div>
+                  </div>
+                </div>
+                <div style={{ position: 'absolute' }}>
+                  <div className="email1">{uf_email}</div>
+                  <div className="number">{number}</div>
+                </div>
+              </div>
             </div>
+
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
+                marginLeft: '143px',
+                flexWrap: 'wrap',
               }}
             >
+
               <div className="name">
                 {firstname} {lastname}
               </div>
@@ -242,6 +279,7 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
               flexWrap: 'wrap',
             }}
           >
+
               <div style={{ display: 'flex', gap: '61px' }}>
                 <div className="label50">Applying for:</div>
                 <div>{position}</div>
@@ -285,12 +323,12 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
                 </div>
 
                 <div>
-                  <div className="label50">Upcoming semester status:</div>
+                  <div className="label50">GPA:</div>
                   <div
                     style={{ textAlign: 'center' }}
                     className="availability1"
                   >
-                    {collegestatus}
+                    {gpa}
                   </div>
                 </div>
               </div>
@@ -326,10 +364,12 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
                 </div>
               )}
             </div>
+
            
         </div>
       )}
     </div>
+
     </>
   );
 };

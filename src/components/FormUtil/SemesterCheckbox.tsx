@@ -11,8 +11,8 @@ interface CheckboxProps {
 
 export default function SemesterCheckbox({ name }: CheckboxProps) {
   const [state, setState] = React.useState({
-    fall_2023: false,
-    spring_2024: false,
+    fall_2024: false,
+    spring_2025: false,
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,8 +25,8 @@ export default function SemesterCheckbox({ name }: CheckboxProps) {
     });
   };
 
-  const { fall_2023, spring_2024 } = state;
-  const error = [fall_2023, spring_2024].filter((v) => v).length !== 2;
+  const { fall_2024, spring_2025 } = state;
+  const error = [fall_2024, spring_2025].filter((v) => v).length !== 2;
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -35,22 +35,22 @@ export default function SemesterCheckbox({ name }: CheckboxProps) {
           <FormControlLabel
             control={
               <Checkbox
-                checked={fall_2023}
+                checked={fall_2024}
                 onChange={handleChange}
-                name={`${name}_fall_2023`}
+                name={`${name}_fall_2024`}
               />
             }
-            label="Fall 2023"
+            label="Fall 2024"
           />
           <FormControlLabel
             control={
               <Checkbox
-                checked={spring_2024}
+                checked={spring_2025}
                 onChange={handleChange}
-                name={`${name}_spring_2024`}
+                name={`${name}_spring_2025`}
               />
             }
-            label="Spring 2024"
+            label="Spring 2025"
           />
         </FormGroup>
       </FormControl>

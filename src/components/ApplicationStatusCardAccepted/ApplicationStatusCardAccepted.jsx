@@ -23,7 +23,7 @@ export const ApplicationStatusCardAccepted = ({ text, course }) => {
       <div className="inner-content-2">
         <div className="text-wrapper-7">Status:</div>
 
-        <div className="text-wrapper-9">You will be notified of your assignment soon.</div>
+        <div className="text-wrapper-9">Please check your email to begin the onboarding process.</div>
       </div>
       <div className="application-button">
         <div className="overlap-group-2">
