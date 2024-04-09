@@ -181,7 +181,7 @@ export default function User() {
           <form onSubmit={e => handleSemesterCreate(e)}>
             <DialogContent>
               <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "20px", color: "black" }}>
-                Please enter the new semester's name.
+                Please enter the new semester&apos;s name.
               </DialogContentText>
               <br />
               <br />
@@ -262,7 +262,7 @@ export default function User() {
                     label="Semester"
                     onChange={handleChange}
                   >
-                    {menu.map(i => <MenuItem value={i}>{i}</MenuItem>
+                    {menu.map(i => <MenuItem key={i} value={i}>{i}</MenuItem>
                     )}
                     <MenuItem value={"New Semester"}>Create New Semester</MenuItem>
                   </Select>
