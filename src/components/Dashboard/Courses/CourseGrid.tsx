@@ -12,7 +12,12 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import {
   GridRowModesModel,
+  GridRowsProp,
   GridRowModes,
+  GridToolbarContainer,
+  GridToolbarExport,
+  GridToolbarFilterButton,
+  GridToolbarColumnsButton,
   DataGrid,
   GridColDef,
   GridActionsCellItem,
@@ -20,11 +25,8 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-  GridRowsProp,
-  GridToolbarContainer,
-  GridToolbarExport,
-  GridToolbarFilterButton,
-  GridToolbarColumnsButton,
+  useGridApiContext,
+  gridClasses
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -32,6 +34,7 @@ import { useAuth } from '@/firebase/auth/auth_context';
 import { Dialog, DialogContent, DialogTitle, LinearProgress } from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
 
+import { alpha, styled } from '@mui/material/styles';
 interface Course {
   id: string;
   code: string;
@@ -49,10 +52,11 @@ interface Course {
 
 interface CourseGridProps {
   userRole: string;
+  semester: string;
 }
 
 export default function CourseGrid(props: CourseGridProps) {
-  const { userRole } = props;
+  const { userRole, semester } = props;
   const { user } = useAuth();
   const [success, setSuccess] = React.useState(false);
 
@@ -62,7 +66,9 @@ export default function CourseGrid(props: CourseGridProps) {
   const userEmail = user?.email;
 
   React.useEffect(() => {
-    const coursesRef = firebase.firestore().collection('courses');
+    console.log("SEM " + semester);
+
+    const coursesRef = firebase.firestore().collection('courses').where("semester", "==", semester);
     if (userRole === 'admin') {
       // IF USER IS ADMIN, THEN FETCH ALL COURSES.
       coursesRef.get().then((querySnapshot) => {
@@ -110,7 +116,7 @@ export default function CourseGrid(props: CourseGridProps) {
           setCourseData(data);
         });
     }
-  }, [userRole, userEmail]);
+  }, [userRole, userEmail, semester]);
 
   // dialog
   // pop-up view setup
@@ -154,12 +160,7 @@ export default function CourseGrid(props: CourseGridProps) {
     return (
       <GridToolbarContainer>
         {/* Include your Dialog component here and pass the open state and setOpen function as props */}
-        <CreateCourseDialog
-          open={open}
-          setOpen={setOpen}
-          setSuccess={setSuccess}
-          setCourseData={setCourseData}
-        />
+
         <GridToolbarExport />
         <GridToolbarFilterButton />
         <GridToolbarColumnsButton />
@@ -342,7 +343,7 @@ export default function CourseGrid(props: CourseGridProps) {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 120,
+      width: 130,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -395,125 +396,82 @@ export default function CourseGrid(props: CourseGridProps) {
         ];
       },
     },
-    { field: 'id', headerName: 'Class Number', width: 120, editable: true },
     {
       field: 'code',
       headerName: 'Course Code',
       width: 130,
       editable: true,
     },
-    { field: 'title', headerName: 'Course Title', width: 130, editable: true },
-    { field: 'credits', headerName: 'Credits', width: 70, editable: true },
+    { field: 'title', headerName: 'Course Title', width: 200, editable: true },
+    { field: 'credits', headerName: 'Credits', width: 100, editable: true },
     {
-      field: 'num_enrolled',
-      headerName: '# Enrolled',
-      width: 80,
+      field: 'enrolled',
+      headerName: 'Enrolled',
+      width: 100,
       editable: true,
     },
     {
       field: 'enrollment_cap',
       headerName: 'Capacity',
-      width: 80,
+      width: 100,
       editable: true,
     },
     {
       field: 'professor_names',
-      headerName: 'Professor Name(s)',
-      width: 150,
+      headerName: 'Professor Name',
+      width: 190,
       editable: true,
     },
     {
       field: 'professor_emails',
-      headerName: 'Professor Email(s)',
-      width: 150,
+      headerName: 'Professor Email',
+      width: 170,
       editable: true,
     },
     {
-      field: 'helper_names',
-      headerName: 'Assistant Name(s)',
+      field: 'semester',
+      headerName: 'Semester',
       width: 130,
       editable: true,
     },
-    {
-      field: 'helper_emails',
-      headerName: 'Assistant Email(s)',
-      width: 130,
-      editable: true,
-    },
+
   ];
 
-  if (userRole === 'faculty' || userRole === 'student_assigned') {
-    columns = [
-      {
-        field: 'actions',
-        type: 'actions',
-        headerName: 'Actions',
-        width: 70,
-        cellClassName: 'actions',
-        getActions: ({ id }) => {
-          return [
-            <GridActionsCellItem
-              key="3"
-              icon={<ZoomInIcon />}
-              label="View"
-              onClick={(event) => handleClickOpenGrid(id)}
-              color="primary"
-            />,
-          ];
+  const ODD_OPACITY = 0.2;
+
+  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [`& .${gridClasses.row}.even`]: {
+      backgroundColor: '#562EBA1F',
+      '&:hover, &.Mui-hovered': {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        '@media (hover: none)': {
+          backgroundColor: 'transparent',
         },
       },
-      { field: 'id', headerName: 'Class Number', width: 120, editable: false },
-      {
-        field: 'code',
-        headerName: 'Course Code',
-        width: 130,
-        editable: false,
+      '&.Mui-selected': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY + theme.palette.action.selectedOpacity,
+        ),
+        '&:hover, &.Mui-hovered': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY +
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity,
+          ),
+          // Reset on touch devices, it doesn't add specificity
+          '@media (hover: none)': {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY + theme.palette.action.selectedOpacity,
+            ),
+          },
+        },
       },
-      {
-        field: 'title',
-        headerName: 'Course Title',
-        width: 130,
-        editable: false,
-      },
-      { field: 'credits', headerName: 'Credits', width: 70, editable: false },
-      {
-        field: 'num_enrolled',
-        headerName: '# Enrolled',
-        width: 80,
-        editable: false,
-      },
-      {
-        field: 'enrollment_cap',
-        headerName: 'Capacity',
-        width: 80,
-        editable: false,
-      },
-      {
-        field: 'professor_names',
-        headerName: 'Professor Name(s)',
-        width: 150,
-        editable: false,
-      },
-      {
-        field: 'professor_emails',
-        headerName: 'Professor Email(s)',
-        width: 150,
-        editable: false,
-      },
-      {
-        field: 'helper_names',
-        headerName: 'Assistant Name(s)',
-        width: 130,
-        editable: false,
-      },
-      {
-        field: 'helper_emails',
-        headerName: 'Assistant Email(s)',
-        width: 130,
-        editable: false,
-      },
-    ];
-  }
+    },
+  }));
+
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
     ref,
@@ -538,8 +496,9 @@ export default function CourseGrid(props: CourseGridProps) {
       </Snackbar>
       <Box
         sx={{
+          marginLeft: 10,
           height: 600,
-          width: '100%',
+          width: '90%',
           '& .actions': {
             color: 'text.secondary',
           },
@@ -549,7 +508,7 @@ export default function CourseGrid(props: CourseGridProps) {
         }}
       >
         {loading ? <LinearProgress color='warning' /> : null}
-        <DataGrid
+        <StripedDataGrid
           rows={courseData}
           columns={columns}
           editMode="row"
@@ -569,6 +528,12 @@ export default function CourseGrid(props: CourseGridProps) {
           initialState={{
             pagination: { paginationModel: { pageSize: 25 } },
           }}
+
+          getRowClassName={(params) =>
+            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+          }
+          sx={{ borderRadius: '16px' }}
+
         />
 
         <Dialog open={open} onClose={handleClose}>

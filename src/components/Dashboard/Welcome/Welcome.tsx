@@ -152,7 +152,9 @@ export default function DashboardWelcome(props: DashboardProps) {
               <Link href="/users">
                 <DashboardCard className={styles.users} image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png" text="Users" />
               </Link>
-              <DashboardCard className={styles.courses} image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png" text="Courses" clickable={true} />
+              <Link href="/admincourses">
+                <DashboardCard className={styles.courses} image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png" text="Courses" />
+              </Link>
               <Link href="/adminApplications">
                 <DashboardCard className={styles.applications} image="https://c.animaapp.com/PWgYNV8T/img/apply-1@2x.png" text="Assign" />
               </Link>

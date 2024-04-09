@@ -11,7 +11,7 @@ export default function Courses(props: CoursesProps) {
     <>
       <Container maxWidth="lg">
         <h1>Courses</h1>
-        <CourseGrid userRole={userRole} />
+        <CourseGrid userRole={userRole} semester='none' />
       </Container>
     </>
   );

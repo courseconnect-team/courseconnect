@@ -209,6 +209,7 @@ export default function Application() {
       setLoading(false);
       return;
     } else {
+      await firebase.firestore().collection('assignments').doc(userId).delete();
       // console.log(applicationData); // FOR DEBUGGING ONLY!
 
       // use fetch to send the application data to the server
