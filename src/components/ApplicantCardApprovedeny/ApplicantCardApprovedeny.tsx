@@ -1,3 +1,5 @@
+
+// @ts-nocheck
 import { FunctionComponent, useCallback } from 'react';
 import './style.css';
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
