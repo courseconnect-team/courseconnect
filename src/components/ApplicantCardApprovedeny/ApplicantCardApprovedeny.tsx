@@ -37,6 +37,7 @@ interface ApplicantCardProps {
   setOpenDenyDialog: (value: boolean) => void;
   currentStu: string;
   setCurrentStu: (value: string) => void;
+  className: string;
 }
 
 const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
@@ -62,9 +63,77 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   setOpenApproveDialog,
   setOpenDenyDialog,
   currentStu,
-  setCurrentStu
+
+  setCurrentStu,
+  className
+  
 
 }) => {
+
+  const handleSendEmail = async () => {
+    try {        
+      const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'applicationStatusApproved',
+          data: {
+            user: {
+              name: `${firstname ?? ''} ${lastname ?? ''}`.trim(),
+              email: uf_email
+            },
+            position: position,
+            classCode: className,
+            timeframe: "2 weeks"
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Email sent successfully:', data);
+      } else {
+        throw new Error('Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+
+  const handleDenyEmail = async () => {
+    try {        
+      const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'applicationStatusDenied',
+          data: {
+            user: {
+              name: `${firstname ?? ''} ${lastname ?? ''}`.trim(),
+              email: uf_email
+            },
+            position: position,
+            classCode: className,
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Email sent successfully:', data);
+      } else {
+        throw new Error('Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+  
+  
 
   const db = firebase.firestore();
   const handleApproveSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -91,6 +160,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application approved successfully');
+      handleSendEmail();
       window.location.reload();
 
     } catch (error) {
@@ -121,6 +191,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application denied successfully');
+      handleDenyEmail();
       window.location.reload();
 
     } catch (error) {

@@ -35,7 +35,9 @@ export const LogInCard = ({ className }: { className: any }) => {
   const handleClose = () => {
     setOpen(false);
   }
-  const handleForgotPassword = (e) => {
+
+  const handleForgotPassword = (e:any) => {
+
     //handleSignOut();
     e.preventDefault()
     const auth = getAuth();
@@ -173,4 +175,3 @@ export const LogInCard = ({ className }: { className: any }) => {
     </div>
   );
 };
-

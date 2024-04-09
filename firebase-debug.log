@@ -1,0 +1,511 @@
+[debug] [2024-04-09T06:05:37.363Z] ----------------------------------------------------------------------
+[debug] [2024-04-09T06:05:37.364Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Oling\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions --debug
+[debug] [2024-04-09T06:05:37.365Z] CLI Version:   13.7.1
+[debug] [2024-04-09T06:05:37.365Z] Platform:      win32
+[debug] [2024-04-09T06:05:37.365Z] Node Version:  v18.17.1
+[debug] [2024-04-09T06:05:37.366Z] Time:          Tue Apr 09 2024 02:05:37 GMT-0400 (Eastern Daylight Time)
+[debug] [2024-04-09T06:05:37.366Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-04-09T06:05:37.417Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-04-09T06:05:37.418Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2024-04-09T06:05:37.419Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2024-04-09T06:05:37.421Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2024-04-09T06:05:37.421Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:05:37.422Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:05:37.621Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2024-04-09T06:05:37.622Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:05:37.623Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2024-04-09T06:05:37.623Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2024-04-09T06:05:37.783Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2024-04-09T06:05:37.784Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] +  functions: Finished running predeploy script. 
+[debug] [2024-04-09T06:05:41.284Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b [none]
+[debug] [2024-04-09T06:05:41.530Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b 200
+[debug] [2024-04-09T06:05:41.530Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b {"projectId":"courseconnect-c6a7b","projectNumber":"1095880459709","displayName":"courseconnect","name":"projects/courseconnect-c6a7b","resources":{"hostingSite":"courseconnect-c6a7b"},"state":"ACTIVE","etag":"1_2018d815-51c6-4ec3-8020-080cebdb78ac"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2024-04-09T06:05:41.532Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-04-09T06:05:41.532Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:05:41.533Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-04-09T06:05:41.533Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:05:41.534Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [none]
+[debug] [2024-04-09T06:05:41.534Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:05:41.535Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [none]
+[debug] [2024-04-09T06:05:41.535Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:05:41.892Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com 200
+[debug] [2024-04-09T06:05:41.892Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2024-04-09T06:05:41.896Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com 200
+[debug] [2024-04-09T06:05:41.896Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [omitted]
+[info] +  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2024-04-09T06:05:41.899Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com 200
+[debug] [2024-04-09T06:05:41.899Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [omitted]
+[info] +  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2024-04-09T06:05:41.905Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com 200
+[debug] [2024-04-09T06:05:41.905Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [omitted]
+[info] +  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2024-04-09T06:05:41.905Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2024-04-09T06:05:42.187Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2024-04-09T06:05:42.187Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.appspot.com"}
+[debug] [2024-04-09T06:05:42.187Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs [none]
+[debug] [2024-04-09T06:05:42.350Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs 200
+[debug] [2024-04-09T06:05:42.351Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs {}
+[debug] [2024-04-09T06:05:42.352Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[debug] [2024-04-09T06:05:43.160Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "lib/src/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-admin": "^11.8.0",
+    "nodemailer": "^6.9.13",
+    "firebase-functions": "^4.3.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[error] 
+[error] Error: There was an error reading functions\package.json:
+
+ functions\lib\src\index.js does not exist, can't deploy Cloud Functions
+[debug] [2024-04-09T06:08:32.439Z] ----------------------------------------------------------------------
+[debug] [2024-04-09T06:08:32.441Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Oling\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions --debug
+[debug] [2024-04-09T06:08:32.441Z] CLI Version:   13.7.1
+[debug] [2024-04-09T06:08:32.441Z] Platform:      win32
+[debug] [2024-04-09T06:08:32.441Z] Node Version:  v18.17.1
+[debug] [2024-04-09T06:08:32.442Z] Time:          Tue Apr 09 2024 02:08:32 GMT-0400 (Eastern Daylight Time)
+[debug] [2024-04-09T06:08:32.442Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-04-09T06:08:32.492Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-04-09T06:08:32.494Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2024-04-09T06:08:32.494Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2024-04-09T06:08:32.496Z] > refreshing access token with scopes: []
+[debug] [2024-04-09T06:08:32.497Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2024-04-09T06:08:32.497Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-04-09T06:08:32.723Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2024-04-09T06:08:32.724Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-04-09T06:08:32.729Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2024-04-09T06:08:32.729Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:08:32.730Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:08:32.885Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2024-04-09T06:08:32.886Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:08:32.887Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2024-04-09T06:08:32.887Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2024-04-09T06:08:33.040Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2024-04-09T06:08:33.041Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] +  functions: Finished running predeploy script. 
+[debug] [2024-04-09T06:08:36.412Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b [none]
+[debug] [2024-04-09T06:08:36.735Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b 200
+[debug] [2024-04-09T06:08:36.735Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b {"projectId":"courseconnect-c6a7b","projectNumber":"1095880459709","displayName":"courseconnect","name":"projects/courseconnect-c6a7b","resources":{"hostingSite":"courseconnect-c6a7b"},"state":"ACTIVE","etag":"1_2018d815-51c6-4ec3-8020-080cebdb78ac"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2024-04-09T06:08:36.738Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-04-09T06:08:36.738Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:08:36.739Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-04-09T06:08:36.739Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:08:36.739Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [none]
+[debug] [2024-04-09T06:08:36.740Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:08:36.740Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [none]
+[debug] [2024-04-09T06:08:36.740Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:08:37.201Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com 200
+[debug] [2024-04-09T06:08:37.201Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [omitted]
+[info] +  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2024-04-09T06:08:37.202Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com 200
+[debug] [2024-04-09T06:08:37.203Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [omitted]
+[info] +  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2024-04-09T06:08:37.203Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com 200
+[debug] [2024-04-09T06:08:37.204Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2024-04-09T06:08:37.205Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com 200
+[debug] [2024-04-09T06:08:37.205Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [omitted]
+[info] +  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2024-04-09T06:08:37.205Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2024-04-09T06:08:37.469Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2024-04-09T06:08:37.470Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.appspot.com"}
+[debug] [2024-04-09T06:08:37.470Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs [none]
+[debug] [2024-04-09T06:08:37.618Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs 200
+[debug] [2024-04-09T06:08:37.619Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs {}
+[debug] [2024-04-09T06:08:37.620Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[debug] [2024-04-09T06:08:38.768Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "lib/src/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-admin": "^11.8.0",
+    "nodemailer": "^6.9.13",
+    "firebase-functions": "^4.3.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[error] 
+[error] Error: There was an error reading functions\package.json:
+
+ functions\lib\src\index.js does not exist, can't deploy Cloud Functions
+[debug] [2024-04-09T06:09:36.559Z] ----------------------------------------------------------------------
+[debug] [2024-04-09T06:09:36.560Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Oling\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions --debug
+[debug] [2024-04-09T06:09:36.561Z] CLI Version:   13.7.1
+[debug] [2024-04-09T06:09:36.561Z] Platform:      win32
+[debug] [2024-04-09T06:09:36.561Z] Node Version:  v18.17.1
+[debug] [2024-04-09T06:09:36.562Z] Time:          Tue Apr 09 2024 02:09:36 GMT-0400 (Eastern Daylight Time)
+[debug] [2024-04-09T06:09:36.562Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-04-09T06:09:36.612Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-04-09T06:09:36.613Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2024-04-09T06:09:36.614Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2024-04-09T06:09:36.616Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2024-04-09T06:09:36.616Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:09:36.617Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:09:36.833Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2024-04-09T06:09:36.833Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:09:36.834Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2024-04-09T06:09:36.834Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2024-04-09T06:09:37.017Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2024-04-09T06:09:37.017Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[error] 
+[error] Error: functions predeploy error: Command terminated with non-zero exit code 2
+[debug] [2024-04-09T06:10:20.652Z] ----------------------------------------------------------------------
+[debug] [2024-04-09T06:10:20.653Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Oling\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions --debug
+[debug] [2024-04-09T06:10:20.654Z] CLI Version:   13.7.1
+[debug] [2024-04-09T06:10:20.654Z] Platform:      win32
+[debug] [2024-04-09T06:10:20.654Z] Node Version:  v18.17.1
+[debug] [2024-04-09T06:10:20.655Z] Time:          Tue Apr 09 2024 02:10:20 GMT-0400 (Eastern Daylight Time)
+[debug] [2024-04-09T06:10:20.655Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-04-09T06:10:20.706Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-04-09T06:10:20.707Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2024-04-09T06:10:20.708Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2024-04-09T06:10:20.710Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2024-04-09T06:10:20.710Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:10:20.711Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:10:20.897Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2024-04-09T06:10:20.898Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:10:20.898Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2024-04-09T06:10:20.898Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2024-04-09T06:10:21.054Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2024-04-09T06:10:21.055Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] +  functions: Finished running predeploy script. 
+[debug] [2024-04-09T06:10:24.495Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b [none]
+[debug] [2024-04-09T06:10:24.811Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b 200
+[debug] [2024-04-09T06:10:24.812Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b {"projectId":"courseconnect-c6a7b","projectNumber":"1095880459709","displayName":"courseconnect","name":"projects/courseconnect-c6a7b","resources":{"hostingSite":"courseconnect-c6a7b"},"state":"ACTIVE","etag":"1_2018d815-51c6-4ec3-8020-080cebdb78ac"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2024-04-09T06:10:24.814Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-04-09T06:10:24.814Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:10:24.815Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-04-09T06:10:24.815Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:10:24.816Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [none]
+[debug] [2024-04-09T06:10:24.817Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:10:24.817Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [none]
+[debug] [2024-04-09T06:10:24.818Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:10:25.257Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com 200
+[debug] [2024-04-09T06:10:25.257Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [omitted]
+[info] +  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2024-04-09T06:10:25.258Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com 200
+[debug] [2024-04-09T06:10:25.258Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2024-04-09T06:10:25.259Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com 200
+[debug] [2024-04-09T06:10:25.259Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [omitted]
+[info] +  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2024-04-09T06:10:25.259Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com 200
+[debug] [2024-04-09T06:10:25.259Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [omitted]
+[info] +  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2024-04-09T06:10:25.260Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2024-04-09T06:10:25.566Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2024-04-09T06:10:25.566Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.appspot.com"}
+[debug] [2024-04-09T06:10:25.567Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs [none]
+[debug] [2024-04-09T06:10:25.929Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs 200
+[debug] [2024-04-09T06:10:25.929Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs {}
+[debug] [2024-04-09T06:10:25.930Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[debug] [2024-04-09T06:10:26.752Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "lib/src/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-admin": "^11.8.0",
+    "nodemailer": "^6.9.13",
+    "firebase-functions": "^4.3.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[error] 
+[error] Error: There was an error reading functions\package.json:
+
+ functions\lib\src\index.js does not exist, can't deploy Cloud Functions
+[debug] [2024-04-09T06:12:55.943Z] ----------------------------------------------------------------------
+[debug] [2024-04-09T06:12:55.944Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Oling\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions --debug
+[debug] [2024-04-09T06:12:55.944Z] CLI Version:   13.7.1
+[debug] [2024-04-09T06:12:55.945Z] Platform:      win32
+[debug] [2024-04-09T06:12:55.945Z] Node Version:  v18.17.1
+[debug] [2024-04-09T06:12:55.945Z] Time:          Tue Apr 09 2024 02:12:55 GMT-0400 (Eastern Daylight Time)
+[debug] [2024-04-09T06:12:55.945Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-04-09T06:12:55.997Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-04-09T06:12:55.998Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2024-04-09T06:12:55.999Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2024-04-09T06:12:56.001Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2024-04-09T06:12:56.001Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:12:56.001Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:12:56.199Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2024-04-09T06:12:56.200Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:12:56.201Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2024-04-09T06:12:56.201Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2024-04-09T06:12:56.354Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2024-04-09T06:12:56.355Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] +  functions: Finished running predeploy script. 
+[debug] [2024-04-09T06:12:59.676Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b [none]
+[debug] [2024-04-09T06:13:00.012Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b 200
+[debug] [2024-04-09T06:13:00.012Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b {"projectId":"courseconnect-c6a7b","projectNumber":"1095880459709","displayName":"courseconnect","name":"projects/courseconnect-c6a7b","resources":{"hostingSite":"courseconnect-c6a7b"},"state":"ACTIVE","etag":"1_2018d815-51c6-4ec3-8020-080cebdb78ac"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2024-04-09T06:13:00.014Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-04-09T06:13:00.015Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:00.015Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-04-09T06:13:00.016Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:00.016Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [none]
+[debug] [2024-04-09T06:13:00.016Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:00.017Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [none]
+[debug] [2024-04-09T06:13:00.017Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:00.377Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com 200
+[debug] [2024-04-09T06:13:00.378Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [omitted]
+[info] +  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2024-04-09T06:13:00.388Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com 200
+[debug] [2024-04-09T06:13:00.388Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [omitted]
+[info] +  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2024-04-09T06:13:00.410Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com 200
+[debug] [2024-04-09T06:13:00.410Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2024-04-09T06:13:00.411Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com 200
+[debug] [2024-04-09T06:13:00.411Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [omitted]
+[info] +  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2024-04-09T06:13:00.411Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2024-04-09T06:13:00.697Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2024-04-09T06:13:00.697Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.appspot.com"}
+[debug] [2024-04-09T06:13:00.698Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs [none]
+[debug] [2024-04-09T06:13:01.200Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs 200
+[debug] [2024-04-09T06:13:01.200Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs {}
+[debug] [2024-04-09T06:13:01.202Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[debug] [2024-04-09T06:13:01.994Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-admin": "^11.8.0",
+    "nodemailer": "^6.9.13",
+    "firebase-functions": "^4.3.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[debug] [2024-04-09T06:13:01.995Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2024-04-09T06:13:01.996Z] Could not find functions.yaml. Must use http discovery
+[debug] [2024-04-09T06:13:02.001Z] Found firebase-functions binary at 'C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\node_modules\.bin\firebase-functions'
+[info] Serving at port 8528
+
+[debug] [2024-04-09T06:13:02.340Z] Got response code 400; body Failed to generate manifest from function source: Error: Cannot find module 'dotenv'
+Require stack:
+- C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\functions\lib\nodemailer.js
+- C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\functions\lib\index.js
+- C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\node_modules\firebase-functions\lib\runtime\loader.js
+- C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\node_modules\firebase-functions\lib\bin\firebase-functions.js
+[info] shutdown requested via /__/quitquitquit
+
+[error] 
+[error] Error: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error
+[debug] [2024-04-09T06:13:30.985Z] ----------------------------------------------------------------------
+[debug] [2024-04-09T06:13:30.987Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Oling\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions --debug
+[debug] [2024-04-09T06:13:30.987Z] CLI Version:   13.7.1
+[debug] [2024-04-09T06:13:30.987Z] Platform:      win32
+[debug] [2024-04-09T06:13:30.987Z] Node Version:  v18.17.1
+[debug] [2024-04-09T06:13:30.988Z] Time:          Tue Apr 09 2024 02:13:30 GMT-0400 (Eastern Daylight Time)
+[debug] [2024-04-09T06:13:30.988Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-04-09T06:13:31.039Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-04-09T06:13:31.041Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2024-04-09T06:13:31.041Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2024-04-09T06:13:31.043Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2024-04-09T06:13:31.044Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:31.044Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:13:31.314Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2024-04-09T06:13:31.314Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-04-09T06:13:31.315Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2024-04-09T06:13:31.316Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2024-04-09T06:13:31.477Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2024-04-09T06:13:31.477Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] +  functions: Finished running predeploy script. 
+[debug] [2024-04-09T06:13:34.833Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b [none]
+[debug] [2024-04-09T06:13:35.146Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b 200
+[debug] [2024-04-09T06:13:35.146Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b {"projectId":"courseconnect-c6a7b","projectNumber":"1095880459709","displayName":"courseconnect","name":"projects/courseconnect-c6a7b","resources":{"hostingSite":"courseconnect-c6a7b"},"state":"ACTIVE","etag":"1_2018d815-51c6-4ec3-8020-080cebdb78ac"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2024-04-09T06:13:35.149Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-04-09T06:13:35.149Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:35.150Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-04-09T06:13:35.150Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:35.151Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [none]
+[debug] [2024-04-09T06:13:35.151Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:35.152Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [none]
+[debug] [2024-04-09T06:13:35.152Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-09T06:13:35.537Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com 200
+[debug] [2024-04-09T06:13:35.537Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2024-04-09T06:13:35.539Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com 200
+[debug] [2024-04-09T06:13:35.539Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [omitted]
+[info] +  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2024-04-09T06:13:35.540Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com 200
+[debug] [2024-04-09T06:13:35.540Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [omitted]
+[info] +  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2024-04-09T06:13:35.543Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com 200
+[debug] [2024-04-09T06:13:35.543Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [omitted]
+[info] +  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2024-04-09T06:13:35.544Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2024-04-09T06:13:35.742Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2024-04-09T06:13:35.743Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.appspot.com"}
+[debug] [2024-04-09T06:13:35.743Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs [none]
+[debug] [2024-04-09T06:13:36.031Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs 200
+[debug] [2024-04-09T06:13:36.032Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs {}
+[debug] [2024-04-09T06:13:36.033Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[debug] [2024-04-09T06:13:36.847Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-admin": "^11.8.0",
+    "nodemailer": "^6.9.13",
+    "firebase-functions": "^4.3.1"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[debug] [2024-04-09T06:13:36.848Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2024-04-09T06:13:36.849Z] Could not find functions.yaml. Must use http discovery
+[debug] [2024-04-09T06:13:36.853Z] Found firebase-functions binary at 'C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\node_modules\.bin\firebase-functions'
+[info] Serving at port 8395
+
+[debug] [2024-04-09T06:13:37.186Z] Got response code 400; body Failed to generate manifest from function source: Error: Cannot find module 'dotenv'
+Require stack:
+- C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\functions\lib\nodemailer.js
+- C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\functions\lib\index.js
+- C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\node_modules\firebase-functions\lib\runtime\loader.js
+- C:\Users\Oling\Documents\courseconnect-landing-page-ui-overhall\courseconnect-landing-page-ui-overhall\node_modules\firebase-functions\lib\bin\firebase-functions.js
+[info] shutdown requested via /__/quitquitquit
+
+[error] 
+[error] Error: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error

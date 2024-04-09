@@ -76,9 +76,11 @@
 }
 
 .studentlandingpage .fullnameandbioinstance {
-  left: 38% !important;
+  left: 48% !important;
   top: 250px !important;
   position: absolute;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
 }
 
 .studentlandingpage .topnavbarsignedin {
@@ -94,9 +96,7 @@
   font-weight: 500;
   letter-spacing: 0;
   line-height: normal;
-  top: 164px;
       position:absolute;
-    top: 50%;
     left: 48%;
     transform: translateY(-50%);
     transform: translateX(-50%);

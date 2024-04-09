@@ -23,6 +23,7 @@
     "firebase": "^9.22.2",
     "firebase-functions": "^4.4.1",
     "next": "13.4.3",
+    "nodemailer": "^6.9.13",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-firebase-hooks": "^5.1.1",

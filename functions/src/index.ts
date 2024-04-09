@@ -9,12 +9,52 @@
 import * as functions from 'firebase-functions';
 import { DocumentSnapshot } from 'firebase-functions/v2/firestore';
 // import * as cors from 'cors';
+import { sendForgotPasswordEmail, sendApplicationConfirmationEmail, sendApplicationStatusApprovedEmail, sendApplicationStatusDeniedEmail, sendFacultyNotificationEmail } from "./nodemailer"
 
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 const auth = admin.auth();
 db.settings({ ignoreUndefinedProperties: true });
+
+
+
+
+exports.sendEmail = functions.https.onRequest((req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+  } else {
+    const {type, data } = req.body;
+    switch (type) {
+      case 'forgotPassword':
+        sendForgotPasswordEmail(data.user, data.resetLink);
+        break;
+      case 'applicationConfirmation':
+        sendApplicationConfirmationEmail(data.user, data.position, data.classCode);
+        break;
+      case 'applicationStatusApproved':
+        // sendApplicationStatusApprovedEmail(data.user, data.position, data.classCode, data.timeframe);
+        sendApplicationStatusApprovedEmail(data.user, data.position, data.classCode);
+
+        break;
+      case 'applicationStatusDenied':
+        sendApplicationStatusDeniedEmail(data.user, data.position, data.classCode);
+        break;
+      case 'facultyNotification':
+        sendFacultyNotificationEmail(data.user, data.position, data.classCode);
+        break;
+      default:
+        res.status(400).json({ message: 'Invalid email type' });
+        return;
+    }
+
+    res.status(200).json({ success: true });
+  }
+});
+
 
 // const corsHandler = cors({ origin: true });
 

@@ -3,8 +3,10 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import CancelIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
+
 import {
   GridRowModesModel,
   GridRowsProp,
@@ -23,49 +25,43 @@ import {
   useGridApiContext,
   gridClasses
 } from '@mui/x-data-grid';
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  TextField,
-} from '@mui/material';
+import {Button}from '@mui/material';
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { LinearProgress, Button } from '@mui/material';
+import { LinearProgress } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
-
+import CheckIcon from '@mui/icons-material/Check';
+import { ThumbDownOffAlt, ThumbUp, ThumbUpOffAlt } from '@mui/icons-material';
 interface User {
   id: string;
   firstname: string;
   lastname: string;
   email: string;
-  password: string;
   department: string;
   role: string;
-  ufid: string;
   isNew?: boolean;
+  fullname: string;
   mode?: 'edit' | 'view' | undefined;
 }
 
 interface EditToolbarProps {
-  setUserData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+  setApplicationData: (
+    newRows: (oldRows: GridRowsProp) => GridRowsProp
+  ) => void;
   setRowModesModel: (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel
   ) => void;
 }
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setUserData, setRowModesModel } = props;
+  const { setApplicationData, setRowModesModel } = props;
 
   // Add state to control the dialog open status
   const [open, setOpen] = React.useState(false);
 
   return (
     <GridToolbarContainer>
-      {/* Include your Dialog component here and pass the open state and setOpen function as props */}
       <GridToolbarExport style={{ color: '#562EBA' }} />
       <GridToolbarFilterButton style={{ color: '#562EBA' }} />
       <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
@@ -73,34 +69,30 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-interface UserGridProps {
+interface ApprovalGridProps {
   userRole: string;
 }
 
-export default function UserGrid(props: UserGridProps) {
+export default function ApprovalGrid(props: ApprovalGridProps) {
   const { userRole } = props;
   const [userData, setUserData] = React.useState<User[]>([]);
-  const [open, setOpen] = React.useState(false);
-  const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState();
 
   React.useEffect(() => {
-    const usersRef = firebase.firestore().collection('users');
+    const usersRef = firebase.firestore().collection('users').where('role', '==', "unapproved");
     usersRef.get().then((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
         ({
           id: doc.id,
+          fullname: doc.data().firstname + " " + doc.data().lastname,
           ...doc.data(),
         } as User)
       );
+      
       setUserData(data);
     });
   }, []);
-  const handleDeleteDiagClose = () => {
 
-    setDelDia(false);
-  }
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
@@ -117,7 +109,7 @@ export default function UserGrid(props: UserGridProps) {
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
-
+  
   const handleSaveClick = (id: GridRowId) => () => {
     const updatedRow = userData.find((row) => row.id === id);
     if (updatedRow) {
@@ -139,11 +131,53 @@ export default function UserGrid(props: UserGridProps) {
       console.error('No matching user data found for id: ', id);
     }
   };
-  const handleDel = (id: GridRowId) => () => {
-    setDelId(id);
-    setDelDia(true);
+
+
+  const handleApproveClick = (id: GridRowId) => () => {
+    const updatedRow = userData.find((row) => row.id === id);
+    if (updatedRow) {
+      firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .update({role: 'faculty'})
+        .then(() => {
+          setRowModesModel({
+            ...rowModesModel,
+            [id]: { mode: GridRowModes.View },
+          });
+        })
+        .catch((error) => {
+          console.error('Error updating document: ', error);
+        });
+    } else {
+      console.error('No matching user data found for id: ', id);
+    }
   };
-  const handleDeleteClick = (id: GridRowId) => {
+
+  const handleDenyClick = (id: GridRowId) => () => {
+    const updatedRow = userData.find((row) => row.id === id);
+    if (updatedRow) {
+      firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .update({role: 'denied'})
+        .then(() => {
+          setRowModesModel({
+            ...rowModesModel,
+            [id]: { mode: GridRowModes.View },
+          });
+        })
+        .catch((error) => {
+          console.error('Error updating document: ', error);
+        });
+    } else {
+      console.error('No matching user data found for id: ', id);
+    }
+  };
+
+  const handleDeleteClick = (id: GridRowId) => () => {
     firebase
       .firestore()
       .collection('users')
@@ -158,22 +192,7 @@ export default function UserGrid(props: UserGridProps) {
       });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(delId.toString());
-    handleDeleteClick(delId);
-    setDelDia(false)
-
-  }
-  function CustomToolbar() {
-    const apiRef = useGridApiContext();
-
-    return (
-      <GridToolbarContainer>
-        <GridToolbarExport />
-      </GridToolbarContainer>
-    );
-  }
+ 
 
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = userData.find((row) => row.id === id);
@@ -243,12 +262,12 @@ export default function UserGrid(props: UserGridProps) {
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef[] = [
+  let columns: GridColDef[] = [
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 200,
+      width: 280,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -260,7 +279,7 @@ export default function UserGrid(props: UserGridProps) {
               icon={<SaveIcon />}
               label="Save"
               sx={{
-                color: '#562EBA',
+                color: 'primary.main',
               }}
               onClick={handleSaveClick(id)}
             />,
@@ -268,7 +287,6 @@ export default function UserGrid(props: UserGridProps) {
               key="2"
               icon={<CancelIcon />}
               label="Cancel"
-              className="textPrimary"
               onClick={handleCancelClick(id)}
               color="inherit"
             />,
@@ -276,6 +294,7 @@ export default function UserGrid(props: UserGridProps) {
         }
 
         return [
+         
           <Button
             key="8"
             variant="outlined"
@@ -299,32 +318,59 @@ export default function UserGrid(props: UserGridProps) {
             startIcon={
               <DeleteIcon />
             }
-
-            onClick={handleDel(id)}
-
+            onClick={handleDeleteClick(id)}
           >
             Delete
           </Button>,
+          <GridActionsCellItem
+            key="4"
+            icon={<ThumbUpOffAlt />}
+            label="Approve"
+            onClick={(event) => handleApproveClick(id)}
+            color="success"
+          />,
+          <GridActionsCellItem
+            key="5"
+            icon={<ThumbDownOffAlt />}
+            label="Deny"
+            onClick={(event) => handleDenyClick(id)}
+            color="error"
+          />,
         ];
       },
     },
     {
-      field: 'firstname',
-      headerName: 'First Name',
-      width: 150,
+      field: 'fullname',
+      headerName: 'Full Name',
+      width: 202,
       editable: true,
     },
-    { field: 'lastname', headerName: 'Last Name', width: 150, editable: true },
-    { field: 'email', headerName: 'Email', width: 250, editable: true },
-    { field: 'password', headerName: 'Password', width: 200, editable: true },
+    { field: 'email', headerName: 'Email', width: 215, editable: true },
     {
       field: 'department',
       headerName: 'Department',
+      width: 119,
+      editable: true,
+    },
+    {
+      field: 'courses',
+      headerName: 'Course Code',
+      width: 300,
+      editable: true,
+    },
+    {
+      field: 'semester',
+      headerName: 'Semester',
       width: 130,
       editable: true,
     },
-    { field: 'role', headerName: 'Role', width: 150, editable: true },
-    { field: 'id', headerName: 'User ID', width: 290, editable: true },
+    {
+      field: 'password',
+      headerName: 'Password',
+      width: 130,
+      editable: true,
+    },
+    { field: 'role', headerName: 'Role', width: 100, editable: true },
   ];
   const ODD_OPACITY = 0.2;
 
@@ -360,8 +406,9 @@ export default function UserGrid(props: UserGridProps) {
       },
     },
   }));
-  return (
 
+  
+  return (
     <Box
       sx={{
         height: 600,
@@ -374,25 +421,6 @@ export default function UserGrid(props: UserGridProps) {
         },
       }}
     >
-      <Dialog style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
-        style: { borderRadius: 20 }
-      }} open={delDia} onClose={handleDeleteDiagClose} >
-        <DialogTitle style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>Delete User</DialogTitle>
-        <form onSubmit={e => handleSubmit(e)}>
-          <DialogContent>
-            <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "24px", color: "black" }}>
-              Are you sure you want to delete this user?
-            </DialogContentText>
-
-
-          </DialogContent>
-          <DialogActions style={{ marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap: "93px" }}>
-            <Button variant="outlined" style={{ fontSize: "17px", marginLeft: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac', borderWidth: "3px" }} onClick={handleDeleteDiagClose}>Cancel</Button>
-
-            <Button variant="contained" style={{ fontSize: "17px", marginRight: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff' }} type="submit">Delete</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
       <StripedDataGrid
         rows={userData}
         columns={columns}
