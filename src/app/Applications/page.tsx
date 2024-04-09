@@ -88,7 +88,7 @@ export default function FacultyApplication() {
         )}
         {courses.length === 0 && (
           
-          <div style={{marginTop: "162px",marginLeft: "227px", marginRight: "227px",textAlign: 'center', color: 'rgba(0, 0, 0, 0.43)', fontSize: 24, fontFamily: 'SF Pro Display', fontWeight: '500'}}>Currently, no courses have been assigned to you yet. Please wait until an admin assigns your courses. Once your courses are assigned, you'll be able to access applicants for those classes.</div>
+          <div style={{marginTop: "162px",marginLeft: "227px", marginRight: "227px",textAlign: 'center', color: 'rgba(0, 0, 0, 0.43)', fontSize: 24, fontFamily: 'SF Pro Display', fontWeight: '500'}}>Currently, no courses have been assigned to you yet. Please wait until an admin assigns your courses. Once your courses are assigned, you&apos;ll be able to access applicants for those classes.</div>
         )}
     </>
   );
