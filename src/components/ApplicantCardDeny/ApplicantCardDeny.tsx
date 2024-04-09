@@ -1,3 +1,4 @@
+
 import { FunctionComponent, useCallback } from 'react';
 import './style.css';
 
@@ -26,7 +27,7 @@ interface ApplicantCardProps {
   qualifications: string;
   resume: string;
   plan: string;
-  gpa,
+  gpa: string;
   expanded: boolean;
   onExpandToggle: any;
   openReview: boolean;
@@ -234,52 +235,6 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
                 flexWrap: 'wrap',
               }}
             >
-
-              <div className="name">
-                {firstname} {lastname}
-              </div>
-            
-              <div className="thumbsContainer4">
-                <div className="applicantStatus">
-                  <div className="deny">Denied</div>
-                </div>
-                
-              </div>
-              <Button
-              variant="outlined"
-              style={{
-                
-                borderRadius: '10px',
-                position: "absolute",
-                right:"20px",
-                top: "112px",
-                height: '43px',
-                width: '192px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                borderColor: '#5736ac',
-                color: '#5736ac',
-              }}
-              onClick={handleOpenReview}
-            >
-              Move to in Review
-            </Button>
-              <div style={{ position: 'absolute' }}>
-                <div className="email1">{uf_email}</div>
-                <div className="number">{number}</div>
-              </div>     
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              marginLeft: '143px',
-              flexWrap: 'wrap',
-            }}
-          >
-
               <div style={{ display: 'flex', gap: '61px' }}>
                 <div className="label50">Applying for:</div>
                 <div>{position}</div>
@@ -364,12 +319,29 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
                 </div>
               )}
             </div>
+            <Button
+              variant="outlined"
+              style={{
 
-           
-        </div>
-      )}
-    </div>
+                borderRadius: '10px',
 
+                position: 'absolute',
+                right: '20px',
+                bottom: '722px',
+                height: '43px',
+                width: '192px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                borderColor: '#5736ac',
+                color: '#5736ac',
+              }}
+              onClick={handleOpenReview}
+            >
+              Move to in Review
+            </Button>
+          </div>
+        )}
+      </div>
     </>
   );
 };

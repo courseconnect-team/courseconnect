@@ -1,7 +1,6 @@
 import Container from '@mui/material/Container';
 import UnderDevelopment from '@/components/UnderDevelopment';
 import { Toaster } from 'react-hot-toast';
-
 import { ApplyCard } from "@/components/ApplyCard/ApplyCard";
 import { StatusCard } from "@/components/StatusCard/StatusCard";
 import { EceLogoPng } from "@/components/EceLogoPng/EceLogoPng";
@@ -14,9 +13,8 @@ import { ApplicationsCard } from "@/components/ApplicationsCard/ApplicationsCard
 import { CourseCard } from "@/components/CourseCard/CourseCard";
 
 import { VerifyEmailCard } from "@/components/VerifyEmailCard/VerifyEmailCard";
-
 import Link from 'next/link';
-import './style.css';
+import "./style.css";
 
 interface DashboardProps {
   user: any;
@@ -26,33 +24,22 @@ interface DashboardProps {
 
 export default function DashboardWelcome(props: DashboardProps) {
   const { userRole, user, emailVerified } = props;
-  console.log(userRole);
+  console.log(userRole)
   return (
     <>
       <Toaster />
       <div className={styles.studentlandingpage}>
         <div className={styles.overlapwrapper}>
-          {(userRole == 'student_applying' || userRole == 'Student') &&
-            emailVerified && (
-              <div className={styles.overlap}>
-                <div className={styles.overlap2}>
-                  <div className={styles.colorblockframe}>
-                    <div className={styles.overlapgroup2}>
-                      <div className={styles.colorblock} />
-                      <img
-                        className={styles.GRADIENTS}
-                        alt="Gradients"
-                        src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                      />
-                      <div className={styles.glasscard} />
-                    </div>
+          {(!emailVerified) && userRole != "admin" &&
+            <div className={styles.overlap}>
+              <div className={styles.overlap2}>
+                <div className={styles.colorblockframe}>
+                  <div className={styles.overlapgroup2}>
+                    <div className={styles.colorblock} />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                    <div className={styles.glasscard} />
                   </div>
-                  <EceLogoPng className={styles.ecelogopng2} />
-                  <Bio user={user} className={styles.fullnameandbioinstance} />
-                  <TopNavBarSigned className={styles.topnavbarsignedin} />
-                  <div className={styles.textwrapper8}>Home</div>
                 </div>
-
                 <EceLogoPng className={styles.ecelogopng2} />
                 <Bio user={user} className={styles.fullnameandbioinstance} />
                 <TopNavBarSigned className={styles.topnavbarsignedin} />
@@ -60,64 +47,21 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <div style={{ marginTop: "630px", marginLeft: "37%" }}>
                   <VerifyEmailCard email={user.email} />
                 </div>
-
               </div>
-            )}
 
-          {(userRole == 'student_applied' ||
-            userRole == 'student_accepted' ||
-            userRole == 'student_denied') &&
-            emailVerified && (
-              <div className={styles.overlap}>
-                <div className={styles.overlap2}>
-                  <div className={styles.colorblockframe}>
-                    <div className={styles.overlapgroup2}>
-                      <div className={styles.colorblock} />
-                      <img
-                        className={styles.GRADIENTS}
-                        alt="Gradients"
-                        src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                      />
-                      <div className={styles.glasscard} />
-                    </div>
-                  </div>
-                  <EceLogoPng className={styles.ecelogopng2} />
-                  <Bio user={user} className={styles.fullnameandbioinstance} />
-                  <TopNavBarSigned className={styles.topnavbarsignedin} />
-                  <div className={styles.textwrapper8}>Home</div>
-                </div>
-                <Link href="/Profile">
-                  <Profile
-                    className={styles.profileinstance2}
-                    profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
-                  />
-                </Link>
-                <Link href="/status">
-                  <StatusCard
-                    apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png"
-                    className={styles.applyinstance2}
-                  />
-                </Link>
-                <Link href="/apply">
-                  <ApplyCard
-                    apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
-                    className={styles.statusinstance}
-                  />
-                </Link>
-              </div>
-            )}
 
-          {userRole == 'faculty' && emailVerified && (
+
+            </div>
+
+          }
+          
+          {(userRole == "student_applying" || userRole == "Student") && emailVerified &&
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>
                   <div className={styles.overlapgroup2}>
                     <div className={styles.colorblock} />
-                    <img
-                      className={styles.GRADIENTS}
-                      alt="Gradients"
-                      src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                    />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
                     <div className={styles.glasscard} />
                   </div>
                 </div>
@@ -127,27 +71,16 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <div className={styles.textwrapper8}>Home</div>
               </div>
               <Link href="/Profile">
-                <Profile
-                  className={styles.profileinstance2}
-                  profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
-                />
+                <Profile className={styles.profileinstance} profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
               </Link>
-              <Link href="/Applications">
-                <ApplicationsCard
-                  className={styles.applicationsinstance}
-                  applications="https://c.animaapp.com/ebG6M1rL/img/apply.svg"
-                />
-              </Link>
-              <Link href="/Courses">
-                <CourseCard
-                  className={styles.courseinstance}
-                  course="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png"
-                />
-              </Link>
-            </div>
-          )}
+              <Link href="/apply">
 
-          {userRole == 'unapproved' && emailVerified && (
+                <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className={styles.applyinstance} />
+              </Link>
+
+            </div>
+          }
+                    {userRole == 'unapproved' && emailVerified && (
           
               <div className={styles.overlap}>
               <div className={styles.overlap2}>
@@ -174,7 +107,8 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className={styles.applyinstance2} />
               </Link>
               <Link href="/apply">
-
+              <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className={styles.statusinstance} />
+              </Link>
               <div
               style={{
                 width: 677,
@@ -241,17 +175,13 @@ export default function DashboardWelcome(props: DashboardProps) {
             //  <div style = {{display: "flex", justifyContent: "center", marginTop:"606px"}}>
           )}
 
-          {userRole == 'admin' && (
+          {(userRole == "student_applied" || userRole == 'student_accepted' || userRole == "student_denied") && emailVerified &&
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>
                   <div className={styles.overlapgroup2}>
                     <div className={styles.colorblock} />
-                    <img
-                      className={styles.GRADIENTS}
-                      alt="Gradients"
-                      src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                    />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
                     <div className={styles.glasscard} />
                   </div>
                 </div>
@@ -260,36 +190,27 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <TopNavBarSigned className={styles.topnavbarsignedin} />
                 <div className={styles.textwrapper8}>Home</div>
               </div>
-              <Link href="/users">
-                <DashboardCard
-                  className={styles.users}
-                  image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png"
-                  text="Users"
-                />
+              <Link href="/Profile">
+                <DashboardCard className={styles.profileinstance2} text="Profile" image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
               </Link>
-              <Link href="/underDevelopment">
-                <DashboardCard
-                  className={styles.courses}
-                  image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png"
-                  text="Courses"
-                />
+              <Link href="/status">
+                <StatusCard apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png" className={styles.applyinstance2} />
               </Link>
+              <Link href="/apply">
 
-              <DashboardCard className={styles.courseinstance} image="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png" text="Courses" clickable={true} />
-
+                <ApplyCard apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png" className={styles.statusinstance} />
+              </Link>
             </div>
-          )}
-          {!emailVerified && userRole != 'admin' && (
+
+          }
+
+          {(userRole == "faculty") && emailVerified &&
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>
                   <div className={styles.overlapgroup2}>
                     <div className={styles.colorblock} />
-                    <img
-                      className={styles.GRADIENTS}
-                      alt="Gradients"
-                      src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                    />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
                     <div className={styles.glasscard} />
                   </div>
                 </div>
@@ -297,12 +218,32 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <Bio user={user} className={styles.fullnameandbioinstance} />
                 <TopNavBarSigned className={styles.topnavbarsignedin} />
                 <div className={styles.textwrapper8}>Home</div>
-                <div style={{ marginTop: '650px', marginLeft: '40%' }}>
-                  <h1>Email Verification Required</h1>
-                  <p>Please check your email for a verification link.</p>
-                </div>
               </div>
+              <Link href="/Profile">
+                <Profile className={styles.profileinstance2} profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png" />
+              </Link>
+              <Link href="/Applications">
+                <ApplicationsCard className={styles.applicationsinstance} applications="https://c.animaapp.com/ebG6M1rL/img/apply.svg" />
+              </Link>
+              <DashboardCard className={styles.courseinstance} image="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png" text="Courses" clickable={true} />
+            </div>
+          }
 
+          {(userRole == "admin") &&
+            <div className={styles.overlap}>
+              <div className={styles.overlap2}>
+                <div className={styles.colorblockframe}>
+                  <div className={styles.overlapgroup2}>
+                    <div className={styles.colorblock} />
+                    <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                    <div className={styles.glasscard} />
+                  </div>
+                </div>
+                <EceLogoPng className={styles.ecelogopng2} />
+                <Bio user={user} className={styles.fullnameandbioinstance} />
+                <TopNavBarSigned className={styles.topnavbarsignedin} />
+                <div className={styles.textwrapper8}>Home</div>
+              </div>
               <Link href="/users">
                 <DashboardCard className={styles.users} image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png" text="Users" />
               </Link>
@@ -320,7 +261,6 @@ export default function DashboardWelcome(props: DashboardProps) {
 
         </div >
       </div >
-
     </>
   );
 }
