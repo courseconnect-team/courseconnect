@@ -22,7 +22,7 @@ import AdditionalSemesterPrompt from '@/components/FormUtil/AddtlSemesterPrompt'
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Toaster, toast } from 'react-hot-toast';
-import { IconButton, LinearProgress } from '@mui/material';
+import { CircularProgress, IconButton, LinearProgress } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { ApplicationStatusCard } from '@/components/ApplicationStatusCard/ApplicationStatusCard';
@@ -51,7 +51,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { FileUploadOutlined, UploadFile } from '@mui/icons-material';
+import { DeleteOutline, FileUploadOutlined, UploadFile } from '@mui/icons-material';
 
 export default function User() {
   const { user } = useAuth();
@@ -59,6 +59,8 @@ export default function User() {
   const [activeComponent, setActiveComponent] = React.useState('welcome');
   const [semester, setSemester] = React.useState('');
   const [menu, setMenu] = React.useState([]);
+  const [processing, setProcessing] = React.useState(false);
+
 
   const handleChange = (event: SelectChangeEvent) => {
     setSemester(event.target.value as string);
@@ -110,13 +112,36 @@ export default function User() {
     }
 
     updateMenu();
-  }, [semester]);
+  }, [semester, processing]);
+
+  const handleDeleteSem = async () => {
+    setProcessing(true);
+    const toastId = toast.loading("Clearing semester data. This may take a couple minutes.", {
+      duration: 300000,
+    });
+
+    await firebase.firestore().collection('courses').where("semester", "==", semester).get().then(function(querySnapshot) {
+      querySnapshot.forEach(function(doc) {
+        doc.ref.delete();
+      });
+    });
+
+    setProcessing(false);
+    toast.success("Semester data cleared!")
+
+    toast.dismiss(toastId);
+  }
 
   const readExcelFile = async (e) => {
     // https://docs.sheetjs.com/docs/demos/local/file/
     console.log("ACTIVE");
 
     try {
+      setProcessing(true);
+      const toastId = toast.loading("Processing course data. This may take a couple minutes.", {
+        duration: 30000,
+      });
+
       const val = e.target.files[0];
       console.log(val);
       const ab = await val.arrayBuffer()
@@ -161,12 +186,18 @@ export default function User() {
       }
 
 
+      setProcessing(false);
+      toast.dismiss(toastId);
 
+      toast.success("Data upload complete!", {
+        duration: 2000,
+      })
 
 
     }
     catch (err) {
       console.log(err);
+      setProcessing(false);
     }
   }
 
@@ -247,13 +278,17 @@ export default function User() {
 
                 <label htmlFor="raised-button-file">
                   <Button sx={{ ml: 40, mt: 1.5 }} style={{ textTransform: "none" }} variant="contained" component="span" startIcon={<FileUploadOutlined />}>
-                    Upload Course Data
+                    Upload Semester Data
                   </Button>
                 </label>
 
+                <Button sx={{ ml: 10, mt: 1.5 }} onClick={e => { e.preventDefault(); handleDeleteSem(); }} style={{ textTransform: "none" }} variant="contained" component="span" startIcon={<DeleteOutline />}>
+                  Clear Semester Data
+                </Button>
 
 
-                <FormControl sx={{ ml: 110, mb: 5, minWidth: 140, }}>
+
+                <FormControl sx={{ ml: 70, mb: 5, minWidth: 140, }}>
                   <InputLabel id="demo-simple-select-label">Semester</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
@@ -268,7 +303,7 @@ export default function User() {
                   </Select>
                 </FormControl>
                 <br />
-                <Courses userRole={role as string} semester={semester} />
+                <Courses userRole={role as string} semester={semester} processing={processing} />
 
 
 
@@ -276,7 +311,9 @@ export default function User() {
             </Box>
 
           </div>
+
         </div>
+
       </div>
     </>
 

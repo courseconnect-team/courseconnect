@@ -53,10 +53,11 @@ interface Course {
 interface CourseGridProps {
   userRole: string;
   semester: string;
+  processing: boolean;
 }
 
 export default function CourseGrid(props: CourseGridProps) {
-  const { userRole, semester } = props;
+  const { userRole, semester, processing } = props;
   const { user } = useAuth();
   const [success, setSuccess] = React.useState(false);
 
@@ -116,7 +117,7 @@ export default function CourseGrid(props: CourseGridProps) {
           setCourseData(data);
         });
     }
-  }, [userRole, userEmail, semester]);
+  }, [userRole, userEmail, semester, processing]);
 
   // dialog
   // pop-up view setup

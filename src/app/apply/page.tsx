@@ -81,12 +81,12 @@ export default function Application() {
     setAdditionalPromptValue(newValue);
   };
   const [loading, setLoading] = useState(false);
-  
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 
     const handleSendEmail = async () => {
-      try {        
-      
+      try {
+
         const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
           method: 'POST',
           headers: {
@@ -99,12 +99,12 @@ export default function Application() {
                 name: user.displayName,
                 email: applicationData.email
               },
-              position:applicationData.position,
+              position: applicationData.position,
               classCode: applicationData.courses
             }
           })
         });
-  
+
         if (response.ok) {
           const data = await response.json();
           console.log('Email sent successfully:', data);
@@ -115,7 +115,7 @@ export default function Application() {
         console.error('Error sending email:', error);
       }
     };
-    
+
     setLoading(true);
     event.preventDefault();
     // extract the form data from the current event
@@ -168,7 +168,7 @@ export default function Application() {
     console.log("MAP " + coursesMap);
 
 
- 
+
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
@@ -186,7 +186,7 @@ export default function Application() {
       englishproficiency: "NA",
       position: formData.get('positions-radio-group') as string,
       available_hours: availabilityArray as string[],
-      available_semesters: semesterArray as string[],
+      available_semesters: ["NA"],
       courses: coursesMap,
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
@@ -244,6 +244,9 @@ export default function Application() {
       setLoading(false);
       return;
     } else {
+      const toastId = toast.loading("Processing application", {
+        duration: 30000,
+      });
       await firebase.firestore().collection('assignments').doc(userId).delete();
       // console.log(applicationData); // FOR DEBUGGING ONLY!
 
@@ -263,6 +266,8 @@ export default function Application() {
 
       if (response.ok) {
         handleSendEmail();
+        toast.dismiss(toastId);
+        toast.success("Application submitted!")
         console.log('SUCCESS: Application data sent to server successfully');
         // now, update the role of the user to student_applied
         await UpdateRole(userId, 'student_applied');
@@ -272,6 +277,8 @@ export default function Application() {
         router.push("/")
       } else {
         console.log(response);
+
+        toast.dismiss(toastId);
         toast.error('Application data failed to send to server!')
         console.log('ERROR: Application data failed to send to server');
       }
@@ -333,7 +340,7 @@ export default function Application() {
 
   return (
     <>
-    
+
       <Toaster />
       <div className={styles.studentlandingpage}>
         <div className={styles.overlapwrapper}>
@@ -356,7 +363,6 @@ export default function Application() {
                   Application submitted successfully!
                 </Alert>
               </Snackbar>
-              {loading ? <LinearProgress color="warning" /> : null}
               <CssBaseline />
               <Box
                 sx={{
@@ -366,7 +372,7 @@ export default function Application() {
                   alignItems: 'center',
                 }}
               >
-          
+
                 <Typography component="h1" variant="h5">
                   TA/UPI/Grader Application
                 </Typography>
@@ -457,12 +463,6 @@ export default function Application() {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography>
-                        Please select the semester(s) for which you are applying.
-                      </Typography>
-                      <SemesterCheckbox name="semesterCheckbox" />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography>
                         Please select one or more options describing the number of hours
                         per week you will be available.
                       </Typography>
@@ -470,8 +470,7 @@ export default function Application() {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography>
-                        Please list the course(s) for which you are applying, separated
-                        by commas.
+                        Please list the course(s) for which you are applying. Ensure that you select the courses with your desired semester and instructor.
                       </Typography>
 
                       <FormControl variant='filled' fullWidth>
@@ -562,7 +561,7 @@ export default function Application() {
                 </Box>
               </Box>
             </Container>
-            
+
           </div>
         </div>
       </div >
