@@ -35,11 +35,13 @@ export function sendForgotPasswordEmail(user, resetLink) {
   }
   
  export function sendApplicationConfirmationEmail(user, position, classCode) {
-    const mailOptions = {
+     const keys = Object.keys(classCode);
+      const commaSeparatedKeys = keys.join(', ');
+      const mailOptions = {
       from: email,
       to: user.email,
       subject: 'Application Submitted Confirmation',
-      text: `Hi ${user.name},\n\nThank you for submitting your application for the ${position} role in ${classCode}. Your application has been received. We will notify you of the outcome soon.\n\nBest regards,\nCourse Connect Team`
+      text: `Hi ${user.name},\n\nThank you for submitting your application for the ${position} role in ${commaSeparatedKeys}. Your application has been received. We will notify you of the outcome soon.\n\nBest regards,\nCourse Connect Team`
     };
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
