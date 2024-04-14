@@ -68,12 +68,12 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
   setCurrentStu,
   className
-  
+
 
 }) => {
 
   const handleSendEmail = async () => {
-    try {        
+    try {
       const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
         method: 'POST',
         headers: {
@@ -105,7 +105,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   };
 
   const handleDenyEmail = async () => {
-    try {        
+    try {
       const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
         method: 'POST',
         headers: {
@@ -134,8 +134,8 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       console.error('Error sending email:', error);
     }
   };
-  
-  
+
+
 
   const db = firebase.firestore();
   const handleApproveSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -145,20 +145,8 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       const statusRef = db.collection('applications').doc(currentStu);
       let doc = await getDoc(statusRef);
       let coursesMap = doc.data().courses;
-      let getQueryParams = query => {
-        return query
-          ? (/^[?#]/.test(query) ? query.slice(1) : query)
-            .split('&')
-            .reduce((params, param) => {
-              let [key, value] = param.split('=');
-              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
-              return params;
-            }, {}
-            )
-          : {}
-      };
-      const { data } = getQueryParams(window.location.search);
-      coursesMap[data] = "accepted"
+
+      coursesMap[className] = "accepted"
       console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application approved successfully');
@@ -176,20 +164,8 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       const statusRef = db.collection('applications').doc(currentStu);
       let doc = await getDoc(statusRef);
       let coursesMap = doc.data().courses;
-      let getQueryParams = query => {
-        return query
-          ? (/^[?#]/.test(query) ? query.slice(1) : query)
-            .split('&')
-            .reduce((params, param) => {
-              let [key, value] = param.split('=');
-              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
-              return params;
-            }, {}
-            )
-          : {}
-      };
-      const { data } = getQueryParams(window.location.search);
-      coursesMap[data] = "denied"
+
+      coursesMap[className] = "denied"
       console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application denied successfully');
@@ -479,10 +455,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                 <div className="label50">Applying for:</div>
                 <div >{position}</div>
               </div>
-              <div style={{ display: 'flex', gap: '61px' }}>
-                <div className="label50">Available Semester(s):</div>
-                <div>{semester}</div>
-              </div>
+
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50">Available Hours Per Week:</div>
                 <div className="availability1">{availability}</div>

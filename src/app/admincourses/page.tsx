@@ -117,7 +117,7 @@ export default function User() {
   const handleDeleteSem = async () => {
     setProcessing(true);
     const toastId = toast.loading("Clearing semester data. This may take a couple minutes.", {
-      duration: 300000,
+      duration: 30000000,
     });
 
     await firebase.firestore().collection('courses').where("semester", "==", semester).get().then(function(querySnapshot) {
@@ -139,7 +139,7 @@ export default function User() {
     try {
       setProcessing(true);
       const toastId = toast.loading("Processing course data. This may take a couple minutes.", {
-        duration: 30000,
+        duration: 300000000,
       });
 
       const val = e.target.files[0];
@@ -273,6 +273,9 @@ export default function User() {
                   multiple
                   type="file"
                   onChange={e => readExcelFile(e)}
+                  onClick={event => event.target.value = null}
+
+
 
                 />
 

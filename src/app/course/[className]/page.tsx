@@ -12,7 +12,7 @@ import 'firebase/firestore';
 import ApplicantCardApprove from '@/components/ApplicantCardApprove/ApplicantCardApprove';
 import ApplicantCardDeny from '@/components/ApplicantCardDeny/ApplicantCardDeny';
 interface pageProps {
-  params: { className: string, semester:string};
+  params: { className: string, semester: string };
 }
 
 // const [selectedItem, setSelectedItem] = useState('needsReview');
@@ -39,7 +39,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
   const [openDenyDialog, setOpenDenyDialog] = useState(false);
   const [openReviewDialog, setOpenReviewDialog] = useState(false);
   const [currentStu, setCurrentStu] = useState("null");
-
+  const [className, setClassName] = useState("none");
   const [expandedStates, setExpandedStates] = useState<{
     [id: string]: boolean;
   }>({});
@@ -120,39 +120,29 @@ const CoursePage: FC<pageProps> = ({ params }) => {
 
   const getDataByPositionAndStatus = async (position: string, status: string) => {
     try {
-      let getQueryParams = query => {
-        return query
-          ? (/^[?#]/.test(query) ? query.slice(1) : query)
-            .split('&')
-            .reduce((params, param) => {
-              let [key, value] = param.split('=');
-              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
-              return params;
-            }, {}
-            )
-          : {}
-      };
-      const { data } = getQueryParams(window.location.search);
-      console.log(data);
+      console.log(className + " " + status + " " + position);
 
       const snapshot = await db
         .collection('applications')
 
-        .where('courses', 'array-contains', params.className)
+        .where(`courses.${className}`, ">=", "")
+        .orderBy(`courses.${className}`)
+
         // .where('semesters', 'array-contains', params.semester )
-        .where('status', '==', status)
-        .where('position', '==', position)
         .get();
 
       return snapshot.docs.filter(function(doc) {
+        if (doc.data().position != position) {
+          return false;
+        }
 
-        if (doc.data().courses[data] == "applied" && selection == "Review") {
+        if (doc.data().courses[className] == "applied" && selection == "Review") {
 
           console.log(doc.data());
           return true;
-        } else if (doc.data().courses[data] == "accepted" && selection == "Approved") {
+        } else if (doc.data().courses[className] == "accepted" && selection == "Approved") {
           return true;
-        } else if (doc.data().courses[data] == "denied" && selection == "Denied") {
+        } else if (doc.data().courses[className] == "denied" && selection == "Denied") {
           return true;
         } else {
           return false;
@@ -165,7 +155,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
         lastname: doc.data().lastname,
         number: doc.data().phonenumber,
         position: doc.data().position,
-        semester: doc.data().available_semesters,
+        semester: params.semester,
         availability: doc.data().available_hours,
         department: doc.data().department,
         degree: doc.data().degree,
@@ -176,7 +166,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
         gpa: doc.data().gpa,
       }));
     } catch (error) {
-      console.error(`Error getting ${params.className} applicants: `, error);
+      console.error(`Error getting ${className} applicants: `, error);
       return [];
     }
   };
@@ -196,7 +186,24 @@ const CoursePage: FC<pageProps> = ({ params }) => {
     };
 
     fetchData();
-  }, [selection]);
+
+    let getQueryParams = query => {
+      return query
+        ? (/^[?#]/.test(query) ? query.slice(1) : query)
+          .split('&')
+          .reduce((params, param) => {
+            let [key, value] = param.split('=');
+            params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
+            return params;
+          }, {}
+          )
+        : {}
+    };
+    const { data } = getQueryParams(window.location.search);
+    console.log(data);
+
+    setClassName(data);
+  }, [selection, className]);
 
   const mapElement = (
     data: {
@@ -244,9 +251,9 @@ const CoursePage: FC<pageProps> = ({ params }) => {
               setOpenApproveDialog={setOpenApproveDialog}
               setOpenDenyDialog={setOpenDenyDialog}
 
-              currentStu = {currentStu}
-              setCurrentStu = {setCurrentStu}
-              className = {params.className}
+              currentStu={currentStu}
+              setCurrentStu={setCurrentStu}
+              className={className}
 
             />
           )}
@@ -270,12 +277,13 @@ const CoursePage: FC<pageProps> = ({ params }) => {
                 lastname={ta.lastname}
                 resume={ta.resume}
                 plan={ta.plan}
-
                 gpa={ta.gpa}
                 openReview={openReviewDialog}
                 setOpenReviewDialog={setOpenReviewDialog}
                 currentStu={currentStu}
                 setCurrentStu={setCurrentStu}
+
+                className={className}
               />
             )}
 
@@ -297,12 +305,12 @@ const CoursePage: FC<pageProps> = ({ params }) => {
               lastname={ta.lastname}
               resume={ta.resume}
               plan={ta.plan}
-
               gpa={ta.gpa}
               openReview={openReviewDialog}
               setOpenReviewDialog={setOpenReviewDialog}
               currentStu={currentStu}
               setCurrentStu={setCurrentStu}
+              className={className}
             />
           )}
         </div>
@@ -321,8 +329,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
           marginTop: '-20px',
         }}
       >
-        <div className="classe">{params.className}</div>
-        <div className="semester">Fall 2023</div>
+        <div className="classe">{className.substring(0, className.indexOf(")")) + ")"}</div>
       </div>
       <div
         style={{

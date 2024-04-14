@@ -32,7 +32,8 @@ interface ApplicantCardProps {
   openReview: boolean;
   setOpenReviewDialog: (value: boolean) => void;
   currentStu: string;
-  setCurrentStu: (value: string) => void;
+  setCurrentStu: (value: string) => void
+  className: string;
 }
 const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
   id,
@@ -56,6 +57,8 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
   setOpenReviewDialog,
   currentStu,
   setCurrentStu,
+
+  className,
 }) => {
   const db = firebase.firestore();
   const handleMoveReview = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -65,20 +68,8 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
       const statusRef = db.collection('applications').doc(currentStu);
       let doc = await getDoc(statusRef);
       let coursesMap = doc.data().courses;
-      let getQueryParams = query => {
-        return query
-          ? (/^[?#]/.test(query) ? query.slice(1) : query)
-            .split('&')
-            .reduce((params, param) => {
-              let [key, value] = param.split('=');
-              params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
-              return params;
-            }, {}
-            )
-          : {}
-      };
-      const { data } = getQueryParams(window.location.search);
-      coursesMap[data] = "applied"
+
+      coursesMap[className] = "applied"
       console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application moved successfully');
@@ -241,10 +232,7 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
                 <div className="label50">Applying for:</div>
                 <div>{position}</div>
               </div>
-              <div style={{ display: 'flex', gap: '61px' }}>
-                <div className="label50">Semester(s):</div>
-                <div>{semester}</div>
-              </div>
+
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50">Availability:</div>
                 <div className="availability1">{availability}</div>
@@ -329,7 +317,7 @@ const ApplicantCardApprove: FunctionComponent<ApplicantCardProps> = ({
 
                 position: 'absolute',
                 right: '20px',
-                bottom: '722px',
+                bottom: '662px',
                 height: '43px',
                 width: '192px',
                 textTransform: 'none',
