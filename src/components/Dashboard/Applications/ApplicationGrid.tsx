@@ -405,7 +405,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 },
                 position: applicationData.position,
                 classCode: applicationData.courses,
-                timeframe: '2 weeks',
               },
             }),
           }
