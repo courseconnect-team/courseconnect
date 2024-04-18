@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 'use client';
 import * as React from 'react';
 import { useState } from 'react';
@@ -46,7 +48,7 @@ import {
   Button,
   TextField,
   DialogActions,
-  LinearProgress
+  LinearProgress,
 } from '@mui/material';
 import { purple } from '@mui/material/colors';
 
@@ -105,9 +107,16 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   // assignment dialog pop-up view setup
   const [openAssignmentDialog, setOpenAssignmentDialog] = React.useState(false);
   const handleOpenAssignmentDialog = async (id: GridRowId) => {
-    const statusRef = firebase.firestore().collection('applications').doc(id.toString());
+    const statusRef = firebase
+      .firestore()
+      .collection('applications')
+      .doc(id.toString());
     const doc = await getDoc(statusRef);
-    setCodes(Object.entries(doc.data().courses).filter(([key, value]) => (value == "accepted")).map(([key, value]) => (key)))
+    setCodes(
+      Object.entries(doc.data().courses)
+        .filter(([key, value]) => value == 'accepted')
+        .map(([key, value]) => key)
+    );
     setSelectedUserGrid(id);
     setOpenAssignmentDialog(true);
   };
@@ -120,12 +129,15 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   ) => {
     event.preventDefault();
     // extract the form data from the current event
-    setLoading(true)
+    setLoading(true);
     const formData = new FormData(event.currentTarget);
 
     // get student's user id
     const student_uid = selectedUserGrid as string;
-    const statusRef = firebase.firestore().collection('applications').doc(student_uid.toString());
+    const statusRef = firebase
+      .firestore()
+      .collection('applications')
+      .doc(student_uid.toString());
     const doc = await getDoc(statusRef);
     // update student's application to approved
     firebase
@@ -158,24 +170,22 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         console.error('Error updating application document: ', error);
       });
 
-
-
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${current.getMonth() + 1
-      }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${
+      current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
       student_uid: student_uid as string,
       class_codes: valueRadio,
       email: doc.data().email,
-      name: (doc.data().firstname + " " + doc.data().lastname),
+      name: doc.data().firstname + ' ' + doc.data().lastname,
       semesters: doc.data().available_semesters,
       department: doc.data().department,
       hours: doc.data().available_hours,
-      position: doc.data().position
-
+      position: doc.data().position,
     };
 
     // Create the document within the "assignments" collection
@@ -236,11 +246,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
 
   const handleDeleteDiagClose = () => {
-
     setDelDia(false);
-  }
-
-
+  };
 
   // fetching application data from firestore
   const [loading, setLoading] = useState(false);
@@ -248,24 +255,28 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     const applicationsRef = firebase.firestore().collection('applications');
 
     if (userRole === 'admin') {
-
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
-        const data = querySnapshot.docs.filter(function(doc) {
-
-          if (doc.data().status != "Admin_approved" && doc.data().status != "Admin_denied") {
-            return true;
-          } else {
-            return false;
-          }
-        }).map(
-          (doc) =>
-
-          ({
-            id: doc.id,
-            ...doc.data(),
-            courses: Object.entries(doc.data().courses).filter(([key, value]) => (value == "accepted")).map(([key, value]) => (key))
-          } as Application)
-        );
+        const data = querySnapshot.docs
+          .filter(function (doc) {
+            if (
+              doc.data().status != 'Admin_approved' &&
+              doc.data().status != 'Admin_denied'
+            ) {
+              return true;
+            } else {
+              return false;
+            }
+          })
+          .map(
+            (doc) =>
+              ({
+                id: doc.id,
+                ...doc.data(),
+                courses: Object.entries(doc.data().courses)
+                  .filter(([key, value]) => value == 'accepted')
+                  .map(([key, value]) => key),
+              } as Application)
+          );
         setApplicationData(data);
       });
       // Clean up the subscription on unmount
@@ -292,10 +303,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       applicationsRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Application)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Application)
         );
         setApplicationData(data);
       });
@@ -315,6 +326,105 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     }
   };
 
+  const handleDenyEmail = async (id: GridRowId) => {
+    try {
+      const snapshot = await firebase
+        .firestore()
+        .collection('applications')
+        .doc(id.toString())
+        .get();
+
+      if (snapshot.exists) {
+        const applicationData = snapshot.data() as Application;
+
+        const response = await fetch(
+          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              type: 'applicationStatusDenied',
+              data: {
+                user: {
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
+                  email: applicationData.email,
+                },
+                position: applicationData.position,
+                classCode: applicationData.courses,
+              },
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Email sent successfully:', data);
+        } else {
+          throw new Error('Failed to send email');
+        }
+      } else {
+        throw new Error('Application data not found');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+
+  const handleSendEmail = async (id: GridRowId) => {
+    try {
+      // Retrieve application data from Firestore
+      const snapshot = await firebase
+        .firestore()
+        .collection('applications')
+        .doc(id.toString())
+        .get();
+
+      if (snapshot.exists) {
+        const applicationData = snapshot.data() as Application;
+
+        // Send email using fetched application data
+        const response = await fetch(
+          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              type: 'applicationStatusApproved',
+              data: {
+                user: {
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
+                  email: applicationData.email,
+                },
+                position: applicationData.position,
+                classCode: applicationData.courses,
+                timeframe: '2 weeks',
+              },
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Email sent successfully:', data);
+        } else {
+          throw new Error('Failed to send email');
+        }
+      } else {
+        throw new Error('Application data not found');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+
   // approve/deny click handlers
   const handleDenyClick = (id: GridRowId) => {
     setLoading(true);
@@ -331,11 +441,12 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         setLoading(false);
         console.error('Error updating application document: ', error);
       });
-
+    handleDenyEmail(id);
   };
 
   const handleApproveClick = (id: GridRowId) => {
     setLoading(true);
+
     // Update the 'applications' collection
     firebase
       .firestore()
@@ -347,6 +458,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         setLoading(false);
         console.error('Error updating application document: ', error);
       });
+    handleSendEmail(id);
 
     // eventually here an email would be sent to the student as a notification
     // however, for now there will just be an "assignment" object generated in the database
@@ -361,8 +473,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${current.getMonth() + 1
-      }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${
+      current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -385,7 +498,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         setLoading(false);
         console.error('Error writing assignment document: ', error);
       });
-
   };
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -403,7 +515,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .update(updatedRow)
         .then(() => {
           setRowModesModel({
-
             ...rowModesModel,
             [id]: { mode: GridRowModes.View },
           });
@@ -416,7 +527,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     } else {
       console.error('No matching user data found for id: ', id);
     }
-
   };
 
   const handleDel = (id: GridRowId) => () => {
@@ -424,7 +534,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setDelDia(true);
   };
   const handleDeleteClick = (id: GridRowId) => {
-
     setLoading(true);
     firebase
       .firestore()
@@ -441,13 +550,12 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(delId.toString());
     handleDeleteClick(delId);
-    setDelDia(false)
-
-  }
+    setDelDia(false);
+  };
 
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = applicationData.find((row) => row.id === id);
@@ -584,12 +692,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           <Button
             key="3"
             variant="outlined"
-            color='inherit'
+            color="inherit"
             size="small"
-            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
-            startIcon={
-              <ZoomInIcon />
-            }
+            style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
+            startIcon={<ZoomInIcon />}
             onClick={(event) => handleClickOpenGrid(id)}
           >
             View
@@ -597,12 +703,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           <Button
             key="8"
             variant="outlined"
-            color='inherit'
+            color="inherit"
             size="small"
-            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
-            startIcon={
-              <EditIcon />
-            }
+            style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
+            startIcon={<EditIcon />}
             onClick={handleEditClick(id)}
           >
             Edit
@@ -611,12 +715,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           <Button
             key="7"
             variant="outlined"
-            color='primary'
+            color="primary"
             size="small"
-            style={{ marginRight: "20px", height: "25px", textTransform: "none" }}
-            startIcon={
-              <DeleteIcon />
-            }
+            style={{
+              marginRight: '20px',
+              height: '25px',
+              textTransform: 'none',
+            }}
+            startIcon={<DeleteIcon />}
             onClick={handleDel(id)}
           >
             Delete
@@ -656,16 +762,15 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     },
 
     {
-        field: 'semesters',
-        headerName: 'Semester(s)',
-        width: 200,
-        editable: false,
-      },
+      field: 'semesters',
+      headerName: 'Semester(s)',
+      width: 200,
+      editable: false,
+    },
     { field: 'courses', headerName: 'Courses', width: 250, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'timestamp', headerName: 'Date', width: 180, editable: true },
     { field: 'status', headerName: 'App Status', width: 130, editable: true },
-
   ];
 
   if (userRole === 'faculty') {
@@ -759,20 +864,20 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       '&.Mui-selected': {
         backgroundColor: alpha(
           theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity,
+          ODD_OPACITY + theme.palette.action.selectedOpacity
         ),
         '&:hover, &.Mui-hovered': {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity,
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
             backgroundColor: alpha(
               theme.palette.primary.main,
-              ODD_OPACITY + theme.palette.action.selectedOpacity,
+              ODD_OPACITY + theme.palette.action.selectedOpacity
             ),
           },
         },
@@ -828,34 +933,100 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         </DialogContent>
       </Dialog>
 
-      <Dialog style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
-        style: { borderRadius: 20 }
-      }} open={delDia} onClose={handleDeleteDiagClose} >
-        <DialogTitle style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>Delete Applicant</DialogTitle>
-        <form onSubmit={e => handleSubmit(e)}>
+      <Dialog
+        style={{
+          borderImage:
+            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+          boxShadow: '0px 2px 20px 4px #00000040',
+          borderRadius: '20px',
+          border: '2px solid',
+        }}
+        PaperProps={{
+          style: { borderRadius: 20 },
+        }}
+        open={delDia}
+        onClose={handleDeleteDiagClose}
+      >
+        <DialogTitle
+          style={{
+            fontFamily: 'SF Pro Display-Medium, Helvetica',
+            textAlign: 'center',
+            fontSize: '35px',
+            fontWeight: '540',
+          }}
+        >
+          Delete Applicant
+        </DialogTitle>
+        <form onSubmit={(e) => handleSubmit(e)}>
           <DialogContent>
-            <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "24px", color: "black" }}>
+            <DialogContentText
+              style={{
+                marginTop: '35px',
+                fontFamily: 'SF Pro Display-Medium, Helvetica',
+                textAlign: 'center',
+                fontSize: '24px',
+                color: 'black',
+              }}
+            >
               Are you sure you want to delete this applicant?
             </DialogContentText>
-
-
           </DialogContent>
-          <DialogActions style={{ marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap: "93px" }}>
-            <Button variant="outlined" style={{ fontSize: "17px", marginLeft: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac', borderWidth: "3px" }} onClick={handleDeleteDiagClose}>Cancel</Button>
+          <DialogActions
+            style={{
+              marginTop: '30px',
+              marginBottom: '42px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: '93px',
+            }}
+          >
+            <Button
+              variant="outlined"
+              style={{
+                fontSize: '17px',
+                marginLeft: '110px',
+                borderRadius: '10px',
+                height: '43px',
+                width: '120px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                borderColor: '#5736ac',
+                color: '#5736ac',
+                borderWidth: '3px',
+              }}
+              onClick={handleDeleteDiagClose}
+            >
+              Cancel
+            </Button>
 
-            <Button variant="contained" style={{ fontSize: "17px", marginRight: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff' }} type="submit">Delete</Button>
+            <Button
+              variant="contained"
+              style={{
+                fontSize: '17px',
+                marginRight: '110px',
+                borderRadius: '10px',
+                height: '43px',
+                width: '120px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                backgroundColor: '#5736ac',
+                color: '#ffffff',
+              }}
+              type="submit"
+            >
+              Delete
+            </Button>
           </DialogActions>
         </form>
       </Dialog>
-
 
       <Dialog open={openAssignmentDialog} onClose={handleCloseAssignmentDialog}>
         <DialogTitle>Course Assignment</DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
             <DialogContentText>
-              Please select the course code to which the student shall
-              be assigned.
+              Please select the course code to which the student shall be
+              assigned.
             </DialogContentText>
             <br />
 
@@ -868,20 +1039,16 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               >
                 {codes.map((code) => {
                   return (
-                    <FormControlLabel key={code}
+                    <FormControlLabel
+                      key={code}
                       value={code}
                       control={<Radio />}
                       label={code}
                     />
-
-                  )
-                })
-
-                }
-
+                  );
+                })}
               </RadioGroup>
             </FormControl>
-
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>

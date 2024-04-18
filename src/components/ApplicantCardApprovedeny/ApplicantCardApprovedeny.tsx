@@ -1,4 +1,3 @@
-
 // @ts-nocheck
 import { FunctionComponent, useCallback } from 'react';
 import './style.css';
@@ -67,78 +66,12 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   currentStu,
 
   setCurrentStu,
-  className
-
-
+  className,
 }) => {
-
-  const handleSendEmail = async () => {
-    try {
-      const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: 'applicationStatusApproved',
-          data: {
-            user: {
-              name: `${firstname ?? ''} ${lastname ?? ''}`.trim(),
-              email: uf_email
-            },
-            position: position,
-            classCode: className,
-            timeframe: "2 weeks"
-          }
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Email sent successfully:', data);
-      } else {
-        throw new Error('Failed to send email');
-      }
-    } catch (error) {
-      console.error('Error sending email:', error);
-    }
-  };
-
-  const handleDenyEmail = async () => {
-    try {
-      const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: 'applicationStatusDenied',
-          data: {
-            user: {
-              name: `${firstname ?? ''} ${lastname ?? ''}`.trim(),
-              email: uf_email
-            },
-            position: position,
-            classCode: className,
-          }
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Email sent successfully:', data);
-      } else {
-        throw new Error('Failed to send email');
-      }
-    } catch (error) {
-      console.error('Error sending email:', error);
-    }
-  };
-
-
-
   const db = firebase.firestore();
-  const handleApproveSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleApproveSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
 
     try {
@@ -146,13 +79,11 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       let doc = await getDoc(statusRef);
       let coursesMap = doc.data().courses;
 
-      coursesMap[className] = "accepted"
+      coursesMap[className] = 'accepted';
       console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application approved successfully');
-      handleSendEmail();
       window.location.reload();
-
     } catch (error) {
       console.error('Error approving application:', error);
     }
@@ -165,13 +96,11 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       let doc = await getDoc(statusRef);
       let coursesMap = doc.data().courses;
 
-      coursesMap[className] = "denied"
+      coursesMap[className] = 'denied';
       console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application denied successfully');
-      handleDenyEmail();
       window.location.reload();
-
     } catch (error) {
       console.error('Error denying application:', error);
     }
@@ -181,36 +110,49 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
     setOpenApproveDialog(false);
   };
 
-
   const handleCloseDeny = () => {
     setOpenDenyDialog(false);
   };
 
   const onThumbUpClick = useCallback((event: any) => {
-    event?.stopPropagation()
+    event?.stopPropagation();
 
     setOpenApproveDialog(true);
     setCurrentStu(id);
   }, []);
 
   const onThumbDownIconClick = useCallback((event: any) => {
-    event?.stopPropagation()
+    event?.stopPropagation();
 
     setOpenDenyDialog(true);
     setCurrentStu(id);
   }, []);
 
   const renderApproveDialog = () => (
-
     <Dialog
-      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
-        style: { borderRadius: 20 }
+      style={{
+        borderImage:
+          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+        boxShadow: '0px 2px 20px 4px #00000040',
+        borderRadius: '20px',
+        border: '2px solid',
+      }}
+      PaperProps={{
+        style: { borderRadius: 20 },
       }}
       open={openApprove}
       onClose={handleCloseApprove}
     >
       <DialogTitle
-        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>        Approve Applicant
+        style={{
+          fontFamily: 'SF Pro Display-Medium, Helvetica',
+          textAlign: 'center',
+          fontSize: '35px',
+          fontWeight: '540',
+        }}
+      >
+        {' '}
+        Approve Applicant
       </DialogTitle>
       <form onSubmit={handleApproveSubmit}>
         <DialogContent>
@@ -263,7 +205,6 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               color: '#ffffff',
             }}
             type="submit"
-
           >
             Approve
           </Button>
@@ -273,14 +214,26 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   );
   const renderDenyDialog = () => (
     <Dialog
-      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
-        style: { borderRadius: 20 }
+      style={{
+        borderImage:
+          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+        boxShadow: '0px 2px 20px 4px #00000040',
+        borderRadius: '20px',
+        border: '2px solid',
+      }}
+      PaperProps={{
+        style: { borderRadius: 20 },
       }}
       open={openDeny}
       onClose={handleCloseDeny}
     >
       <DialogTitle
-        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}
+        style={{
+          fontFamily: 'SF Pro Display-Medium, Helvetica',
+          textAlign: 'center',
+          fontSize: '35px',
+          fontWeight: '540',
+        }}
       >
         Deny Applicant
       </DialogTitle>
@@ -356,7 +309,9 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
           <>
             <div>
               <div className="ellipse">
-                <div className="initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase()}</div>
+                <div className="initials">
+                  {firstname[0].toUpperCase() + lastname[0].toUpperCase()}
+                </div>
               </div>
               <div
                 style={{
@@ -388,9 +343,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               />
 
               <div className="applicantStatus23">
-                <div className="review23">
-                  Review
-                </div>
+                <div className="review23">Review</div>
               </div>
             </div>
           </>
@@ -399,8 +352,10 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
         {expanded && (
           <div>
             <div>
-              <div className="ellipse" >
-                <div className="initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase()}</div>
+              <div className="ellipse">
+                <div className="initials">
+                  {firstname[0].toUpperCase() + lastname[0].toUpperCase()}
+                </div>
               </div>
               <div
                 style={{
@@ -422,7 +377,6 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                     className="thumbsUpIcon"
                     style={{
                       fontSize: '41px',
-
                     }}
                   />
                   <ThumbDownOffAltIcon
@@ -433,9 +387,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                     }}
                   />
                   <div className="applicantStatus23">
-                    <div className="review23" >
-                      Review
-                    </div>
+                    <div className="review23">Review</div>
                   </div>
                 </div>
               </div>
@@ -450,10 +402,9 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
                 marginRight: '139px',
               }}
             >
-
               <div style={{ display: 'flex', gap: '61px' }}>
                 <div className="label50">Applying for:</div>
-                <div >{position}</div>
+                <div>{position}</div>
               </div>
 
               <div style={{ display: 'flex', gap: '75px' }}>
@@ -472,33 +423,51 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
               >
                 <div>
                   <div className="label50">Department:</div>
-                  <div style={{ textAlign: "center" }} className="availability1">{department}</div>
+                  <div
+                    style={{ textAlign: 'center' }}
+                    className="availability1"
+                  >
+                    {department}
+                  </div>
                 </div>
 
                 <div>
                   <div className="label50">Degree:</div>
-                  <div style={{ textAlign: "center" }} className="availability1">{degree}</div>
+                  <div
+                    style={{ textAlign: 'center' }}
+                    className="availability1"
+                  >
+                    {degree}
+                  </div>
                 </div>
 
                 <div>
                   <div className="label50">GPA:</div>
-                  <div style={{ textAlign: "center" }} className="availability1">{gpa}</div>
+                  <div
+                    style={{ textAlign: 'center' }}
+                    className="availability1"
+                  >
+                    {gpa}
+                  </div>
                 </div>
               </div>
 
-              <div style={{ marginBottom: '10px' }} className="label50">Qualifications:</div>
+              <div style={{ marginBottom: '10px' }} className="label50">
+                Qualifications:
+              </div>
               <div className="availability1" style={{ marginBottom: '31px' }}>
                 {qualifications}
               </div>
 
-              <div style={{ marginBottom: '10px' }} className="label50">Resume Link:</div>
+              <div style={{ marginBottom: '10px' }} className="label50">
+                Resume Link:
+              </div>
               <a style={{ marginBottom: '104px' }} href={resume}>
                 {resume}
               </a>
             </div>
           </div>
         )}
-
       </div>
     </>
   );

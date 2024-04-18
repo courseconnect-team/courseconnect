@@ -33,8 +33,8 @@ import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import Chip from '@mui/material/Chip';
 
-import styles from "./style.module.css";
-import { useRouter } from 'next/navigation'
+import styles from './style.module.css';
+import { useRouter } from 'next/navigation';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -54,7 +54,6 @@ const MenuProps = {
   },
 };
 
-
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -64,14 +63,15 @@ const MenuProps = {
 // ...yeah that's probably the best way to do it
 export default function Application() {
   // get the current user's uid
-  const router = useRouter()
+  const router = useRouter();
   const { user } = useAuth();
   const userId = user.uid;
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${
+    current.getMonth() + 1
+  }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -83,27 +83,35 @@ export default function Application() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-
     const handleSendEmail = async () => {
       try {
-
-        const response = await fetch('https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            type: 'applicationConfirmation',
-            data: {
-              user: {
-                name: user.displayName,
-                email: applicationData.email
-              },
-              position: applicationData.position,
-              classCode: applicationData.courses
-            }
-          })
+        let courseNamesWithSemester = coursesArray.map((course) => {
+          let parts = course.split(' :');
+          let courseNameWithSemester = parts[0].trim();
+          return courseNameWithSemester; // Get the first part and trim any extra spaces
         });
+        let resultString = courseNamesWithSemester.join(', ');
+
+        const response = await fetch(
+          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              type: 'applicationConfirmation',
+              data: {
+                user: {
+                  name: user.displayName,
+                  email: applicationData.email,
+                },
+                position: applicationData.position,
+                classCode: resultString,
+              },
+            }),
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -156,26 +164,18 @@ export default function Application() {
 
     // get courses as array
     const coursesArray = personName;
-    console.log(coursesArray);
 
-
-    let coursesMap: { [key: string]: string } = {}
+    let coursesMap: { [key: string]: string } = {};
     for (let i = 0; i < coursesArray.length; i++) {
-      console.log("VAL " + coursesArray[i]);
-
-      coursesMap[coursesArray[i]] = "applied";
+      coursesMap[coursesArray[i]] = 'applied';
     }
-    console.log("MAP " + coursesMap);
-
-
-
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
       firstname: formData.get('firstName') as string,
       lastname: formData.get('lastName') as string,
       email: formData.get('email') as string,
-      ufid: "NA",
+      ufid: 'NA',
       phonenumber: formData.get('phone-number') as string,
       gpa: formData.get('gpa-select') as string,
       department: formData.get('department-select') as string,
@@ -183,10 +183,10 @@ export default function Application() {
       semesterstatus: formData.get('semstatus-radio-group') as string,
       additionalprompt: additionalPromptValue,
       nationality: nationality as string,
-      englishproficiency: "NA",
+      englishproficiency: 'NA',
       position: formData.get('positions-radio-group') as string,
       available_hours: availabilityArray as string[],
-      available_semesters: ["NA"],
+      available_semesters: ['NA'],
       courses: coursesMap,
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,
@@ -211,23 +211,38 @@ export default function Application() {
     } else if (applicationData.phonenumber === '') {
       toast.error('Please enter a valid phone number!');
       setLoading(false);
-    } else if (applicationData.degree === null || applicationData.degree === '') {
+    } else if (
+      applicationData.degree === null ||
+      applicationData.degree === ''
+    ) {
       toast.error('Please select a degree!');
       setLoading(false);
       return;
-    } else if (applicationData.department === null || applicationData.department === '') {
+    } else if (
+      applicationData.department === null ||
+      applicationData.department === ''
+    ) {
       toast.error('Please select a department!');
       setLoading(false);
       return;
-    } else if (applicationData.semesterstatus === null || applicationData.semesterstatus === '') {
+    } else if (
+      applicationData.semesterstatus === null ||
+      applicationData.semesterstatus === ''
+    ) {
       toast.error('Please select a semester status!');
       setLoading(false);
       return;
-    } else if (applicationData.resume_link === null || applicationData.resume_link === '') {
+    } else if (
+      applicationData.resume_link === null ||
+      applicationData.resume_link === ''
+    ) {
       toast.error('Please provide a resume link!');
       setLoading(false);
       return;
-    } else if (applicationData.position === null || applicationData.position === '') {
+    } else if (
+      applicationData.position === null ||
+      applicationData.position === ''
+    ) {
       toast.error('Please enter a position!');
       setLoading(false);
       return;
@@ -244,7 +259,7 @@ export default function Application() {
       setLoading(false);
       return;
     } else {
-      const toastId = toast.loading("Processing application", {
+      const toastId = toast.loading('Processing application', {
         duration: 30000,
       });
       await firebase.firestore().collection('assignments').doc(userId).delete();
@@ -267,19 +282,19 @@ export default function Application() {
       if (response.ok) {
         handleSendEmail();
         toast.dismiss(toastId);
-        toast.success("Application submitted!")
+        toast.success('Application submitted!');
         console.log('SUCCESS: Application data sent to server successfully');
         // now, update the role of the user to student_applied
         await UpdateRole(userId, 'student_applied');
         // then, refresh the page somehow to reflect the state changing
         // so the form goes away and the user can see the status of their application
 
-        router.push("/")
+        router.push('/');
       } else {
         console.log(response);
 
         toast.dismiss(toastId);
-        toast.error('Application data failed to send to server!')
+        toast.error('Application data failed to send to server!');
         console.log('ERROR: Application data failed to send to server');
       }
       setLoading(false);
@@ -288,12 +303,15 @@ export default function Application() {
   const [success, setSuccess] = React.useState(false);
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
-    ref,
+    ref
   ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
 
-  const handleSuccess = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleSuccess = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
     if (reason === 'clickaway') {
       return;
     }
@@ -309,25 +327,20 @@ export default function Application() {
     } = event;
     setPersonName(
       // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
+      typeof value === 'string' ? value.split(',') : value
     );
-    console.log(event.target.value);
-    console.log(personName);
-
-
   };
   const [names, setNames] = useState([]);
 
   React.useEffect(() => {
     async function fetchData() {
       try {
-        let data = []
-        await firebase.firestore()
+        let data = [];
+        await firebase
+          .firestore()
           .collection('courses')
           .get()
-          .then(snapshot => snapshot.docs.map(doc => (
-            data.push(doc.id)
-          )))
+          .then((snapshot) => snapshot.docs.map((doc) => data.push(doc.id)));
 
         setNames(data);
       } catch (err) {
@@ -337,10 +350,8 @@ export default function Application() {
     fetchData();
   }, []);
 
-
   return (
     <>
-
       <Toaster />
       <div className={styles.studentlandingpage}>
         <div className={styles.overlapwrapper}>
@@ -349,7 +360,11 @@ export default function Application() {
               <div className={styles.colorblockframe}>
                 <div className={styles.overlapgroup2}>
                   <div className={styles.colorblock} />
-                  <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                  <img
+                    className={styles.GRADIENTS}
+                    alt="Gradients"
+                    src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
+                  />
                   <div className={styles.glasscard} />
                 </div>
               </div>
@@ -358,7 +373,11 @@ export default function Application() {
               <div className={styles.textwrapper8}>Application</div>
             </div>
             <Container className="container" component="main" maxWidth="md">
-              <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>
+              <Snackbar
+                open={success}
+                autoHideDuration={3000}
+                onClose={handleSuccess}
+              >
                 <Alert severity="success" sx={{ width: '100%' }}>
                   Application submitted successfully!
                 </Alert>
@@ -372,11 +391,10 @@ export default function Application() {
                   alignItems: 'center',
                 }}
               >
-
                 <Typography component="h1" variant="h5">
                   TA/UPI/Grader Application
                 </Typography>
-                <Box component="form" noValidate onSubmit={handleSubmit} >
+                <Box component="form" noValidate onSubmit={handleSubmit}>
                   <Grid item xs={12} sm={6} sx={{ marginTop: 45 }}>
                     <Typography align="center" component="h2" variant="h6">
                       Personal Information
@@ -384,8 +402,6 @@ export default function Application() {
                   </Grid>
                   <br />
                   <Grid container spacing={2} sx={{ marginTop: 0 }}>
-
-
                     <Grid item xs={12} sm={6}>
                       <TextField
                         autoComplete="given-name"
@@ -434,7 +450,13 @@ export default function Application() {
                         helperText="Enter your phone number. Example: 123-456-7890"
                       />
                     </Grid>
-                    <Grid item xs={22} sm={116} justifyContent="center" alignItems="center">
+                    <Grid
+                      item
+                      xs={22}
+                      sm={116}
+                      justifyContent="center"
+                      alignItems="center"
+                    >
                       <DepartmentSelect />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -449,44 +471,61 @@ export default function Application() {
                   </Grid>
 
                   <br />
-                  <Typography align="center" component="h2" variant="h6" sx={{ m: 1 }}>
+                  <Typography
+                    align="center"
+                    component="h2"
+                    variant="h6"
+                    sx={{ m: 1 }}
+                  >
                     Position Information
                   </Typography>
                   <br />
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Typography>
-                        Please select the position for which you are interested in
-                        applying.
+                        Please select the position for which you are interested
+                        in applying.
                       </Typography>
                       <PositionSelect />
                     </Grid>
                     <Grid item xs={12}>
                       <Typography>
-                        Please select one or more options describing the number of hours
-                        per week you will be available.
+                        Please select one or more options describing the number
+                        of hours per week you will be available.
                       </Typography>
                       <AvailabilityCheckbox name="availabilityCheckbox" />
                     </Grid>
                     <Grid item xs={12}>
                       <Typography>
-                        Please list the course(s) for which you are applying. Ensure that you select the courses with your desired semester and instructor.
+                        Please list the course(s) for which you are applying.
+                        Ensure that you select the courses with your desired
+                        semester and instructor.
                       </Typography>
 
-                      <FormControl variant='filled' fullWidth>
-                        <InputLabel id="demo-multiple-checkbox-label" variant='filled'>Course(s)*</InputLabel>
+                      <FormControl variant="filled" fullWidth>
+                        <InputLabel
+                          id="demo-multiple-checkbox-label"
+                          variant="filled"
+                        >
+                          Course(s)*
+                        </InputLabel>
                         <Select
-
-                          variant='filled'
+                          variant="filled"
                           labelId="demo-multiple-checkbox-label"
                           id="course-prompt"
-                          name='course-prompt'
+                          name="course-prompt"
                           multiple
                           value={personName}
                           onChange={handleChange}
                           input={<FilledInput label="Tag" />}
                           renderValue={(selected) => (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 0.5,
+                              }}
+                            >
                               {selected.map((value) => (
                                 <Chip key={value} label={value} />
                               ))}
@@ -497,17 +536,19 @@ export default function Application() {
                         >
                           {names.map((name) => (
                             <MenuItem key={name} value={name}>
-                              <Checkbox checked={personName.indexOf(name) > -1} />
+                              <Checkbox
+                                checked={personName.indexOf(name) > -1}
+                              />
                               <ListItemText primary={name} />
                             </MenuItem>
                           ))}
                         </Select>
                       </FormControl>
-
                     </Grid>
                     <Grid item xs={12}>
                       <Typography>
-                        Please provide your most recently calculated cumulative UF GPA.
+                        Please provide your most recently calculated cumulative
+                        UF GPA.
                       </Typography>
                       <GPA_Select />
                     </Grid>
@@ -529,12 +570,13 @@ export default function Application() {
                         Please describe your qualifications for the position and
                         course(s) for which you are applying. <br />
                         <em>
-                          If you have been a TA, UPI, or grader before, please mention
-                          the course(s) and teacher(s) for which you worked.
+                          If you have been a TA, UPI, or grader before, please
+                          mention the course(s) and teacher(s) for which you
+                          worked.
                         </em>{' '}
                         <br /> <br />
-                        Write about any relevant experience, such as teaching, tutoring,
-                        grading, or coursework. <br />
+                        Write about any relevant experience, such as teaching,
+                        tutoring, grading, or coursework. <br />
                       </Typography>
                       <TextField
                         required
@@ -561,11 +603,9 @@ export default function Application() {
                 </Box>
               </Box>
             </Container>
-
           </div>
         </div>
-      </div >
+      </div>
     </>
-
   );
 }

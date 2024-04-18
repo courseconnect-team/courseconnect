@@ -23,9 +23,9 @@ import {
   GridRowModel,
   GridRowEditStopReasons,
   useGridApiContext,
-  gridClasses
+  gridClasses,
 } from '@mui/x-data-grid';
-import {Button}from '@mui/material';
+import { Button } from '@mui/material';
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -78,19 +78,24 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
   const [userData, setUserData] = React.useState<User[]>([]);
 
   React.useEffect(() => {
-    const usersRef = firebase.firestore().collection('users').where('role', '==', "unapproved");
-    usersRef.get().then((querySnapshot) => {
+    const usersRef = firebase
+      .firestore()
+      .collection('users')
+      .where('role', '==', 'unapproved');
+    const unsubscribe = usersRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          fullname: doc.data().firstname + " " + doc.data().lastname,
-          ...doc.data(),
-        } as User)
+          ({
+            id: doc.id,
+            fullname: doc.data().firstname + ' ' + doc.data().lastname,
+            ...doc.data(),
+          } as User)
       );
-      
+
       setUserData(data);
     });
+
+    return () => unsubscribe();
   }, []);
 
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
@@ -109,7 +114,7 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
   const handleEditClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
-  
+
   const handleSaveClick = (id: GridRowId) => () => {
     const updatedRow = userData.find((row) => row.id === id);
     if (updatedRow) {
@@ -132,7 +137,6 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
     }
   };
 
-
   const handleApproveClick = (id: GridRowId) => () => {
     const updatedRow = userData.find((row) => row.id === id);
     if (updatedRow) {
@@ -140,7 +144,7 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
         .firestore()
         .collection('users')
         .doc(id.toString())
-        .update({role: 'faculty'})
+        .update({ role: 'faculty' })
         .then(() => {
           setRowModesModel({
             ...rowModesModel,
@@ -162,7 +166,7 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
         .firestore()
         .collection('users')
         .doc(id.toString())
-        .update({role: 'denied'})
+        .update({ role: 'denied' })
         .then(() => {
           setRowModesModel({
             ...rowModesModel,
@@ -191,8 +195,6 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
         console.error('Error removing document: ', error);
       });
   };
-
- 
 
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = userData.find((row) => row.id === id);
@@ -294,16 +296,13 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
         }
 
         return [
-         
           <Button
             key="8"
             variant="outlined"
-            color='inherit'
+            color="inherit"
             size="small"
-            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
-            startIcon={
-              <EditIcon />
-            }
+            style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
+            startIcon={<EditIcon />}
             onClick={handleEditClick(id)}
           >
             Edit
@@ -312,12 +311,14 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
           <Button
             key="7"
             variant="outlined"
-            color='primary'
+            color="primary"
             size="small"
-            style={{ marginRight: "20px", height: "25px", textTransform: "none" }}
-            startIcon={
-              <DeleteIcon />
-            }
+            style={{
+              marginRight: '20px',
+              height: '25px',
+              textTransform: 'none',
+            }}
+            startIcon={<DeleteIcon />}
             onClick={handleDeleteClick(id)}
           >
             Delete
@@ -326,14 +327,14 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
             key="4"
             icon={<ThumbUpOffAlt />}
             label="Approve"
-            onClick={(event) => handleApproveClick(id)}
+            onClick={handleApproveClick(id)}
             color="success"
           />,
           <GridActionsCellItem
             key="5"
             icon={<ThumbDownOffAlt />}
             label="Deny"
-            onClick={(event) => handleDenyClick(id)}
+            onClick={handleDenyClick(id)}
             color="error"
           />,
         ];
@@ -386,20 +387,20 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
       '&.Mui-selected': {
         backgroundColor: alpha(
           theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity,
+          ODD_OPACITY + theme.palette.action.selectedOpacity
         ),
         '&:hover, &.Mui-hovered': {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity,
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
             backgroundColor: alpha(
               theme.palette.primary.main,
-              ODD_OPACITY + theme.palette.action.selectedOpacity,
+              ODD_OPACITY + theme.palette.action.selectedOpacity
             ),
           },
         },
@@ -407,7 +408,6 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
     },
   }));
 
-  
   return (
     <Box
       sx={{
