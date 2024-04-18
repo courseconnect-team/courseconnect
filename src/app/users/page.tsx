@@ -145,25 +145,10 @@ export default function User() {
                 width: '100%',
               }}
             >
-              <Box sx={{ minWidth: 120 }}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">Semester</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={semester}
-                    label="Semester"
-                    onChange={handleChange}
-                  >
-                    <MenuItem value={"Fall 2024"}>Fall 2024</MenuItem>
-                    <MenuItem value={"Spring 2025"}>Spring 2025</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+
               <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
 
                 <Users userRole={role as string} />
-                <input type="file" id="input_dom_element" onChange={e => readExcelFile(e)} />
 
 
               </Box>
