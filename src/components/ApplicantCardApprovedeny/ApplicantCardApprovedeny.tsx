@@ -409,7 +409,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50">Available Hours Per Week:</div>
-                <div className="availability1">{availability}</div>
+                <div className="availability1">{availability.join(", ")}</div>
               </div>
 
               <br></br>
