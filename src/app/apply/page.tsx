@@ -69,9 +69,8 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${
-    current.getMonth() + 1
-  }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -155,10 +154,22 @@ export default function Application() {
       formData.get('semesterCheckbox_spring_2025') === 'on';
 
     const semesterArray: string[] = [];
-    if (semesterCheckbox_fall_2023) {
+
+    let f24 = false;
+    let s25 = false;
+    for (let i = 0; i < personName.length; i++) {
+      if (personName[i].includes("Fall 2024")) {
+        f24 = true;
+      }
+      if (personName[i].includes("Spring 2025")) {
+        s25 = true;
+      }
+    }
+
+    if (f24) {
       semesterArray.push('Fall 2024');
     }
-    if (semesterCheckbox_spring_2024) {
+    if (s25) {
       semesterArray.push('Spring 2025');
     }
 
@@ -186,7 +197,7 @@ export default function Application() {
       englishproficiency: 'NA',
       position: formData.get('positions-radio-group') as string,
       available_hours: availabilityArray as string[],
-      available_semesters: ['NA'],
+      available_semesters: semesterArray as string[],
       courses: coursesMap,
       qualifications: formData.get('qualifications-prompt') as string,
       uid: userId,

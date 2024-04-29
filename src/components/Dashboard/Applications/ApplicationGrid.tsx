@@ -172,9 +172,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${current.getMonth() + 1
+      }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -257,7 +256,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     if (userRole === 'admin') {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
-          .filter(function (doc) {
+          .filter(function(doc) {
             if (
               doc.data().status != 'Admin_approved' &&
               doc.data().status != 'Admin_denied'
@@ -269,13 +268,13 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           })
           .map(
             (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-                courses: Object.entries(doc.data().courses)
-                  .filter(([key, value]) => value == 'accepted')
-                  .map(([key, value]) => key),
-              } as Application)
+            ({
+              id: doc.id,
+              ...doc.data(),
+              courses: Object.entries(doc.data().courses)
+                .filter(([key, value]) => value == 'accepted')
+                .map(([key, value]) => key),
+            } as Application)
           );
         setApplicationData(data);
       });
@@ -303,10 +302,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       applicationsRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Application)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Application)
         );
         setApplicationData(data);
       });
@@ -348,9 +347,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type: 'applicationStatusDenied',
               data: {
                 user: {
-                  name: `${applicationData.firstname ?? ''} ${
-                    applicationData.lastname ?? ''
-                  }`.trim(),
+                  name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
+                    }`.trim(),
                   email: applicationData.email,
                 },
                 position: applicationData.position,
@@ -398,9 +396,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type: 'applicationStatusApproved',
               data: {
                 user: {
-                  name: `${applicationData.firstname ?? ''} ${
-                    applicationData.lastname ?? ''
-                  }`.trim(),
+                  name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
+                    }`.trim(),
                   email: applicationData.email,
                 },
                 position: applicationData.position,
@@ -472,9 +469,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${current.getMonth() + 1
+      }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -761,14 +757,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     },
 
     {
-      field: 'semesters',
+      field: 'available_semesters',
       headerName: 'Semester(s)',
       width: 200,
       editable: false,
     },
-    { field: 'courses', headerName: 'Courses', width: 250, editable: true },
+    { field: 'courses', headerName: 'Faculty Approved Courses', width: 250, editable: true },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
-    { field: 'timestamp', headerName: 'Date', width: 180, editable: true },
+    { field: 'date', headerName: 'Date', width: 100, editable: true },
     { field: 'status', headerName: 'App Status', width: 130, editable: true },
   ];
 
@@ -869,8 +865,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-              theme.palette.action.selectedOpacity +
-              theme.palette.action.hoverOpacity
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
