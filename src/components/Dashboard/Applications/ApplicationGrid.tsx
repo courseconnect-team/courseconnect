@@ -751,7 +751,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       valueGetter: getFullName,
     },
 
-    { field: 'uf_email', headerName: 'Email', width: 230, editable: true },
+    { field: 'email', headerName: 'Email', width: 230, editable: true },
 
     {
       field: 'degree',
