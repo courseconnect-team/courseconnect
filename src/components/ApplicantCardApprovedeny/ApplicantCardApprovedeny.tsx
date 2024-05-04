@@ -68,6 +68,40 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   setCurrentStu,
   className,
 }) => {
+  const handleDenyEmail = async () => {
+    try {
+      const response = await fetch(
+        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'applicationStatusDenied',
+            data: {
+              user: {
+                name: `${firstname ?? ''} ${lastname ?? ''}`.trim(),
+                email: uf_email,
+              },
+              position: position,
+              classCode: className,
+            },
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Email sent successfully:', data);
+      } else {
+        throw new Error('Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+
   const db = firebase.firestore();
   const handleApproveSubmit = async (
     event: React.FormEvent<HTMLFormElement>
@@ -100,6 +134,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application denied successfully');
+      handleDenyEmail();
       window.location.reload();
     } catch (error) {
       console.error('Error denying application:', error);

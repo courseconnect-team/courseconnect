@@ -106,6 +106,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
   // assignment dialog pop-up view setup
   const [openAssignmentDialog, setOpenAssignmentDialog] = React.useState(false);
+  const [openDenyDialog, setOpenDenyDialog] = React.useState(false);
+
   const handleOpenAssignmentDialog = async (id: GridRowId) => {
     const statusRef = firebase
       .firestore()
@@ -114,14 +116,37 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     const doc = await getDoc(statusRef);
     setCodes(
       Object.entries(doc.data().courses)
-        .filter(([key, value]) => value == 'accepted')
-        .map(([key, value]) => key)
+      // .filter(([key, value]) => value == 'accepted')
+      // .map(([key, value]) => key)
     );
     setSelectedUserGrid(id);
+
     setOpenAssignmentDialog(true);
   };
+
+  const handleDenyAssignmentDialog = async (id: GridRowId) => {
+    const statusRef = firebase
+      .firestore()
+      .collection('applications')
+      .doc(id.toString());
+
+    const doc = await getDoc(statusRef);
+
+    setCodes(
+      Object.entries(doc.data().courses)
+        .filter(([key, value]) => value == 'denied') // Change 'accepted' to 'denied'
+        .map(([key, value]) => key)
+    );
+
+    setSelectedUserGrid(id);
+    setOpenDenyDialog(true);
+  };
+
   const handleCloseAssignmentDialog = () => {
     setOpenAssignmentDialog(false);
+  };
+  const handleCloseDenyDialog = () => {
+    setOpenDenyDialog(false);
   };
 
   const handleSubmitAssignment = async (
@@ -180,13 +205,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       date: current_date as string,
       student_uid: student_uid as string,
       class_codes: valueRadio,
-      email: doc.data().email,
+      email: doc.data().uf_email,
       name: doc.data().firstname + ' ' + doc.data().lastname,
-      semesters: doc.data().available_semesters,
-      department: doc.data().department,
-      hours: doc.data().available_hours,
+      semesters: doc.data().semesters,
+      department: doc.data().dept,
+      hours: doc.data().availability,
       position: doc.data().position,
     };
+    console.log(assignmentObject);
 
     // Create the document within the "assignments" collection
     firebase
@@ -197,6 +223,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .catch((error: any) => {
         console.error('Error writing assignment document: ', error);
       });
+    handleSendEmail(assignmentObject);
 
     handleCloseAssignmentDialog();
     setLoading(false);
@@ -272,9 +299,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               ({
                 id: doc.id,
                 ...doc.data(),
-                courses: Object.entries(doc.data().courses)
-                  .filter(([key, value]) => value == 'accepted')
-                  .map(([key, value]) => key),
+                // courses: Object.entries(doc.data().courses)
+                //   .filter(([key, value]) => value == 'accepted')
+                //   .map(([key, value]) => key),
               } as Application)
           );
         setApplicationData(data);
@@ -374,50 +401,48 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     }
   };
 
-  const handleSendEmail = async (id: GridRowId) => {
+  const handleSendEmail = async (assignmentObject) => {
     try {
-      // Retrieve application data from Firestore
-      const snapshot = await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .get();
+      // Retrieve application data from assignmentObject
+      const {
+        date,
+        student_uid,
+        class_codes,
+        email,
+        name,
+        semesters,
+        department,
+        hours,
+        position,
+      } = assignmentObject;
 
-      if (snapshot.exists) {
-        const applicationData = snapshot.data() as Application;
-
-        // Send email using fetched application data
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              type: 'applicationStatusApproved',
-              data: {
-                user: {
-                  name: `${applicationData.firstname ?? ''} ${
-                    applicationData.lastname ?? ''
-                  }`.trim(),
-                  email: applicationData.email,
-                },
-                position: applicationData.position,
-                classCode: applicationData.courses,
+      // Send email using assignmentObject data
+      const response = await fetch(
+        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'applicationStatusApproved',
+            data: {
+              user: {
+                name: name.trim(),
+                email: email,
               },
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Email sent successfully:', data);
-        } else {
-          throw new Error('Failed to send email');
+              position: position,
+              classCode: class_codes,
+            },
+          }),
         }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Email sent successfully:', data);
       } else {
-        throw new Error('Application data not found');
+        throw new Error('Failed to send email');
       }
     } catch (error) {
       console.error('Error sending email:', error);
@@ -457,7 +482,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         setLoading(false);
         console.error('Error updating application document: ', error);
       });
-    handleSendEmail(id);
 
     // eventually here an email would be sent to the student as a notification
     // however, for now there will just be an "assignment" object generated in the database
@@ -737,7 +761,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             key="5"
             icon={<ThumbDownAltIcon />}
             label="Deny"
-            onClick={(event) => handleDenyClick(id)}
+            onClick={(event) => handleDenyAssignmentDialog(id)}
             color="error"
           />,
         ];
@@ -1040,9 +1064,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                   return (
                     <FormControlLabel
                       key={code}
-                      value={code}
+                      value={code[1]}
                       control={<Radio />}
-                      label={code}
+                      label={code[1]}
                     />
                   );
                 })}
@@ -1052,6 +1076,93 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           <DialogActions>
             <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>
             <Button type="submit">Submit</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      <Dialog
+        style={{
+          borderImage:
+            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+          boxShadow: '0px 2px 20px 4px #00000040',
+          borderRadius: '20px',
+          border: '2px solid',
+        }}
+        PaperProps={{
+          style: { borderRadius: 20 },
+        }}
+        open={openDenyDialog}
+        onClose={handleCloseDenyDialog}
+      >
+        <DialogTitle
+          style={{
+            fontFamily: 'SF Pro Display-Medium, Helvetica',
+            textAlign: 'center',
+            fontSize: '35px',
+            fontWeight: '540',
+          }}
+        >
+          Deny Applicant
+        </DialogTitle>
+        <form onSubmit={handleDenyClick}>
+          <DialogContent>
+            <DialogContentText
+              style={{
+                marginTop: '35px',
+                fontFamily: 'SF Pro Display-Medium, Helvetica',
+                textAlign: 'center',
+                fontSize: '24px',
+                color: 'black',
+              }}
+            >
+              Are you sure you want to deny this applicant?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions
+            style={{
+              marginTop: '30px',
+              marginBottom: '42px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: '93px',
+            }}
+          >
+            <Button
+              variant="outlined"
+              style={{
+                fontSize: '17px',
+                marginLeft: '110px',
+                borderRadius: '10px',
+                height: '43px',
+                width: '120px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                borderColor: '#5736ac',
+                color: '#5736ac',
+                borderWidth: '3px',
+              }}
+              onClick={handleCloseDenyDialog}
+            >
+              No
+            </Button>
+
+            <Button
+              variant="contained"
+              style={{
+                fontSize: '17px',
+                marginRight: '110px',
+                borderRadius: '10px',
+                height: '43px',
+                width: '120px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                backgroundColor: '#5736ac',
+                color: '#ffffff',
+              }}
+              type="submit"
+            >
+              Yes
+            </Button>
           </DialogActions>
         </form>
       </Dialog>
