@@ -1,0 +1,72 @@
+[debug] [2024-04-18T17:44:34.065Z] ----------------------------------------------------------------------
+[debug] [2024-04-18T17:44:34.067Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Oling\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js functions:shell
+[debug] [2024-04-18T17:44:34.067Z] CLI Version:   13.7.1
+[debug] [2024-04-18T17:44:34.067Z] Platform:      win32
+[debug] [2024-04-18T17:44:34.067Z] Node Version:  v18.17.1
+[debug] [2024-04-18T17:44:34.068Z] Time:          Thu Apr 18 2024 13:44:34 GMT-0400 (Eastern Daylight Time)
+[debug] [2024-04-18T17:44:34.068Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-04-18T17:44:34.132Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-04-18T17:44:34.133Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2024-04-18T17:44:34.133Z] [iam] checking project courseconnect-c6a7b for permissions ["firebase.projects.get"]
+[debug] [2024-04-18T17:44:34.135Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2024-04-18T17:44:34.135Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2024-04-18T17:44:34.136Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-04-18T17:44:34.592Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2024-04-18T17:44:34.592Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-04-18T17:44:34.596Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2024-04-18T17:44:34.597Z] defaultcredentials: writing to file C:\Users\Oling\AppData\Roaming\firebase\courseconnect_team_gmail.com_application_default_credentials.json
+[debug] [2024-04-18T17:44:34.598Z] DEBUG: Setting GAC to C:\Users\Oling\AppData\Roaming\firebase\courseconnect_team_gmail.com_application_default_credentials.json
+[debug] [2024-04-18T17:44:34.599Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2024-04-18T17:44:34.983Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2024-04-18T17:44:34.983Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.appspot.com"}
+[debug] [2024-04-18T17:44:34.991Z] [functions] Watching "C:\Users\Oling\Documents\courseconnect\functions" for Cloud Functions...
+[debug] [2024-04-18T17:44:34.995Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[debug] [2024-04-18T17:44:36.044Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^11.8.0",
+    "firebase-functions": "^4.3.1",
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[debug] [2024-04-18T17:44:36.044Z] Building nodejs source
+[debug] [2024-04-18T17:44:36.045Z] Failed to find version of module node: reached end of search path C:\Users\Oling\Documents\courseconnect\functions\node_modules
+[info] +  functions: Using node@18 from host. 
+[info] i  functions: Loaded environment variables from .env. 
+[debug] [2024-04-18T17:44:36.047Z] Could not find functions.yaml. Must use http discovery
+[debug] [2024-04-18T17:44:36.051Z] Found firebase-functions binary at 'C:\Users\Oling\Documents\courseconnect\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8661
+
+[debug] [2024-04-18T17:44:36.427Z] Got response from /__/functions.yaml {"endpoints":{"processSignUpForm":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"processSignUpForm"},"processApplicationForm":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"processApplicationForm"},"processCreateCourseForm":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"processCreateCourseForm"},"deleteUserFromID":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"deleteUserFromID"},"sendEmail":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"sendEmail"}},"specVersion":"v1alpha1","requiredAPIs":[]}
+[info] shutdown requested via /__/quitquitquit
+
+[debug] [2024-04-18T17:44:36.445Z] [functions] Loaded functions definitions from source: processSignUpForm, processApplicationForm, processCreateCourseForm, deleteUserFromID, sendEmail.
+[debug] [2024-04-18T17:44:36.446Z] [functions[us-central1-processSignUpForm]] http function initialized (http://127.0.0.1:5000/courseconnect-c6a7b/us-central1/processSignUpForm).
+[debug] [2024-04-18T17:44:36.446Z] [functions[us-central1-processApplicationForm]] http function initialized (http://127.0.0.1:5000/courseconnect-c6a7b/us-central1/processApplicationForm).
+[debug] [2024-04-18T17:44:36.446Z] [functions[us-central1-processCreateCourseForm]] http function initialized (http://127.0.0.1:5000/courseconnect-c6a7b/us-central1/processCreateCourseForm).
+[debug] [2024-04-18T17:44:36.446Z] [functions[us-central1-deleteUserFromID]] http function initialized (http://127.0.0.1:5000/courseconnect-c6a7b/us-central1/deleteUserFromID).
+[debug] [2024-04-18T17:44:36.446Z] [functions[us-central1-sendEmail]] http function initialized (http://127.0.0.1:5000/courseconnect-c6a7b/us-central1/sendEmail).
+[info] i  functions: Loaded functions: processSignUpForm, processApplicationForm, processCreateCourseForm, deleteUserFromID, sendEmail 
+[warn] !  functions: The following emulators are not running, calls to these services will affect production: firestore, database, pubsub, storage, eventarc 
