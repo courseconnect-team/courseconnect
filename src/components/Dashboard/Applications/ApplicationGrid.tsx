@@ -205,13 +205,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       date: current_date as string,
       student_uid: student_uid as string,
       class_codes: valueRadio,
-      email: doc.data().uf_email,
+      email: doc.data().email,
       name: doc.data().firstname + ' ' + doc.data().lastname,
-      semesters: doc.data().semesters,
-      department: doc.data().dept,
-      hours: doc.data().availability,
+      semesters: doc.data().available_semesters,
+      department: doc.data().department,
+      hours: doc.data().available_hours,
       position: doc.data().position,
     };
+
     console.log(assignmentObject);
 
     // Create the document within the "assignments" collection
@@ -299,9 +300,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               ({
                 id: doc.id,
                 ...doc.data(),
-                // courses: Object.entries(doc.data().courses)
-                //   .filter(([key, value]) => value == 'accepted')
-                //   .map(([key, value]) => key),
+                courses: Object.entries(doc.data().courses)
+                  .filter(([key, value]) => value == 'accepted')
+                  .map(([key, value]) => key),
               } as Application)
           );
         setApplicationData(data);
@@ -355,10 +356,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleDenyEmail = async (id: GridRowId) => {
     try {
+      console.log(id);
       const snapshot = await firebase
         .firestore()
         .collection('applications')
-        .doc(id.toString())
+        .doc(id.student_uid.toString())
         .get();
 
       if (snapshot.exists) {
@@ -401,48 +403,50 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     }
   };
 
-  const handleSendEmail = async (assignmentObject) => {
+  const handleSendEmail = async (id: GridRowId) => {
     try {
-      // Retrieve application data from assignmentObject
-      const {
-        date,
-        student_uid,
-        class_codes,
-        email,
-        name,
-        semesters,
-        department,
-        hours,
-        position,
-      } = assignmentObject;
+      // Retrieve application data from Firestore
+      const snapshot = await firebase
+        .firestore()
+        .collection('applications')
+        .doc(id.student_uid.toString())
+        .get();
 
-      // Send email using assignmentObject data
-      const response = await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'applicationStatusApproved',
-            data: {
-              user: {
-                name: name.trim(),
-                email: email,
-              },
-              position: position,
-              classCode: class_codes,
+      if (snapshot.exists) {
+        const applicationData = snapshot.data() as Application;
+
+        // Send email using fetched application data
+        const response = await fetch(
+          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          }),
-        }
-      );
+            body: JSON.stringify({
+              type: 'applicationStatusApproved',
+              data: {
+                user: {
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
+                  email: applicationData.email,
+                },
+                position: applicationData.position,
+                classCode: applicationData.courses,
+              },
+            }),
+          }
+        );
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Email sent successfully:', data);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Email sent successfully:', data);
+        } else {
+          throw new Error('Failed to send email');
+        }
       } else {
-        throw new Error('Failed to send email');
+        throw new Error('Application data not found');
       }
     } catch (error) {
       console.error('Error sending email:', error);
@@ -451,6 +455,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   // approve/deny click handlers
   const handleDenyClick = (id: GridRowId) => {
+    console.log(id);
     setLoading(true);
     // Update the 'applications' collection
     firebase
@@ -1064,9 +1069,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                   return (
                     <FormControlLabel
                       key={code}
-                      value={code[1]}
+                      value={code[0]}
                       control={<Radio />}
-                      label={code[1]}
+                      label={code}
                     />
                   );
                 })}
@@ -1159,7 +1164,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 backgroundColor: '#5736ac',
                 color: '#ffffff',
               }}
-              type="submit"
+              onClick={() => handleDenyClick(deniedItemId)}
             >
               Yes
             </Button>
