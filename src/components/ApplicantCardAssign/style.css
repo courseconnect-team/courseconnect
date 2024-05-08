@@ -1,0 +1,91 @@
+.applicantCardApprove1{
+    position: relative;
+    margin: 0 28px 0 40px;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    font-size: 24px;
+    color: #000;
+
+     font-family: 'SF Pro Display' , Helvetica;
+    border-radius: 20px;
+    box-shadow: 0px 2px 20px 4px rgba(0, 0, 0, 0.25);
+    justify-content: space-between;
+    cursor: pointer;
+
+  }
+
+
+ 
+  .ellipse {
+
+     font-family: 'SF Pro Display' , Helvetica;
+    position: absolute;
+    height: 71px;
+    width: 71px;
+    margin: 17px 0 19px 32px;
+    border-radius: 50%;
+    background-color: rgba(158, 158, 158, 0.58);
+    border: 2px solid #4d4d4d;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .initial {
+
+     font-family: 'SF Pro Display' , Helvetica;
+    color:#ffffff;
+  }
+  .name {
+
+     font-family: 'SF Pro Display' , Helvetica;
+    margin: 17px 0 61px 133px;
+  }
+  .ufid {
+
+     font-family: 'SF Pro Display' , Helvetica;
+    position: absolute;
+    margin: 46px 0 42px 133px;
+    font-size: 16px;
+    color: #9e9e9e;
+  }
+  
+  .thumbsContainer1{
+    position: absolute;
+    right: 20px;
+    align-items: center;
+    margin: 24px 0 26px 0;
+    justify-content: center;
+  }
+  
+ 
+  
+  .approved2 {
+
+     font-family: 'SF Pro Display' , Helvetica;
+    font-size: 24px;
+    font-weight: 500;
+    color: #0038FF;
+    text-align: left;
+    display: inline-block;
+    width: 80px;
+  }
+
+  .applicantStatus2{
+
+     font-family: 'SF Pro Display' , Helvetica;
+    border-radius: 10px;
+    background-color:#D1E2FF;
+    border: 2px solid #0038FF;
+    box-sizing: border-box;
+    padding: 14px 55px 14px 30px;
+    
+  }
+
+
+
+
+  
+  /* Add any other styles as needed */
+  

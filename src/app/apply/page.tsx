@@ -78,7 +78,7 @@ export default function Application() {
   const [additionalPromptValue, setAdditionalPromptValue] = React.useState('');
   const handleAdditionalPromptChange = (newValue: string) => {
     setAdditionalPromptValue(newValue);
-  };
+  }
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -291,7 +291,7 @@ export default function Application() {
       );
 
       if (response.ok) {
-        handleSendEmail();
+        await handleSendEmail();
         toast.dismiss(toastId);
         toast.success('Application submitted!');
         console.log('SUCCESS: Application data sent to server successfully');

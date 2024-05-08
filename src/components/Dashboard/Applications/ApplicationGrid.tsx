@@ -116,8 +116,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     const doc = await getDoc(statusRef);
     setCodes(
       Object.entries(doc.data().courses)
-      // .filter(([key, value]) => value == 'accepted')
-      // .map(([key, value]) => key)
+        .filter(([key, value]) => value == 'accepted')
+        .map(([key, value]) => key)
     );
     setSelectedUserGrid(id);
 
@@ -409,10 +409,16 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .collection('applications')
         .doc(id.student_uid.toString())
         .get();
+      const snapshot2 = await firebase
+        .firestore()
+        .collection('assignments')
+        .doc(id.student_uid.toString())
+        .get();
+
 
       if (snapshot.exists) {
         const applicationData = snapshot.data() as Application;
-
+        const assignmentData = snapshot2.data();
         // Send email using fetched application data
         const response = await fetch(
           'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
@@ -429,8 +435,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                     }`.trim(),
                   email: applicationData.email,
                 },
-                position: applicationData.position,
-                classCode: applicationData.courses,
+                position: assignmentData.position,
+                classCode: assignmentData.class_codes,
               },
             }),
           }
@@ -1065,7 +1071,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                   return (
                     <FormControlLabel
                       key={code}
-                      value={code[0]}
+                      value={code}
                       control={<Radio />}
                       label={code}
                     />

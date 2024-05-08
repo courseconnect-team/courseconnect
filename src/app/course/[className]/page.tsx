@@ -9,6 +9,8 @@ import CourseNavBar from '@/components/CourseNavBar/CourseNavBar';
 import ApplicantCardApprovedeny from '@/components/ApplicantCardApprovedeny/ApplicantCardApprovedeny';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+
+import ApplicantCardAssign from '@/components/ApplicantCardAssign/ApplicantCardAssign';
 import ApplicantCardApprove from '@/components/ApplicantCardApprove/ApplicantCardApprove';
 import ApplicantCardDeny from '@/components/ApplicantCardDeny/ApplicantCardDeny';
 interface pageProps {
@@ -131,11 +133,42 @@ const CoursePage: FC<pageProps> = ({ params }) => {
         // .where('semesters', 'array-contains', params.semester )
         .get();
 
+      const snapshot2 = await db
+        .collection('assignments')
+        .where("class_codes", "==", className)
+        .where("position", "==", position)
+        .get();
+
+
+      if (selection == "Assigned") {
+        return snapshot2.docs.map((doc) => ({
+          id: doc.id,
+          uf_email: doc.data().email,
+          firstname: doc.data().name,
+          lastname: " ",
+          number: "",
+          position: doc.data().position,
+          semester: params.semester,
+          availability: doc.data().hours,
+          department: doc.data().department,
+          degree: "",
+          collegestatus: "",
+          qualifications: "",
+          resume: "",
+          plan: "",
+          gpa: "",
+        }));
+      }
       return snapshot.docs.filter(function(doc) {
         if (doc.data().position != position) {
           return false;
         }
-
+        if (doc.data().status == "Admin_approved") {
+          return false;
+        }
+        if (doc.data().status == "Admin_denied" && selection != "Denied") {
+          return false;
+        }
         if (doc.data().courses[className] == "applied" && selection == "Review") {
 
           console.log(doc.data());
@@ -286,6 +319,35 @@ const CoursePage: FC<pageProps> = ({ params }) => {
                 className={className}
               />
             )}
+          {selection === 'Assigned' &&
+            (
+              <ApplicantCardAssign
+                id={ta.id}
+                number={ta.number}
+                position={ta.position}
+                semester={ta.semester}
+                availability={ta.availability}
+                department={ta.department}
+                degree={ta.degree}
+                collegestatus={ta.collegestatus}
+                qualifications={ta.qualifications}
+                expanded={expandedStates[ta.id] || false}
+                onExpandToggle={() => handleExpandToggle(ta.id)}
+                uf_email={ta.uf_email}
+                firstname={ta.firstname}
+                lastname={ta.lastname}
+                resume={ta.resume}
+                plan={ta.plan}
+                gpa={ta.gpa}
+                openReview={openReviewDialog}
+                setOpenReviewDialog={setOpenReviewDialog}
+                currentStu={currentStu}
+                setCurrentStu={setCurrentStu}
+
+                className={className}
+              />
+            )}
+
 
           {selection === 'Denied' && (
             <ApplicantCardDeny

@@ -37,8 +37,6 @@ export function sendForgotPasswordEmail(user, resetLink) {
 }
 
 export function sendApplicationConfirmationEmail(user, position, classCode) {
-  console.log(keysString);
-
   const mailOptions = {
     from: email,
     to: user.email,
@@ -47,11 +45,8 @@ export function sendApplicationConfirmationEmail(user, position, classCode) {
   };
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.error(pass);
-      console.error('play');
       console.error(
-        'Error occurred while sending application confirmation email:',
-        pass
+        'Error occurred while sending application confirmation email:'
       );
     } else {
       console.log('Application confirmation email sent:', info.response);
@@ -64,7 +59,7 @@ export function sendApplicationStatusApprovedEmail(user, position, classCode) {
     from: email,
     to: user.email,
     subject: 'Student Application Status',
-    text: `Hi ${user.name},\n\nCongratulations! Your application for the ${position} role in ${classCode} has been approved. To proceed, please provide your UFID as soon as possible.\n\nBest regards,\nCourse Connect Team`,
+    text: `Hi ${user.name},\n\nCongratulations! Your application for the ${position} role in ${classCode} has been approved. To proceed, please provide your UFID to cbobda@ece.ufl.edu. Be sure to include your Position (TA/UPI/Grader), Course Code, Instructor, and UFID in the email. \n\nBest regards,\nCourse Connect Team`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
