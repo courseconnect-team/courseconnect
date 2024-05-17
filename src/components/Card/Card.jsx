@@ -15,7 +15,7 @@ export const Card = ({
         <p className={`as-a-student-course`}>{text}</p>
         <div className="student">{text1}</div>
       </div>
-      <img className="rectangle" src={imgLink} />
+      <iframe className="rectangle" src={imgLink} title="Course Connect Student" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </div>
   );
 };
