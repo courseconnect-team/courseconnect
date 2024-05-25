@@ -455,9 +455,41 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 240,
       editable: true,
     },
-    { field: 'date', headerName: 'Date Approved', width: 170, editable: true },
+    {
+      field: 'date', headerName: 'Dates', width: 100, editable: true,
+      valueFormatter: (value) => {
 
-    { field: 'position', headerName: 'Position', width: 100, editable: true },
+        // Split the date string by hyphen
+        const dateParts = value.value.split('-');
+
+        // Extract year, month, and day parts
+        const year = dateParts[2];
+        const month = dateParts[0];
+        const day = dateParts[1];
+
+        // Construct the new date string in "year month day" format
+        const newDateString = `${year}-${month}-${day}`;
+
+        return newDateString;
+      },
+    },
+
+
+    {
+      field: 'position', headerName: 'Position Type', width: 110, editable: true, valueFormatter: (value) => {
+        return "TA";
+      },
+    },
+    {
+      field: 'action', headerName: 'Requested Action', width: 140, editable: false, valueFormatter: (value) => {
+        return "NEW HIRE";
+      },
+    },
+    {
+      field: 'Degree Type', headerName: 'Degree Type', width: 140, editable: false, valueFormatter: (value) => {
+        return "BS";
+      },
+    }
 
   ];
   const ODD_OPACITY = 0.2;
