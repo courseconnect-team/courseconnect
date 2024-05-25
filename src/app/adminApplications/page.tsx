@@ -75,7 +75,7 @@ export default function AdminApplications() {
               }}
             >
 
-              <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
+              <Box sx={{ mt: 50, mb: 2, width: '120%' }}>
 
                 <Applications userRole={role as string} />
 
