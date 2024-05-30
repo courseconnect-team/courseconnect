@@ -4,13 +4,15 @@ import styles from "./style.module.css";
 export const Bio = ({ user, className }) => {
   console.log(user)
   console.log(user.displayName)
+  const split = user.displayName.split(' '); 
+  console.log(split);
   return (
     <div className={`${styles.fullnameandbio} ${className}`}>
       <div className={styles.ellipse}>
 
       {user.displayName &&
 
-          <div className={styles.initial}>{user.displayName.split(' ').map(part => part[0].toUpperCase()).join('')}</div>
+          <div className={styles.initial}>{user.displayName.split(' ').map(part => part[0]).join('')}</div>
         }
       </div>
 
