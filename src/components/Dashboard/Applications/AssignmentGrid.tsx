@@ -436,28 +436,91 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Name',
       width: 190,
       editable: true,
+
+      disableExport: true,
     },
     {
       field: 'email',
       headerName: 'Email',
       width: 210,
       editable: true,
+
+      disableExport: true,
     },
     {
       field: 'hours',
       headerName: 'Avaliable Hours',
       width: 140,
       editable: true,
+
+      disableExport: true,
     },
     {
       field: 'class_codes',
       headerName: 'Assigned Class Code',
       width: 240,
       editable: true,
-    },
-    { field: 'date', headerName: 'Date Approved', width: 170, editable: true },
 
-    { field: 'position', headerName: 'Position', width: 100, editable: true },
+      disableExport: true,
+    },
+    {
+      field: 'date', headerName: 'Dates', width: 100, editable: true,
+      valueFormatter: (value) => {
+
+        // Split the date string by hyphen
+        const dateParts = value.value.split('-');
+
+        // Extract year, month, and day parts
+        const year = dateParts[2];
+        let month = dateParts[0];
+        let day = dateParts[1];
+        if (month.length == 1) {
+          month = "0" + month;
+        }
+        if (day.length == 1) {
+          day = "0" + day;
+        }
+        // Construct the new date string in "year month day" format
+        const newDateString = `${year}-${month}-${day}`;
+
+        return newDateString;
+      },
+    },
+    {
+      field: 'action', headerName: 'Requested Action', width: 140, editable: false, valueFormatter: (value) => {
+        return "NEW HIRE";
+      },
+    },
+
+    {
+      field: 'position', headerName: 'Position Type', width: 110, editable: true, valueFormatter: (value) => {
+        return "TA";
+      },
+
+    },
+    {
+      field: 'degree', headerName: 'Degree Type', width: 110, editable: true
+    },
+    {
+      field: 'semesters', headerName: 'Semester', width: 110, editable: true, valueFormatter: (value) => {
+        const val = value.value;
+        if (val[0].includes("Fall")) {
+          return "FALL";
+        }
+        if (val[0].includes("Spring")) {
+          return "SPRING";
+        }
+        if (val[0].includes("Summer")) {
+          return "SUMMER";
+        }
+      },
+    },
+
+    {
+      field: 'Imported', headerName: 'Imported', width: 140, editable: false, valueFormatter: (value) => {
+        return "YES";
+      },
+    }
 
   ];
   const ODD_OPACITY = 0.2;

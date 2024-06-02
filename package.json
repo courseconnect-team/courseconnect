@@ -20,6 +20,7 @@
     "@types/react-dom": "18.2.4",
     "autoprefixer": "10.4.14",
     "eslint-config-next": "13.4.3",
+    "exceljs": "^4.4.0",
     "firebase": "^9.22.2",
     "firebase-functions": "^4.4.1",
     "next": "13.4.3",

@@ -10,7 +10,7 @@ export const Bio = ({ user, className }) => {
 
       {user.displayName &&
 
-          <div className={styles.initial}>{user.displayName.split(' ').map(part => part[0].toUpperCase()).join('')}</div>
+          <div className={styles.initial}>{user.displayName.split(' ').map(part => part[0]).join('')}</div>
         }
       </div>
 
