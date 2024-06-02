@@ -365,12 +365,6 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
       width: 130,
       editable: true,
     },
-    {
-      field: 'password',
-      headerName: 'Password',
-      width: 130,
-      editable: true,
-    },
     { field: 'role', headerName: 'Role', width: 100, editable: true },
   ];
   const ODD_OPACITY = 0.2;

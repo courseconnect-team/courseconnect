@@ -197,8 +197,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${current.getMonth() + 1
-      }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${
+      current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -284,7 +285,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     if (userRole === 'admin') {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
-          .filter(function(doc) {
+          .filter(function (doc) {
             if (
               doc.data().status != 'Admin_approved' &&
               doc.data().status != 'Admin_denied'
@@ -296,13 +297,13 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           })
           .map(
             (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-              courses: Object.entries(doc.data().courses)
-                .filter(([key, value]) => value == 'accepted')
-                .map(([key, value]) => key),
-            } as Application)
+              ({
+                id: doc.id,
+                ...doc.data(),
+                courses: Object.entries(doc.data().courses)
+                  .filter(([key, value]) => value == 'accepted')
+                  .map(([key, value]) => key),
+              } as Application)
           );
         setApplicationData(data);
       });
@@ -330,10 +331,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       applicationsRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Application)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Application)
         );
         setApplicationData(data);
       });
@@ -376,8 +377,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type: 'applicationStatusDenied',
               data: {
                 user: {
-                  name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
-                    }`.trim(),
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
                   email: applicationData.email,
                 },
                 position: applicationData.position,
@@ -415,7 +417,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .doc(id.student_uid.toString())
         .get();
 
-
       if (snapshot.exists) {
         const applicationData = snapshot.data() as Application;
         const assignmentData = snapshot2.data();
@@ -431,8 +432,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type: 'applicationStatusApproved',
               data: {
                 user: {
-                  name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
-                    }`.trim(),
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
                   email: applicationData.email,
                 },
                 position: assignmentData.position,
@@ -504,8 +506,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${current.getMonth() + 1
-      }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${
+      current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -797,10 +800,34 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       width: 200,
       editable: false,
     },
-    { field: 'courses', headerName: 'Faculty Approved Courses', width: 250, editable: true },
+    {
+      field: 'courses',
+      headerName: 'Faculty Approved Courses',
+      width: 250,
+      editable: true,
+    },
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'date', headerName: 'Date', width: 100, editable: true },
-    { field: 'status', headerName: 'App Status', width: 130, editable: true },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 130,
+      editable: true,
+      renderCell: (params) => (
+        <span
+          style={{
+            color: '#f2a900',
+            border: '1px solid #f2a900',
+            padding: '2px 4px',
+            borderRadius: '4px',
+            backgroundColor: '#fffdf0',
+            display: 'inline-block',
+          }}
+        >
+          {params.value}
+        </span>
+      ),
+    },
   ];
 
   if (userRole === 'faculty') {
@@ -900,8 +927,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
@@ -951,16 +978,40 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         }
         sx={{ borderRadius: '16px' }}
       />
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{'User Application'}</DialogTitle>
-        <DialogContent>
-          {/* Display the application data of the selected user */}
-          {selectedUserGrid && (
-            <div>
-              <AppView uid={selectedUserGrid as string} />
-            </div>
-          )}
-        </DialogContent>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          style: {
+            maxWidth: '2000px',
+            maxHeight: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: '1000px',
+            borderRadius: '16px',
+          },
+        }}
+      >
+        {/* Display the application data of the selected user */}
+        {selectedUserGrid && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              width: '100%',
+              height: '100%',
+
+              overflow: 'hidden',
+            }}
+          >
+            <AppView
+              close={handleClose}
+              handleDenyClick={handleDenyClick}
+              handleApproveClick={handleApproveClick}
+              uid={selectedUserGrid as string}
+            />
+          </Box>
+        )}
       </Dialog>
 
       <Dialog

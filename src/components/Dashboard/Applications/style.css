@@ -1,0 +1,123 @@
+.applicantCardApprovedeny1 {
+    position: relative;
+    margin: 0 28px 0 40px;
+    display: flex;
+    align-items: center;
+    
+    text-align: left;
+    font-size: 24px;
+    color: #000;
+  
+    font-family: "SF Pro Display-Regular", Helvetica;
+  
+    border-radius: 20px;
+    box-shadow: 0px 2px 20px 4px rgba(0, 0, 0, 0.25);
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  
+  .ellipse5 {
+    height: 71px;
+    width: 71px;
+    margin: 17px 0 19px 24px;
+    border-radius: 50%;
+    background-color: rgba(158, 158, 158, 0.58);
+    border: 2px solid #4d4d4d;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 35px;
+  }
+  .initials {
+  
+    font-family: 'SF Pro Display' , Helvetica;
+    color:#ffffff;
+  }
+  .name5 {
+    margin: 17px 0px 0px 25px;
+    white-space: nowrap;
+    font-size: 23px;
+    font-family: "SF Pro Display-Regular", Helvetica;
+  }
+  .number{
+    margin: 50px 0 42px 270px;
+    font-size: 16px;
+    font-family: "SF Pro Display-Regular", Helvetica;
+    color: #9e9e9e;
+    
+  }
+  
+  .email1 {
+    position: absolute;
+    margin: 50px 0 42px 25px;
+    font-size: 16px;
+    font-family: "SF Pro Display-Regular", Helvetica;
+    color: #9e9e9e;
+  }
+  
+  .thumbsContainer3 {
+    position: absolute;
+    right: 20px;
+    align-items: center;
+    display: flex;
+    justify-content: space-around;
+    margin: 24px 0 26px 0;
+  }
+  
+  .thumbsUpIcon {
+    color: green;
+    cursor: pointer;
+    margin-right: 23px;
+    font-size: 2rem;
+  }
+  
+  .thumbsDownIcon {
+    color: red;
+    cursor: pointer;
+    margin-right: 31px;
+    font-size: 2rem;
+  }
+  
+  .review23 {
+    
+    font-size: 23px;
+    font-weight: 500;
+    font-family: "SF Pro Display-Regular", Helvetica !important;
+    color: #f2a900;
+    text-align: center;
+    display: inline-block;
+    width: 80px;
+  
+  }
+  .applicantStatus231 {
+    
+    border-radius: 10px;
+    background-color: rgba(242, 169, 0, 0.12);
+    border: 2px solid #f2a900;
+    box-sizing: border-box;
+    padding: 11px 35px;
+    cursor: pointer;
+    display: inline-block;
+  }
+  
+  .description{
+    margin-bottom: 31px;
+  }
+  .label50{
+    font-family: "SF Pro Display-Regular", "Helvetica";
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: #000000;;
+  }
+  .availability2{
+    font-family: "SF Pro Display-Regular", "Helvetica";
+    font-size: 16px;
+    font-weight: 400;
+    margin-bottom: 20px;
+    color:#4c4c4c;
+  }
+  
+  /* Add any other styles as needed */
+  
