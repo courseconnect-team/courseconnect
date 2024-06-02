@@ -322,7 +322,6 @@ export default function UserGrid(props: UserGridProps) {
     },
     { field: 'lastname', headerName: 'Last Name', width: 150, editable: true },
     { field: 'email', headerName: 'Email', width: 250, editable: true },
-    { field: 'password', headerName: 'Password', width: 200, editable: true },
     {
       field: 'department',
       headerName: 'Department',
