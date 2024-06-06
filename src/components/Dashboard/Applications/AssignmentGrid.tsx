@@ -504,15 +504,20 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     {
       field: 'semesters', headerName: 'Semester', width: 110, editable: true, valueFormatter: (value) => {
         const val = value.value;
-        if (val[0].includes("Fall")) {
+        try {
+          if (val[0].includes("Fall")) {
+            return "FALL";
+          }
+          if (val[0].includes("Spring")) {
+            return "SPRING";
+          }
+          if (val[0].includes("Summer")) {
+            return "SUMMER";
+          }
+        } catch {
           return "FALL";
         }
-        if (val[0].includes("Spring")) {
-          return "SPRING";
-        }
-        if (val[0].includes("Summer")) {
-          return "SUMMER";
-        }
+
       },
     },
 
