@@ -31,8 +31,7 @@ export default function AppView({
   const onThumbUpClick = useCallback(
     (event: any) => {
       event?.stopPropagation();
-      handleApproveClick(uid);
-      handleApproveClick(uid);
+      // handleApproveClick(uid);
     },
     [handleApproveClick, uid]
   );
@@ -40,7 +39,6 @@ export default function AppView({
   const onThumbDownIconClick = useCallback(
     (event: any) => {
       event?.stopPropagation();
-      handleDenyClick(uid);
       handleDenyClick(uid);
     },
     [handleDenyClick, uid]

@@ -1,0 +1,51 @@
+.text-wrapper-11 {
+    position: relative;
+    font-size: 25px;
+    font-weight: 500;
+    font-family: 'SF Pro Display-Medium', Helvetica;
+    color: #000;
+    text-align: left;
+  
+  }
+  
+  
+   .courses{
+    font-size: 36px;
+    padding-top: 34px;
+  }
+  .text-past{
+    font-size: 36px;
+    font-weight: 500;
+    font-family: 'SF Pro Display-Medium', Helvetica;
+    color: #000;
+    
+  }
+  
+  .ta{
+    font-size: 40px;
+  }
+  
+  .page-container {
+    display: flex;
+    flex-direction: column;
+    padding-left: 51px;
+    margin-top: 120px;
+  }
+  
+  
+  .class-cards-container {
+    display: flex;
+    margin-top: 8px;
+    margin-left: 32px;
+    height: 100%;
+    
+    
+  }
+  .class{
+    margin:22px
+  }
+  .full-name-and-bio-instance {
+    left: 38% !important;
+    position: absolute !important;
+    top: 250px !important;
+  }

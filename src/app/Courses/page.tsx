@@ -2,36 +2,42 @@
 import './style.css';
 import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import SemesterSelect from './semesterselect';
-import ClassCard from '@/components/ClassCard/ClassCard';
+import SmallClassCard from '@/components/SmallClassCard/SmallClassCard';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-
+import { Bio } from '@/components/Bio/Bio';
+import styles from './style.module.css';
+import { Timeline } from '@/components/Timeline/Timeline';
 export default function FacultyApplication() {
+  type CourseType = [string, string]; // Define the type for courses
+
   const auth = getAuth();
-  const [semester, setSemester] = useState('Fall 2022');
-  const [courses, setCourses] = useState<[]>([]);
+  const [courses, setCourses] = useState<CourseType[]>([]); // Use the defined type for state
   const db = firebase.firestore();
 
   // Reactively listen to auth state changes
   const user = auth.currentUser;
   const uemail = user?.email;
 
-  const formatSeasonYear = (sem: string): string => {
-    const parts = sem.split(' ');
-    const season = parts[0].toLowerCase();
-    const yearShort = parts[1].substring(2);
-    return `${season}${yearShort}`;
+  useEffect(() => {
+    if (uemail) {
+      fetchCourses();
+    }
+  }, [uemail]);
+
+  const fetchCourses = async () => {
+    const courses = await getCourses();
+    setCourses(courses);
   };
 
-  const getCourses = async (semester: string) => {
+  const getCourses = async (): Promise<CourseType[]> => {
+    // Ensure getCourses returns the correct type
+
     try {
-      console.log(semester);
       const snapshot = await db
-        .collection(`courses`)
-        .where('semester', '==', semester)
+        .collection('courses')
         .where('professor_emails', '==', uemail) // Check if the current user is the instructor
         .get();
 
@@ -47,24 +53,15 @@ export default function FacultyApplication() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getCourses(semester);
-        setCourses(result);
-      } catch (error) {
-        console.error('Error fetching data: ', error);
-      }
-    };
-
-    fetchData();
-  }, [semester]);
-
   const mapElement = () => {
     return courses.map((val) => {
       return (
         <div key={val[0]}>
-          <ClassCard courseName={val[1]} courseId={val[0]} className="class" />
+          <SmallClassCard
+            courseName={val[1]}
+            courseId={val[0]}
+            className="class"
+          />
         </div>
       );
     });
@@ -73,17 +70,16 @@ export default function FacultyApplication() {
     <>
       <Toaster />
 
-      <HeaderCard text="Applications" />
+      <HeaderCard text="Courses" />
+      <Bio user={user} className="full-name-and-bio-instance" />
       <div className="page-container">
-        <div className="text-wrapper-11 ta">TA/UPI/Grader Applications</div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div className="text-wrapper-11 courses">My courses:</div>
-          <div style={{ marginRight: '35px' }}>
-            <SemesterSelect
-              semester={semester}
-              setSemester={setSemester}
-            ></SemesterSelect>
-          </div>
+          <div style={{ marginRight: '35px' }}></div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div className="text-past">Past Courses:</div>
+          <Timeline></Timeline>
         </div>
       </div>
       {courses.length !== 0 && (
@@ -97,7 +93,7 @@ export default function FacultyApplication() {
             marginRight: '227px',
             textAlign: 'center',
             color: 'rgba(0, 0, 0, 0.43)',
-            fontSize: 24,
+            fontSize: 17,
             fontFamily: 'SF Pro Display',
             fontWeight: '500',
           }}
