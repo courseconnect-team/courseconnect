@@ -1,29 +1,76 @@
-"use client";
-import React from "react";
-import { useState } from "react";
-import { FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, SelectChangeEvent, Snackbar, TextField } from "@mui/material";
+'use client';
+import React from 'react';
+import { useState } from 'react';
+import {
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  InputLabel,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  Select,
+  SelectChangeEvent,
+  Snackbar,
+  TextField,
+} from '@mui/material';
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
 
-import styles from "./style.module.css";
+import styles from './style.module.css';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { toast } from "react-hot-toast";
+import { toast } from 'react-hot-toast';
 export const SignUpCard = ({ className }: { className: any }) => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [password, setPassword] = useState("");
-  const [ufid, setUFID] = useState("");
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [password, setPassword] = useState('');
+  const [ufid, setUFID] = useState('');
   const [department, setDepartment] = useState('');
-  const [role, setRole] = useState("");
-  const [confirmedPassword, setConfirmedPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [label, setLabel] = useState("Department");
+  const [role, setRole] = useState('');
+  const [confirmedPassword, setConfirmedPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [label, setLabel] = useState('Department');
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
-    ref,
+    ref
   ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
+
+  const handleNotificationEmail = async () => {
+    if (role == 'unapproved') {
+      try {
+        const response = await fetch(
+          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              type: 'unapprovedUser',
+              data: {
+                user: {
+                  name: `${firstName ?? ''} ${lastName ?? ''}`.trim(),
+                  email: email,
+                },
+              },
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Email sent successfully:', data);
+        } else {
+          throw new Error('Failed to send email');
+        }
+      } catch (error) {
+        console.error('Error sending email:', error);
+      }
+    }
+  };
+
   function isStrongPassword(password: string): boolean {
     // Check if the password is at least 8 characters long
     if (password.length < 8) {
@@ -41,17 +88,19 @@ export const SignUpCard = ({ className }: { className: any }) => {
       return false;
     }
     if (!lowercaseRegex.test(password)) {
-      toast.error('Password should contain at least one lowercase letter!')
+      toast.error('Password should contain at least one lowercase letter!');
 
       return false;
     }
     if (!numberRegex.test(password)) {
-      toast.error('Password should contain at least one number!')
+      toast.error('Password should contain at least one number!');
 
       return false;
     }
     if (!specialCharacterRegex.test(password)) {
-      toast.error('Password should contain at least one special case character!')
+      toast.error(
+        'Password should contain at least one special case character!'
+      );
 
       return false;
     }
@@ -76,7 +125,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
       ufid: ufid,
       uid: '',
     };
-    console.log("Role " + userData.role);
+    console.log('Role ' + userData.role);
 
     // add the following:
     if (userData.firstname === '') {
@@ -85,21 +134,21 @@ export const SignUpCard = ({ className }: { className: any }) => {
       toast.error('First name should only contain letters!');
     } else if (userData.lastname == '') {
       toast.error('Please enter a last name!');
-    } else if (userData.role === null || userData.role === "") {
+    } else if (userData.role === null || userData.role === '') {
       toast.error('Please select a role!');
     } else if (userData.department === '') {
-      toast.error('Please select a department!')
+      toast.error('Please select a department!');
     } else if (userData.password === '') {
       toast.error('Please enter a password!');
     } else if (userData.confirmedpassword != userData.password) {
       toast.error('Passwords should match!');
     } else if (!isStrongPassword(userData.password)) {
-      console.log("invalid password");
+      console.log('invalid password');
     } else {
       const uid_from_signup = await handleSignUp(
         userData.firstname + ' ' + userData.lastname,
         userData.email,
-        userData.password,
+        userData.password
       );
       userData.uid = uid_from_signup;
       console.log(userData.uid);
@@ -142,12 +191,13 @@ export const SignUpCard = ({ className }: { className: any }) => {
           console.log('ERROR: User data failed to send to server');
           // display some kind of snackbar or toast saying data failed to send to server
         }
+
+        handleNotificationEmail();
       }
     }
 
     setLoading(false);
   };
-
 
   return (
     <div className={styles.box}>
@@ -167,10 +217,13 @@ export const SignUpCard = ({ className }: { className: any }) => {
             <div className={styles.textwrapper2}>Name</div>
             <div className={styles.overlapgroupwrapper}>
               <div className={styles.overlapgroup}>
-                <TextField variant="standard"
+                <TextField
+                  variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className={styles.textwrapper3} placeholder="First Name"
+                  }}
+                  className={styles.textwrapper3}
+                  placeholder="First Name"
                   margin="none"
                   required
                   fullWidth
@@ -181,9 +234,8 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   id="first-name"
                   name="first-name"
                   autoComplete="given-name"
-                  autoFocus />
-
-
+                  autoFocus
+                />
               </div>
             </div>
           </div>
@@ -198,10 +250,18 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   setRole(event.target.value);
                 }}
                 value={role}
-                style={{ marginTop: "30px" }}
+                style={{ marginTop: '30px' }}
               >
-                <FormControlLabel value="student_applying" control={<Radio />} label="Student" />
-                <FormControlLabel value="unapproved" control={<Radio />} label="Staff" />
+                <FormControlLabel
+                  value="student_applying"
+                  control={<Radio />}
+                  label="Student"
+                />
+                <FormControlLabel
+                  value="unapproved"
+                  control={<Radio />}
+                  label="Faculty"
+                />
               </RadioGroup>
             </FormControl>
           </div>
@@ -210,7 +270,10 @@ export const SignUpCard = ({ className }: { className: any }) => {
               <div className={styles.textwrapper7}>Department</div>
               <div className={styles.overlapgroup2}>
                 <TextField
-                  sx={{ boxShadow: 'none', '.MuiOutlinedInput-notchedOutline': { border: 0 } }}
+                  sx={{
+                    boxShadow: 'none',
+                    '.MuiOutlinedInput-notchedOutline': { border: 0 },
+                  }}
                   value={department}
                   placeholder="First Name"
                   InputLabelProps={{ shrink: false }}
@@ -218,7 +281,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   select
                   onChange={(event) => {
                     setDepartment(event.target.value);
-                    setLabel("");
+                    setLabel('');
                   }}
                   className={styles.textwrapper9}
                 >
@@ -240,10 +303,13 @@ export const SignUpCard = ({ className }: { className: any }) => {
             <div className={styles.textwrapper2}>Last Name</div>
             <div className={styles.overlapgroupwrapper}>
               <div className={styles.overlapgroup}>
-                <TextField variant="standard"
+                <TextField
+                  variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className={styles.textwrapper3} placeholder="Last Name"
+                  }}
+                  className={styles.textwrapper3}
+                  placeholder="Last Name"
                   margin="none"
                   required
                   fullWidth
@@ -253,7 +319,8 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   id="full-width"
                   name="first-name"
                   autoComplete="given-name"
-                  autoFocus />
+                  autoFocus
+                />
               </div>
             </div>
           </div>
@@ -262,10 +329,13 @@ export const SignUpCard = ({ className }: { className: any }) => {
             <div className={styles.textwrapper11}>Enter email address</div>
             <div className={styles.divwrapper}>
               <div className={styles.overlapgroup3}>
-                <TextField variant="standard"
+                <TextField
+                  variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className={styles.textwrapper3} placeholder="Email"
+                  }}
+                  className={styles.textwrapper3}
+                  placeholder="Email"
                   margin="none"
                   required
                   fullWidth
@@ -275,7 +345,8 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   id="email"
                   name="email"
                   autoComplete="email"
-                  autoFocus />
+                  autoFocus
+                />
               </div>
             </div>
           </div>
@@ -284,10 +355,13 @@ export const SignUpCard = ({ className }: { className: any }) => {
             <div className={styles.textwrapper14}>Confirm password</div>
             <div className={styles.divwrapper}>
               <div className={styles.overlapgroup3}>
-                <TextField variant="standard"
+                <TextField
+                  variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className={styles.textwrapper15} placeholder="Password"
+                  }}
+                  className={styles.textwrapper15}
+                  placeholder="Password"
                   margin="none"
                   required
                   size="small"
@@ -298,15 +372,19 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setPassword(event.target.value);
                   }}
-                  autoComplete="current-password" />
+                  autoComplete="current-password"
+                />
               </div>
             </div>
             <div className={styles.confirmpassword}>
               <div className={styles.overlapgroup3}>
-                <TextField variant="standard"
+                <TextField
+                  variant="standard"
                   InputProps={{
                     disableUnderline: true,
-                  }} className={styles.textwrapper15} placeholder="Confirm"
+                  }}
+                  className={styles.textwrapper15}
+                  placeholder="Confirm"
                   margin="none"
                   required
                   size="small"
@@ -317,20 +395,22 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setConfirmedPassword(event.target.value);
                   }}
-                  autoComplete="current-password" />
+                  autoComplete="current-password"
+                />
               </div>
             </div>
           </div>
           <div className={styles.signinbutton}>
             <br />
-            <button onClick={(e) => handleSubmit(e)} className={styles.overlap2}>
+            <button
+              onClick={(e) => handleSubmit(e)}
+              className={styles.overlap2}
+            >
               <div className={styles.textwrapper16}>Sign up</div>
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );
 };
-

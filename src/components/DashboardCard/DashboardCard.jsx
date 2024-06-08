@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
-import React from "react";
-import styles from "./style.module.css";
+import PropTypes from 'prop-types';
+import React from 'react';
+import styles from './style.module.css';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -8,24 +8,24 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 import Button from '@mui/material/Button';
-export const DashboardCard = ({ className, image, text, clickable = false }) => {
+export const DashboardCard = ({ className, image, text }) => {
   const [open, setOpen] = React.useState(false);
   const handleClose = () => {
     setOpen(false);
-  }
+  };
   const handleSubmit = () => {
     setOpen(false);
 
-    console.log(open)
-  }
+    console.log(open);
+  };
   return (
-    <div className={className} >
-      <div className={styles.card} onClick={e => {
-        if (clickable) {
-          e.preventDefault();
-        }
-        setOpen(true)
-      }}>
+    <div className={className}>
+      <div
+        className={styles.card}
+        onClick={(e) => {
+          setOpen(true);
+        }}
+      >
         <div className={styles.innercontent2}>
           <img className={styles.img2} alt="Card" src={image} />
 
@@ -33,7 +33,7 @@ export const DashboardCard = ({ className, image, text, clickable = false }) => 
         </div>
       </div>
 
-      {clickable &&
+      {/* {clickable &&
         <Dialog sx={{
           "& .MuiDialog-container": {
             "& .MuiPaper-root": {
@@ -59,8 +59,7 @@ export const DashboardCard = ({ className, image, text, clickable = false }) => 
             </DialogActions>
           </form>
         </Dialog>
-      }
-
+      } */}
     </div>
   );
 };
@@ -70,4 +69,3 @@ DashboardCard.propTypes = {
   text: PropTypes.string,
   clickable: PropTypes.bool,
 };
-

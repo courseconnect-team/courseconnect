@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 
 const pass = process.env.EMAIL_PASS;
 const email = process.env.EMAIL;
+const adminEmail = process.env.ADMINEMAIL;
 
 let transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -115,3 +116,23 @@ export function sendFacultyNotificationEmail(user, position, classCode) {
     }
   });
 }
+export function sendUnapprovedUserNotificationEmail(user) {
+  const mailOptions = {
+    from: email,
+    to: adminEmail,
+    subject: 'New Unapproved User',
+    text: `Dear Admin,\n\n${user.name} has recently created an account and is awaiting your approval. Please review the user ${user.email}'s account and approve or deny the registration at your earliest convenience. You can access the user's profile and take action using the following link: https://courseconnect.eng.ufl.edu/.\n\nIf you have any questions or need further assistance, please do not hesitate to contact us.\n\nThank you for your prompt attention to this matter.\n\nBest regards,\nCourse Connect Team`,
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(
+        'Error occurred while sending unapproved user notification email:',
+        error
+      );
+    } else {
+      console.log('Unapproved user notification email sent:', info.response);
+    }
+  });
+}
+exports.sendUnapprovedUserNotificationEmail =
+  sendUnapprovedUserNotificationEmail;

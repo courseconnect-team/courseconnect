@@ -9,16 +9,20 @@
 import * as functions from 'firebase-functions';
 import { DocumentSnapshot } from 'firebase-functions/v2/firestore';
 // import * as cors from 'cors';
-import { sendForgotPasswordEmail, sendApplicationConfirmationEmail, sendApplicationStatusApprovedEmail, sendApplicationStatusDeniedEmail, sendFacultyNotificationEmail } from "./nodemailer"
+import {
+  sendForgotPasswordEmail,
+  sendApplicationConfirmationEmail,
+  sendApplicationStatusApprovedEmail,
+  sendApplicationStatusDeniedEmail,
+  sendFacultyNotificationEmail,
+  sendUnapprovedUserNotificationEmail,
+} from './nodemailer';
 
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 const auth = admin.auth();
 db.settings({ ignoreUndefinedProperties: true });
-
-
-
 
 exports.sendEmail = functions.https.onRequest((req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
@@ -27,24 +31,38 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
   } else {
-    const {type, data } = req.body;
+    const { type, data } = req.body;
     switch (type) {
       case 'forgotPassword':
         sendForgotPasswordEmail(data.user, data.resetLink);
         break;
       case 'applicationConfirmation':
-        sendApplicationConfirmationEmail(data.user, data.position, data.classCode);
+        sendApplicationConfirmationEmail(
+          data.user,
+          data.position,
+          data.classCode
+        );
         break;
       case 'applicationStatusApproved':
-        // sendApplicationStatusApprovedEmail(data.user, data.position, data.classCode, data.timeframe);
-        sendApplicationStatusApprovedEmail(data.user, data.position, data.classCode);
+        sendApplicationStatusApprovedEmail(
+          data.user,
+          data.position,
+          data.classCode
+        );
 
         break;
       case 'applicationStatusDenied':
-        sendApplicationStatusDeniedEmail(data.user, data.position, data.classCode);
+        sendApplicationStatusDeniedEmail(
+          data.user,
+          data.position,
+          data.classCode
+        );
         break;
       case 'facultyNotification':
         sendFacultyNotificationEmail(data.user, data.position, data.classCode);
+        break;
+      case 'unapprovedUser':
+        sendUnapprovedUserNotificationEmail(data.user);
         break;
       default:
         res.status(400).json({ message: 'Invalid email type' });
@@ -54,7 +72,6 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
     res.status(200).json({ success: true });
   }
 });
-
 
 // const corsHandler = cors({ origin: true });
 
@@ -121,7 +138,7 @@ export const processApplicationForm = functions.https.onRequest(
         semesterstatus: request.body.semesterstatus,
         additionalprompt: request.body.additionalprompt,
         nationality: request.body.nationality,
-        englishproficiency: "NA",
+        englishproficiency: 'NA',
         position: request.body.position,
         available_hours: request.body.available_hours,
         available_semesters: request.body.available_semesters,
@@ -131,10 +148,8 @@ export const processApplicationForm = functions.https.onRequest(
         date: request.body.date,
         status: request.body.status,
         resume_link: request.body.resume_link,
-        classnumbers: "NA",
+        classnumbers: 'NA',
       };
-
-
 
       // Create the document within the "applications" collection
       db.collection('applications')
@@ -144,8 +159,7 @@ export const processApplicationForm = functions.https.onRequest(
           response.status(200).send('Application created successfully');
         })
         .catch((error: any) => {
-          response
-            .send('Error creating application: ' + error.message);
+          response.send('Error creating application: ' + error.message);
         });
     }
   }
@@ -288,4 +302,3 @@ export const deleteUserFromID = functions.https.onRequest(
     }
   }
 );
-
