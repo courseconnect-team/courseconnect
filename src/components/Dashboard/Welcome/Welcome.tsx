@@ -305,12 +305,13 @@ export default function DashboardWelcome(props: DashboardProps) {
                 text="Scheduling"
                 clickable={true}
               />
-              <DashboardCard
-                className={styles.stats}
-                image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png"
-                text="Faculty Stats"
-                clickable={true}
-              />
+              <Link href="facultyStats">
+                <DashboardCard
+                  className={styles.stats}
+                  image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png"
+                  text="Faculty Stats"
+                />
+              </Link>
             </div>
           )}
         </div>

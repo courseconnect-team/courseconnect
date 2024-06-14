@@ -1,0 +1,114 @@
+.studentlandingpage {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+
+.studentlandingpage .overlapwrapper {
+  height: 1024px;
+  width: 100%;
+}
+
+.studentlandingpage .overlap {
+  height: 1024px;
+  position: relative;
+  width: 100%;
+}
+
+.studentlandingpage .overlap2 {
+  height: 545px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .colorblockframe {
+  height: 350px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .overlapgroup2 {
+  left: -5px;
+  position: relative;
+  width: 100%;
+}
+
+.studentlandingpage .colorblock {
+  background-color: #001776;
+  height: 458px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .GRADIENTS {
+  height: 350px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .glasscard {
+  -webkit-backdrop-filter: blur(200px) brightness(100%);
+  backdrop-filter: blur(200px) brightness(100%);
+  background-blend-mode: luminosity;
+  background-color: #00000024;
+  height: 458px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 101%;
+}
+
+.studentlandingpage .ecelogopng2 {
+  left: 27px !important;
+  position: absolute !important;
+  top: 23px !important;
+}
+
+.studentlandingpage .fullnameandbioinstance {
+  left: 38% !important;
+  position: absolute !important;
+  top: 250px !important;
+}
+
+.studentlandingpage .topnavbarsignedin {
+  left: 80% !important;
+  position: absolute !important;
+  top: 27px !important;
+}
+
+.studentlandingpage .textwrapper8 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 50px;
+  font-weight: 500;
+  left: 42%;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 114px;
+  width: 133px;
+}
+
+.studentlandingpage .profileinstance {
+  left: 52% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+
+.studentlandingpage .applyinstance {
+  left: 38% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+

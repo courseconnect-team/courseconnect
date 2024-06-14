@@ -49,7 +49,7 @@ export default function AppView({
       .get()
       .then((doc) => {
         if (doc.exists) {
-          console.log(doc.data());
+          // console.log(doc.data());
 
           setDocData(doc.data());
         } else {
@@ -89,20 +89,20 @@ export default function AppView({
                 </div>
               </div>
               <div className="thumbsContainer3">
-                <ThumbUpOffAltIcon
-                  onClick={onThumbUpClick}
-                  className="thumbsUpIcon"
-                  style={{
-                    fontSize: '41px',
-                  }}
-                />
-                <ThumbDownOffAltIcon
-                  onClick={onThumbDownIconClick}
-                  className="thumbsDownIcon"
-                  style={{
-                    fontSize: '41px',
-                  }}
-                />
+                {/* <ThumbUpOffAltIcon */}
+                {/*   onClick={onThumbUpClick} */}
+                {/*   className="thumbsUpIcon" */}
+                {/*   style={{ */}
+                {/*     fontSize: '41px', */}
+                {/*   }} */}
+                {/* /> */}
+                {/* <ThumbDownOffAltIcon */}
+                {/*   onClick={onThumbDownIconClick} */}
+                {/*   className="thumbsDownIcon" */}
+                {/*   style={{ */}
+                {/*     fontSize: '41px', */}
+                {/*   }} */}
+                {/* /> */}
                 <div className="applicantStatus231" onClick={close}>
                   <div className="review23">Review</div>
                 </div>
@@ -130,6 +130,22 @@ export default function AppView({
                 <div className="label50">Availability:</div>
                 <div className="availability2">
                   {docData.available_hours.join(', ')}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '75px' }}>
+                <div className="label50"> All Course(s):</div>
+                <div className="availability2">
+                  {Object.entries(
+                    docData.courses
+                  ).map(([key, value]) => key).join(', ')}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '75px' }}>
+                <div className="label50">Faculty Approved Course(s):</div>
+                <div className="availability2">
+                  {Object.entries(docData.courses)
+                    .filter(([key, value]) => value == 'accepted')
+                    .map(([key, value]) => key).join(', ')}
                 </div>
               </div>
 
