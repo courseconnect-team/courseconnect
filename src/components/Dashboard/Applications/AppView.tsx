@@ -89,20 +89,20 @@ export default function AppView({
                 </div>
               </div>
               <div className="thumbsContainer3">
-                {/* <ThumbUpOffAltIcon */}
-                {/*   onClick={onThumbUpClick} */}
-                {/*   className="thumbsUpIcon" */}
-                {/*   style={{ */}
-                {/*     fontSize: '41px', */}
-                {/*   }} */}
-                {/* /> */}
-                {/* <ThumbDownOffAltIcon */}
-                {/*   onClick={onThumbDownIconClick} */}
-                {/*   className="thumbsDownIcon" */}
-                {/*   style={{ */}
-                {/*     fontSize: '41px', */}
-                {/*   }} */}
-                {/* /> */}
+                <ThumbUpOffAltIcon
+                  onClick={onThumbUpClick}
+                  className="thumbsUpIcon"
+                  style={{
+                    fontSize: '41px',
+                  }}
+                />
+                <ThumbDownOffAltIcon
+                  onClick={onThumbDownIconClick}
+                  className="thumbsDownIcon"
+                  style={{
+                    fontSize: '41px',
+                  }}
+                />
                 <div className="applicantStatus231" onClick={close}>
                   <div className="review23">Review</div>
                 </div>
