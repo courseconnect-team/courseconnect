@@ -238,7 +238,7 @@ export default function DashboardWelcome(props: DashboardProps) {
               </div>
               <Link href="/Profile">
                 <Profile
-                  className={styles.profileinstance2}
+                  className={styles.profileinstance5}
                   profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
                 />
               </Link>

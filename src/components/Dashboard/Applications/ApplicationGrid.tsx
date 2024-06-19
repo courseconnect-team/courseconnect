@@ -113,6 +113,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .firestore()
       .collection('applications')
       .doc(id.toString());
+
     const doc = await getDoc(statusRef);
     setCodes(
       Object.entries(doc.data().courses)
@@ -1105,31 +1106,39 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         <DialogTitle>Course Assignment</DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
-            <DialogContentText>
-              Please select the course code to which the student shall be
-              assigned.
-            </DialogContentText>
-            <br />
-
-            <FormControl required>
-              <RadioGroup
-                name="positions-radio-group"
-                value={valueRadio}
-                onChange={handleChangeRadio}
-                aria-required="true"
-              >
-                {codes.map((code) => {
-                  return (
-                    <FormControlLabel
-                      key={code}
-                      value={code}
-                      control={<Radio />}
-                      label={code}
-                    />
-                  );
-                })}
-              </RadioGroup>
-            </FormControl>
+            {console.log(codes.length)}
+            {codes == [] ? (
+              <>
+                <DialogContentText>
+                  Please select the course code to which the student shall be
+                  assigned.
+                </DialogContentText>
+                <br />
+                <FormControl required>
+                  <RadioGroup
+                    name="positions-radio-group"
+                    value={valueRadio}
+                    onChange={handleChangeRadio}
+                    aria-required="true"
+                  >
+                    {codes.map((code) => {
+                      return (
+                        <FormControlLabel
+                          key={code}
+                          value={code}
+                          control={<Radio />}
+                          label={code.replace(/,/g, ', ')}
+                        />
+                      );
+                    })}
+                  </RadioGroup>
+                </FormControl>{' '}
+              </>
+            ) : (
+              <DialogContentText>
+                No faculty has accepted this student yet.
+              </DialogContentText>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>

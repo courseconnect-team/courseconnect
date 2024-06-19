@@ -40,7 +40,11 @@
   position: absolute;
   width: 100%;
 }
-
+.studentlandingpage .applicationsinstance {
+  left: 33% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
 .studentlandingpage .colorblock {
   background-color: #001776;
   height: 458px;
@@ -97,7 +101,7 @@
   letter-spacing: 0;
   line-height: normal;
       position:absolute;
-    left: 48%;
+    left: 50%;
     transform: translateY(-50%);
     transform: translateX(-50%);
   top: 150px;
@@ -116,12 +120,17 @@
 }
 
 .studentlandingpage .profileinstance2 {
-  left: 58% !important;
+  left: 60% !important;
+  position: absolute !important;
+  top: 640px !important;
+}
+.studentlandingpage .profileinstance5 {
+  left: 59% !important;
   position: absolute !important;
   top: 640px !important;
 }
 .studentlandingpage .applyinstance2 {
-  left: 44% !important;
+  left: 46% !important;
   position: absolute !important;
   top: 640px !important;
 }
@@ -160,17 +169,17 @@
 }
 
 .studentlandingpage .statusinstance {
-  left: 30% !important;
+  left: 32% !important;
   position: absolute !important;
   top: 640px !important;
 }
  .applicationsinstance {
-  left: 30% !important;
+  left: 34% !important;
   position: absolute !important;
   top: 640px !important;
 }
 .courseinstance {
-  left: 44% !important;
+  left: 46% !important;
   position: absolute !important;
   top: 640px !important;
 }

@@ -3,11 +3,11 @@ import React from 'react';
 import Link from 'next/link';
 import './style.css';
 
-const ClassCard = ({ className, courseName, courseId }) => {
+const SmallClassCard = ({ className, courseName, courseId, pathname }) => {
   return (
     <Link
       href={{
-        pathname: `/course/${encodeURIComponent(courseId)}`,
+        pathname: pathname,
         query: { data: courseId },
       }}
       passHref
@@ -21,4 +21,4 @@ const ClassCard = ({ className, courseName, courseId }) => {
   );
 };
 
-export default ClassCard;
+export default SmallClassCard;
