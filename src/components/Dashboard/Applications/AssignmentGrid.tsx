@@ -54,7 +54,13 @@ interface Assignment {
   date: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
-
+  firstName: string;
+  lastName: string;
+  year: string;
+  fte: number;
+  pname: string;
+  pid: string;
+  hr: number;
 }
 
 interface AssignmentGridProps {
@@ -129,6 +135,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         ({
           id: doc.id,
           ...doc.data(),
+          firstName: doc.data().name.split(' ')[0],
+          lastName: doc.data().name.split(' ')[1],
+          year: doc.data().semesters[0].split(' ')[1],
+          fte: 15,
+          pname: "DEPARTMENT TA/UPIS",
+          pid: "000108927",
+          hr: 15,
         } as Assignment)
       );
       setAssignmentData(data);
@@ -432,65 +445,103 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       },
     },
     {
-      field: 'name',
-      headerName: 'Name',
+      field: 'ufid',
+      headerName: 'Student UFID',
+      width: 190,
+      editable: false,
+
+    },
+
+    {
+      field: 'firstName',
+      headerName: 'Student First Name',
       width: 190,
       editable: true,
 
-      disableExport: true,
+    },
+    {
+      field: 'lastName',
+      headerName: 'Student Last Name',
+      width: 190,
+      editable: true,
+
     },
     {
       field: 'email',
-      headerName: 'Email',
+      headerName: 'Student Email',
       width: 210,
       editable: true,
 
-      disableExport: true,
     },
     {
-      field: 'hours',
-      headerName: 'Avaliable Hours',
-      width: 140,
+      field: 'supervisorUfid',
+      headerName: 'Supervisor UFID',
+      width: 190,
       editable: true,
 
-      disableExport: true,
     },
+
+
     {
-      field: 'class_codes',
-      headerName: 'Assigned Class Code',
-      width: 240,
+      field: 'supervisorFirstName',
+      headerName: 'Supervisor First Name',
+      width: 190,
       editable: true,
 
-      disableExport: true,
     },
     {
-      field: 'date', headerName: 'Dates', width: 100, editable: true,
-      valueFormatter: (value) => {
+      field: 'supervisorLastName',
+      headerName: 'Supervisor Last Name',
+      width: 190,
+      editable: true,
 
-        // Split the date string by hyphen
-        const dateParts = value.value.split('-');
+    },
 
-        // Extract year, month, and day parts
-        const year = dateParts[2];
-        let month = dateParts[0];
-        let day = dateParts[1];
-        if (month.length == 1) {
-          month = "0" + month;
-        }
-        if (day.length == 1) {
-          day = "0" + day;
-        }
-        // Construct the new date string in "year month day" format
-        const newDateString = `${year}-${month}-${day}`;
+    {
+      field: 'supervisorEmail',
+      headerName: 'Supervisor Email',
+      width: 190,
+      editable: true,
 
-        return newDateString;
-      },
+    },
+
+    {
+      field: 'proxyUfid',
+      headerName: 'Proxy UFID',
+      width: 190,
+      editable: true,
+
+    },
+
+
+    {
+      field: 'proxyFirstName',
+      headerName: 'Proxy First Name',
+      width: 190,
+      editable: true,
+
+    },
+    {
+      field: 'proxyLastName',
+      headerName: 'Proxy Last Name',
+      width: 190,
+      editable: true,
+
+    },
+
+    {
+      field: 'proxyEmail',
+      headerName: 'Proxy Email',
+      width: 190,
+      editable: true,
+
     },
     {
       field: 'action', headerName: 'Requested Action', width: 140, editable: false, valueFormatter: (value) => {
         return "NEW HIRE";
       },
     },
+
 
     {
       field: 'position', headerName: 'Position Type', width: 110, editable: true, valueFormatter: (value) => {
@@ -520,6 +571,68 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
       },
     },
+
+    {
+      field: 'year', headerName: 'Year', width: 110, editable: true
+    },
+    {
+      field: 'none', headerName: 'Starting Date', width: 100, editable: true,
+    },
+    {
+      field: 'ed', headerName: 'End Date', width: 110, editable: true
+    },
+
+    {
+      field: 'pid', headerName: 'Project Id', width: 110, editable: true
+    },
+    {
+      field: 'pname',
+      headerName: 'Project Name',
+      width: 240,
+      editable: true,
+
+    },
+
+
+    {
+      field: 'percentage', headerName: 'Percentage', width: 110, editable: true
+    },
+    {
+      field: 'hours',
+      headerName: 'Hours',
+      width: 140,
+      editable: true,
+
+    },
+
+    {
+      field: 'ar', headerName: 'Anual Rate', width: 110, editable: true
+    },
+
+    {
+      field: 'hr', headerName: 'Hourly Rate', width: 110, editable: true
+    },
+
+    {
+      field: 'ta', headerName: 'Target Amount', width: 110, editable: true
+    },
+
+    {
+      field: 'wt', headerName: 'Working Title', width: 110, editable: true
+    },
+
+    {
+      field: 'class_codes', headerName: 'Duties', width: 140, editable: true
+      , valueFormatter: (value) => {
+        return "UPI in " + value.value;
+      },
+    },
+
+    {
+      field: 'fte', headerName: 'FTE', width: 110, editable: true,
+
+    },
+
 
     {
       field: 'Imported', headerName: 'Imported', width: 140, editable: false, valueFormatter: (value) => {
