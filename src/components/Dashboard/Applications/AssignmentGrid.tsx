@@ -61,6 +61,7 @@ interface Assignment {
   pname: string;
   pid: string;
   hr: number;
+  bwr: number;
 }
 
 interface AssignmentGridProps {
@@ -406,7 +407,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             variant="outlined"
             color='inherit'
             size="small"
-            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
+            style={{ marginLeft: "0px", height: "25px", textTransform: "none" }}
             startIcon={
               <ZoomInIcon />
             }
@@ -414,25 +415,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           >
             View
           </Button>,
-          <Button
-            key="4"
-            variant="outlined"
-            color='inherit'
-            size="small"
-            style={{ marginLeft: 0, height: "25px", textTransform: "none" }}
-            startIcon={
-              <EditIcon />
-            }
-            onClick={handleEditClick(id)}
-          >
-            Edit
-          </Button>,
+
           <Button
             key="5"
             variant="outlined"
             color='primary'
             size="small"
-            style={{ marginRight: "20px", height: "25px", textTransform: "none" }}
+            style={{ marginRight: "10px", height: "25px", textTransform: "none" }}
             startIcon={
               <DeleteIcon />
             }
@@ -606,9 +595,12 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
 
     {
-      field: 'ar', headerName: 'Anual Rate', width: 110, editable: true
+      field: 'ar', headerName: 'Annual Rate', width: 110, editable: true
     },
 
+    {
+      field: 'bwr', headerName: 'Biweekly Rate', width: 110, editable: true
+    },
     {
       field: 'hr', headerName: 'Hourly Rate', width: 110, editable: true
     },
