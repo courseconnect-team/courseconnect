@@ -707,9 +707,11 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         }
         sx={{ borderRadius: '16px' }}
       />
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{'Approved Application'}</DialogTitle>
-        <DialogContent>
+      <Dialog PaperProps={{ sx: { borderRadius: 4 } }}
+        maxWidth={"lg"} open={open} onClose={handleClose}>
+        <DialogTitle style={{ fontWeight: 'bold', fontSize: '25px', marginBottom: '10px' }}>{'View Assignment Details'}</DialogTitle>
+
+        <DialogContent sx={{ minWidth: '100%' }}>
           {/* Display the application data of the selected user */}
           {selectedUserGrid && (
             <div>
