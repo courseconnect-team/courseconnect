@@ -1,5 +1,3 @@
-// given a user ID, this function returns the role (student, faculty, admin) of that user
-
 import { useEffect, useState } from 'react';
 import firebase from '@/firebase/firebase_config';
 import { useDocument } from 'react-firebase-hooks/firestore';
@@ -24,3 +22,11 @@ const GetUserRole = (userId) => {
 };
 
 export default GetUserRole;
+
+// Wrapper hook
+const useUserRole = (userId) => {
+  const [role, loading, error] = GetUserRole(userId);
+  return { role, loading, error };
+};
+
+export { useUserRole };

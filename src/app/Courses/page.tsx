@@ -8,11 +8,10 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Bio } from '@/components/Bio/Bio';
-import styles from './style.module.css';
 import { Timeline } from '@/components/Timeline/Timeline';
-import { Class } from '@mui/icons-material';
+
 export default function FacultyApplication() {
-  type CourseType = [string, string]; // Define the type for courses
+  type CourseType = [string, string, string]; // Define the type for courses
 
   const auth = getAuth();
   const [courses, setCourses] = useState<CourseType[]>([]); // Use the defined type for state
@@ -43,8 +42,11 @@ export default function FacultyApplication() {
       const filteredDocs = snapshot.docs.filter(
         (doc) => doc.data().code !== null && doc.data().code !== undefined
       );
-
-      return filteredDocs.map((doc) => [doc.id, doc.data().code]);
+      return filteredDocs.map((doc) => [
+        doc.id,
+        doc.data().code,
+        doc.data().courseId,
+      ]);
     } catch (error) {
       console.error(`Error getting courses:`, error);
       alert('Error getting courses:');
@@ -62,8 +64,11 @@ export default function FacultyApplication() {
       const filteredDocs = snapshot.docs.filter(
         (doc) => doc.data().code !== null && doc.data().code !== undefined
       );
-
-      return filteredDocs.map((doc) => [doc.id, doc.data().code]);
+      return filteredDocs.map((doc) => [
+        doc.id,
+        doc.data().code,
+        doc.data().courseId,
+      ]);
     } catch (error) {
       console.error(`Error getting courses:`, error);
       alert('Error getting courses:');

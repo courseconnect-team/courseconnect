@@ -4,6 +4,7 @@ import './style.css';
 
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/firebase/auth/auth_context';
+
 export const VerifyEmailCard = ({ email }) => {
   const { user } = useAuth();
   return (

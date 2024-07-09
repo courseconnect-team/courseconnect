@@ -9,10 +9,12 @@ import CourseNavBar from '@/components/CourseNavBar/CourseNavBar';
 import ApplicantCardApprovedeny from '@/components/ApplicantCardApprovedeny/ApplicantCardApprovedeny';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-
+import Spinner from '@/components/Spinner/Spinner';
 import ApplicantCardAssign from '@/components/ApplicantCardAssign/ApplicantCardAssign';
 import ApplicantCardApprove from '@/components/ApplicantCardApprove/ApplicantCardApprove';
 import ApplicantCardDeny from '@/components/ApplicantCardDeny/ApplicantCardDeny';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useUserRole } from '@/firebase/util/GetUserRole';
 
 interface pageProps {
   params: { className: string; semester: string };
@@ -20,6 +22,24 @@ interface pageProps {
 interface QueryParams {
   [key: string]: string;
 }
+interface applicationData {
+  id: string;
+  uf_email: string;
+  firstname: string;
+  lastname: string;
+  number: string;
+  position: string;
+  semester: string;
+  availability: string;
+  department: string;
+  degree: string;
+  collegestatus: string;
+  qualifications: string;
+  resume: string;
+  plan: string;
+  gpa: string;
+}
+
 // const [selectedItem, setSelectedItem] = useState('needsReview');
 
 // const NeedsReviewApplicants = () => {
@@ -40,11 +60,21 @@ interface QueryParams {
 
 const CoursePage: FC<pageProps> = ({ params }) => {
   const db = firebase.firestore();
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const {
+    role,
+    loading: roleLoading,
+    error: roleError,
+  } = useUserRole(user?.uid);
+
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
   const [openDenyDialog, setOpenDenyDialog] = useState(false);
   const [openReviewDialog, setOpenReviewDialog] = useState(false);
   const [currentStu, setCurrentStu] = useState('null');
   const [className, setClassName] = useState('none');
+  const [loading, setLoading] = useState<boolean>(true);
+
   const [expandedStates, setExpandedStates] = useState<{
     [id: string]: boolean;
   }>({});
@@ -56,66 +86,9 @@ const CoursePage: FC<pageProps> = ({ params }) => {
     }));
   };
 
-  const [taData, setTaData] = useState<
-    {
-      id: string;
-      uf_email: string;
-      firstname: string;
-      lastname: string;
-      number: string;
-      position: string;
-      semester: string;
-      availability: string;
-      department: string;
-      degree: string;
-      collegestatus: string;
-      qualifications: string;
-      resume: string;
-      plan: string;
-      gpa: string;
-    }[]
-  >([]);
-
-  const [upiData, setupiData] = useState<
-    {
-      id: string;
-      uf_email: string;
-      firstname: string;
-      lastname: string;
-      number: string;
-      position: string;
-      semester: string;
-      availability: string;
-      department: string;
-      degree: string;
-      collegestatus: string;
-      qualifications: string;
-      resume: string;
-      plan: string;
-      gpa: string;
-    }[]
-  >([]);
-
-  const [graderData, setgraderData] = useState<
-    {
-      id: string;
-      uf_email: string;
-      firstname: string;
-      lastname: string;
-      number: string;
-      position: string;
-      semester: string;
-      availability: string;
-      department: string;
-      degree: string;
-      collegestatus: string;
-      qualifications: string;
-      resume: string;
-      plan: string;
-      gpa: string;
-    }[]
-  >([]);
-
+  const [taData, setTaData] = useState<applicationData[]>([]);
+  const [upiData, setupiData] = useState<applicationData[]>([]);
+  const [graderData, setgraderData] = useState<applicationData[]>([]);
   const [selection, setSelection] = useState<string>('Review');
 
   const toggleSelection = (select: string): void => {
@@ -128,11 +101,8 @@ const CoursePage: FC<pageProps> = ({ params }) => {
     status: string
   ) => {
     try {
-      console.log(className + ' ' + status + ' ' + position);
-
       const snapshot = await db
         .collection('applications')
-
         .where(`courses.${className}`, '>=', '')
         .orderBy(`courses.${className}`)
 
@@ -221,6 +191,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const result = await getDataByPositionAndStatus('TA', selection);
         const result2 = await getDataByPositionAndStatus('UPI', selection);
         const result3 = await getDataByPositionAndStatus('Grader', selection);
@@ -229,6 +200,8 @@ const CoursePage: FC<pageProps> = ({ params }) => {
         setgraderData(result3);
       } catch (error) {
         console.error('Error fetching data: ', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -389,6 +362,18 @@ const CoursePage: FC<pageProps> = ({ params }) => {
     });
   };
 
+  if (roleError) {
+    return <p>Error loading role</p>;
+  }
+
+  if (!user) {
+    return <p>Please sign in.</p>;
+  }
+
+  if (role !== 'faculty' && role !== 'admin') {
+    return <p>Access denied.</p>;
+  }
+
   return (
     <>
       <Toaster />
@@ -414,12 +399,14 @@ const CoursePage: FC<pageProps> = ({ params }) => {
       >
         <CourseNavBar handleClick={toggleSelection} />
       </div>
+
+      {loading && <Spinner />}
+
       {taData.length != 0 && (
         <div className="TAtext" style={{ margin: '35px 0 24px 40px' }}>
           TA
         </div>
       )}
-
       {mapElement(taData)}
 
       {upiData.length != 0 && (

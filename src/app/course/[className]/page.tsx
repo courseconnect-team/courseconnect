@@ -1,79 +1,153 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
-import { Toaster } from 'react-hot-toast';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import './style.css';
-import CourseNavBar from '@/components/CourseNavBar/CourseNavBar';
-import ApplicantCardApprovedeny from '@/components/ApplicantCardApprovedeny/ApplicantCardApprovedeny';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import CourseDetails from '@/components/CourseDetails/CourseDetails';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useUserRole } from '@/firebase/util/GetUserRole';
+import { useRouter } from 'next/router';
+
 interface pageProps {
-  params: { className: string; semester: string };
+  params: { semester: string; collection: string; courseCode: string };
 }
 interface QueryParams {
   [key: string]: string;
 }
+interface TA {
+  name: string;
+  email: string;
+}
 
-const getQueryParams = (query: string): QueryParams => {
-  return query
-    ? (/^[?#]/.test(query) ? query.slice(1) : query)
-        .split('&')
-        .reduce((params: QueryParams, param) => {
-          let [key, value] = param.split('=');
-          params[key] = value
-            ? decodeURIComponent(value.replace(/\+/g, ' '))
-            : '';
-          return params;
-        }, {})
-    : {};
-};
+interface Schedule {
+  day: string;
+  time: string;
+  location: string;
+}
+
+interface CourseDetails {
+  id: string;
+  courseName: string;
+  instructor: string;
+  email: string;
+  studentsEnrolled: number;
+  maxStudents: number;
+  courseCode: string;
+  TAs: TA[];
+  department: string;
+  credits: number;
+  semester: string;
+}
 
 const StatisticsPage: FC<pageProps> = ({ params }) => {
-  const [className, setClassName] = useState('none');
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const router = useRouter();
+  const { courseId } = router.query;
 
+  const {
+    role,
+    loading: roleLoading,
+    error: roleError,
+  } = useUserRole(user?.uid);
+
+  const [courseData, setCourseData] = useState<CourseDetails | null>(null);
+
+  const db = firebase.firestore();
+
+  const getCourseDetails = async (): Promise<CourseDetails | null> => {
+    try {
+      const snapshot = await db
+        .collection(params.collection)
+        .where('number', '==', courseId)
+        .get();
+
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        return {
+          id: doc.id,
+          courseName: doc.data().code,
+          instructor: doc.data().professor_names,
+          email: doc.data().professor_emails,
+          studentsEnrolled: doc.data().enrolled,
+          maxStudents: doc.data().enrollment_cap,
+          courseCode: doc.data().courseId,
+          TAs: doc.data().tas,
+          department: doc.data().department,
+          credits: doc.data().credits,
+          semester: doc.data().semester,
+        };
+      } else {
+        throw new Error('No matching documents found');
+      }
+    } catch (error) {
+      console.error(`Error getting applicants: `, error);
+      return null;
+    }
+  };
   useEffect(() => {
-    const params = getQueryParams(window.location.search);
-    const data = params.data;
+    const fetchData = async () => {
+      try {
+        const result = await getCourseDetails();
+        setCourseData(result);
+      } catch (error) {
+        console.error('Error fetching data: ', error);
+      }
+    };
+    if (role && !roleLoading) {
+      fetchData();
+    }
+  }, [courseId]);
 
-    setClassName(data);
-  }, []);
+  if (roleError) {
+    return <p>Error loading role</p>;
+  }
+
+  if (!user) {
+    return <p>Please sign in.</p>;
+  }
+
+  if (role !== 'faculty' && role !== 'admin') {
+    return <p>Access denied.</p>;
+  }
 
   return (
     <>
-      <HeaderCard text="Courses" />
-      <CourseDetails
-        courseName="COP3502C - Programming Fundamentals 1"
-        semester="Fall 2023"
-        instructor="Firstname Lastname"
-        email="emailaddress@ufl.edu"
-        studentsEnrolled={40}
-        maxStudents={75}
-        credits={4}
-        courseCode="#10740"
-        department="CISE"
-        TAs={[
-          { name: 'Firstname Lastname', email: 'emailaddress@ufl.edu' },
-          { name: 'Firstname Lastname', email: 'emailaddress@ufl.edu' },
-        ]}
-        schedule={[
-          {
-            day: 'T',
-            time: 'Periods 8-9 (3:00 PM - 4:55 PM)',
-            location: 'CAR 0100',
-          },
-          {
-            day: 'W',
-            time: 'Periods 10-11 (5:10 PM - 7:05 PM)',
-            location: 'CSE E312',
-          },
-          {
-            day: 'R',
-            time: 'Periods 9 (4:05 PM - 4:55 PM)',
-            location: 'CAR 0100',
-          },
-        ]}
-      />
+      {courseData && (
+        <>
+          <HeaderCard text="Courses" />
+          <CourseDetails
+            courseName={courseData.courseName}
+            semester={courseData.courseName}
+            instructor={courseData.courseName}
+            email={courseData.courseName}
+            studentsEnrolled={courseData.studentsEnrolled}
+            maxStudents={courseData.maxStudents}
+            credits={courseData.credits}
+            courseCode={params.courseCode}
+            department={courseData.department}
+            TAs={courseData.TAs}
+            schedule={[
+              {
+                day: 'T',
+                time: 'Periods 8-9 (3:00 PM - 4:55 PM)',
+                location: 'CAR 0100',
+              },
+              {
+                day: 'W',
+                time: 'Periods 10-11 (5:10 PM - 7:05 PM)',
+                location: 'CSE E312',
+              },
+              {
+                day: 'R',
+                time: 'Periods 9 (4:05 PM - 4:55 PM)',
+                location: 'CAR 0100',
+              },
+            ]}
+          />
+        </>
+      )}
     </>
   );
 };

@@ -94,7 +94,7 @@ export default function User() {
     try {
       setProcessing(true);
       const toastId = toast.loading(
-        'Processing course data. This may take a couple minutes.',
+        'Processing TA data. This may take a couple of minutes.',
         { duration: 300000000 }
       );
 
@@ -110,31 +110,114 @@ export default function User() {
         sheetData.forEach((row: any) => data.push(row));
       });
 
+      const db = firebase.firestore();
+      const collectionRef = db.collection('past-courses');
+      let batch = db.batch();
+      let batchCount = 0;
+
       for (const row of data) {
-        await firebase
-          .firestore()
-          .collection('courses')
-          .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_22']}`)
-          .set({
-            professor_emails: row['__EMPTY_23'] ?? 'undef',
-            professor_names: row['__EMPTY_22'] ?? 'undef',
-            code: row['__EMPTY_5'] ?? 'undef',
-            credits: row['__EMPTY_9'] ?? 'undef',
-            enrollment_cap: row['__EMPTY_24'] ?? 'undef',
-            enrolled: row['__EMPTY_26'] ?? 'undef',
-            title: row['__EMPTY_21'] ?? 'undef',
-            semester: semester,
-          });
+        const courseCode = row['Class']; // Replace with the actual column name
+        const taName = row['Name']; // Replace with the actual column name
+        const taEmail = row['Email']; // Replace with the actual column name
+
+        if (!courseCode || !taName || !taEmail) continue; // Ensure all fields are defined and not empty
+
+        // Use a query to find the matching document
+        const querySnapshot = await collectionRef
+          .where('code', '==', courseCode)
+          .get();
+
+        querySnapshot.forEach((doc) => {
+          const courseDocRef = collectionRef.doc(doc.id);
+
+          const ta = {
+            name: taName,
+            email: taEmail === 'nan' ? 'undef' : taEmail,
+          };
+
+          // Ensure both name and email are defined before adding to the batch
+          if (ta.name && ta.email) {
+            batch.set(
+              courseDocRef,
+              {
+                tas: firebase.firestore.FieldValue.arrayUnion(ta),
+                credits: 3,
+              },
+              { merge: true }
+            );
+
+            batchCount++;
+
+            // Commit the batch when it reaches the limit
+            if (batchCount >= 500) {
+              batch.commit();
+              batch = db.batch();
+              batchCount = 0;
+            }
+          }
+        });
+      }
+
+      // Commit any remaining operations in the batch
+      if (batchCount > 0) {
+        await batch.commit();
       }
 
       setProcessing(false);
       toast.dismiss(toastId);
-      toast.success('Data upload complete!', { duration: 2000 });
+      toast.success('TA data upload complete!', { duration: 2000 });
     } catch (err) {
       console.log(err);
       setProcessing(false);
+      toast.error('An error occurred while processing the TA data.');
     }
   };
+
+  // const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   try {
+  //     setProcessing(true);
+  //     const toastId = toast.loading(
+  //       'Processing course data. This may take a couple minutes.',
+  //       { duration: 300000000 }
+  //     );
+
+  //     const file = e.target.files?.[0];
+  //     if (!file) return;
+
+  //     const arrayBuffer = await file.arrayBuffer();
+  //     const workbook = read(arrayBuffer);
+  //     const data: any[] = [];
+
+  //     workbook.SheetNames.forEach((sheetName) => {
+  //       const sheetData = utils.sheet_to_json(workbook.Sheets[sheetName]);
+  //       sheetData.forEach((row: any) => data.push(row));
+  //     });
+
+  //     for (const row of data) {
+  //       await firebase
+  //         .firestore()
+  //         .collection('courses')
+  //         .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_22']}`)
+  //         .set({
+  //           professor_emails: row['__EMPTY_23'] ?? 'undef',
+  //           professor_names: row['__EMPTY_22'] ?? 'undef',
+  //           code: row['__EMPTY_5'] ?? 'undef',
+  //           credits: row['__EMPTY_9'] ?? 'undef',
+  //           enrollment_cap: row['__EMPTY_24'] ?? 'undef',
+  //           enrolled: row['__EMPTY_26'] ?? 'undef',
+  //           title: row['__EMPTY_21'] ?? 'undef',
+  //           semester: semester,
+  //         });
+  //     }
+
+  //     setProcessing(false);
+  //     toast.dismiss(toastId);
+  //     toast.success('Data upload complete!', { duration: 2000 });
+  //   } catch (err) {
+  //     console.log(err);
+  //     setProcessing(false);
+  //   }
+  // };
 
   const handleChange = (event: SelectChangeEvent) => {
     const value = event.target.value;
@@ -283,7 +366,7 @@ export default function User() {
                   multiple
                   type="file"
                   onChange={readExcelFile}
-                  onClick={(event) => (event.target.value = '')}
+                  onClick={(event) => (event.currentTarget.value = '')}
                 />
                 <label htmlFor="raised-button-file">
                   <Button
