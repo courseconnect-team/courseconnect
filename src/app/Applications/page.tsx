@@ -28,7 +28,6 @@ export default function FacultyApplication() {
 
   const getCourses = async (semester: string): Promise<[string, any][]> => {
     try {
-      console.log(semester);
       const snapshot = await db
         .collection(`courses`)
         .where('semester', '==', semester)

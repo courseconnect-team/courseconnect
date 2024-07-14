@@ -24,7 +24,6 @@ interface DashboardProps {
 
 export default function DashboardWelcome(props: DashboardProps) {
   const { userRole, user, emailVerified } = props;
-  console.log(userRole);
   return (
     <>
       <Toaster />

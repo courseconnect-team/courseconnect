@@ -1,4 +1,3 @@
-
 import { FunctionComponent, useCallback } from 'react';
 import './style.css';
 import firebase from '@/firebase/firebase_config';
@@ -32,7 +31,7 @@ interface ApplicantCardProps {
   openReview: boolean;
   setOpenReviewDialog: (value: boolean) => void;
   currentStu: string;
-  setCurrentStu: (value: string) => void
+  setCurrentStu: (value: string) => void;
   className: string;
 }
 const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
@@ -69,8 +68,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
       let doc = await getDoc(statusRef);
       let coursesMap = doc.data().courses;
 
-      coursesMap[className] = "applied"
-      console.log(coursesMap);
+      coursesMap[className] = 'applied';
       await statusRef.update({ courses: coursesMap });
       console.log('Application moved successfully');
       window.location.reload();
@@ -84,7 +82,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
   };
 
   const handleOpenReview = useCallback((event: any) => {
-    event?.stopPropagation()
+    event?.stopPropagation();
 
     setOpenReviewDialog(true);
     setCurrentStu(id);
@@ -92,14 +90,26 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
 
   const renderReviewDialog = () => (
     <Dialog
-      style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
-        style: { borderRadius: 20 }
+      style={{
+        borderImage:
+          'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+        boxShadow: '0px 2px 20px 4px #00000040',
+        borderRadius: '20px',
+        border: '2px solid',
+      }}
+      PaperProps={{
+        style: { borderRadius: 20 },
       }}
       open={openReview}
       onClose={handleCloseReview}
     >
       <DialogTitle
-        style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}
+        style={{
+          fontFamily: 'SF Pro Display-Medium, Helvetica',
+          textAlign: 'center',
+          fontSize: '35px',
+          fontWeight: '540',
+        }}
       >
         Review Applicant
       </DialogTitle>
@@ -168,12 +178,14 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
   return (
     <>
       {renderReviewDialog()}
-      <div className="applicantCardApprove1" onClick={handleCardClick} >
+      <div className="applicantCardApprove1" onClick={handleCardClick}>
         {!expanded && (
           <>
-            <div >
+            <div>
               <div className="ellipse">
-                <div className="initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase()}</div>
+                <div className="initials">
+                  {firstname[0].toUpperCase() + lastname[0].toUpperCase()}
+                </div>
               </div>
               <div className="ufid">Email: {uf_email}</div>
               <div className="name">
@@ -181,9 +193,8 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
               </div>
             </div>
 
-
             <div className="thumbsContainer1">
-              <div className="applicantStatus2" >
+              <div className="applicantStatus2">
                 <div className="approved2">Assigned</div>
               </div>
             </div>
@@ -194,7 +205,9 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
           <div>
             <div>
               <div className="ellipse">
-                <div className="initials">{firstname[0].toUpperCase() + lastname[0].toUpperCase()}</div>
+                <div className="initials">
+                  {firstname[0].toUpperCase() + lastname[0].toUpperCase()}
+                </div>
               </div>
               <div
                 style={{
@@ -207,7 +220,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
                 </div>
 
                 <div className="thumbsContainer1">
-                  <div className="applicantStatus3" >
+                  <div className="applicantStatus3">
                     <div className="approved1">Approved</div>
                   </div>
                 </div>
@@ -224,10 +237,9 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
                 flexDirection: 'column',
                 marginLeft: '143px',
                 flexWrap: 'wrap',
-                marginRight: '139px'
+                marginRight: '139px',
               }}
             >
-
               <div style={{ display: 'flex', gap: '61px' }}>
                 <div className="label50">Applying for:</div>
                 <div>{position}</div>
@@ -235,7 +247,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
 
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50">Availability:</div>
-                <div className="availability1">{availability.join(", ")}</div>
+                <div className="availability1">{availability.join(', ')}</div>
               </div>
 
               <br></br>
@@ -312,7 +324,6 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
             <Button
               variant="outlined"
               style={{
-
                 borderRadius: '10px',
 
                 position: 'absolute',

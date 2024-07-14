@@ -1,4 +1,3 @@
-// pages/application/[className].js
 'use client';
 import { FC } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -149,7 +148,6 @@ const CoursePage: FC<pageProps> = ({ params }) => {
             doc.data().courses[className] == 'applied' &&
             selection == 'Review'
           ) {
-            console.log(doc.data());
             return true;
           } else if (
             doc.data().courses[className] == 'accepted' &&

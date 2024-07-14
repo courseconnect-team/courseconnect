@@ -7,7 +7,7 @@ import 'firebase/firestore';
 import CourseDetails from '@/components/CourseDetails/CourseDetails';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface pageProps {
   params: { semester: string; collection: string; courseCode: string };
@@ -44,8 +44,9 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
   const auth = getAuth();
   const user = auth.currentUser;
   const router = useRouter();
-  const { courseId } = router.query;
+  const searchParams = useSearchParams();
 
+  const courseId = searchParams.get('courseId');
   const {
     role,
     loading: roleLoading,

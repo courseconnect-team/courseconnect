@@ -49,8 +49,6 @@ export default function AppView({
       .get()
       .then((doc) => {
         if (doc.exists) {
-          console.log(doc.data());
-
           setDocData(doc.data());
         } else {
           console.log('No such document!');

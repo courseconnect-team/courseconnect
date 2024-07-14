@@ -214,8 +214,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       position: doc.data().position,
     };
 
-    console.log(assignmentObject);
-
     // Create the document within the "assignments" collection
     firebase
       .firestore()
@@ -357,7 +355,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleDenyEmail = async (id: GridRowId) => {
     try {
-      console.log(id);
       const snapshot = await firebase
         .firestore()
         .collection('applications')
@@ -461,7 +458,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   // approve/deny click handlers
   const handleDenyClick = (id: GridRowId) => {
-    console.log(id);
     setLoading(true);
     // Update the 'applications' collection
     firebase
@@ -586,7 +582,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(delId.toString());
     handleDeleteClick(delId);
     setDelDia(false);
   };
@@ -1106,7 +1101,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         <DialogTitle>Course Assignment</DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
-            {console.log(codes.length)}
             {codes == [] ? (
               <>
                 <DialogContentText>
