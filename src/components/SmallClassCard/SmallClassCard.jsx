@@ -1,4 +1,3 @@
-// components/ClassCard.js
 import React from 'react';
 import Link from 'next/link';
 import './style.css';
@@ -8,8 +7,9 @@ const SmallClassCard = ({ className, courseName, courseId, pathname }) => {
     <Link
       href={{
         pathname: pathname,
-        query: { data: courseId },
+        query: { courseId },
       }}
+      prefetch={false}
       passHref
     >
       <div className={`class ${className}`}>

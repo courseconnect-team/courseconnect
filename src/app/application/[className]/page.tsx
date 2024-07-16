@@ -369,7 +369,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
   }
 
   if (role !== 'faculty' && role !== 'admin') {
-    return <p>Access denied.</p>;
+    return <p>Loading.</p>;
   }
 
   return (

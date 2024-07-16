@@ -1,20 +1,19 @@
 'use client';
+
 import { FC, useEffect, useState } from 'react';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import './style.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import CourseDetails from '@/components/CourseDetails/CourseDetails';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface pageProps {
   params: { semester: string; collection: string; courseCode: string };
 }
-interface QueryParams {
-  [key: string]: string;
-}
+
 interface TA {
   name: string;
   email: string;
@@ -38,6 +37,7 @@ interface CourseDetails {
   department: string;
   credits: number;
   semester: string;
+  title: string;
 }
 
 const StatisticsPage: FC<pageProps> = ({ params }) => {
@@ -45,8 +45,8 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
   const user = auth.currentUser;
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const courseId = searchParams.get('courseId');
+
   const {
     role,
     loading: roleLoading,
@@ -55,51 +55,54 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
 
   const [courseData, setCourseData] = useState<CourseDetails | null>(null);
 
-  const db = firebase.firestore();
-
-  const getCourseDetails = async (): Promise<CourseDetails | null> => {
+  const getCourseDetails = async (
+    courseId: string
+  ): Promise<CourseDetails | null> => {
     try {
-      const snapshot = await db
-        .collection(params.collection)
-        .where('number', '==', courseId)
-        .get();
+      const db = firebase.firestore(); // Use the existing Firestore instance
+      const doc = await db.collection('past-courses').doc(courseId).get();
 
-      if (!snapshot.empty) {
-        const doc = snapshot.docs[0];
+      if (doc.exists) {
+        const data = doc.data();
         return {
           id: doc.id,
-          courseName: doc.data().code,
-          instructor: doc.data().professor_names,
-          email: doc.data().professor_emails,
-          studentsEnrolled: doc.data().enrolled,
-          maxStudents: doc.data().enrollment_cap,
-          courseCode: doc.data().courseId,
-          TAs: doc.data().tas,
-          department: doc.data().department,
-          credits: doc.data().credits,
-          semester: doc.data().semester,
+          courseName: data?.code || 'N/A',
+          instructor: data?.professor_names || 'Unknown',
+          email: data?.professor_emails || 'Unknown',
+          studentsEnrolled: data?.enrolled || 0,
+          maxStudents: data?.enrollment_cap || 0,
+          courseCode: data?.class_number || 'N/A',
+          TAs: data?.tas || [],
+          department: data?.department || 'Unknown',
+          credits: data?.credits || 0,
+          semester: data?.semester || 'N/A',
+          title: data?.title || 'N/A',
         };
       } else {
         throw new Error('No matching documents found');
       }
     } catch (error) {
-      console.error(`Error getting applicants: `, error);
+      console.error('Error getting course details:', error);
       return null;
     }
   };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getCourseDetails();
-        setCourseData(result);
-      } catch (error) {
-        console.error('Error fetching data: ', error);
+    if (courseId) {
+      const fetchData = async () => {
+        try {
+          const result = await getCourseDetails(courseId);
+          setCourseData(result);
+        } catch (error) {
+          console.error('Error fetching data: ', error);
+        }
+      };
+
+      if (role && !roleLoading) {
+        fetchData();
       }
-    };
-    if (role && !roleLoading) {
-      fetchData();
     }
-  }, [courseId]);
+  }, [courseId, role, roleLoading]);
 
   if (roleError) {
     return <p>Error loading role</p>;
@@ -109,8 +112,8 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
     return <p>Please sign in.</p>;
   }
 
-  if (role !== 'faculty' && role !== 'admin') {
-    return <p>Access denied.</p>;
+  if (roleLoading || !role || (role !== 'faculty' && role !== 'admin')) {
+    return <p>Loading...</p>;
   }
 
   return (
@@ -120,15 +123,16 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
           <HeaderCard text="Courses" />
           <CourseDetails
             courseName={courseData.courseName}
-            semester={courseData.courseName}
-            instructor={courseData.courseName}
-            email={courseData.courseName}
+            semester={courseData.semester}
+            instructor={courseData.instructor}
+            email={courseData.email}
             studentsEnrolled={courseData.studentsEnrolled}
             maxStudents={courseData.maxStudents}
             credits={courseData.credits}
-            courseCode={params.courseCode}
+            courseCode={courseData.courseCode}
             department={courseData.department}
             TAs={courseData.TAs}
+            title={courseData.title}
             schedule={[
               {
                 day: 'T',

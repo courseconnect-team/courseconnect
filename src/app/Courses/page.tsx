@@ -6,18 +6,17 @@ import SmallClassCard from '@/components/SmallClassCard/SmallClassCard';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { Bio } from '@/components/Bio/Bio';
 import { Timeline } from '@/components/Timeline/Timeline';
 
-export default function FacultyApplication() {
-  type CourseType = [string, string, string]; // Define the type for courses
+export default function FacultyCourses() {
+  type CourseType = [string, string, string];
 
   const auth = getAuth();
-  const [courses, setCourses] = useState<CourseType[]>([]); // Use the defined type for state
+  const [courses, setCourses] = useState<CourseType[]>([]);
   const db = firebase.firestore();
   const [selectedYear, setSelectedYear] = useState<number>(1);
-  // Reactively listen to auth state changes
   const user = auth.currentUser;
   const uemail = user?.email;
 
@@ -35,8 +34,8 @@ export default function FacultyApplication() {
   const getCourses = async (): Promise<CourseType[]> => {
     try {
       const snapshot = await db
-        .collection('courses')
-        .where('professor_emails', '==', uemail) // Check if the current user is the instructor
+        .collection('past-courses')
+        .where('professor_emails', '==', uemail)
         .get();
 
       const filteredDocs = snapshot.docs.filter(
@@ -58,7 +57,7 @@ export default function FacultyApplication() {
     try {
       const snapshot = await db
         .collection('courses')
-        .where('professor_emails', '==', uemail) // Check if the current user is the instructor
+        .where('professor_emails', '==', uemail)
         .get();
 
       const filteredDocs = snapshot.docs.filter(
@@ -77,18 +76,16 @@ export default function FacultyApplication() {
   };
 
   const mapElement = () => {
-    return courses.map((val) => {
-      return (
-        <div key={val[0]}>
-          <SmallClassCard
-            pathname={`/course/${encodeURIComponent(val[0])}`}
-            courseName={val[1]}
-            courseId={val[0]}
-            className="class"
-          />
-        </div>
-      );
-    });
+    return courses.map((val) => (
+      <div key={val[0]}>
+        <SmallClassCard
+          pathname={`/course/${encodeURIComponent(val[0])}`}
+          courseName={val[1]}
+          courseId={val[0]}
+          className="class"
+        />
+      </div>
+    ));
   };
 
   return (
