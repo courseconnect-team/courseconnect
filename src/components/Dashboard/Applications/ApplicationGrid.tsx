@@ -54,6 +54,7 @@ import { purple } from '@mui/material/colors';
 
 import UnderDevelopment from '@/components/UnderDevelopment';
 import AppView from './AppView';
+import { ThumbDownOffAlt, ThumbUpOffAlt } from '@mui/icons-material';
 
 interface Application {
   id: string;
@@ -212,6 +213,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       department: doc.data().department,
       hours: doc.data().available_hours,
       position: doc.data().position,
+      degree: doc.data().degree,
     };
 
     // Create the document within the "assignments" collection
@@ -302,6 +304,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 courses: Object.entries(doc.data().courses)
                   .filter(([key, value]) => value == 'accepted')
                   .map(([key, value]) => key),
+                allcourses: Object.entries(doc.data().courses).map(
+                  ([key, value]) => key
+                ),
               } as Application)
           );
         setApplicationData(data);
@@ -758,14 +763,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           </Button>,
           <GridActionsCellItem
             key="4"
-            icon={<ThumbUpAltIcon />}
+            icon={<ThumbUpOffAlt />}
             label="Approve"
             onClick={(event) => handleOpenAssignmentDialog(id)}
             color="success"
           />,
           <GridActionsCellItem
             key="5"
-            icon={<ThumbDownAltIcon />}
+            icon={<ThumbDownOffAlt />}
             label="Deny"
             onClick={(event) => handleDenyAssignmentDialog(id)}
             color="error"
@@ -793,15 +798,23 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     {
       field: 'available_semesters',
       headerName: 'Semester(s)',
-      width: 200,
+      width: 150,
       editable: false,
     },
+
     {
-      field: 'courses',
-      headerName: 'Faculty Approved Courses',
+      field: 'allcourses',
+      headerName: 'All Course(s)',
       width: 250,
       editable: true,
     },
+    {
+      field: 'courses',
+      headerName: 'Faculty Approved Course(s)',
+      width: 250,
+      editable: true,
+    },
+
     { field: 'position', headerName: 'Position', width: 70, editable: true },
     { field: 'date', headerName: 'Date', width: 100, editable: true },
     {
@@ -845,14 +858,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             />,
             <GridActionsCellItem
               key="4"
-              icon={<ThumbUpAltIcon />}
+              icon={<ThumbUpOffAlt />}
               label="Approve"
               onClick={(event) => handleApproveClick(id)}
               color="success"
             />,
             <GridActionsCellItem
               key="5"
-              icon={<ThumbDownAltIcon />}
+              icon={<ThumbDownOffAlt />}
               label="Deny"
               onClick={(event) => handleDenyClick(id)}
               color="error"

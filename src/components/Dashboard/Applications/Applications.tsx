@@ -13,7 +13,7 @@ export default function Applications(props: ApplicationsProps) {
   if (userRole === 'admin') {
     return (
       <>
-        <Container maxWidth={false} sx={{maxWidth:"80%"}}>
+        <Container maxWidth={false} sx={{ maxWidth: '80%' }}>
           <h1>Applications</h1>
           <ApplicationGrid userRole={userRole} />
           <h1>Assignments</h1>

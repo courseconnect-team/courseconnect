@@ -130,6 +130,23 @@ export default function AppView({
                   {docData.available_hours.join(', ')}
                 </div>
               </div>
+              <div style={{ display: 'flex', gap: '75px' }}>
+                <div className="label50"> All Course(s):</div>
+                <div className="availability2">
+                  {Object.entries(docData.courses)
+                    .map(([key, value]) => key)
+                    .join(', ')}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '75px' }}>
+                <div className="label50">Faculty Approved Course(s):</div>
+                <div className="availability2">
+                  {Object.entries(docData.courses)
+                    .filter(([key, value]) => value == 'accepted')
+                    .map(([key, value]) => key)
+                    .join(', ')}
+                </div>
+              </div>
 
               <br />
               <div
