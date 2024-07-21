@@ -973,6 +973,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        checkboxSelection
         slots={{
           toolbar: EditToolbar,
         }}

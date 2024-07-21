@@ -38,7 +38,7 @@ export default function AppView({ uid }: AppViewProps) {
       {docData && (
         <Grid sx={{ flexGrow: 1 }} spacing={4}>
           <Grid item xs={22}>
-            <Grid container justifyContent="center" spacing={4}>
+            <Grid container justifyContent="left" spacing={4}>
               {[0, 1, 2, 3, 4, 5, 6, 7].map((value) => {
                 if (value == 0) {
                   return (
