@@ -36,10 +36,10 @@ const EnrollmentInfo: React.FC<EnrollmentInfoProps> = (props) => {
           <CircularProgress
             variant="determinate"
             value={percentage}
-            size={80}
+            size={250}
             thickness={4}
             {...circularProgressProps}
-            sx={{ color: 'purple' }}
+            sx={{ color: '#562EBA' }}
           />
           <Box
             sx={{
