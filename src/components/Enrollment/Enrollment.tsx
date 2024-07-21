@@ -50,15 +50,25 @@ const EnrollmentInfo: React.FC<EnrollmentInfoProps> = (props) => {
               position: 'absolute',
               display: 'flex',
               alignItems: 'center',
+              flexDirection: 'column',
               justifyContent: 'center',
             }}
           >
             <Typography
               variant="caption"
               component="div"
-              color="text.secondary"
+              color="text.primary"
+              fontSize="40px"
             >
               {`${Math.round(percentage)}%`}
+            </Typography>
+            <Typography
+              variant="caption"
+              component="div"
+              color="text.secondary"
+              fontSize="20px"
+            >
+              {'Student Enrolled'}
             </Typography>
           </Box>
         </Box>
@@ -74,7 +84,7 @@ const EnrollmentInfo: React.FC<EnrollmentInfoProps> = (props) => {
       <LinearProgress
         variant="determinate"
         value={percentage}
-        sx={{ height: '8px', borderRadius: '4px' }}
+        sx={{ height: '8px', borderRadius: '4px', color: '#562EBA' }}
       />
     </Box>
   );

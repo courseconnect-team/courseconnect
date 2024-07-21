@@ -28,23 +28,44 @@
     flex-direction: row;
     padding-left: 51px;
     margin-top: 175px;
-    gap: 30%;
+    gap: 18%;
+   
   }
   
+  @media (max-width: 1200px) {
+    .page-container {
+      padding-left: 40px; /* Adjust padding */
+      margin-top: 150px;  /* Adjust margin */
+      gap: 10%; /* Decrease gap */
+    }
+  }
   
+  @media (max-width: 900px) {
+    .page-container {
+      padding-left: 30px; /* Adjust padding */
+      margin-top: 125px;  /* Adjust margin */
+      gap: 7%; /* Further decrease gap */
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .page-container {
+      padding-left: 20px; /* Adjust padding */
+      margin-top: 100px;  /* Adjust margin */
+      gap: 5%; /* Minimal gap */
+    }
+  }
+
   .class-cards-container1 {
     display: flex;
     margin-top: 8px;
     height: 100%;
     margin-left: -18px;
-    
-    
   }
   .class-cards-container {
     display: flex;
     margin-top: 8px;
     height: 100%;
-
   }
   .class{
     margin:22px
