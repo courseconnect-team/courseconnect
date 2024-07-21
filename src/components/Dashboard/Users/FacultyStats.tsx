@@ -9,8 +9,8 @@ export default function FacultyStats(props: UsersProps) {
   const { userRole } = props;
   return (
     <>
-      <Container maxWidth={false} sx={{ maxWidth: "90%" }}>
-        <div style={{ marginBottom: "100px" }}>
+      <Container maxWidth={false} sx={{ maxWidth: '90%' }}>
+        <div style={{ marginBottom: '100px' }}>
           <StatsGrid userRole={userRole} />
         </div>
       </Container>

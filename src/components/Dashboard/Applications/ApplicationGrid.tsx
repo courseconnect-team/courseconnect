@@ -114,6 +114,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .firestore()
       .collection('applications')
       .doc(id.toString());
+
     const doc = await getDoc(statusRef);
     setCodes(
       Object.entries(doc.data().courses)
@@ -198,8 +199,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${current.getMonth() + 1
-      }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${
+      current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -213,8 +215,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       position: doc.data().position,
       degree: doc.data().degree,
     };
-
-    console.log(assignmentObject);
 
     // Create the document within the "assignments" collection
     firebase
@@ -286,7 +286,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     if (userRole === 'admin') {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
-          .filter(function(doc) {
+          .filter(function (doc) {
             if (
               doc.data().status != 'Admin_approved' &&
               doc.data().status != 'Admin_denied'
@@ -298,16 +298,16 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           })
           .map(
             (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-              courses: Object.entries(doc.data().courses)
-                .filter(([key, value]) => value == 'accepted')
-                .map(([key, value]) => key),
-              allcourses: Object.entries(
-                doc.data().courses
-              ).map(([key, value]) => key),
-            } as Application)
+              ({
+                id: doc.id,
+                ...doc.data(),
+                courses: Object.entries(doc.data().courses)
+                  .filter(([key, value]) => value == 'accepted')
+                  .map(([key, value]) => key),
+                allcourses: Object.entries(doc.data().courses).map(
+                  ([key, value]) => key
+                ),
+              } as Application)
           );
         setApplicationData(data);
       });
@@ -335,10 +335,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       applicationsRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Application)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Application)
         );
         setApplicationData(data);
       });
@@ -360,7 +360,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleDenyEmail = async (id: GridRowId) => {
     try {
-      console.log(id);
       const snapshot = await firebase
         .firestore()
         .collection('applications')
@@ -381,8 +380,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type: 'applicationStatusDenied',
               data: {
                 user: {
-                  name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
-                    }`.trim(),
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
                   email: applicationData.email,
                 },
                 position: applicationData.position,
@@ -435,8 +435,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type: 'applicationStatusApproved',
               data: {
                 user: {
-                  name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
-                    }`.trim(),
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
                   email: applicationData.email,
                 },
                 position: assignmentData.position,
@@ -462,7 +463,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   // approve/deny click handlers
   const handleDenyClick = (id: GridRowId) => {
-    console.log(id);
     setLoading(true);
     // Update the 'applications' collection
     firebase
@@ -508,8 +508,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     // get the current date in month/day/year format
     const current = new Date();
-    const current_date = `${current.getMonth() + 1
-      }-${current.getDate()}-${current.getFullYear()}`;
+    const current_date = `${
+      current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
     const assignmentObject = {
       date: current_date as string,
@@ -586,7 +587,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(delId.toString());
     handleDeleteClick(delId);
     setDelDia(false);
   };
@@ -936,8 +936,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
@@ -1115,31 +1115,38 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         <DialogTitle>Course Assignment</DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
-            <DialogContentText>
-              Please select the course code to which the student shall be
-              assigned.
-            </DialogContentText>
-            <br />
-
-            <FormControl required>
-              <RadioGroup
-                name="positions-radio-group"
-                value={valueRadio}
-                onChange={handleChangeRadio}
-                aria-required="true"
-              >
-                {codes.map((code) => {
-                  return (
-                    <FormControlLabel
-                      key={code}
-                      value={code}
-                      control={<Radio />}
-                      label={code}
-                    />
-                  );
-                })}
-              </RadioGroup>
-            </FormControl>
+            {codes == [] ? (
+              <>
+                <DialogContentText>
+                  Please select the course code to which the student shall be
+                  assigned.
+                </DialogContentText>
+                <br />
+                <FormControl required>
+                  <RadioGroup
+                    name="positions-radio-group"
+                    value={valueRadio}
+                    onChange={handleChangeRadio}
+                    aria-required="true"
+                  >
+                    {codes.map((code) => {
+                      return (
+                        <FormControlLabel
+                          key={code}
+                          value={code}
+                          control={<Radio />}
+                          label={code.replace(/,/g, ', ')}
+                        />
+                      );
+                    })}
+                  </RadioGroup>
+                </FormControl>{' '}
+              </>
+            ) : (
+              <DialogContentText>
+                No faculty has accepted this student yet.
+              </DialogContentText>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>

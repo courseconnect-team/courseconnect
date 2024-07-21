@@ -2,7 +2,6 @@
   height: 295px;
   position: absolute;
   width: 408px;
-
 }
 
 .fullnameandbio .ellipse {
@@ -11,7 +10,7 @@
   border-color: #ffffff;
   border-radius: 100px;
   height: 200px;
-  left: 95px;
+  left: 37%;
   position: absolute;
   top: 0;
   width: 200px;
@@ -29,6 +28,7 @@
   font-size: 48px;
   font-weight: 400;
   margin: auto;
+  left:11%;
   text-align: center;
   letter-spacing: 0;
   line-height: normal;
@@ -47,6 +47,7 @@
   line-height: normal;
   position: relative;
   top: 200px;
+   left:11%;
 }
 
 .fullnameandbio .textwrapper2 {

@@ -23,6 +23,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/ClassCard/ClassCard.jsx", "functions/sendEmail/nodemailer.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/ClassCard/ClassCard.jsx", "functions/sendEmail/nodemailer.ts", "src/components/LinearProgress/LinearProgress.jsx"],
   "exclude": ["node_modules"]
 }

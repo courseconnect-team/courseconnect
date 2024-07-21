@@ -90,11 +90,11 @@ export default function StatsGrid(props: UserGridProps) {
     const unsubscribe = usersRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          fullname: doc.data().firstname + ' ' + doc.data().lastname,
-          ...doc.data(),
-        } as unknown as User)
+          ({
+            id: doc.id,
+            fullname: doc.data().firstname + ' ' + doc.data().lastname,
+            ...doc.data(),
+          } as unknown as User)
       );
 
       setUserData(data);
@@ -296,8 +296,6 @@ export default function StatsGrid(props: UserGridProps) {
           >
             View
           </Button>,
-
-
         ];
       },
     },
@@ -307,8 +305,18 @@ export default function StatsGrid(props: UserGridProps) {
       width: 150,
       editable: false,
     },
-    { field: 'ral', headerName: 'Research Activity Level', width: 200, editable: false },
-    { field: 'acu1', headerName: 'Assigned Course Units', width: 200, editable: false },
+    {
+      field: 'ral',
+      headerName: 'Research Activity Level',
+      width: 200,
+      editable: false,
+    },
+    {
+      field: 'acu1',
+      headerName: 'Assigned Course Units',
+      width: 200,
+      editable: false,
+    },
     {
       field: 'acu2',
       headerName: 'Accumulated Course Credits',
@@ -319,10 +327,19 @@ export default function StatsGrid(props: UserGridProps) {
 
     { field: 'ce', headerName: 'Credit Excess', width: 150, editable: true },
 
-    { field: 'tot', headerName: 'Total Classes Taught (3yrs)', width: 200, editable: true },
+    {
+      field: 'tot',
+      headerName: 'Total Classes Taught (3yrs)',
+      width: 200,
+      editable: true,
+    },
 
-    { field: 'acu3', headerName: 'Average Course Units', width: 170, editable: true },
-
+    {
+      field: 'acu3',
+      headerName: 'Average Course Units',
+      width: 170,
+      editable: true,
+    },
 
     { field: 'lc', headerName: 'Lab Courses', width: 150, editable: true },
   ];
@@ -346,8 +363,8 @@ export default function StatsGrid(props: UserGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {

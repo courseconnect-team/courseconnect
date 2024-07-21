@@ -12,7 +12,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 export default function FacultyApplication() {
   const auth = getAuth();
   const [semester, setSemester] = useState('Fall 2022');
-  const [courses, setCourses] = useState<[]>([]);
+  const [courses, setCourses] = useState<[string, any][]>([]);
   const db = firebase.firestore();
 
   // Reactively listen to auth state changes
@@ -26,9 +26,8 @@ export default function FacultyApplication() {
     return `${season}${yearShort}`;
   };
 
-  const getCourses = async (semester: string) => {
+  const getCourses = async (semester: string): Promise<[string, any][]> => {
     try {
-      console.log(semester);
       const snapshot = await db
         .collection(`courses`)
         .where('semester', '==', semester)

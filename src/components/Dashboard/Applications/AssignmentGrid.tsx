@@ -29,7 +29,6 @@ import 'firebase/firestore';
 import { alpha, styled } from '@mui/material/styles';
 import { gridClasses } from '@mui/x-data-grid';
 
-
 import { getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import {
   Button,
@@ -43,8 +42,6 @@ import {
 } from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
 import AssignView from './AssignView';
-
-
 
 interface Assignment {
   id: string;
@@ -115,7 +112,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   };
   const handleDeleteDiagClose = () => {
     setDelDia(false);
-  }
+  };
   // assignment dialog pop-up view setup
   const [openAssignmentDialog, setOpenAssignmentDialog] = React.useState(false);
   const handleOpenAssignmentDialog = (id: GridRowId) => {
@@ -133,17 +130,17 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-          firstName: doc.data().name.split(' ')[0],
-          lastName: doc.data().name.split(' ')[1],
-          year: doc.data().semesters[0].split(' ')[1],
-          fte: 15,
-          pname: "DEPARTMENT TA/UPIS",
-          pid: "000108927",
-          hr: 15,
-        } as Assignment)
+          ({
+            id: doc.id,
+            ...doc.data(),
+            firstName: doc.data().name.split(' ')[0],
+            lastName: doc.data().name.split(' ')[1],
+            year: doc.data().semesters[0].split(' ')[1],
+            fte: 15,
+            pname: 'DEPARTMENT TA/UPIS',
+            pid: '000108927',
+            hr: 15,
+          } as Assignment)
       );
       setAssignmentData(data);
     });
@@ -306,9 +303,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     e.preventDefault();
     console.log(delId.toString());
     handleDeleteClick(delId);
-    setDelDia(false)
-
-  }
+    setDelDia(false);
+  };
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
     setLoading(true);
     const updatedRow = {
@@ -405,12 +401,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           <Button
             key="3"
             variant="outlined"
-            color='inherit'
+            color="inherit"
             size="small"
-            style={{ marginLeft: "0px", height: "25px", textTransform: "none" }}
-            startIcon={
-              <ZoomInIcon />
-            }
+            style={{ marginLeft: '0px', height: '25px', textTransform: 'none' }}
+            startIcon={<ZoomInIcon />}
             onClick={(event) => handleClickOpenGrid(id)}
           >
             View
@@ -419,17 +413,18 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           <Button
             key="5"
             variant="outlined"
-            color='primary'
+            color="primary"
             size="small"
-            style={{ marginRight: "10px", height: "25px", textTransform: "none" }}
-            startIcon={
-              <DeleteIcon />
-            }
+            style={{
+              marginRight: '10px',
+              height: '25px',
+              textTransform: 'none',
+            }}
+            startIcon={<DeleteIcon />}
             onClick={handleDel(id)}
           >
             Delete
           </Button>,
-
         ];
       },
     },
@@ -438,7 +433,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Student UFID',
       width: 190,
       editable: false,
-
     },
 
     {
@@ -446,44 +440,37 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Student First Name',
       width: 190,
       editable: true,
-
     },
     {
       field: 'lastName',
       headerName: 'Student Last Name',
       width: 190,
       editable: true,
-
     },
     {
       field: 'email',
       headerName: 'Student Email',
       width: 210,
       editable: true,
-
     },
     {
       field: 'supervisorUfid',
       headerName: 'Supervisor UFID',
       width: 190,
       editable: true,
-
     },
-
 
     {
       field: 'supervisorFirstName',
       headerName: 'Supervisor First Name',
       width: 190,
       editable: true,
-
     },
     {
       field: 'supervisorLastName',
       headerName: 'Supervisor Last Name',
       width: 190,
       editable: true,
-
     },
 
     {
@@ -491,7 +478,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Supervisor Email',
       width: 190,
       editable: true,
-
     },
 
     {
@@ -499,23 +485,19 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Proxy UFID',
       width: 190,
       editable: true,
-
     },
-
 
     {
       field: 'proxyFirstName',
       headerName: 'Proxy First Name',
       width: 190,
       editable: true,
-
     },
     {
       field: 'proxyLastName',
       headerName: 'Proxy Last Name',
       width: 190,
       editable: true,
-
     },
 
     {
@@ -523,115 +505,160 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Proxy Email',
       width: 190,
       editable: true,
-
     },
     {
-      field: 'action', headerName: 'Requested Action', width: 140, editable: false, valueFormatter: (value) => {
-        return "NEW HIRE";
+      field: 'action',
+      headerName: 'Requested Action',
+      width: 140,
+      editable: false,
+      valueFormatter: (value) => {
+        return 'NEW HIRE';
       },
     },
 
-
     {
-      field: 'position', headerName: 'Position Type', width: 110, editable: true, valueFormatter: (value) => {
-        return "TA";
+      field: 'position',
+      headerName: 'Position Type',
+      width: 110,
+      editable: true,
+      valueFormatter: (value) => {
+        return 'TA';
       },
-
     },
     {
-      field: 'degree', headerName: 'Degree Type', width: 110, editable: true
+      field: 'degree',
+      headerName: 'Degree Type',
+      width: 110,
+      editable: true,
     },
     {
-      field: 'semesters', headerName: 'Semester', width: 110, editable: true, valueFormatter: (value) => {
+      field: 'semesters',
+      headerName: 'Semester',
+      width: 110,
+      editable: true,
+      valueFormatter: (value) => {
         const val = value.value;
         try {
-          if (val[0].includes("Fall")) {
-            return "FALL";
+          if (val[0].includes('Fall')) {
+            return 'FALL';
           }
-          if (val[0].includes("Spring")) {
-            return "SPRING";
+          if (val[0].includes('Spring')) {
+            return 'SPRING';
           }
-          if (val[0].includes("Summer")) {
-            return "SUMMER";
+          if (val[0].includes('Summer')) {
+            return 'SUMMER';
           }
         } catch {
-          return "FALL";
+          return 'FALL';
         }
-
       },
     },
 
     {
-      field: 'year', headerName: 'Year', width: 110, editable: true
+      field: 'year',
+      headerName: 'Year',
+      width: 110,
+      editable: true,
     },
     {
-      field: 'none', headerName: 'Starting Date', width: 100, editable: true,
+      field: 'none',
+      headerName: 'Starting Date',
+      width: 100,
+      editable: true,
     },
     {
-      field: 'ed', headerName: 'End Date', width: 110, editable: true
+      field: 'ed',
+      headerName: 'End Date',
+      width: 110,
+      editable: true,
     },
 
     {
-      field: 'pid', headerName: 'Project Id', width: 110, editable: true
+      field: 'pid',
+      headerName: 'Project Id',
+      width: 110,
+      editable: true,
     },
     {
       field: 'pname',
       headerName: 'Project Name',
       width: 240,
       editable: true,
-
     },
 
-
     {
-      field: 'percentage', headerName: 'Percentage', width: 110, editable: true
+      field: 'percentage',
+      headerName: 'Percentage',
+      width: 110,
+      editable: true,
     },
     {
       field: 'hours',
       headerName: 'Hours',
       width: 140,
       editable: true,
-
     },
 
     {
-      field: 'ar', headerName: 'Annual Rate', width: 110, editable: true
+      field: 'ar',
+      headerName: 'Annual Rate',
+      width: 110,
+      editable: true,
     },
 
     {
-      field: 'bwr', headerName: 'Biweekly Rate', width: 110, editable: true
+      field: 'bwr',
+      headerName: 'Biweekly Rate',
+      width: 110,
+      editable: true,
     },
     {
-      field: 'hr', headerName: 'Hourly Rate', width: 110, editable: true
-    },
-
-    {
-      field: 'ta', headerName: 'Target Amount', width: 110, editable: true
-    },
-
-    {
-      field: 'wt', headerName: 'Working Title', width: 110, editable: true
+      field: 'hr',
+      headerName: 'Hourly Rate',
+      width: 110,
+      editable: true,
     },
 
     {
-      field: 'class_codes', headerName: 'Duties', width: 140, editable: true
-      , valueFormatter: (value) => {
-        return "UPI in " + value.value;
+      field: 'ta',
+      headerName: 'Target Amount',
+      width: 110,
+      editable: true,
+    },
+
+    {
+      field: 'wt',
+      headerName: 'Working Title',
+      width: 110,
+      editable: true,
+    },
+
+    {
+      field: 'class_codes',
+      headerName: 'Duties',
+      width: 140,
+      editable: true,
+      valueFormatter: (value) => {
+        return 'UPI in ' + value.value;
       },
     },
 
     {
-      field: 'fte', headerName: 'FTE', width: 110, editable: true,
-
+      field: 'fte',
+      headerName: 'FTE',
+      width: 110,
+      editable: true,
     },
 
-
     {
-      field: 'Imported', headerName: 'Imported', width: 140, editable: false, valueFormatter: (value) => {
-        return "YES";
+      field: 'Imported',
+      headerName: 'Imported',
+      width: 140,
+      editable: false,
+      valueFormatter: (value) => {
+        return 'YES';
       },
-    }
-
+    },
   ];
   const ODD_OPACITY = 0.2;
 
@@ -647,27 +674,26 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       '&.Mui-selected': {
         backgroundColor: alpha(
           theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity,
+          ODD_OPACITY + theme.palette.action.selectedOpacity
         ),
         '&:hover, &.Mui-hovered': {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity,
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
             backgroundColor: alpha(
               theme.palette.primary.main,
-              ODD_OPACITY + theme.palette.action.selectedOpacity,
+              ODD_OPACITY + theme.palette.action.selectedOpacity
             ),
           },
         },
       },
     },
   }));
-
 
   return (
     <Box
@@ -682,9 +708,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         },
       }}
     >
-
-
-      {loading ? <LinearProgress color='warning' /> : null}
+      {loading ? <LinearProgress color="warning" /> : null}
       <StripedDataGrid
         rows={assignmentData}
         columns={columns}
@@ -707,9 +731,17 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         }
         sx={{ borderRadius: '16px' }}
       />
-      <Dialog PaperProps={{ sx: { borderRadius: 4 } }}
-        maxWidth={"lg"} open={open} onClose={handleClose}>
-        <DialogTitle style={{ fontWeight: 'bold', fontSize: '25px', marginBottom: '10px' }}>{'View Assignment Details'}</DialogTitle>
+      <Dialog
+        PaperProps={{ sx: { borderRadius: 4 } }}
+        maxWidth={'lg'}
+        open={open}
+        onClose={handleClose}
+      >
+        <DialogTitle
+          style={{ fontWeight: 'bold', fontSize: '25px', marginBottom: '10px' }}
+        >
+          {'View Assignment Details'}
+        </DialogTitle>
 
         <DialogContent sx={{ minWidth: '100%' }}>
           {/* Display the application data of the selected user */}
@@ -722,22 +754,89 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         </DialogContent>
       </Dialog>
 
-      <Dialog style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
-        style: { borderRadius: 20 }
-      }} open={delDia} onClose={handleDeleteDiagClose} >
-        <DialogTitle style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>Delete Applicant</DialogTitle>
-        <form onSubmit={e => handleSubmit(e)}>
+      <Dialog
+        style={{
+          borderImage:
+            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+          boxShadow: '0px 2px 20px 4px #00000040',
+          borderRadius: '20px',
+          border: '2px solid',
+        }}
+        PaperProps={{
+          style: { borderRadius: 20 },
+        }}
+        open={delDia}
+        onClose={handleDeleteDiagClose}
+      >
+        <DialogTitle
+          style={{
+            fontFamily: 'SF Pro Display-Medium, Helvetica',
+            textAlign: 'center',
+            fontSize: '35px',
+            fontWeight: '540',
+          }}
+        >
+          Delete Applicant
+        </DialogTitle>
+        <form onSubmit={(e) => handleSubmit(e)}>
           <DialogContent>
-            <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "24px", color: "black" }}>
+            <DialogContentText
+              style={{
+                marginTop: '35px',
+                fontFamily: 'SF Pro Display-Medium, Helvetica',
+                textAlign: 'center',
+                fontSize: '24px',
+                color: 'black',
+              }}
+            >
               Are you sure you want to delete this applicant?
             </DialogContentText>
-
-
           </DialogContent>
-          <DialogActions style={{ marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap: "93px" }}>
-            <Button variant="outlined" style={{ fontSize: "17px", marginLeft: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac', borderWidth: "3px" }} onClick={handleDeleteDiagClose}>Cancel</Button>
+          <DialogActions
+            style={{
+              marginTop: '30px',
+              marginBottom: '42px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: '93px',
+            }}
+          >
+            <Button
+              variant="outlined"
+              style={{
+                fontSize: '17px',
+                marginLeft: '110px',
+                borderRadius: '10px',
+                height: '43px',
+                width: '120px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                borderColor: '#5736ac',
+                color: '#5736ac',
+                borderWidth: '3px',
+              }}
+              onClick={handleDeleteDiagClose}
+            >
+              Cancel
+            </Button>
 
-            <Button variant="contained" style={{ fontSize: "17px", marginRight: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff' }} type="submit">Delete</Button>
+            <Button
+              variant="contained"
+              style={{
+                fontSize: '17px',
+                marginRight: '110px',
+                borderRadius: '10px',
+                height: '43px',
+                width: '120px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                backgroundColor: '#5736ac',
+                color: '#ffffff',
+              }}
+              type="submit"
+            >
+              Delete
+            </Button>
           </DialogActions>
         </form>
       </Dialog>

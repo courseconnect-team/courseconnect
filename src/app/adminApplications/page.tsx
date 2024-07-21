@@ -36,7 +36,7 @@ import GetUserUfid from '@/firebase/util/GetUserUfid';
 import { ApplicationStatusCardDenied } from '@/components/ApplicationStatusCardDenied/ApplicationStatusCardDenied';
 
 import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCardAccepted/ApplicationStatusCardAccepted';
-import styles from "./style.module.css";
+import styles from './style.module.css';
 import 'firebase/firestore';
 import Applications from '@/components/Dashboard/Applications/Applications';
 
@@ -55,13 +55,19 @@ export default function AdminApplications() {
               <div className={styles.colorblockframe}>
                 <div className={styles.overlapgroup2}>
                   <div className={styles.colorblock} />
-                  <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                  <img
+                    className={styles.GRADIENTS}
+                    alt="Gradients"
+                    src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
+                  />
                   <div className={styles.glasscard} />
                 </div>
               </div>
               <EceLogoPng className={styles.ecelogopng2} />
               <TopNavBarSigned className={styles.topnavbarsignedin} />
-              <div className={styles.textwrapper8}>Applications & Assignments</div>
+              <div className={styles.textwrapper8}>
+                Applications & Assignments
+              </div>
             </div>
 
             <CssBaseline />
@@ -74,18 +80,13 @@ export default function AdminApplications() {
                 width: '100%',
               }}
             >
-
               <Box sx={{ mt: 50, mb: 2, width: '120%' }}>
-
                 <Applications userRole={role as string} />
-
               </Box>
             </Box>
-
           </div>
         </div>
       </div>
     </>
-
   );
 }

@@ -69,8 +69,9 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${
+    current.getMonth() + 1
+  }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -78,7 +79,7 @@ export default function Application() {
   const [additionalPromptValue, setAdditionalPromptValue] = React.useState('');
   const handleAdditionalPromptChange = (newValue: string) => {
     setAdditionalPromptValue(newValue);
-  }
+  };
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -158,10 +159,10 @@ export default function Application() {
     let f24 = false;
     let s25 = false;
     for (let i = 0; i < personName.length; i++) {
-      if (personName[i].includes("Fall 2024")) {
+      if (personName[i].includes('Fall 2024')) {
         f24 = true;
       }
-      if (personName[i].includes("Spring 2025")) {
+      if (personName[i].includes('Spring 2025')) {
         s25 = true;
       }
     }
@@ -205,7 +206,6 @@ export default function Application() {
       status: 'Submitted',
       resume_link: formData.get('resumeLink') as string,
     };
-    console.log(applicationData);
 
     if (!applicationData.email.includes('ufl')) {
       toast.error('Please enter a valid ufl email!');
@@ -302,8 +302,6 @@ export default function Application() {
 
         router.push('/');
       } else {
-        console.log(response);
-
         toast.dismiss(toastId);
         toast.error('Application data failed to send to server!');
         console.log('ERROR: Application data failed to send to server');

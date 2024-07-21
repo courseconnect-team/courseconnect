@@ -189,3 +189,15 @@
   position: absolute;
   top: 10px;
 }
+.verification {
+  color: #6c6c6c;
+  font-size: 18px;
+  width: 300px;
+  margin-top: 167px;
+  margin-left: -1px;
+}
+.verification:hover{
+  cursor: pointer;
+  color: #562EBA;
+  text-decoration: underline;
+}

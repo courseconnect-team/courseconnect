@@ -125,7 +125,6 @@ export const SignUpCard = ({ className }: { className: any }) => {
       ufid: ufid,
       uid: '',
     };
-    console.log('Role ' + userData.role);
 
     // add the following:
     if (userData.firstname === '') {
@@ -151,7 +150,6 @@ export const SignUpCard = ({ className }: { className: any }) => {
         userData.password
       );
       userData.uid = uid_from_signup;
-      console.log(userData.uid);
 
       if (userData.uid === '-1' || userData.uid === '') {
         toast.error('This UFID is Already in Use!');

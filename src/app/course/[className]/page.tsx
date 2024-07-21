@@ -1,431 +1,160 @@
-// pages/course/[className].js
 'use client';
-import { FC } from 'react';
-import React, { useEffect, useState } from 'react';
-import { Toaster } from 'react-hot-toast';
+
+import { FC, useEffect, useState } from 'react';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import './style.css';
-import CourseNavBar from '@/components/CourseNavBar/CourseNavBar';
-import ApplicantCardApprovedeny from '@/components/ApplicantCardApprovedeny/ApplicantCardApprovedeny';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import CourseDetails from '@/components/CourseDetails/CourseDetails';
+import { getAuth } from 'firebase/auth';
+import { useUserRole } from '@/firebase/util/GetUserRole';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-import ApplicantCardAssign from '@/components/ApplicantCardAssign/ApplicantCardAssign';
-import ApplicantCardApprove from '@/components/ApplicantCardApprove/ApplicantCardApprove';
-import ApplicantCardDeny from '@/components/ApplicantCardDeny/ApplicantCardDeny';
 interface pageProps {
-  params: { className: string, semester: string };
+  params: { semester: string; collection: string; courseCode: string };
 }
 
-// const [selectedItem, setSelectedItem] = useState('needsReview');
+interface TA {
+  name: string;
+  email: string;
+}
 
-// const NeedsReviewApplicants = () => {
-//   const [applicants, setApplicants] = useState([]);
+interface Schedule {
+  day: string;
+  time: string;
+  location: string;
+}
 
-//   useEffect(() => {
-//     const fetchApplicants = async () => {
-//       const needsReviewApplicants = await getNeedsReviewApplicants();
+interface CourseDetails {
+  id: string;
+  courseName: string;
+  instructor: string;
+  email: string;
+  studentsEnrolled: number;
+  maxStudents: number;
+  courseCode: string;
+  TAs: TA[];
+  department: string;
+  credits: number;
+  semester: string;
+  title: string;
+}
 
-//     };
+const StatisticsPage: FC<pageProps> = ({ params }) => {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const courseId = searchParams.get('courseId');
 
-//     fetchApplicants();
-//   }, []);
-// }
-// const handleNavBarItemClick = (item) => {
-//   setSelectedItem(item);
-// };
+  const {
+    role,
+    loading: roleLoading,
+    error: roleError,
+  } = useUserRole(user?.uid);
 
-const CoursePage: FC<pageProps> = ({ params }) => {
-  const db = firebase.firestore();
-  const [openApproveDialog, setOpenApproveDialog] = useState(false);
-  const [openDenyDialog, setOpenDenyDialog] = useState(false);
-  const [openReviewDialog, setOpenReviewDialog] = useState(false);
-  const [currentStu, setCurrentStu] = useState("null");
-  const [className, setClassName] = useState("none");
-  const [expandedStates, setExpandedStates] = useState<{
-    [id: string]: boolean;
-  }>({});
+  const [courseData, setCourseData] = useState<CourseDetails | null>(null);
 
-  const handleExpandToggle = (id: string) => {
-    setExpandedStates((prevExpandedStates) => ({
-      ...prevExpandedStates,
-      [id]: !prevExpandedStates[id],
-    }));
-  };
-
-  const [taData, setTaData] = useState<
-    {
-      id: string;
-      uf_email: string;
-      firstname: string;
-      lastname: string;
-      number: string;
-      position: string;
-      semester: string;
-      availability: string;
-      department: string;
-      degree: string;
-      collegestatus: string;
-      qualifications: string;
-      resume: string;
-      plan: string;
-      gpa: string;
-    }[]
-  >([]);
-
-  const [upiData, setupiData] = useState<
-    {
-      id: string;
-      uf_email: string;
-      firstname: string;
-      lastname: string;
-      number: string;
-      position: string;
-      semester: string;
-      availability: string;
-      department: string;
-      degree: string;
-      collegestatus: string;
-      qualifications: string;
-      resume: string;
-      plan: string;
-      gpa: string;
-    }[]
-  >([]);
-
-  const [graderData, setgraderData] = useState<
-    {
-      id: string;
-      uf_email: string;
-      firstname: string;
-      lastname: string;
-      number: string;
-      position: string;
-      semester: string;
-      availability: string;
-      department: string;
-      degree: string;
-      collegestatus: string;
-      qualifications: string;
-      resume: string;
-      plan: string;
-      gpa: string;
-    }[]
-  >([]);
-
-  const [selection, setSelection] = useState<string>('Review');
-
-  const toggleSelection = (select: string): void => {
-    setSelection(select);
-    setExpandedStates({})
-  };
-
-  const getDataByPositionAndStatus = async (position: string, status: string) => {
+  const getCourseDetails = async (
+    courseId: string
+  ): Promise<CourseDetails | null> => {
     try {
-      console.log(className + " " + status + " " + position);
+      const db = firebase.firestore(); // Use the existing Firestore instance
+      const doc = await db.collection('past-courses').doc(courseId).get();
 
-      const snapshot = await db
-        .collection('applications')
-
-        .where(`courses.${className}`, ">=", "")
-        .orderBy(`courses.${className}`)
-
-        // .where('semesters', 'array-contains', params.semester )
-        .get();
-
-      const snapshot2 = await db
-        .collection('assignments')
-        .where("class_codes", "==", className)
-        .where("position", "==", position)
-        .get();
-
-
-      if (selection == "Assigned") {
-        return snapshot2.docs.map((doc) => ({
+      if (doc.exists) {
+        const data = doc.data();
+        return {
           id: doc.id,
-          uf_email: doc.data().email,
-          firstname: doc.data().name,
-          lastname: " ",
-          number: "",
-          position: doc.data().position,
-          semester: params.semester,
-          availability: doc.data().hours,
-          department: doc.data().department,
-          degree: "",
-          collegestatus: "",
-          qualifications: "",
-          resume: "",
-          plan: "",
-          gpa: "",
-        }));
+          courseName: data?.code || 'N/A',
+          instructor: data?.professor_names || 'Unknown',
+          email: data?.professor_emails || 'Unknown',
+          studentsEnrolled: data?.enrolled || 0,
+          maxStudents: data?.enrollment_cap || 0,
+          courseCode: data?.class_number || 'N/A',
+          TAs: data?.tas || [],
+          department: data?.department || 'Unknown',
+          credits: data?.credits || 0,
+          semester: data?.semester || 'N/A',
+          title: data?.title || 'N/A',
+        };
+      } else {
+        throw new Error('No matching documents found');
       }
-      return snapshot.docs.filter(function(doc) {
-        if (doc.data().position != position) {
-          return false;
-        }
-        if (doc.data().status == "Admin_approved") {
-          return false;
-        }
-        if (doc.data().status == "Admin_denied" && selection != "Denied") {
-          return false;
-        }
-        if (doc.data().courses[className] == "applied" && selection == "Review") {
-
-          console.log(doc.data());
-          return true;
-        } else if (doc.data().courses[className] == "accepted" && selection == "Approved") {
-          return true;
-        } else if (doc.data().courses[className] == "denied" && selection == "Denied") {
-          return true;
-        } else {
-          return false;
-        }
-      }).map((doc) => ({
-
-        id: doc.id,
-        uf_email: doc.data().email,
-        firstname: doc.data().firstname,
-        lastname: doc.data().lastname,
-        number: doc.data().phonenumber,
-        position: doc.data().position,
-        semester: params.semester,
-        availability: doc.data().available_hours,
-        department: doc.data().department,
-        degree: doc.data().degree,
-        collegestatus: doc.data().semesterstatus,
-        qualifications: doc.data().qualifications,
-        resume: doc.data().resume_link,
-        plan: doc.data().grad_plans,
-        gpa: doc.data().gpa,
-      }));
     } catch (error) {
-      console.error(`Error getting ${className} applicants: `, error);
-      return [];
+      console.error('Error getting course details:', error);
+      return null;
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getDataByPositionAndStatus('TA', selection);
-        const result2 = await getDataByPositionAndStatus('UPI', selection);
-        const result3 = await getDataByPositionAndStatus('Grader', selection);
-        setTaData(result);
-        setupiData(result2);
-        setgraderData(result3);
-      } catch (error) {
-        console.error('Error fetching data: ', error);
+    if (courseId) {
+      const fetchData = async () => {
+        try {
+          const result = await getCourseDetails(courseId);
+          setCourseData(result);
+        } catch (error) {
+          console.error('Error fetching data: ', error);
+        }
+      };
+
+      if (role && !roleLoading) {
+        fetchData();
       }
-    };
+    }
+  }, [courseId, role, roleLoading]);
 
-    fetchData();
+  if (roleError) {
+    return <p>Error loading role</p>;
+  }
 
-    let getQueryParams = query => {
-      return query
-        ? (/^[?#]/.test(query) ? query.slice(1) : query)
-          .split('&')
-          .reduce((params, param) => {
-            let [key, value] = param.split('=');
-            params[key] = value ? decodeURIComponent(value.replace(/\+/g, ' ')) : '';
-            return params;
-          }, {}
-          )
-        : {}
-    };
-    const { data } = getQueryParams(window.location.search);
-    console.log(data);
+  if (!user) {
+    return <p>Please sign in.</p>;
+  }
 
-    setClassName(data);
-  }, [selection, className]);
-
-  const mapElement = (
-    data: {
-      id: string;
-      uf_email: any;
-      firstname: any;
-      lastname: any;
-      number: string;
-      position: string;
-      semester: string;
-      availability: string;
-      department: string;
-      degree: string;
-      collegestatus: string;
-      qualifications: string;
-      resume: string;
-      plan: string;
-      gpa: string;
-    }[]
-  ) => {
-    return data.map((ta) => {
-      return (
-        <div key={ta.id} style={{ paddingBottom: '31px' }}>
-          {selection === 'Review' && (
-            <ApplicantCardApprovedeny
-              id={ta.id}
-              number={ta.number}
-              position={ta.position}
-              semester={ta.semester}
-              availability={ta.availability}
-              department={ta.department}
-              degree={ta.degree}
-              collegestatus={ta.collegestatus}
-              qualifications={ta.qualifications}
-              expanded={expandedStates[ta.id] || false}
-              onExpandToggle={() => handleExpandToggle(ta.id)}
-              uf_email={ta.uf_email}
-              firstname={ta.firstname}
-              lastname={ta.lastname}
-              resume={ta.resume}
-              plan={ta.plan}
-              gpa={ta.gpa}
-              openApprove={openApproveDialog}
-              openDeny={openDenyDialog}
-              setOpenApproveDialog={setOpenApproveDialog}
-              setOpenDenyDialog={setOpenDenyDialog}
-
-              currentStu={currentStu}
-              setCurrentStu={setCurrentStu}
-              className={className}
-
-            />
-          )}
-
-          {selection === 'Approved' &&
-            (
-              <ApplicantCardApprove
-                id={ta.id}
-                number={ta.number}
-                position={ta.position}
-                semester={ta.semester}
-                availability={ta.availability}
-                department={ta.department}
-                degree={ta.degree}
-                collegestatus={ta.collegestatus}
-                qualifications={ta.qualifications}
-                expanded={expandedStates[ta.id] || false}
-                onExpandToggle={() => handleExpandToggle(ta.id)}
-                uf_email={ta.uf_email}
-                firstname={ta.firstname}
-                lastname={ta.lastname}
-                resume={ta.resume}
-                plan={ta.plan}
-                gpa={ta.gpa}
-                openReview={openReviewDialog}
-                setOpenReviewDialog={setOpenReviewDialog}
-                currentStu={currentStu}
-                setCurrentStu={setCurrentStu}
-
-                className={className}
-              />
-            )}
-          {selection === 'Assigned' &&
-            (
-              <ApplicantCardAssign
-                id={ta.id}
-                number={ta.number}
-                position={ta.position}
-                semester={ta.semester}
-                availability={ta.availability}
-                department={ta.department}
-                degree={ta.degree}
-                collegestatus={ta.collegestatus}
-                qualifications={ta.qualifications}
-                expanded={expandedStates[ta.id] || false}
-                onExpandToggle={() => handleExpandToggle(ta.id)}
-                uf_email={ta.uf_email}
-                firstname={ta.firstname}
-                lastname={ta.lastname}
-                resume={ta.resume}
-                plan={ta.plan}
-                gpa={ta.gpa}
-                openReview={openReviewDialog}
-                setOpenReviewDialog={setOpenReviewDialog}
-                currentStu={currentStu}
-                setCurrentStu={setCurrentStu}
-
-                className={className}
-              />
-            )}
-
-
-          {selection === 'Denied' && (
-            <ApplicantCardDeny
-              id={ta.id}
-              number={ta.number}
-              position={ta.position}
-              semester={ta.semester}
-              availability={ta.availability}
-              department={ta.department}
-              degree={ta.degree}
-              collegestatus={ta.collegestatus}
-              qualifications={ta.qualifications}
-              expanded={expandedStates[ta.id] || false}
-              onExpandToggle={() => handleExpandToggle(ta.id)}
-              uf_email={ta.uf_email}
-              firstname={ta.firstname}
-              lastname={ta.lastname}
-              resume={ta.resume}
-              plan={ta.plan}
-              gpa={ta.gpa}
-              openReview={openReviewDialog}
-              setOpenReviewDialog={setOpenReviewDialog}
-              currentStu={currentStu}
-              setCurrentStu={setCurrentStu}
-              className={className}
-            />
-          )}
-        </div>
-      );
-    });
-  };
+  if (roleLoading || !role || (role !== 'faculty' && role !== 'admin')) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <>
-      <Toaster />
-      <HeaderCard text="Applications" />
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: '-20px',
-        }}
-      >
-        <div className="classe">{className.substring(0, className.indexOf(")")) + ")"}</div>
-      </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center', // Center the content horizontally
-          maxWidth: '40%', // Set the maximum width to 1/3 of the page
-          margin: '0 auto',
-        }}
-      >
-        <CourseNavBar handleClick={toggleSelection} />
-      </div>
-      {taData.length != 0 && (
-        <div className="TAtext" style={{ margin: '35px 0 24px 40px' }}>
-          TA
-        </div>
+      {courseData && (
+        <>
+          <HeaderCard text="Courses" />
+          <CourseDetails
+            courseName={courseData.courseName}
+            semester={courseData.semester}
+            instructor={courseData.instructor}
+            email={courseData.email}
+            studentsEnrolled={courseData.studentsEnrolled}
+            maxStudents={courseData.maxStudents}
+            credits={courseData.credits}
+            courseCode={courseData.courseCode}
+            department={courseData.department}
+            TAs={courseData.TAs}
+            title={courseData.title}
+            schedule={[
+              {
+                day: 'T',
+                time: 'Periods 8-9 (3:00 PM - 4:55 PM)',
+                location: 'CAR 0100',
+              },
+              {
+                day: 'W',
+                time: 'Periods 10-11 (5:10 PM - 7:05 PM)',
+                location: 'CSE E312',
+              },
+              {
+                day: 'R',
+                time: 'Periods 9 (4:05 PM - 4:55 PM)',
+                location: 'CAR 0100',
+              },
+            ]}
+          />
+        </>
       )}
-
-      {mapElement(taData)}
-
-      {upiData.length != 0 && (
-        <div className="TAtext" style={{ margin: '35px 0 24px 40px' }}>
-          UPI
-        </div>
-      )}
-      {mapElement(upiData)}
-
-      {graderData.length != 0 && (
-        <div className="TAtext" style={{ margin: '35px 0 24px 40px' }}>
-          Grader
-        </div>
-      )}
-      {mapElement(graderData)}
     </>
   );
 };
 
-export default CoursePage;
+export default StatisticsPage;

@@ -34,7 +34,7 @@ import GetUserUfid from '@/firebase/util/GetUserUfid';
 import { ApplicationStatusCardDenied } from '@/components/ApplicationStatusCardDenied/ApplicationStatusCardDenied';
 
 import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCardAccepted/ApplicationStatusCardAccepted';
-import styles from "./style.module.css";
+import styles from './style.module.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
@@ -49,10 +49,10 @@ import { firestore } from 'firebase-functions/v1';
 // from a list of existing courses
 // ...yeah that's probably the best way to do it
 
-// todo: If the user role says application denied, then make the general denied box with a 
-// denied message that leads to a reapplication form. 
-// If their user role says accepted, then add all of their assignments as accepted 
-// If nothing then (go throgh their application list and say pending). 
+// todo: If the user role says application denied, then make the general denied box with a
+// denied message that leads to a reapplication form.
+// If their user role says accepted, then add all of their assignments as accepted
+// If nothing then (go throgh their application list and say pending).
 //
 // todo: add the apply link to all states.
 export default function Status() {
@@ -96,30 +96,25 @@ export default function Status() {
   React.useEffect(() => {
     async function fetch() {
       const statusRef2 = db.collection('assignments').doc(userId);
-      await getDoc(statusRef2).then(doc => {
+      await getDoc(statusRef2).then((doc) => {
         if (doc.data() != null && doc.data() != undefined) {
-
-          console.log(doc.data());
-          setAssignment(doc.data().class_codes)
+          setAssignment(doc.data().class_codes);
         }
       });
 
       const statusRef = db.collection('applications').doc(userId);
-      await getDoc(statusRef).then(doc => {
+      await getDoc(statusRef).then((doc) => {
         if (doc.data() != null && doc.data() != undefined) {
-          setAdminDenied(doc.data().status == "Admin_denied")
+          setAdminDenied(doc.data().status == 'Admin_denied');
           setCourses(doc.data().courses);
         }
       });
 
-
       return;
     }
     if (!courses) {
-      fetch()
-
+      fetch();
     }
-
   }, [courses]);
 
   return (
@@ -132,7 +127,11 @@ export default function Status() {
               <div className={styles.colorblockframe}>
                 <div className={styles.overlapgroup2}>
                   <div className={styles.colorblock} />
-                  <img className={styles.GRADIENTS} alt="Gradients" src="https://c.animaapp.com/vYQBTcnO/img/gradients.png" />
+                  <img
+                    className={styles.GRADIENTS}
+                    alt="Gradients"
+                    src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
+                  />
                   <div className={styles.glasscard} />
                 </div>
               </div>
@@ -140,8 +139,11 @@ export default function Status() {
               <TopNavBarSigned className={styles.topnavbarsignedin} />
               <div className={styles.textwrapper8}>Status</div>
             </div>
-            <Container className={styles.container} component="main" maxWidth="md">
-
+            <Container
+              className={styles.container}
+              component="main"
+              maxWidth="md"
+            >
               <CssBaseline />
               <Box
                 sx={{
@@ -151,71 +153,60 @@ export default function Status() {
                   alignItems: 'center',
                 }}
               >
-
                 <Box sx={{ mt: 50, mb: 2 }}>
-                  {courses && adminDenied &&
+                  {courses &&
+                    adminDenied &&
                     Object.entries(courses).map(([key, value]) => (
                       <div key={key}>
-
                         <ApplicationStatusCardDenied
                           text="TA/UPI/Grader"
                           course={key}
                         />
 
-
                         <br />
                       </div>
-
-
                     ))}
 
-                  {assignment && !adminDenied &&
+                  {assignment && !adminDenied && (
                     <ApplicationStatusCardAccepted
                       text="TA/UPI/Grader"
                       course={assignment}
                     />
-                  }
+                  )}
 
-                  {courses && !assignment && !adminDenied &&
+                  {courses &&
+                    !assignment &&
+                    !adminDenied &&
                     Object.entries(courses).map(([key, value]) => (
                       <div key={key}>
-                        {value == "applied" &&
+                        {value == 'applied' && (
                           <ApplicationStatusCard
                             text="TA/UPI/Grader"
                             course={key}
                           />
-
-                        }
-                        {value == "denied" &&
+                        )}
+                        {value == 'denied' && (
                           <ApplicationStatusCardDenied
                             text="TA/UPI/Grader"
                             course={key}
                           />
-
-                        }
-                        {value == "accepted" &&
+                        )}
+                        {value == 'accepted' && (
                           <ApplicationStatusCard
                             text="TA/UPI/Grader"
                             course={key}
                           />
-
-                        }
+                        )}
 
                         <br />
                       </div>
-
-
                     ))}
-
-
                 </Box>
               </Box>
             </Container>
-
           </div>
         </div>
-      </div >
+      </div>
     </>
-
   );
 }

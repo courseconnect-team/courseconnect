@@ -24,7 +24,6 @@ interface DashboardProps {
 
 export default function DashboardWelcome(props: DashboardProps) {
   const { userRole, user, emailVerified } = props;
-  console.log(userRole);
   return (
     <>
       <Toaster />
@@ -48,8 +47,18 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <Bio user={user} className={styles.fullnameandbioinstance} />
                 <TopNavBarSigned className={styles.topnavbarsignedin} />
                 <div className={styles.textwrapper8}>Home</div>
-                <div style={{ marginTop: '630px', marginLeft: '37%' }}>
-                  <VerifyEmailCard email={user.email} />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                  }}
+                >
+                  <div style={{ marginTop: '550px' }}>
+                    {' '}
+                    <VerifyEmailCard email={user.email} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -238,7 +247,7 @@ export default function DashboardWelcome(props: DashboardProps) {
               </div>
               <Link href="/Profile">
                 <Profile
-                  className={styles.profileinstance2}
+                  className={styles.profileinstance5}
                   profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
                 />
               </Link>
