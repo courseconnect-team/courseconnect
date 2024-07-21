@@ -151,7 +151,7 @@ export default function FacultyCourses() {
             display: 'flex',
             justifyContent: 'space-between',
             flexDirection: 'column',
-            marginLeft: '30px',
+            marginLeft: '20px',
           }}
         >
           <div className="text-wrapper-11 courses">My courses:</div>
@@ -162,7 +162,6 @@ export default function FacultyCourses() {
 
         <div
           style={{
-            paddingLeft: '30px',
             paddingRight: 'auto',
             marginTop: '15px',
           }}
