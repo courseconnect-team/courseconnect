@@ -5,47 +5,73 @@
     font-family: 'SF Pro Display-Medium', Helvetica;
     color: #000;
     text-align: left;
-  
+    margin-left:20px;
+    margin-top: 18px
   }
-  
-  
    .courses{
     font-size: 36px;
-    padding-top: 34px;
   }
   .text-past{
     font-size: 36px;
     font-weight: 500;
     font-family: 'SF Pro Display-Medium', Helvetica;
     color: #000;
-    
+    margin-bottom: 26px;
   }
-  
+
   .ta{
     font-size: 40px;
   }
   
   .page-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     padding-left: 51px;
-    margin-top: 120px;
+    margin-top: 175px;
+    gap: 18%;
+   
   }
   
+  @media (max-width: 1200px) {
+    .page-container {
+      padding-left: 40px; /* Adjust padding */
+      margin-top: 150px;  /* Adjust margin */
+      gap: 10%; /* Decrease gap */
+    }
+  }
   
+  @media (max-width: 900px) {
+    .page-container {
+      padding-left: 30px; /* Adjust padding */
+      margin-top: 125px;  /* Adjust margin */
+      gap: 7%; /* Further decrease gap */
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .page-container {
+      padding-left: 20px; /* Adjust padding */
+      margin-top: 100px;  /* Adjust margin */
+      gap: 5%; /* Minimal gap */
+    }
+  }
+
+  .class-cards-container1 {
+    display: flex;
+    margin-top: 8px;
+    height: 100%;
+    margin-left: -18px;
+  }
   .class-cards-container {
     display: flex;
     margin-top: 8px;
-    margin-left: 32px;
     height: 100%;
-    
-    
   }
   .class{
     margin:22px
   }
   .full-name-and-bio-instance {
-    left: 38% !important;
+    left: 37%;
     position: absolute !important;
     top: 250px !important;
   }

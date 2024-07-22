@@ -114,7 +114,6 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       let coursesMap = doc.data().courses;
 
       coursesMap[className] = 'accepted';
-      console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application approved successfully');
       window.location.reload();
@@ -131,7 +130,6 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
       let coursesMap = doc.data().courses;
 
       coursesMap[className] = 'denied';
-      console.log(coursesMap);
       await statusRef.update({ courses: coursesMap });
       console.log('Application denied successfully');
       handleDenyEmail();
@@ -444,7 +442,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50">Available Hours Per Week:</div>
-                <div className="availability1">{availability.join(", ")}</div>
+                <div className="availability1">{availability.join(', ')}</div>
               </div>
 
               <br></br>

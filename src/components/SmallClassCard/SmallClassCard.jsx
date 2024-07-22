@@ -1,15 +1,15 @@
-// components/ClassCard.js
 import React from 'react';
 import Link from 'next/link';
 import './style.css';
 
-const ClassCard = ({ className, courseName, courseId }) => {
+const SmallClassCard = ({ className, courseName, courseId, pathname }) => {
   return (
     <Link
       href={{
-        pathname: `/course/${encodeURIComponent(courseId)}`,
-        query: { data: courseId },
+        pathname: pathname,
+        query: { courseId },
       }}
+      prefetch={false}
       passHref
     >
       <div className={`class ${className}`}>
@@ -21,4 +21,4 @@ const ClassCard = ({ className, courseName, courseId }) => {
   );
 };
 
-export default ClassCard;
+export default SmallClassCard;

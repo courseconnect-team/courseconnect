@@ -29,7 +29,7 @@ export default function PositionSelect() {
           control={<Radio />}
           label="Undergraduate Peer Instructor (UPI)"
         />
-        <FormControlLabel value="grader" control={<Radio />} label="Grader" />
+        <FormControlLabel value="Grader" control={<Radio />} label="Grader" />
       </RadioGroup>
     </FormControl>
   );

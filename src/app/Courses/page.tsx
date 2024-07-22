@@ -6,65 +6,138 @@ import SmallClassCard from '@/components/SmallClassCard/SmallClassCard';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { Bio } from '@/components/Bio/Bio';
-import styles from './style.module.css';
 import { Timeline } from '@/components/Timeline/Timeline';
-export default function FacultyApplication() {
-  type CourseType = [string, string]; // Define the type for courses
 
+interface CourseType {
+  id: string;
+  code: string;
+  courseId: string;
+}
+export default function FacultyCourses() {
   const auth = getAuth();
-  const [courses, setCourses] = useState<CourseType[]>([]); // Use the defined type for state
-  const db = firebase.firestore();
+  const [courses, setCourses] = useState<CourseType[]>([]);
+  const [pastCourses, setPastCourses] = useState<CourseType[]>([]);
 
-  // Reactively listen to auth state changes
+  const db = firebase.firestore();
+  const [selectedYear, setSelectedYear] = useState<number>(1);
   const user = auth.currentUser;
   const uemail = user?.email;
 
   useEffect(() => {
     if (uemail) {
       fetchCourses();
+      fetchPastCourses;
     }
   }, [uemail]);
+
+  useEffect(() => {
+    fetchPastCourses();
+  }, [selectedYear]);
 
   const fetchCourses = async () => {
     const courses = await getCourses();
     setCourses(courses);
   };
 
-  const getCourses = async (): Promise<CourseType[]> => {
-    // Ensure getCourses returns the correct type
+  const fetchPastCourses = async () => {
+    const pastCourses = await getPastCourses(selectedYear);
+    setPastCourses(pastCourses);
+  };
 
+  const getCourses = async (): Promise<CourseType[]> => {
     try {
       const snapshot = await db
-        .collection('courses')
-        .where('professor_emails', '==', uemail) // Check if the current user is the instructor
+        .collection('past-courses')
+        .where('professor_emails', '==', uemail)
         .get();
 
       const filteredDocs = snapshot.docs.filter(
         (doc) => doc.data().code !== null && doc.data().code !== undefined
       );
 
-      return filteredDocs.map((doc) => [doc.id, doc.data().code]);
+      const courses = filteredDocs.map((doc) => ({
+        id: doc.id,
+        code: doc.data().code,
+        courseId: doc.data().class_number,
+      }));
+
+      return courses;
     } catch (error) {
-      console.error(`Error getting courses:`, error);
-      alert('Error getting courses:');
+      console.error('Error getting courses:', error);
+      alert('Error getting courses');
+      return [];
+    }
+  };
+  const getPastCourses = async (
+    selectedYear: number
+  ): Promise<CourseType[]> => {
+    try {
+      const currentYear = new Date().getFullYear();
+      const year = currentYear - selectedYear;
+
+      const springQuery = db
+        .collection('past-courses')
+        .where('semester', '==', `Spring ${year}`)
+        .where('professor_emails', '==', uemail)
+        .get();
+
+      const fallQuery = db
+        .collection('past-courses')
+        .where('semester', '==', `Fall ${year}`)
+        .where('professor_emails', '==', uemail)
+        .get();
+
+      const [springSnapshot, fallSnapshot] = await Promise.all([
+        springQuery,
+        fallQuery,
+      ]);
+
+      const courses: CourseType[] = [];
+
+      const springFilter = springSnapshot.docs.filter(
+        (doc) => doc.data().code !== null && doc.data().code !== undefined
+      );
+      springFilter.forEach((doc) => {
+        courses.push({
+          id: doc.id,
+          code: doc.data().code,
+          courseId: doc.data().class_number,
+        });
+      });
+
+      const fallFilter = fallSnapshot.docs.filter(
+        (doc) => doc.data().code !== null && doc.data().code !== undefined
+      );
+
+      fallFilter.forEach((doc) => {
+        courses.push({
+          id: doc.id,
+          code: doc.data().code,
+          courseId: doc.data().class_number,
+        });
+      });
+
+      return courses;
+    } catch (error) {
+      console.error('Error getting courses:', error);
+      alert('Error getting courses');
       return [];
     }
   };
 
-  const mapElement = () => {
-    return courses.map((val) => {
-      return (
-        <div key={val[0]}>
-          <SmallClassCard
-            courseName={val[1]}
-            courseId={val[0]}
-            className="class"
-          />
-        </div>
-      );
-    });
+  const mapElement = (courses: CourseType[]) => {
+    return courses.map((val) => (
+      <div key={val.id}>
+        <SmallClassCard
+          pathname={`/course/${encodeURIComponent(val.id)}`}
+          courseName={val.code}
+          courseId={val.id}
+          className="class"
+        />
+      </div>
+    ));
   };
   return (
     <>
@@ -73,18 +146,40 @@ export default function FacultyApplication() {
       <HeaderCard text="Courses" />
       <Bio user={user} className="full-name-and-bio-instance" />
       <div className="page-container">
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            flexDirection: 'column',
+            marginLeft: '20px',
+          }}
+        >
           <div className="text-wrapper-11 courses">My courses:</div>
-          <div style={{ marginRight: '35px' }}></div>
+          {courses.length !== 0 && (
+            <div className="class-cards-container">{mapElement(courses)}</div>
+          )}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+
+        <div
+          style={{
+            paddingRight: 'auto',
+            marginTop: '15px',
+          }}
+        >
           <div className="text-past">Past Courses:</div>
-          <Timeline></Timeline>
+          <Timeline
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+          />
+
+          {pastCourses.length !== 0 && (
+            <div className="class-cards-container1">
+              {mapElement(pastCourses)}
+            </div>
+          )}
         </div>
       </div>
-      {courses.length !== 0 && (
-        <div className="class-cards-container">{mapElement()}</div>
-      )}
+
       {courses.length === 0 && (
         <div
           style={{

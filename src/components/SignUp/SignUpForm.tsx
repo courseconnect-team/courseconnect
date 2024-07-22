@@ -20,11 +20,10 @@ import handleSignIn from '@/firebase/auth/auth_signin_password';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
-
 export default function SignUpForm() {
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
-    ref,
+    ref
   ) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
   });
@@ -45,17 +44,19 @@ export default function SignUpForm() {
       return false;
     }
     if (!lowercaseRegex.test(password)) {
-      toast.error('Password should contain at least one lowercase letter!')
+      toast.error('Password should contain at least one lowercase letter!');
 
       return false;
     }
     if (!numberRegex.test(password)) {
-      toast.error('Password should contain at least one number!')
+      toast.error('Password should contain at least one number!');
 
       return false;
     }
     if (!specialCharacterRegex.test(password)) {
-      toast.error('Password should contain at least one special case character!')
+      toast.error(
+        'Password should contain at least one special case character!'
+      );
 
       return false;
     }
@@ -81,7 +82,6 @@ export default function SignUpForm() {
       ufid: formData.get('ufid') as string,
       uid: '',
     };
-    console.log("Role " + userData.role);
 
     // add the following:
     if (userData.firstname === '') {
@@ -95,22 +95,20 @@ export default function SignUpForm() {
     } else if (userData.role === null) {
       toast.error('Please select a role!');
     } else if (userData.department === '') {
-      toast.error('Please select a department!')
+      toast.error('Please select a department!');
     } else if (userData.password === '') {
       toast.error('Please enter a password!');
     } else if (!isStrongPassword(userData.password)) {
-      console.log("invalid password");
-
+      console.log('invalid password');
     } else if (userData.ufid == '') {
       toast.error('Please enter your UFID!');
     } else {
       const uid_from_signup = await handleSignUp(
         userData.firstname + ' ' + userData.lastname,
         userData.email,
-        userData.password,
+        userData.password
       );
       userData.uid = uid_from_signup;
-      console.log(userData.uid);
 
       if (userData.uid === '-1' || userData.uid === '') {
         toast.error('This UFID is Already in Use!');

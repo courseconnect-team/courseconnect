@@ -49,8 +49,6 @@ export default function AppView({
       .get()
       .then((doc) => {
         if (doc.exists) {
-          // console.log(doc.data());
-
           setDocData(doc.data());
         } else {
           console.log('No such document!');
@@ -135,9 +133,9 @@ export default function AppView({
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50"> All Course(s):</div>
                 <div className="availability2">
-                  {Object.entries(
-                    docData.courses
-                  ).map(([key, value]) => key).join(', ')}
+                  {Object.entries(docData.courses)
+                    .map(([key, value]) => key)
+                    .join(', ')}
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '75px' }}>
@@ -145,7 +143,8 @@ export default function AppView({
                 <div className="availability2">
                   {Object.entries(docData.courses)
                     .filter(([key, value]) => value == 'accepted')
-                    .map(([key, value]) => key).join(', ')}
+                    .map(([key, value]) => key)
+                    .join(', ')}
                 </div>
               </div>
 
