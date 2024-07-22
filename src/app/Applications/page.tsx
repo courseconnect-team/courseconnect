@@ -11,7 +11,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default function FacultyApplication() {
   const auth = getAuth();
-  const [semester, setSemester] = useState('Fall 2022');
+  const [semester, setSemester] = useState('Fall 2024');
   const [courses, setCourses] = useState<[string, any][]>([]);
   const db = firebase.firestore();
 
