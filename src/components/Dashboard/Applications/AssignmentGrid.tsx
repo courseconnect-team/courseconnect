@@ -130,17 +130,17 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-            firstName: doc.data().name.split(' ')[0],
-            lastName: doc.data().name.split(' ')[1],
-            year: doc.data().semesters[0].split(' ')[1],
-            fte: 15,
-            pname: 'DEPARTMENT TA/UPIS',
-            pid: '000108927',
-            hr: 15,
-          } as Assignment)
+        ({
+          id: doc.id,
+          ...doc.data(),
+          firstName: doc.data().name.split(' ')[0],
+          lastName: doc.data().name.split(' ')[1],
+          year: doc.data().semesters[0].split(' ')[1],
+          fte: 15,
+          pname: 'DEPARTMENT TA/UPIS',
+          pid: '000108927',
+          hr: 15,
+        } as Assignment)
       );
       setAssignmentData(data);
     });
@@ -680,8 +680,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-              theme.palette.action.selectedOpacity +
-              theme.palette.action.hoverOpacity
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
@@ -714,6 +714,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         columns={columns}
         editMode="row"
         rowModesModel={rowModesModel}
+        checkboxSelection
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
