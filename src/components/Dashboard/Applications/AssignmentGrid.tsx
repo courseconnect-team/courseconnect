@@ -468,7 +468,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
 
 
-      valueGetter: (params) => params.row.class_codes.split(' ')[4].split(',')[1],
+      valueGetter: (params) => params.row.class_codes != undefined ? params.row.class_codes.split(' ')[4].split(',')[1] : ' ',
     },
     {
       field: 'supervisorLastName',
@@ -476,7 +476,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 190,
       editable: true,
 
-      valueGetter: (params) => params.row.class_codes.split(' ')[4].split(',')[0],
+      valueGetter: (params) => params.row.class_codes != undefined ? params.row.class_codes.split(' ')[4].split(',')[0] : ' ',
     },
 
     {
