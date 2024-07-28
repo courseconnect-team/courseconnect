@@ -1112,7 +1112,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         <DialogTitle>Course Assignment</DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
-            {codes == [] ? (
+            {codes != [] ? (
               <>
                 <DialogContentText>
                   Please select the course code to which the student shall be

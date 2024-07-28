@@ -714,6 +714,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         columns={columns}
         editMode="row"
         rowModesModel={rowModesModel}
+        checkboxSelection
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
