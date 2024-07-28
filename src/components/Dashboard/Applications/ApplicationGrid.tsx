@@ -118,7 +118,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     const doc = await getDoc(statusRef);
     setCodes(
       Object.entries(doc.data().courses)
-        .filter(([key, value]) => value == 'accepted')
         .map(([key, value]) => key)
     );
     setSelectedUserGrid(id);
