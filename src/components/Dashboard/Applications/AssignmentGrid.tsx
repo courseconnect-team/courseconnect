@@ -2,12 +2,10 @@
 import * as React from 'react';
 import { useState } from 'react';
 import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import {
   GridRowModesModel,
   GridRowModes,
@@ -98,7 +96,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   // pop-up view setup
   const [open, setOpen] = React.useState(false);
   const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState();
+  const [delId, setDelId] = React.useState<GridRowId>();
   const [selectedUserGrid, setSelectedUserGrid] =
     React.useState<GridRowId | null>(null);
 
@@ -230,6 +228,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   const handleSaveClick = (id: GridRowId) => () => {
     setLoading(true);
     const updatedRow = assignmentData.find((row) => row.id === id);
+
     if (updatedRow) {
       firebase
         .firestore()
@@ -299,12 +298,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       setLoading(false);
     }
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(delId.toString());
-    handleDeleteClick(delId);
+    console.log(delId!.toString());
+    handleDeleteClick(delId!);
     setDelDia(false);
   };
+
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
     setLoading(true);
     const updatedRow = {

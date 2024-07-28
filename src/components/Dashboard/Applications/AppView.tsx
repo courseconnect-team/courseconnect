@@ -14,26 +14,27 @@ export interface AppViewProps {
   uid: string;
   close: () => void;
   handleDenyClick: (id: GridRowId) => void;
-  handleApproveClick: (id: GridRowId) => void;
+  handleOpenAssignmentDialog: (id: GridRowId) => void;
 }
 
 export default function AppView({
   close,
   uid,
-  handleApproveClick,
   handleDenyClick,
+  handleOpenAssignmentDialog,
 }: AppViewProps) {
   const [docData, setDocData] = React.useState<any>(null);
 
   // get application object from uid
   const applicationsRef = firebase.firestore().collection('applications');
   const docRef = applicationsRef.doc(uid);
+
   const onThumbUpClick = useCallback(
     (event: any) => {
       event?.stopPropagation();
-      // handleApproveClick(uid);
+      handleOpenAssignmentDialog(uid);
     },
-    [handleApproveClick, uid]
+    [handleOpenAssignmentDialog, uid]
   );
 
   const onThumbDownIconClick = useCallback(

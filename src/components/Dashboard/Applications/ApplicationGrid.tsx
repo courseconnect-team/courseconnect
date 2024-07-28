@@ -482,7 +482,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleApproveClick = (id: GridRowId) => {
     setLoading(true);
-
     // Update the 'applications' collection
     firebase
       .firestore()
@@ -505,7 +504,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         - approver's role
         --> EVENTUALLY THERE WILL BE SUGGESTED SECTIONS AND CLASSES. FOR NOW, NOTHING.
       */
-
     // get the current date in month/day/year format
     const current = new Date();
     const current_date = `${
@@ -519,7 +517,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       approver_role: userRole as string,
       approver_name: userName as string,
     };
-
     // Create the document within the "assignments" collection
     firebase
       .firestore()
@@ -1017,7 +1014,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             <AppView
               close={handleClose}
               handleDenyClick={handleDenyClick}
-              handleApproveClick={handleApproveClick}
+              handleOpenAssignmentDialog={handleOpenAssignmentDialog}
               uid={selectedUserGrid as string}
             />
           </Box>
