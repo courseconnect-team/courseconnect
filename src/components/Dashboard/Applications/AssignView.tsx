@@ -117,7 +117,7 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Supervisor Name: ----------
+                          Supervisor Name: {docData.class_codes.split(' ')[4]}
                         </Typography>
 
                         <Typography

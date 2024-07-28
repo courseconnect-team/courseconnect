@@ -116,11 +116,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .doc(id.toString());
 
     const doc = await getDoc(statusRef);
-    setCodes(
-      Object.entries(doc.data().courses)
-        .filter(([key, value]) => value == 'accepted')
-        .map(([key, value]) => key)
-    );
+    setCodes(Object.entries(doc.data().courses).map(([key, value]) => key));
     setSelectedUserGrid(id);
 
     setOpenAssignmentDialog(true);

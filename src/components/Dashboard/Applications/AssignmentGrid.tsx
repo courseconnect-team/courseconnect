@@ -131,9 +131,18 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           ({
             id: doc.id,
             ...doc.data(),
-            firstName: doc.data().name.split(' ')[0],
-            lastName: doc.data().name.split(' ')[1],
-            year: doc.data().semesters[0].split(' ')[1],
+            firstName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[0]
+                : ' ',
+            lastName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[1]
+                : ' ',
+            year:
+              doc.data().semesters != undefined
+                ? doc.data().semesters[0].split(' ')[1]
+                : ' ',
             fte: 15,
             pname: 'DEPARTMENT TA/UPIS',
             pid: '000108927',
@@ -461,16 +470,22 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
 
     {
-      field: 'supervisorFirstName',
+      field: 'sf',
       headerName: 'Supervisor First Name',
       width: 190,
       editable: true,
+
+      valueGetter: (params) =>
+        params.row.class_codes.split(' ')[4].split(',')[1],
     },
     {
       field: 'supervisorLastName',
       headerName: 'Supervisor Last Name',
       width: 190,
       editable: true,
+
+      valueGetter: (params) =>
+        params.row.class_codes.split(' ')[4].split(',')[0],
     },
 
     {
