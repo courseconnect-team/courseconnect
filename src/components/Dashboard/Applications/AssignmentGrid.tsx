@@ -516,10 +516,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       field: 'action',
       headerName: 'Requested Action',
       width: 140,
-      editable: false,
-      valueFormatter: (value) => {
-        return 'NEW HIRE';
-      },
+      editable: true,
+
+      valueFormatter: (params) => "NEW HIRE",
+
     },
 
     {
@@ -590,6 +590,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Project Name',
       width: 240,
       editable: true,
+
+
+      valueFormatter: (params) => "DEPARTMENT TA / UPIS",
     },
 
     {
@@ -597,12 +600,16 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Percentage',
       width: 110,
       editable: true,
+
     },
     {
       field: 'hours',
       headerName: 'Hours',
       width: 140,
       editable: true,
+      valueFormatter: (value) => {
+        return (value.value[0]);
+      }
     },
 
     {
@@ -610,6 +617,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Annual Rate',
       width: 110,
       editable: true,
+
     },
 
     {
@@ -617,6 +625,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Biweekly Rate',
       width: 110,
       editable: true,
+
     },
     {
       field: 'hr',
@@ -630,6 +639,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Target Amount',
       width: 110,
       editable: true,
+
     },
 
     {
@@ -637,6 +647,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Working Title',
       width: 110,
       editable: true,
+
     },
 
     {
@@ -645,7 +656,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 140,
       editable: true,
       valueFormatter: (value) => {
-        return 'UPI in ' + value.value;
+        return `"${'UPI in ' + value.value}"`;
       },
     },
 
