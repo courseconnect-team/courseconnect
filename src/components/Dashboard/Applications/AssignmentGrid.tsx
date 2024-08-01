@@ -653,10 +653,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     {
       field: 'class_codes',
       headerName: 'Duties',
-      width: 140,
+      width: 180,
       editable: true,
       valueFormatter: (value) => {
-        return `${'UPI in ' + value.value}`;
+        return `${'UPI in ' + value.value.replace(/,/g, " ")}`;
       },
     },
 
