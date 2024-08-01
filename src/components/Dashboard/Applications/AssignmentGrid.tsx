@@ -656,7 +656,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 140,
       editable: true,
       valueFormatter: (value) => {
-        return `"${'UPI in ' + value.value}"`;
+        return `${'UPI in ' + value.value}`;
       },
     },
 
