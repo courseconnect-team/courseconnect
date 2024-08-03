@@ -1,5 +1,3 @@
-import Container from '@mui/material/Container';
-import UnderDevelopment from '@/components/UnderDevelopment';
 import { Toaster } from 'react-hot-toast';
 import { ApplyCard } from '@/components/ApplyCard/ApplyCard';
 import { StatusCard } from '@/components/StatusCard/StatusCard';
@@ -10,11 +8,8 @@ import { Profile } from '@/components/Profile/Profile';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import styles from './style.module.css';
 import { ApplicationsCard } from '@/components/ApplicationsCard/ApplicationsCard';
-import { CourseCard } from '@/components/CourseCard/CourseCard';
-
 import { VerifyEmailCard } from '@/components/VerifyEmailCard/VerifyEmailCard';
 import Link from 'next/link';
-import './style.css';
 
 interface DashboardProps {
   user: any;
@@ -245,26 +240,29 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <TopNavBarSigned className={styles.topnavbarsignedin} />
                 <div className={styles.textwrapper8}>Home</div>
               </div>
-              <Link href="/Profile">
-                <Profile
-                  className={styles.profileinstance5}
-                  profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
-                />
-              </Link>
-              <Link href="/Applications">
-                <ApplicationsCard
-                  className={styles.applicationsinstance}
-                  applications="https://c.animaapp.com/ebG6M1rL/img/apply.svg"
-                />
-              </Link>
-
-              <Link href="/Courses">
-                <DashboardCard
-                  className={styles.courseinstance}
-                  image="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png"
-                  text="Courses"
-                />
-              </Link>
+              <div className={styles.container}>
+                <Link href="/Applications">
+                  <DashboardCard
+                    className={styles.applicationcard}
+                    image="https://c.animaapp.com/ebG6M1rL/img/apply.svg"
+                    text="Applications"
+                  />
+                </Link>
+                <Link href="/Courses">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png"
+                    text="Courses"
+                  />
+                </Link>
+                <Link href="/Profile">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
+                    text="Profile"
+                  />
+                </Link>
+              </div>
             </div>
           )}
 

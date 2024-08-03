@@ -40,11 +40,7 @@
   position: absolute;
   width: 100%;
 }
-.studentlandingpage .applicationsinstance {
-  left: 33% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
+
 .studentlandingpage .colorblock {
   background-color: #001776;
   height: 458px;
@@ -95,15 +91,15 @@
 
 .studentlandingpage .textwrapper8 {
   color: #ffffff;
-  font-family: "SF Pro Display-Medium", Helvetica;
+  font-family: 'SF Pro Display-Medium', Helvetica;
   font-size: 50px;
   font-weight: 500;
   letter-spacing: 0;
   line-height: normal;
-      position:absolute;
-    left: 50%;
-    transform: translateY(-50%);
-    transform: translateX(-50%);
+  position: absolute;
+  left: 50%;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
   top: 150px;
 }
 
@@ -124,11 +120,7 @@
   position: absolute !important;
   top: 640px !important;
 }
-.studentlandingpage .profileinstance5 {
-  left: 59% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
+
 .studentlandingpage .applyinstance2 {
   left: 46% !important;
   position: absolute !important;
@@ -158,12 +150,12 @@
   top: 640px !important;
 }
 .studentlandingpage .scheduling {
-  left: 60%!important;
+  left: 60% !important;
   position: absolute !important;
   top: 640px !important;
 }
 .studentlandingpage .stats {
-  left: 75%!important;
+  left: 75% !important;
   position: absolute !important;
   top: 640px !important;
 }
@@ -173,13 +165,14 @@
   position: absolute !important;
   top: 640px !important;
 }
- .applicationsinstance {
-  left: 34% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-.courseinstance {
-  left: 46% !important;
-  position: absolute !important;
-  top: 640px !important;
+
+.container {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  left: 50%;
+  gap: 50px;
+  top: 600px;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
 }
