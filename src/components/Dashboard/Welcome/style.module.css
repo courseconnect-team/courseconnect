@@ -101,69 +101,6 @@
   top: 150px;
 }
 
-.studentlandingpage .profileinstance {
-  left: 52% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
-.studentlandingpage .applyinstance {
-  left: 38% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
-.studentlandingpage .profileinstance2 {
-  left: 60% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
-.studentlandingpage .applyinstance2 {
-  left: 46% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
-.studentlandingpage .statusinstance {
-  left: 30% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
-.studentlandingpage .courses {
-  left: 15% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-.studentlandingpage .users {
-  left: 30% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
-.studentlandingpage .applications {
-  left: 45% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-.studentlandingpage .scheduling {
-  left: 60% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-.studentlandingpage .stats {
-  left: 75% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
-.studentlandingpage .statusinstance {
-  left: 32% !important;
-  position: absolute !important;
-  top: 640px !important;
-}
-
 .container {
   display: flex;
   flex-direction: row;
