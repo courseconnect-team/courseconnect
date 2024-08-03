@@ -2,12 +2,10 @@
 import * as React from 'react';
 import { useState } from 'react';
 import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import {
   GridRowModesModel,
   GridRowModes,
@@ -98,7 +96,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   // pop-up view setup
   const [open, setOpen] = React.useState(false);
   const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState();
+  const [delId, setDelId] = React.useState<GridRowId>();
   const [selectedUserGrid, setSelectedUserGrid] =
     React.useState<GridRowId | null>(null);
 
@@ -130,17 +128,26 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-          firstName: doc.data().name != undefined ? doc.data().name.split(' ')[0] : ' ',
-          lastName: doc.data().name != undefined ? doc.data().name.split(' ')[1] : ' ',
-          year: doc.data().semesters != undefined ? doc.data().semesters[0].split(' ')[1] : ' ',
-          fte: 15,
-          pname: 'DEPARTMENT TA/UPIS',
-          pid: '000108927',
-          hr: 15,
-        } as Assignment)
+          ({
+            id: doc.id,
+            ...doc.data(),
+            firstName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[0]
+                : ' ',
+            lastName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[1]
+                : ' ',
+            year:
+              doc.data().semesters != undefined
+                ? doc.data().semesters[0].split(' ')[1]
+                : ' ',
+            fte: 15,
+            pname: 'DEPARTMENT TA/UPIS',
+            pid: '000108927',
+            hr: 15,
+          } as Assignment)
       );
       setAssignmentData(data);
     });
@@ -230,6 +237,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   const handleSaveClick = (id: GridRowId) => () => {
     setLoading(true);
     const updatedRow = assignmentData.find((row) => row.id === id);
+
     if (updatedRow) {
       firebase
         .firestore()
@@ -299,12 +307,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       setLoading(false);
     }
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(delId.toString());
-    handleDeleteClick(delId);
+    console.log(delId!.toString());
+    handleDeleteClick(delId!);
     setDelDia(false);
   };
+
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
     setLoading(true);
     const updatedRow = {
@@ -461,14 +470,15 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
 
     {
-
       field: 'sf',
       headerName: 'Supervisor First Name',
       width: 190,
       editable: true,
 
-
-      valueGetter: (params) => params.row.class_codes != undefined ? params.row.class_codes.split(' ')[4].split(',')[1] : ' ',
+      valueGetter: (params) =>
+        params.row.class_codes != undefined
+          ? params.row.class_codes.split(' ')[4].split(',')[1]
+          : ' ',
     },
     {
       field: 'supervisorLastName',
@@ -476,7 +486,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 190,
       editable: true,
 
-      valueGetter: (params) => params.row.class_codes != undefined ? params.row.class_codes.split(' ')[4].split(',')[0] : ' ',
+      valueGetter: (params) =>
+        params.row.class_codes != undefined
+          ? params.row.class_codes.split(' ')[4].split(',')[0]
+          : ' ',
     },
 
     {
@@ -518,8 +531,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 140,
       editable: true,
 
-      valueFormatter: (params) => "NEW HIRE",
-
+      valueFormatter: (params) => 'NEW HIRE',
     },
 
     {
@@ -591,8 +603,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 240,
       editable: true,
 
-
-      valueFormatter: (params) => "DEPARTMENT TA / UPIS",
+      valueFormatter: (params) => 'DEPARTMENT TA / UPIS',
     },
 
     {
@@ -600,7 +611,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Percentage',
       width: 110,
       editable: true,
-
     },
     {
       field: 'hours',
@@ -608,8 +618,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 140,
       editable: true,
       valueFormatter: (value) => {
-        return (value.value[0]);
-      }
+        return value.value[0];
+      },
     },
 
     {
@@ -617,7 +627,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Annual Rate',
       width: 110,
       editable: true,
-
     },
 
     {
@@ -625,7 +634,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Biweekly Rate',
       width: 110,
       editable: true,
-
     },
     {
       field: 'hr',
@@ -639,7 +647,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Target Amount',
       width: 110,
       editable: true,
-
     },
 
     {
@@ -647,7 +654,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Working Title',
       width: 110,
       editable: true,
-
     },
 
     {
@@ -656,7 +662,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 180,
       editable: true,
       valueFormatter: (value) => {
-        return `${'UPI in ' + value.value.replace(/,/g, " ")}`;
+        return `${'UPI in ' + value.value.replace(/,/g, ' ')}`;
       },
     },
 
@@ -697,8 +703,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {

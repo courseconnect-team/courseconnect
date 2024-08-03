@@ -1,5 +1,3 @@
-import Container from '@mui/material/Container';
-import UnderDevelopment from '@/components/UnderDevelopment';
 import { Toaster } from 'react-hot-toast';
 import { ApplyCard } from '@/components/ApplyCard/ApplyCard';
 import { StatusCard } from '@/components/StatusCard/StatusCard';
@@ -9,12 +7,8 @@ import { Bio } from '@/components/Bio/Bio';
 import { Profile } from '@/components/Profile/Profile';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import styles from './style.module.css';
-import { ApplicationsCard } from '@/components/ApplicationsCard/ApplicationsCard';
-import { CourseCard } from '@/components/CourseCard/CourseCard';
-
 import { VerifyEmailCard } from '@/components/VerifyEmailCard/VerifyEmailCard';
 import Link from 'next/link';
-import './style.css';
 
 interface DashboardProps {
   user: any;
@@ -204,25 +198,29 @@ export default function DashboardWelcome(props: DashboardProps) {
                   <TopNavBarSigned className={styles.topnavbarsignedin} />
                   <div className={styles.textwrapper8}>Home</div>
                 </div>
-                <Link href="/Profile">
-                  <DashboardCard
-                    className={styles.profileinstance2}
-                    text="Profile"
-                    image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
-                  />
-                </Link>
-                <Link href="/status">
-                  <StatusCard
-                    apply="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png"
-                    className={styles.applyinstance2}
-                  />
-                </Link>
-                <Link href="/apply">
-                  <ApplyCard
-                    apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
-                    className={styles.statusinstance}
-                  />
-                </Link>
+                <div className={styles.container}>
+                  <Link href="/Profile">
+                    <DashboardCard
+                      className={styles}
+                      text="Profile"
+                      image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
+                    />
+                  </Link>
+                  <Link href="/status">
+                    <DashboardCard
+                      text="Status"
+                      image="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png"
+                      className={styles}
+                    />
+                  </Link>
+                  <Link href="/apply">
+                    <DashboardCard
+                      text="Apply"
+                      image="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
+                      className={styles}
+                    />
+                  </Link>
+                </div>
               </div>
             )}
 
@@ -245,26 +243,29 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <TopNavBarSigned className={styles.topnavbarsignedin} />
                 <div className={styles.textwrapper8}>Home</div>
               </div>
-              <Link href="/Profile">
-                <Profile
-                  className={styles.profileinstance5}
-                  profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
-                />
-              </Link>
-              <Link href="/Applications">
-                <ApplicationsCard
-                  className={styles.applicationsinstance}
-                  applications="https://c.animaapp.com/ebG6M1rL/img/apply.svg"
-                />
-              </Link>
-
-              <Link href="/Courses">
-                <DashboardCard
-                  className={styles.courseinstance}
-                  image="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png"
-                  text="Courses"
-                />
-              </Link>
+              <div className={styles.container}>
+                <Link href="/Applications">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/ebG6M1rL/img/apply.svg"
+                    text="Applications"
+                  />
+                </Link>
+                <Link href="/Courses">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/lmfJ7wLf/img/apply@2x.png"
+                    text="Courses"
+                  />
+                </Link>
+                <Link href="/Profile">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
+                    text="Profile"
+                  />
+                </Link>
+              </div>
             </div>
           )}
 
@@ -287,40 +288,42 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <TopNavBarSigned className={styles.topnavbarsignedin} />
                 <div className={styles.textwrapper8}>Home</div>
               </div>
-              <Link href="/users">
+              <div className={styles.container}>
+                <Link href="/users">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png"
+                    text="Users"
+                  />
+                </Link>
+                <Link href="/admincourses">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png"
+                    text="Courses"
+                  />
+                </Link>
+                <Link href="/adminApplications">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/PWgYNV8T/img/apply-1@2x.png"
+                    text="Assign"
+                  />
+                </Link>
                 <DashboardCard
-                  className={styles.users}
-                  image="https://c.animaapp.com/PWgYNV8T/img/group@2x.png"
-                  text="Users"
+                  className={styles}
+                  image="https://c.animaapp.com/PWgYNV8T/img/calendar-clock@2x.png"
+                  text="Scheduling"
+                  clickable={true}
                 />
-              </Link>
-              <Link href="/admincourses">
-                <DashboardCard
-                  className={styles.courses}
-                  image="https://c.animaapp.com/PWgYNV8T/img/apply@2x.png"
-                  text="Courses"
-                />
-              </Link>
-              <Link href="/adminApplications">
-                <DashboardCard
-                  className={styles.applications}
-                  image="https://c.animaapp.com/PWgYNV8T/img/apply-1@2x.png"
-                  text="Assign"
-                />
-              </Link>
-              <DashboardCard
-                className={styles.scheduling}
-                image="https://c.animaapp.com/PWgYNV8T/img/calendar-clock@2x.png"
-                text="Scheduling"
-                clickable={true}
-              />
-              <Link href="facultyStats">
-                <DashboardCard
-                  className={styles.stats}
-                  image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png"
-                  text="Faculty Stats"
-                />
-              </Link>
+                <Link href="facultyStats">
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/PWgYNV8T/img/badge@2x.png"
+                    text="Faculty Stats"
+                  />
+                </Link>
+              </div>
             </div>
           )}
         </div>
