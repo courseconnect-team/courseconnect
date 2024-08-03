@@ -7,7 +7,6 @@ import { Bio } from '@/components/Bio/Bio';
 import { Profile } from '@/components/Profile/Profile';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import styles from './style.module.css';
-import { ApplicationsCard } from '@/components/ApplicationsCard/ApplicationsCard';
 import { VerifyEmailCard } from '@/components/VerifyEmailCard/VerifyEmailCard';
 import Link from 'next/link';
 

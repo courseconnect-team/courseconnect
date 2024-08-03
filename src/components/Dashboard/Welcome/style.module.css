@@ -7,17 +7,16 @@
 }
 
 .studentlandingpage .overlapwrapper {
-  height: 1024px;
   width: 100%;
 }
 
 .studentlandingpage .overlap {
-  height: 1024px;
   position: absolute;
   width: 100%;
 }
 
 .studentlandingpage .overlap2 {
+  
   height: 545px;
   left: 0;
   position: absolute;
@@ -76,7 +75,7 @@
 }
 
 .studentlandingpage .fullnameandbioinstance {
-  left: 48% !important;
+  left: 50%;
   top: 250px !important;
   position: absolute;
   transform: translateY(-50%);
@@ -84,8 +83,7 @@
 }
 
 .studentlandingpage .topnavbarsignedin {
-  left: 80% !important;
-  position: absolute !important;
+  right: 70px;
   top: 27px !important;
 }
 
