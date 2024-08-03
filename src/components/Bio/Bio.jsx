@@ -7,10 +7,14 @@ export const Bio = ({ user, className }) => {
       <div className={styles.ellipse}>
         {user.displayName && (
           <div className={styles.initial}>
-            {user.displayName
-              .split(' ')
-              .map((part) => part[0].toUpperCase())
-              .join('')}
+            {user.displayName != undefined
+              ? user.displayName
+                  .split(' ')
+                  .map((part) =>
+                    part[0] != undefined ? part[0].toUpperCase() : ''
+                  )
+                  .join('')
+              : ''}
           </div>
         )}
       </div>

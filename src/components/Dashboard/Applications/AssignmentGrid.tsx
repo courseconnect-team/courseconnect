@@ -476,7 +476,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
 
       valueGetter: (params) =>
-        params.row.class_codes.split(' ')[4].split(',')[1],
+        params.row.class_codes != undefined
+          ? params.row.class_codes.split(' ')[4].split(',')[1]
+          : ' ',
     },
     {
       field: 'supervisorLastName',
@@ -485,7 +487,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
 
       valueGetter: (params) =>
-        params.row.class_codes.split(' ')[4].split(',')[0],
+        params.row.class_codes != undefined
+          ? params.row.class_codes.split(' ')[4].split(',')[0]
+          : ' ',
     },
 
     {
@@ -525,10 +529,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       field: 'action',
       headerName: 'Requested Action',
       width: 140,
-      editable: false,
-      valueFormatter: (value) => {
-        return 'NEW HIRE';
-      },
+      editable: true,
+
+      valueFormatter: (params) => 'NEW HIRE',
     },
 
     {
@@ -599,6 +602,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Project Name',
       width: 240,
       editable: true,
+
+      valueFormatter: (params) => 'DEPARTMENT TA / UPIS',
     },
 
     {
@@ -612,6 +617,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Hours',
       width: 140,
       editable: true,
+      valueFormatter: (value) => {
+        return value.value[0];
+      },
     },
 
     {
@@ -651,10 +659,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     {
       field: 'class_codes',
       headerName: 'Duties',
-      width: 140,
+      width: 180,
       editable: true,
       valueFormatter: (value) => {
-        return 'UPI in ' + value.value;
+        return `${'UPI in ' + value.value.replace(/,/g, ' ')}`;
       },
     },
 
