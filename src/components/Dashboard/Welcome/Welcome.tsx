@@ -78,18 +78,22 @@ export default function DashboardWelcome(props: DashboardProps) {
                   <TopNavBarSigned className={styles.topnavbarsignedin} />
                   <div className={styles.textwrapper8}>Home</div>
                 </div>
-                <Link href="/Profile">
-                  <Profile
-                    className={styles.profileinstance}
-                    profile="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
-                  />
-                </Link>
-                <Link href="/apply">
-                  <ApplyCard
-                    apply="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
-                    className={styles.applyinstance}
-                  />
-                </Link>
+                <div className={styles.container}>
+                  <Link href="/Profile">
+                    <DashboardCard
+                      text="Profile"
+                      className={styles}
+                      image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
+                    />
+                  </Link>
+                  <Link href="/apply">
+                    <DashboardCard
+                      text="Apply"
+                      image="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
+                      className={styles}
+                    />
+                  </Link>
+                </div>
               </div>
             )}
           {userRole == 'unapproved' && emailVerified && (
