@@ -717,6 +717,15 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         return 'YES';
       },
     },
+    {
+      field: 'Remote',
+      headerName: 'Remote',
+      width: 140,
+      editable: false,
+      valueFormatter: (value) => {
+        return 'No';
+      },
+    },
   ];
   const ODD_OPACITY = 0.2;
 
