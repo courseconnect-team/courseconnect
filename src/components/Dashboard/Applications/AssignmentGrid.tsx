@@ -653,7 +653,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 140,
       editable: true,
       valueFormatter: (value) => {
-        return value.value[0];
+        return Number(value.value[0]);
       },
     },
 
@@ -706,6 +706,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'FTE',
       width: 110,
       editable: true,
+      valueGetter: (params) => {
+        if (params.row.hours != undefined) {
+          return Math.floor(params.row.hours[0] / 1.029411 / 40 * 100) / 100;
+        } else {
+          return ' ';
+        }
+      }
     },
 
     {
