@@ -1,20 +1,14 @@
-
 'use client';
-import SignInForm from '@/components/SignIn/SignInForm';
-import scss from './Home.module.scss';
-import toast, { Toaster } from 'react-hot-toast';
+
+import { Toaster } from 'react-hot-toast';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import { TopNavBar } from '@/components/TopNavBar/TopNavBar';
-import { LogInCard } from '@/components/LogInCard/LogInCard';
-import styles from "./style.module.css";
-import Link from 'next/link';
-import { SignUpCard } from '@/components/SignUpCard/SignUpCard';
-import { Card } from '@/components/Card/Card'
+import styles from './style.module.css';
+import { Card } from '@/components/Card/Card';
 
 import { useAuth } from '@/firebase/auth/auth_context';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 export default function About() {
-
   const { user } = useAuth();
   return (
     <>
@@ -43,33 +37,34 @@ export default function About() {
               </div>
             </div>
             <div className={styles.registerheretext}>
-              <p className={styles.p}>Course Connect is your all-in-one solution for managing the TA, PI, and grader processes. Whether you are a student looking for opportunities, a faculty member seeking to streamline your workflow, or an administrator in charge of overseeing the entire system, Course Connect offers the features and functionality you need to succeed.</p>
+              <p className={styles.p}>
+                Course Connect is your all-in-one solution for managing the TA,
+                PI, and grader processes. Whether you are a student looking for
+                opportunities, a faculty member seeking to streamline your
+                workflow, or an administrator in charge of overseeing the entire
+                system, Course Connect offers the features and functionality you
+                need to succeed.
+              </p>
             </div>
-
           </div>
           <EceLogoPng className={styles.ecelogopng2} />
-          {!user &&
-            <TopNavBar
-              className={styles.topnavbarinstance}
-              divClassName={styles.designcomponentinstancenode}
-              divClassNameOverride={styles.topnavbar3}
-              logInButtonClassName={styles.topnavbar2}
-            />
-          }
-          {
-            user &&
-            <TopNavBarSigned
-              className={styles.topnavbarinstance}
-            />
-
-          }
+          {!user && <TopNavBar className={styles.topnavbarinstance} />}
+          {user && <TopNavBarSigned className={styles.topnavbarinstance} />}
           <EceLogoPng className={styles.ecelogopng2} />
         </div>
         <div className={styles.sectionaboutus}>
           <div className={styles.aboutus}>
-            <img className={styles.img2} alt="Line" src="https://c.animaapp.com/1tYHWIVt/img/line-1-1.svg" />
+            <img
+              className={styles.img2}
+              alt="Line"
+              src="https://c.animaapp.com/1tYHWIVt/img/line-1-1.svg"
+            />
             <div className={styles.textwrapper6}>Features</div>
-            <img className={styles.img} alt="Line" src="https://c.animaapp.com/1tYHWIVt/img/line-1-1.svg" />
+            <img
+              className={styles.img}
+              alt="Line"
+              src="https://c.animaapp.com/1tYHWIVt/img/line-1-1.svg"
+            />
           </div>
           <Card
             className={styles.studentcard}
@@ -94,9 +89,7 @@ export default function About() {
             imgLink="https://www.youtube.com/embed/bJQ6bIeIq9s"
           />
         </div>
-
       </div>
     </>
   );
 }
-

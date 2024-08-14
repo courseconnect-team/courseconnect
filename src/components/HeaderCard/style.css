@@ -72,9 +72,10 @@
 }
 
 .header .top-nav-bar-signed-in {
-  left: 80%;
-  position: absolute !important;
+  right: 70px;
   top: 27px !important;
+  position: absolute; 
+
 }
 
 .header .text-wrapper-10 {
@@ -82,10 +83,17 @@
   font-family: 'SF Pro Display-Medium', Helvetica;
   font-size: 50px;
   font-weight: 500;
-  left: 44%;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
-  top: 114px;
-  width: 133px;
+  left: 50%;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
+  top: 150px;
+}
+
+@media (max-width: 570px) {
+  .ece-logo-png-2 {
+    display: none;
+  }
 }

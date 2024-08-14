@@ -3,14 +3,14 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
-
+  position: relative;
   overflow-x: hidden;
 }
 
 .loginlowfi .div2 {
   background-color: #ffffff;
   height: 100%;
-  position: absolute;
+  position: relative;
   width: 100%;
 
   overflow-x: hidden;
@@ -19,7 +19,7 @@
 .loginlowfi .overlap2 {
   height: 777px;
   left: 0;
-  position: absolute;
+  position: relative;
   top: 0;
   width: 100%;
 }
@@ -198,10 +198,10 @@
 }
 
 .loginlowfi .topnavbarinstance {
-  left: 82% !important;
+  right: 70px !important;
   position: absolute !important;
   top: 27px !important;
-  width: 100% !important;
+  z-index: 10;
 }
 
 .loginlowfi .designcomponentinstancenode {
@@ -211,9 +211,15 @@
 
 .loginlowfi .topnavbar2 {
   width: 100% !important;
+  
 }
 
 .loginlowfi .topnavbar3 {
   width: 100% !important;
 }
 
+@media (max-width: 570px) {
+  .ecelogopng2 {
+    display: none;
+  }
+}

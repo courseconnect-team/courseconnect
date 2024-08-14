@@ -40,7 +40,10 @@
   position: absolute;
   top: 0;
   width: 117px;
+  cursor: pointer;
+
 }
+
 
 .top-nav-bar-signed .overlap-group {
   background-color: #ffffff;

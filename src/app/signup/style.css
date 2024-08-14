@@ -196,10 +196,9 @@
 }
 
 .login-low-fi .top-nav-bar-instance {
-  left: 82% !important;
+  right: 70px !important;
   position: absolute !important;
   top: 27px !important;
-  width: 100% !important;
 }
 
 .login-low-fi .design-component-instance-node {
@@ -215,3 +214,8 @@
   width: 100% !important;
 }
 
+@media (max-width: 570px) {
+  .ece-logo-png-2 {
+    display: none;
+  }
+}

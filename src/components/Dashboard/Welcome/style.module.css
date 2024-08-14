@@ -85,6 +85,8 @@
 .studentlandingpage .topnavbarsignedin {
   right: 70px;
   top: 27px !important;
+  position: absolute; 
+
 }
 
 .studentlandingpage .textwrapper8 {
@@ -110,4 +112,10 @@
   top: 600px;
   transform: translateY(-50%);
   transform: translateX(-50%);
+}
+
+@media (max-width: 570px) {
+  .ecelogopng2 {
+    display: none;
+  }
 }

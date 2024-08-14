@@ -6,7 +6,7 @@ import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 
 import { TopNavBar } from '@/components/TopNavBar/TopNavBar';
 import { LogInCard } from '@/components/LogInCard/LogInCard';
-import styles from "./style.module.css";
+import styles from './style.module.css';
 import Link from 'next/link';
 export default function Home() {
   return (
@@ -39,19 +39,17 @@ export default function Home() {
               <p className={styles.p}>If you don’t have an account</p>
               <p className={styles.youcanregister}>
                 <span className={styles.textwrapper8}>You can </span>
-                <Link href="/signup" className={styles.textwrapper12}> {"Register here!"} </Link>
+                <Link href="/signup" className={styles.textwrapper12}>
+                  {' '}
+                  {'Register here!'}{' '}
+                </Link>
               </p>
             </div>
 
             <LogInCard className={styles.logincardinstance} />
           </div>
           <EceLogoPng className={styles.ecelogopng2} />
-          <TopNavBar
-            className={styles.topnavbarinstance}
-            divClassName={styles.designcomponentinstancenode}
-            divClassNameOverride={styles.topnavbar3}
-            logInButtonClassName={styles.topnavbar2}
-          />
+          <TopNavBar className={styles.topnavbarinstance} />
         </div>
       </div>
     </>
