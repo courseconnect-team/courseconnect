@@ -96,9 +96,11 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   // pop-up view setup
   const [open, setOpen] = React.useState(false);
   const [delDia, setDelDia] = React.useState(false);
+  const [loading2, setLoading2] = React.useState(false);
   const [delId, setDelId] = React.useState<GridRowId>();
   const [selectedUserGrid, setSelectedUserGrid] =
     React.useState<GridRowId | null>(null);
+  const [courseEmailMap, setCourseEmailMap] = React.useState(new Map());
 
   const handleClickOpenGrid = (id: GridRowId) => {
     setSelectedUserGrid(id);
@@ -151,6 +153,15 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       );
       setAssignmentData(data);
     });
+
+    const courseRef = firebase.firestore().collection('courses');
+    const map = new Map(courseEmailMap);
+    courseRef.onSnapshot((querySnapshot) => {
+      const data = querySnapshot.docs.map((doc) => {
+        map.set(doc.id, doc.data().professor_emails);
+      });
+    });
+    setCourseEmailMap(map);
 
     // Clean up the subscription on unmount
     return () => unsubscribe();
@@ -463,12 +474,30 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
     },
     {
+      field: 'date',
+      headerName: 'Timestamp',
+      width: 210,
+      editable: true,
+    },
+    {
       field: 'supervisorUfid',
       headerName: 'Supervisor UFID',
       width: 190,
       editable: true,
     },
-
+    {
+      field: 'supervisorEmail',
+      headerName: 'Supervisor Email',
+      width: 190,
+      editable: true,
+      valueGetter: (params) => {
+        if (params.row.class_codes != undefined) {
+          return courseEmailMap.get(params.row.class_codes);
+        } else {
+          return ' ';
+        }
+      },
+    },
     {
       field: 'sf',
       headerName: 'Supervisor First Name',
@@ -493,13 +522,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
 
     {
-      field: 'supervisorEmail',
-      headerName: 'Supervisor Email',
-      width: 190,
-      editable: true,
-    },
-
-    {
       field: 'proxyUfid',
       headerName: 'Proxy UFID',
       width: 190,
@@ -511,12 +533,18 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Proxy First Name',
       width: 190,
       editable: true,
+      valueGetter: (value) => {
+        return 'Christophe';
+      },
     },
     {
       field: 'proxyLastName',
       headerName: 'Proxy Last Name',
       width: 190,
       editable: true,
+      valueGetter: (value) => {
+        return 'Bobda';
+      },
     },
 
     {
@@ -524,6 +552,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Proxy Email',
       width: 190,
       editable: true,
+      valueGetter: (value) => {
+        return 'cbobda@ufl.edu';
+      },
     },
     {
       field: 'action',
@@ -618,7 +649,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 140,
       editable: true,
       valueFormatter: (value) => {
-        return value.value[0];
+        return Number(value.value[0]);
       },
     },
 
@@ -671,6 +702,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'FTE',
       width: 110,
       editable: true,
+      valueGetter: (params) => {
+        if (params.row.hours != undefined) {
+          return Math.floor((params.row.hours[0] / 1.029411 / 40) * 100) / 100;
+        } else {
+          return ' ';
+        }
+      },
     },
 
     {
@@ -680,6 +718,15 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: false,
       valueFormatter: (value) => {
         return 'YES';
+      },
+    },
+    {
+      field: 'Remote',
+      headerName: 'Remote',
+      width: 140,
+      editable: false,
+      valueFormatter: (value) => {
+        return 'No';
       },
     },
   ];
