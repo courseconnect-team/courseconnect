@@ -10,7 +10,7 @@ export const TopNavBar = ({ className }) => {
       </Link>
       <button className="logout-button">
         <div className="overlap-group">
-          <Link href="/dashboard">
+          <Link href="/">
             <div className="text-wrapper-4">Home</div>
           </Link>
         </div>
