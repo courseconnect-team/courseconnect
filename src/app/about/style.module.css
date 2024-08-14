@@ -267,12 +267,17 @@ padding: 0; margin: 0;
 }
 
 .loginlowfi .topnavbarinstance {
-  left: 82% !important;
-  position: absolute !important;
-  top: 27px !important;
-  width: 100% !important;
+  position: absolute; 
+  right: 70px; 
+  top: 27px; 
 }
 
+
+@media (max-width: 570px) {
+  .ecelogopng2{
+    display: none;
+  }
+}
 .loginlowfi .designcomponentinstancenode {
   left: 10px !important;
   width: 105px !important;

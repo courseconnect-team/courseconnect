@@ -6,27 +6,10 @@ import './style.css';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import DeleteUserButton from './DeleteUserButton';
 import { updateProfile } from 'firebase/auth';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';import Box from '@mui/material/Box';
-import { styled } from '@mui/material/styles';
 
 interface ProfileProps {
   userRole: string;
 }
-
-const AddClassButton = styled(Button)({
-  background: 'white', // Assuming the button has a white background
-  borderRadius: '10px', // Adjust your border-radius accordingly
-  padding: '6px 24px', // Adjust the padding accordingly
-  width: "158", height: "4",
-  boxShadow: '0px 4px 35px rgba(0, 0, 0, 0.08)', // Example shadow
-  border: '1px black solid',
-  textTransform: 'none', // Keeps the button text as-is
-  '&:hover': {
-    background: 'white', // Keep the background color on hover
-    // You can add a different shadow or any other style for hover state
-  },
-  // If you have other states like "active", you can style them as well
-});
 
 export default function Profile(props: ProfileProps) {
   const { user } = useAuth();
@@ -156,8 +139,7 @@ export default function Profile(props: ProfileProps) {
               </div>
             </div>
           </form>
-          </div>
-        
+        </div>
       </div>
     </>
   );

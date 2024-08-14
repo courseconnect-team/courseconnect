@@ -142,7 +142,6 @@ export default function FacultyCourses() {
   return (
     <>
       <Toaster />
-
       <HeaderCard text="Courses" />
       <Bio user={user} className="full-name-and-bio-instance" />
       <div className="page-container">

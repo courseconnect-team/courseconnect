@@ -1,60 +1,56 @@
 .top-nav-bar {
   height: 37px;
-  position: relative;
-  width: 100%;
+  position: fixed;
+  width: 279px;
 }
 
-.top-nav-bar .div-wrapper {
-  all: unset;
-  box-sizing: border-box;
-  height: 37px;
-  left: 98px;
-  position: relative;
-  top: 0;
-  width: 100%;
-}
-
-.top-nav-bar .overlap-group-2 {
-  background-color: #ffffff;
-  border-radius: 10px;
-  height: 37px;
-  position: relative;
-  width: 126.5px;
-}
-
-.top-nav-bar .text-wrapper-6 {
-  color: #000000;
-  font-family: "SF Pro Display-Bold", Helvetica;
-  font-size: 18px;
-  font-weight: 700;
-  left: 11px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  text-align: center;
-  top: 9px;
-  white-space: nowrap;
-  width: 114px;
-}
-
-.top-nav-bar .log-in-button {
-  height: 18px;
-  position: absolute;
-  top: 9px;
-  width: 57px;
-}
-
-.top-nav-bar .text-wrapper-7 {
+.top-nav-bar .text-wrapper-3 {
   color: #ffffff;
   font-family: "SF Pro Display-Bold", Helvetica;
   font-size: 18px;
   font-weight: 700;
-  left: 0;
+  left: 100px;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
-  top: 0;
+  top: 8px;
   white-space: nowrap;
-  width: 55px;
+  width: 53px;
+}
+
+.top-nav-bar .text-wrapper-4 {
+  color: #000000;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-size: 18px;
+  font-weight: 700;
+  left: 28px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 9px;
+  white-space: nowrap;
+  width: 59px;
+}
+
+
+
+.top-nav-bar .overlap-group {
+  background-color: #ffffff;
+  border-radius: 10px;
+  height: 37px;
+  position: relative;
+  width: 115px;
+}
+
+.top-nav-bar .logout-button {
+  all: unset;
+  box-sizing: border-box;
+  height: 37px;
+  left: 207px;
+  position: absolute;
+  top: 0;
+  width: 117px;
+  cursor: pointer;
+
 }
 

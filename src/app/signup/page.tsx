@@ -39,20 +39,17 @@ export default function SignUpPage() {
               <p className="p">Already have an account?</p>
               <p className="you-can-register">
                 <span className="text-wrapper-8">You can </span>
-                <Link href="/" className="text-wrapper-12"> {"Login here!"} </Link>
+                <Link href="/" className="text-wrapper-12">
+                  {' '}
+                  {'Login here!'}{' '}
+                </Link>
               </p>
             </div>
 
             <SignUpCard className="log-in-card-instance" />
           </div>
           <EceLogoPng className="ece-logo-png-2" />
-          <TopNavBar
-            className="top-nav-bar-instance"
-            divClassName="design-component-instance-node"
-            divClassNameOverride="top-nav-bar-3"
-            logInButtonClassName="top-nav-bar-2"
-          />
-          <EceLogoPng className="ece-logo-png-2" />
+          <TopNavBar className="top-nav-bar-instance" />
         </div>
       </div>
     </>

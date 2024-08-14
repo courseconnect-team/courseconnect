@@ -130,39 +130,37 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-          firstName:
-            doc.data().name != undefined
-              ? doc.data().name.split(' ')[0]
-              : ' ',
-          lastName:
-            doc.data().name != undefined
-              ? doc.data().name.split(' ')[1]
-              : ' ',
-          year:
-            doc.data().semesters != undefined
-              ? doc.data().semesters[0].split(' ')[1]
-              : ' ',
-          fte: 15,
-          pname: 'DEPARTMENT TA/UPIS',
-          pid: '000108927',
-          hr: 15,
-        } as Assignment)
+          ({
+            id: doc.id,
+            ...doc.data(),
+            firstName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[0]
+                : ' ',
+            lastName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[1]
+                : ' ',
+            year:
+              doc.data().semesters != undefined
+                ? doc.data().semesters[0].split(' ')[1]
+                : ' ',
+            fte: 15,
+            pname: 'DEPARTMENT TA/UPIS',
+            pid: '000108927',
+            hr: 15,
+          } as Assignment)
       );
       setAssignmentData(data);
     });
 
     const courseRef = firebase.firestore().collection('courses');
-    const map = new Map(courseEmailMap)
+    const map = new Map(courseEmailMap);
     courseRef.onSnapshot((querySnapshot) => {
-      const data = querySnapshot.docs.map(
-        (doc) => {
-          map.set(doc.id, doc.data().professor_emails)
-        })
-    }
-    );
+      const data = querySnapshot.docs.map((doc) => {
+        map.set(doc.id, doc.data().professor_emails);
+      });
+    });
     setCourseEmailMap(map);
 
     // Clean up the subscription on unmount
@@ -494,11 +492,11 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
       valueGetter: (params) => {
         if (params.row.class_codes != undefined) {
-          return courseEmailMap.get(params.row.class_codes)
+          return courseEmailMap.get(params.row.class_codes);
         } else {
           return ' ';
         }
-      }
+      },
     },
     {
       field: 'sf',
@@ -523,8 +521,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           : ' ',
     },
 
-
-
     {
       field: 'proxyUfid',
       headerName: 'Proxy UFID',
@@ -538,8 +534,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 190,
       editable: true,
       valueGetter: (value) => {
-        return "Christophe";
-      }
+        return 'Christophe';
+      },
     },
     {
       field: 'proxyLastName',
@@ -547,8 +543,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 190,
       editable: true,
       valueGetter: (value) => {
-        return "Bobda";
-      }
+        return 'Bobda';
+      },
     },
 
     {
@@ -557,8 +553,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 190,
       editable: true,
       valueGetter: (value) => {
-        return "cbobda@ufl.edu";
-      }
+        return 'cbobda@ufl.edu';
+      },
     },
     {
       field: 'action',
@@ -708,11 +704,11 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
       valueGetter: (params) => {
         if (params.row.hours != undefined) {
-          return Math.floor(params.row.hours[0] / 1.029411 / 40 * 100) / 100;
+          return Math.floor((params.row.hours[0] / 1.029411 / 40) * 100) / 100;
         } else {
           return ' ';
         }
-      }
+      },
     },
 
     {
@@ -754,8 +750,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {

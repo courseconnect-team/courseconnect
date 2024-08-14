@@ -1,35 +1,20 @@
-/*
-We're constantly improving the code you see. 
-Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcNg&d=1152665201300829
-*/
+import React from 'react';
+import './style.css';
+import Link from 'next/link';
 
-import React from "react";
-import "./style.css";
-import Link from "next/link";
-
-export const TopNavBar = ({
-  className,
-  divClassName,
-  logInButtonClassName,
-  divClassNameOverride
-}) => {
+export const TopNavBar = ({ className }) => {
   return (
     <div className={`top-nav-bar ${className}`}>
-      <Link href="/">
-        <button className="div-wrapper">
-          <div className="overlap-group-2">
-            <div className={`text-wrapper-6 ${divClassName}`}>Home</div>
-          </div>
-        </button>
-      </Link>
-
       <Link href="/about">
-
-        <div className={`log-in-button`}>
-          <div className={`text-wrapper-7 ${divClassNameOverride}`}>About</div>
-        </div>
+        <div className="text-wrapper-3">About</div>
       </Link>
+      <button className="logout-button">
+        <div className="overlap-group">
+          <Link href="/dashboard">
+            <div className="text-wrapper-4">Home</div>
+          </Link>
+        </div>
+      </button>
     </div>
   );
 };
-
