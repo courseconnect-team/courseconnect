@@ -16,6 +16,7 @@ import {
   sendApplicationStatusDeniedEmail,
   sendFacultyNotificationEmail,
   sendUnapprovedUserNotificationEmail,
+  sendFacultyAssignedNotificationEmail,
 } from './nodemailer';
 
 const admin = require('firebase-admin');
@@ -60,6 +61,13 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
         break;
       case 'facultyNotification':
         sendFacultyNotificationEmail(data.user, data.position, data.classCode);
+        break;
+      case 'facultyAssignment':
+        sendFacultyAssignedNotificationEmail(
+          data.userEmail,
+          data.position,
+          data.classCode
+        );
         break;
       case 'unapprovedUser':
         sendUnapprovedUserNotificationEmail(data.user);

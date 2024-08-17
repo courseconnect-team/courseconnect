@@ -60,10 +60,8 @@ interface Application {
   id: string;
   additionalprompt: string;
   available_hours: string;
-
   available_semesters: string;
   courses: string[];
-
   date: string;
   degree: string;
   department: string;
@@ -150,18 +148,61 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleSubmitAssignment = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
-    event.preventDefault();
-    // extract the form data from the current event
-    setLoading(true);
-    const formData = new FormData(event.currentTarget);
-
-    // get student's user id
     const student_uid = selectedUserGrid as string;
     const statusRef = firebase
       .firestore()
       .collection('applications')
       .doc(student_uid.toString());
     const doc = await getDoc(statusRef);
+
+    const courseDetails = firebase
+      .firestore()
+      .collection('courses')
+      .doc(valueRadio);
+    const courseDoc = await getDoc(courseDetails);
+    const emailArray = courseDoc
+      .data()
+      .professor_emails.split(';')
+      .map((email) => email.trim());
+
+    for (email in emailArray) {
+      try {
+        const response = await fetch(
+          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              type: 'facultyAssignment',
+              data: {
+                userEmail: email,
+                position: doc.data().position,
+                classCode: valueRadio,
+              },
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Email sent successfully:', data);
+        } else {
+          throw new Error('Failed to send email');
+        }
+      } catch (error) {
+        console.error('Error sending email:', error);
+      }
+    }
+
+    event.preventDefault();
+    // extract the form data from the current event
+    setLoading(true);
+    const formData = new FormData(event.currentTarget);
+
+    // get student's user id
+
     // update student's application to approved
     firebase
       .firestore()
