@@ -137,13 +137,14 @@ export function sendUnapprovedUserNotificationEmail(user) {
 export function sendFacultyAssignedNotificationEmail(
   userEmail,
   position,
-  classCode
+  classCode,
+  semester
 ) {
   const mailOptions = {
     from: email,
     to: userEmail,
     subject: 'New Student Application',
-    text: `Dear Professor,\n\nA student has been assigned for the ${position} role in your ${classCode} class. Please login to your account to view more information regarding the new assignment.\n\nBest regards,\nCourse Connect Team`,
+    text: `Dear Professor,\n\nA student has been assigned for the ${position} role in your ${semester} ${classCode} class. Please login to your account to view more information regarding the new assignment.\n\nBest regards,\nCourse Connect Team`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {

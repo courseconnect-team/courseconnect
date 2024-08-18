@@ -66,7 +66,8 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
         sendFacultyAssignedNotificationEmail(
           data.userEmail,
           data.position,
-          data.classCode
+          data.classCode,
+          data.semester
         );
         break;
       case 'unapprovedUser':
