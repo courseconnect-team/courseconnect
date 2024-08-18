@@ -2,7 +2,7 @@
 
 'use client';
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
@@ -60,10 +60,8 @@ interface Application {
   id: string;
   additionalprompt: string;
   available_hours: string;
-
   available_semesters: string;
   courses: string[];
-
   date: string;
   degree: string;
   department: string;
@@ -150,81 +148,104 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleSubmitAssignment = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
-    event.preventDefault();
-    // extract the form data from the current event
+    event.preventDefault(); // Prevent the form from submitting the default way
     setLoading(true);
-    const formData = new FormData(event.currentTarget);
 
-    // get student's user id
-    const student_uid = selectedUserGrid as string;
-    const statusRef = firebase
-      .firestore()
-      .collection('applications')
-      .doc(student_uid.toString());
-    const doc = await getDoc(statusRef);
-    // update student's application to approved
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(student_uid.toString())
-      .update({ status: 'Admin_approved' })
-      // .then(() => {
-      //   // Update the 'users' collection
-      //   firebase
-      //     .firestore()
-      //     .collection('users')
-      //     .doc(id.toString())
-      //     .update({ role: 'student_accepted' })
-      //     .then(() => {
-      //       // Update the local state
-      //       const updatedData = applicationData.map((row) => {
-      //         if (row.id === id) {
-      //           return { ...row, status: 'Approved' };
-      //         }
-      //         return row;
-      //       });
-      //       setApplicationData(updatedData);
-      //     })
-      //     .catch((error) => {
-      //       console.error('Error updating user document: ', error);
-      //     });
-      // })
-      .catch((error) => {
-        console.error('Error updating application document: ', error);
-      });
+    try {
+      const student_uid = selectedUserGrid as string;
+      const statusRef = firebase
+        .firestore()
+        .collection('applications')
+        .doc(student_uid.toString());
+      const doc = await getDoc(statusRef);
 
-    // get the current date in month/day/year format
-    const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+      const courseDetails = firebase
+        .firestore()
+        .collection('courses')
+        .doc(valueRadio);
+      const courseDoc = await getDoc(courseDetails);
 
-    const assignmentObject = {
-      date: current_date as string,
-      student_uid: student_uid as string,
-      class_codes: valueRadio,
-      email: doc.data().email,
-      name: doc.data().firstname + ' ' + doc.data().lastname,
-      semesters: doc.data().available_semesters,
-      department: doc.data().department,
-      hours: doc.data().available_hours,
-      position: doc.data().position,
-      degree: doc.data().degree,
-    };
+      // Update student's application to approved
+      await firebase
+        .firestore()
+        .collection('applications')
+        .doc(student_uid.toString())
+        .update({ status: 'Admin_approved' });
 
-    // Create the document within the "assignments" collection
-    firebase
-      .firestore()
-      .collection('assignments')
-      .doc(assignmentObject.student_uid)
-      .set(assignmentObject)
-      .catch((error: any) => {
-        console.error('Error writing assignment document: ', error);
-      });
-    handleSendEmail(assignmentObject);
+      // Get the current date in month/day/year format
+      const current = new Date();
+      const current_date = `${
+        current.getMonth() + 1
+      }-${current.getDate()}-${current.getFullYear()}`;
 
-    handleCloseAssignmentDialog();
-    setLoading(false);
+      const assignmentObject = {
+        date: current_date as string,
+        student_uid: student_uid as string,
+        class_codes: valueRadio,
+        email: doc.data()?.email,
+        name: doc.data()?.firstname + ' ' + doc.data()?.lastname,
+        semesters: doc.data()?.available_semesters,
+        department: doc.data()?.department,
+        hours: doc.data()?.available_hours,
+        position: doc.data()?.position,
+        degree: doc.data()?.degree,
+      };
+
+      // Create the document within the "assignments" collection
+      await firebase
+        .firestore()
+        .collection('assignments')
+        .doc(assignmentObject.student_uid)
+        .set(assignmentObject);
+
+      // Extract and process the professor emails
+      const emailArray = courseDoc
+        .data()
+        ?.professor_emails.split(';')
+        .map((email) => email.trim());
+
+      // Send emails after all documents have been fetched and updated
+      if (emailArray) {
+        for (const email of emailArray) {
+          try {
+            const response = await fetch(
+              'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  type: 'facultyAssignment',
+                  data: {
+                    userEmail: email,
+                    position: doc.data()?.position,
+                    classCode: courseDoc.data()?.code,
+                    semester: courseDoc.data()?.semester,
+                  },
+                }),
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Email sent successfully:', data);
+            } else {
+              throw new Error('Failed to send email');
+            }
+          } catch (error) {
+            console.error('Error sending email:', error);
+          }
+        }
+      }
+
+      handleSendEmail(assignmentObject);
+      handleCloseAssignmentDialog();
+    } catch (error) {
+      console.error('Error in handleSubmitAssignment:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // toolbar
