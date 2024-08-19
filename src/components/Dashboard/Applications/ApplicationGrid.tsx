@@ -93,6 +93,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const { user } = useAuth();
   const { userRole } = props;
   const userName = GetUserName(user?.uid);
+  const [paginationModel, setPaginationModel] = React.useState({
+    page: 0,
+    pageSize: 25,
+  });
 
   // application props
   const [applicationData, setApplicationData] = React.useState<Application[]>(
@@ -497,56 +501,30 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     handleDenyEmail(id);
   };
 
-  const handleApproveClick = (id: GridRowId) => {
+  const handleApproveClick = async (id: GridRowId) => {
     setLoading(true);
-    // Update the 'applications' collection
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString())
-      .update({ status: 'Approved' })
+    try {
+      // Update the 'applications' collection
+      await firebase
+        .firestore()
+        .collection('applications')
+        .doc(id.toString())
+        .update({ status: 'Approved' });
 
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error updating application document: ', error);
-      });
+      // Update the state locally to avoid reloading the entire data
+      setApplicationData((prevData) =>
+        prevData.map((row) =>
+          row.id === id ? { ...row, status: 'Approved' } : row
+        )
+      );
 
-    // eventually here an email would be sent to the student as a notification
-    // however, for now there will just be an "assignment" object generated in the database
-    /*
-        the assignment object will have the following fields:
-        - date
-        - student's uid (same as grid row id here)
-        - approver's uid (uid of the logged-in user)
-        - approver's role
-        --> EVENTUALLY THERE WILL BE SUGGESTED SECTIONS AND CLASSES. FOR NOW, NOTHING.
-      */
-    // get the current date in month/day/year format
-    const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
-
-    const assignmentObject = {
-      date: current_date as string,
-      student_uid: id.toString() as string,
-      approver_uid: user?.uid as string,
-      approver_role: userRole as string,
-      approver_name: userName as string,
-    };
-    // Create the document within the "assignments" collection
-    firebase
-      .firestore()
-      .collection('assignments')
-      .doc(assignmentObject.student_uid)
-      .set(assignmentObject)
-      .then(() => {
-        setLoading(false);
-      })
-      .catch((error: any) => {
-        setLoading(false);
-        console.error('Error writing assignment document: ', error);
-      });
+      // Send email notification or any other side effects
+      await handleSendEmail(id);
+    } catch (error) {
+      console.error('Error updating application document: ', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -994,9 +972,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         slotProps={{
           toolbar: { setApplicationData, setRowModesModel },
         }}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 25 } },
-        }}
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel} // Keep pagination state in sync
         getRowClassName={(params) =>
           params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
         }
