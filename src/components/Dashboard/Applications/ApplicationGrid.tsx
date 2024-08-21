@@ -309,6 +309,12 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         const data = querySnapshot.docs
           .filter(function (doc) {
             if (doc.data().status != 'Admin_denied') {
+              if (
+                doc.data().status == 'Admin_approved' &&
+                Object.values(doc.data().courses).length < 2
+              ) {
+                return false;
+              }
               return true;
             } else {
               return false;
