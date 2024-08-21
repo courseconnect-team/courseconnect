@@ -308,10 +308,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
           .filter(function (doc) {
-            if (
-              doc.data().status != 'Admin_approved' &&
-              doc.data().status != 'Admin_denied'
-            ) {
+            if (doc.data().status != 'Admin_denied') {
               return true;
             } else {
               return false;
@@ -690,7 +687,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       headerName: 'Actions',
       width: 370,
       cellClassName: 'actions',
-      getActions: ({ id }) => {
+      getActions: ({ id, row }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
         if (isInEditMode) {
@@ -714,7 +711,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           ];
         }
 
-        return [
+        const actions = [
           <Button
             key="3"
             variant="outlined"
@@ -760,14 +757,20 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             onClick={(event) => handleOpenAssignmentDialog(id)}
             color="success"
           />,
-          <GridActionsCellItem
-            key="5"
-            icon={<ThumbDownOffAlt />}
-            label="Deny"
-            onClick={(event) => handleDenyAssignmentDialog(id)}
-            color="error"
-          />,
         ];
+        if (row.status === 'Submitted') {
+          actions.push(
+            <GridActionsCellItem
+              key="5"
+              icon={<ThumbDownOffAlt />}
+              label="Deny"
+              onClick={() => handleDenyAssignmentDialog(id)}
+              color="error"
+            />
+          );
+        }
+
+        return actions;
       },
     },
     {
@@ -814,21 +817,32 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       headerName: 'Status',
       width: 130,
       editable: true,
-      renderCell: (params) => (
-        <span
-          style={{
-            color: '#f2a900',
-            border: '1px solid #f2a900',
-            padding: '2px 4px',
-            borderRadius: '4px',
-            backgroundColor: '#fffdf0',
-            display: 'inline-block',
-          }}
-        >
-          {params.value}
-        </span>
-      ),
+      renderCell: (params) => {
+        let color = '#f2a900';
+        let backgroundColor = '#fffdf0';
+
+        if (params.value === 'Admin_approved') {
+          color = '#4caf50';
+          backgroundColor = '#e8f5e9';
+        }
+
+        return (
+          <span
+            style={{
+              color: color,
+              border: `1px solid ${color}`,
+              padding: '2px 4px',
+              borderRadius: '4px',
+              backgroundColor: backgroundColor,
+              display: 'inline-block',
+            }}
+          >
+            {params.value}
+          </span>
+        );
+      },
     },
+    ,
   ];
 
   if (userRole === 'faculty') {
