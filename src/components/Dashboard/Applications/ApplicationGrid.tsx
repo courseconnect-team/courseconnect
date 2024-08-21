@@ -93,6 +93,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const { user } = useAuth();
   const { userRole } = props;
   const userName = GetUserName(user?.uid);
+  const [paginationModel, setPaginationModel] = React.useState({
+    page: 0,
+    pageSize: 25,
+  });
 
   // application props
   const [applicationData, setApplicationData] = React.useState<Application[]>(
@@ -304,10 +308,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
           .filter(function (doc) {
-            if (
-              doc.data().status != 'Admin_approved' &&
-              doc.data().status != 'Admin_denied'
-            ) {
+            if (doc.data().status != 'Admin_denied') {
               return true;
             } else {
               return false;
@@ -497,56 +498,30 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     handleDenyEmail(id);
   };
 
-  const handleApproveClick = (id: GridRowId) => {
+  const handleApproveClick = async (id: GridRowId) => {
     setLoading(true);
-    // Update the 'applications' collection
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString())
-      .update({ status: 'Approved' })
+    try {
+      // Update the 'applications' collection
+      await firebase
+        .firestore()
+        .collection('applications')
+        .doc(id.toString())
+        .update({ status: 'Approved' });
 
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error updating application document: ', error);
-      });
+      // Update the state locally to avoid reloading the entire data
+      setApplicationData((prevData) =>
+        prevData.map((row) =>
+          row.id === id ? { ...row, status: 'Approved' } : row
+        )
+      );
 
-    // eventually here an email would be sent to the student as a notification
-    // however, for now there will just be an "assignment" object generated in the database
-    /*
-        the assignment object will have the following fields:
-        - date
-        - student's uid (same as grid row id here)
-        - approver's uid (uid of the logged-in user)
-        - approver's role
-        --> EVENTUALLY THERE WILL BE SUGGESTED SECTIONS AND CLASSES. FOR NOW, NOTHING.
-      */
-    // get the current date in month/day/year format
-    const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
-
-    const assignmentObject = {
-      date: current_date as string,
-      student_uid: id.toString() as string,
-      approver_uid: user?.uid as string,
-      approver_role: userRole as string,
-      approver_name: userName as string,
-    };
-    // Create the document within the "assignments" collection
-    firebase
-      .firestore()
-      .collection('assignments')
-      .doc(assignmentObject.student_uid)
-      .set(assignmentObject)
-      .then(() => {
-        setLoading(false);
-      })
-      .catch((error: any) => {
-        setLoading(false);
-        console.error('Error writing assignment document: ', error);
-      });
+      // Send email notification or any other side effects
+      await handleSendEmail(id);
+    } catch (error) {
+      console.error('Error updating application document: ', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -712,7 +687,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       headerName: 'Actions',
       width: 370,
       cellClassName: 'actions',
-      getActions: ({ id }) => {
+      getActions: ({ id, row }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
         if (isInEditMode) {
@@ -736,7 +711,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           ];
         }
 
-        return [
+        const actions = [
           <Button
             key="3"
             variant="outlined"
@@ -782,14 +757,20 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             onClick={(event) => handleOpenAssignmentDialog(id)}
             color="success"
           />,
-          <GridActionsCellItem
-            key="5"
-            icon={<ThumbDownOffAlt />}
-            label="Deny"
-            onClick={(event) => handleDenyAssignmentDialog(id)}
-            color="error"
-          />,
         ];
+        if (row.status === 'Submitted') {
+          actions.push(
+            <GridActionsCellItem
+              key="5"
+              icon={<ThumbDownOffAlt />}
+              label="Deny"
+              onClick={() => handleDenyAssignmentDialog(id)}
+              color="error"
+            />
+          );
+        }
+
+        return actions;
       },
     },
     {
@@ -836,21 +817,32 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       headerName: 'Status',
       width: 130,
       editable: true,
-      renderCell: (params) => (
-        <span
-          style={{
-            color: '#f2a900',
-            border: '1px solid #f2a900',
-            padding: '2px 4px',
-            borderRadius: '4px',
-            backgroundColor: '#fffdf0',
-            display: 'inline-block',
-          }}
-        >
-          {params.value}
-        </span>
-      ),
+      renderCell: (params) => {
+        let color = '#f2a900';
+        let backgroundColor = '#fffdf0';
+
+        if (params.value === 'Admin_approved') {
+          color = '#4caf50';
+          backgroundColor = '#e8f5e9';
+        }
+
+        return (
+          <span
+            style={{
+              color: color,
+              border: `1px solid ${color}`,
+              padding: '2px 4px',
+              borderRadius: '4px',
+              backgroundColor: backgroundColor,
+              display: 'inline-block',
+            }}
+          >
+            {params.value}
+          </span>
+        );
+      },
     },
+    ,
   ];
 
   if (userRole === 'faculty') {
@@ -994,9 +986,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         slotProps={{
           toolbar: { setApplicationData, setRowModesModel },
         }}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 25 } },
-        }}
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel} // Keep pagination state in sync
         getRowClassName={(params) =>
           params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
         }
