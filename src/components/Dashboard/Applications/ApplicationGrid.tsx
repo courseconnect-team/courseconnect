@@ -2,7 +2,7 @@
 
 'use client';
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
@@ -60,10 +60,8 @@ interface Application {
   id: string;
   additionalprompt: string;
   available_hours: string;
-
   available_semesters: string;
   courses: string[];
-
   date: string;
   degree: string;
   department: string;
@@ -95,6 +93,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const { user } = useAuth();
   const { userRole } = props;
   const userName = GetUserName(user?.uid);
+  const [paginationModel, setPaginationModel] = React.useState({
+    page: 0,
+    pageSize: 25,
+  });
 
   // application props
   const [applicationData, setApplicationData] = React.useState<Application[]>(
@@ -150,81 +152,104 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleSubmitAssignment = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
-    event.preventDefault();
-    // extract the form data from the current event
+    event.preventDefault(); // Prevent the form from submitting the default way
     setLoading(true);
-    const formData = new FormData(event.currentTarget);
 
-    // get student's user id
-    const student_uid = selectedUserGrid as string;
-    const statusRef = firebase
-      .firestore()
-      .collection('applications')
-      .doc(student_uid.toString());
-    const doc = await getDoc(statusRef);
-    // update student's application to approved
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(student_uid.toString())
-      .update({ status: 'Admin_approved' })
-      // .then(() => {
-      //   // Update the 'users' collection
-      //   firebase
-      //     .firestore()
-      //     .collection('users')
-      //     .doc(id.toString())
-      //     .update({ role: 'student_accepted' })
-      //     .then(() => {
-      //       // Update the local state
-      //       const updatedData = applicationData.map((row) => {
-      //         if (row.id === id) {
-      //           return { ...row, status: 'Approved' };
-      //         }
-      //         return row;
-      //       });
-      //       setApplicationData(updatedData);
-      //     })
-      //     .catch((error) => {
-      //       console.error('Error updating user document: ', error);
-      //     });
-      // })
-      .catch((error) => {
-        console.error('Error updating application document: ', error);
-      });
+    try {
+      const student_uid = selectedUserGrid as string;
+      const statusRef = firebase
+        .firestore()
+        .collection('applications')
+        .doc(student_uid.toString());
+      const doc = await getDoc(statusRef);
 
-    // get the current date in month/day/year format
-    const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+      const courseDetails = firebase
+        .firestore()
+        .collection('courses')
+        .doc(valueRadio);
+      const courseDoc = await getDoc(courseDetails);
 
-    const assignmentObject = {
-      date: current_date as string,
-      student_uid: student_uid as string,
-      class_codes: valueRadio,
-      email: doc.data().email,
-      name: doc.data().firstname + ' ' + doc.data().lastname,
-      semesters: doc.data().available_semesters,
-      department: doc.data().department,
-      hours: doc.data().available_hours,
-      position: doc.data().position,
-      degree: doc.data().degree,
-    };
+      // Update student's application to approved
+      await firebase
+        .firestore()
+        .collection('applications')
+        .doc(student_uid.toString())
+        .update({ status: 'Admin_approved' });
 
-    // Create the document within the "assignments" collection
-    firebase
-      .firestore()
-      .collection('assignments')
-      .doc(assignmentObject.student_uid)
-      .set(assignmentObject)
-      .catch((error: any) => {
-        console.error('Error writing assignment document: ', error);
-      });
-    handleSendEmail(assignmentObject);
+      // Get the current date in month/day/year format
+      const current = new Date();
+      const current_date = `${
+        current.getMonth() + 1
+      }-${current.getDate()}-${current.getFullYear()}`;
 
-    handleCloseAssignmentDialog();
-    setLoading(false);
+      const assignmentObject = {
+        date: current_date as string,
+        student_uid: student_uid as string,
+        class_codes: valueRadio,
+        email: doc.data()?.email,
+        name: doc.data()?.firstname + ' ' + doc.data()?.lastname,
+        semesters: doc.data()?.available_semesters,
+        department: doc.data()?.department,
+        hours: doc.data()?.available_hours,
+        position: doc.data()?.position,
+        degree: doc.data()?.degree,
+      };
+
+      // Create the document within the "assignments" collection
+      await firebase
+        .firestore()
+        .collection('assignments')
+        .doc(assignmentObject.student_uid)
+        .set(assignmentObject);
+
+      // Extract and process the professor emails
+      const emailArray = courseDoc
+        .data()
+        ?.professor_emails.split(';')
+        .map((email) => email.trim());
+
+      // Send emails after all documents have been fetched and updated
+      if (emailArray) {
+        for (const email of emailArray) {
+          try {
+            const response = await fetch(
+              'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  type: 'facultyAssignment',
+                  data: {
+                    userEmail: email,
+                    position: doc.data()?.position,
+                    classCode: courseDoc.data()?.code,
+                    semester: courseDoc.data()?.semester,
+                  },
+                }),
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Email sent successfully:', data);
+            } else {
+              throw new Error('Failed to send email');
+            }
+          } catch (error) {
+            console.error('Error sending email:', error);
+          }
+        }
+      }
+
+      handleSendEmail(assignmentObject);
+      handleCloseAssignmentDialog();
+    } catch (error) {
+      console.error('Error in handleSubmitAssignment:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // toolbar
@@ -283,10 +308,13 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
           .filter(function (doc) {
-            if (
-              doc.data().status != 'Admin_approved' &&
-              doc.data().status != 'Admin_denied'
-            ) {
+            if (doc.data().status != 'Admin_denied') {
+              if (
+                doc.data().status == 'Admin_approved' &&
+                Object.values(doc.data().courses).length < 2
+              ) {
+                return false;
+              }
               return true;
             } else {
               return false;
@@ -476,56 +504,30 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     handleDenyEmail(id);
   };
 
-  const handleApproveClick = (id: GridRowId) => {
+  const handleApproveClick = async (id: GridRowId) => {
     setLoading(true);
-    // Update the 'applications' collection
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString())
-      .update({ status: 'Approved' })
+    try {
+      // Update the 'applications' collection
+      await firebase
+        .firestore()
+        .collection('applications')
+        .doc(id.toString())
+        .update({ status: 'Approved' });
 
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error updating application document: ', error);
-      });
+      // Update the state locally to avoid reloading the entire data
+      setApplicationData((prevData) =>
+        prevData.map((row) =>
+          row.id === id ? { ...row, status: 'Approved' } : row
+        )
+      );
 
-    // eventually here an email would be sent to the student as a notification
-    // however, for now there will just be an "assignment" object generated in the database
-    /*
-        the assignment object will have the following fields:
-        - date
-        - student's uid (same as grid row id here)
-        - approver's uid (uid of the logged-in user)
-        - approver's role
-        --> EVENTUALLY THERE WILL BE SUGGESTED SECTIONS AND CLASSES. FOR NOW, NOTHING.
-      */
-    // get the current date in month/day/year format
-    const current = new Date();
-    const current_date = `${
-      current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
-
-    const assignmentObject = {
-      date: current_date as string,
-      student_uid: id.toString() as string,
-      approver_uid: user?.uid as string,
-      approver_role: userRole as string,
-      approver_name: userName as string,
-    };
-    // Create the document within the "assignments" collection
-    firebase
-      .firestore()
-      .collection('assignments')
-      .doc(assignmentObject.student_uid)
-      .set(assignmentObject)
-      .then(() => {
-        setLoading(false);
-      })
-      .catch((error: any) => {
-        setLoading(false);
-        console.error('Error writing assignment document: ', error);
-      });
+      // Send email notification or any other side effects
+      await handleSendEmail(id);
+    } catch (error) {
+      console.error('Error updating application document: ', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -691,7 +693,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       headerName: 'Actions',
       width: 370,
       cellClassName: 'actions',
-      getActions: ({ id }) => {
+      getActions: ({ id, row }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
         if (isInEditMode) {
@@ -715,7 +717,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           ];
         }
 
-        return [
+        const actions = [
           <Button
             key="3"
             variant="outlined"
@@ -761,14 +763,20 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             onClick={(event) => handleOpenAssignmentDialog(id)}
             color="success"
           />,
-          <GridActionsCellItem
-            key="5"
-            icon={<ThumbDownOffAlt />}
-            label="Deny"
-            onClick={(event) => handleDenyAssignmentDialog(id)}
-            color="error"
-          />,
         ];
+        if (row.status === 'Submitted') {
+          actions.push(
+            <GridActionsCellItem
+              key="5"
+              icon={<ThumbDownOffAlt />}
+              label="Deny"
+              onClick={() => handleDenyAssignmentDialog(id)}
+              color="error"
+            />
+          );
+        }
+
+        return actions;
       },
     },
     {
@@ -815,21 +823,32 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       headerName: 'Status',
       width: 130,
       editable: true,
-      renderCell: (params) => (
-        <span
-          style={{
-            color: '#f2a900',
-            border: '1px solid #f2a900',
-            padding: '2px 4px',
-            borderRadius: '4px',
-            backgroundColor: '#fffdf0',
-            display: 'inline-block',
-          }}
-        >
-          {params.value}
-        </span>
-      ),
+      renderCell: (params) => {
+        let color = '#f2a900';
+        let backgroundColor = '#fffdf0';
+
+        if (params.value === 'Admin_approved') {
+          color = '#4caf50';
+          backgroundColor = '#e8f5e9';
+        }
+
+        return (
+          <span
+            style={{
+              color: color,
+              border: `1px solid ${color}`,
+              padding: '2px 4px',
+              borderRadius: '4px',
+              backgroundColor: backgroundColor,
+              display: 'inline-block',
+            }}
+          >
+            {params.value}
+          </span>
+        );
+      },
     },
+    ,
   ];
 
   if (userRole === 'faculty') {
@@ -973,9 +992,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         slotProps={{
           toolbar: { setApplicationData, setRowModesModel },
         }}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 25 } },
-        }}
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel} // Keep pagination state in sync
         getRowClassName={(params) =>
           params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
         }

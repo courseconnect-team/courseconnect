@@ -1,46 +1,27 @@
 'use client';
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Grid';
+
 import Box from '@mui/material/Box';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import DepartmentSelect from '@/components/FormUtil/DepartmentSelect';
-import GPA_Select from '@/components/FormUtil/GPASelect';
-import Typography from '@mui/material/Typography';
+
 import Container from '@mui/material/Container';
-import DegreeSelect from '@/components/FormUtil/DegreeSelect';
-import SemesterStatusSelect from '@/components/FormUtil/SemesterStatusSelect';
-import NationalitySelect from '@/components/FormUtil/NationalitySelect';
-import ProficiencySelect from '@/components/FormUtil/ProficiencySelect';
-import PositionSelect from '@/components/FormUtil/PositionSelect';
-import AvailabilityCheckbox from '@/components/FormUtil/AvailabilityCheckbox';
-import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
-import AdditionalSemesterPrompt from '@/components/FormUtil/AddtlSemesterPrompt';
-import UpdateRole from '@/firebase/util/UpdateUserRole';
+
 import { useAuth } from '@/firebase/auth/auth_context';
-import { Toaster, toast } from 'react-hot-toast';
-import { LinearProgress } from '@mui/material';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { Toaster } from 'react-hot-toast';
+
 import { ApplicationStatusCard } from '@/components/ApplicationStatusCard/ApplicationStatusCard';
 import { useState } from 'react';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import GetUserUfid from '@/firebase/util/GetUserUfid';
 import { ApplicationStatusCardDenied } from '@/components/ApplicationStatusCardDenied/ApplicationStatusCardDenied';
 
 import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCardAccepted/ApplicationStatusCardAccepted';
 import styles from './style.module.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
-import GetUserName from '@/firebase/util/GetUserName';
-import { log } from 'console';
-import { firestore } from 'firebase-functions/v1';
+import { getDoc } from 'firebase/firestore';
+
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -84,10 +65,7 @@ export default function Status() {
   const { user } = useAuth();
   const userId = user.uid;
   const [role, loading, error] = GetUserRole(user?.uid);
-  const [applicationData, setApplicationData] = React.useState<Application[]>(
-    []
-  );
-  const [applications, setApplications] = React.useState([]);
+
   const [courses, setCourses] = useState(null);
   const [adminDenied, setAdminDenied] = useState(false);
 
@@ -98,15 +76,15 @@ export default function Status() {
       const statusRef2 = db.collection('assignments').doc(userId);
       await getDoc(statusRef2).then((doc) => {
         if (doc.data() != null && doc.data() != undefined) {
-          setAssignment(doc.data().class_codes);
+          setAssignment(doc.data()?.class_codes);
         }
       });
 
       const statusRef = db.collection('applications').doc(userId);
       await getDoc(statusRef).then((doc) => {
         if (doc.data() != null && doc.data() != undefined) {
-          setAdminDenied(doc.data().status == 'Admin_denied');
-          setCourses(doc.data().courses);
+          setAdminDenied(doc.data()?.status == 'Admin_denied');
+          setCourses(doc.data()?.courses);
         }
       });
 
