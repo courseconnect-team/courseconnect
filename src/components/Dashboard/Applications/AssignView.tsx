@@ -1,10 +1,14 @@
 import * as React from 'react';
+
+import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { Grid } from '@mui/material';
+import { Button, Grid, Input } from '@mui/material';
 import Paper from '@mui/material/Paper';
+import { table } from 'console';
+import { setDoc } from 'firebase/firestore';
 
 export interface AppViewProps {
   uid: string;
@@ -12,17 +16,117 @@ export interface AppViewProps {
 
 export default function AppView({ uid }: AppViewProps) {
   const [docData, setDocData] = React.useState<any>(null);
+  const [studentName, setStudentName] = React.useState("");
+  const [studentEmail, setStudentEmail] = React.useState("");
+  const [studentId, setStudentId] = React.useState("");
+  const [facultyId, setFacultyId] = React.useState("");
+  const [startDate, setStartDate] = React.useState("");
+  const [endDate, setEndDate] = React.useState("");
+  const [hours, setHours] = React.useState<any>(null);
+  const [title, setTitle] = React.useState("");
+  const [percentage, setPercentage] = React.useState("");
+  const [annualRate, setAnnualRate] = React.useState("");
+  const [biweeklyRate, setBiweeklyRate] = React.useState("");
+  const [targetAmt, setTargetAmt] = React.useState("");
 
   // get application object from uid
   const applicationsRef = firebase.firestore().collection('assignments');
   const docRef = applicationsRef.doc(uid);
 
+  function handleSave(event: any) {
+    console.log(hours);
+
+
+    setDoc(docRef, {
+      name: studentName,
+      email: studentEmail,
+      ufid: studentId,
+      supervisor_ufid: facultyId,
+      start_date: startDate,
+      end_date: endDate,
+      date: docData.date,
+      class_codes: docData.class_codes,
+      degree: docData.degree,
+      department: docData.department,
+      hours: Array.isArray(hours) ? hours : docData.hours,
+      position: docData.position,
+      semesters: docData.semesters,
+      student_uid: docData.student_uid,
+      title: title,
+      percentage: percentage,
+      annual_rate: annualRate,
+      biweekly_rate: biweeklyRate,
+      target_amount: targetAmt,
+    })
+
+  }
   React.useEffect(() => {
     docRef
       .get()
       .then((doc) => {
         if (doc.exists) {
           setDocData(doc.data());
+          console.log(doc.data());
+
+          setStudentName(doc.data().name);
+          setStudentEmail(doc.data().email);
+          setHours(doc.data().hours[0]);
+          if (doc.data().ufid === undefined) {
+            setStudentId("");
+          } else {
+            setStudentId(doc.data().ufid);
+          }
+
+          if (doc.data().supervisor_ufid === undefined) {
+            setFacultyId("");
+          } else {
+            setFacultyId(doc.data().supervisor_ufid);
+          }
+
+          if (doc.data().start_date === undefined) {
+            setStartDate("");
+          } else {
+            setStartDate(doc.data().start_date);
+          }
+
+
+          if (doc.data().end_date === undefined) {
+            setEndDate("");
+          } else {
+            setEndDate(doc.data().end_date);
+          }
+
+          if (doc.data().title === undefined) {
+            setTitle("");
+          } else {
+            setTitle(doc.data().title);
+          }
+
+          if (doc.data().percentage === undefined) {
+            setPercentage("");
+          } else {
+            setPercentage(doc.data().percentage);
+          }
+
+          if (doc.data().annual_rate === undefined) {
+            setAnnualRate("");
+          } else {
+            setAnnualRate(doc.data().annual_rate);
+          }
+
+          if (doc.data().biweekly_rate === undefined) {
+            setBiweeklyRate("");
+          } else {
+            setBiweeklyRate(doc.data().biweekly_rate);
+          }
+
+          if (doc.data().target_amount === undefined) {
+            setTargetAmt("");
+          } else {
+            setTargetAmt(doc.data().target_amount);
+          }
+          console.log(studentName);
+
         } else {
           console.log('No such document!');
         }
@@ -30,8 +134,7 @@ export default function AppView({ uid }: AppViewProps) {
       .catch((error) => {
         console.log('Error getting document:', error);
       });
-  }, [uid, docRef]); // Only re-run the effect if uid changes
-  console.log(docData);
+  }, [uid]); // Only re-run the effect if uid changes
 
   return (
     <Box sx={{ minWidth: '1000px', maxWidth: '1000px', borderRadius: 4 }}>
@@ -39,7 +142,7 @@ export default function AppView({ uid }: AppViewProps) {
         <Grid sx={{ flexGrow: 1 }} spacing={4}>
           <Grid item xs={22}>
             <Grid container justifyContent="left" spacing={4}>
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((value) => {
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((value) => {
                 if (value == 0) {
                   return (
                     <Grid key={value} item>
@@ -68,7 +171,14 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Student Name: {docData.name}
+                          Name: {' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={docData.name} onChange={event => { setStudentName(event.target.value) }} />
+
                         </Typography>
 
                         <Typography
@@ -76,7 +186,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Email: {docData.email}
+                          Email: {' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={docData.email} onChange={event => { setStudentEmail(event.target.value) }} />
                         </Typography>
 
                         <Typography
@@ -84,7 +200,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Student UFID: ------
+                          UFID: {' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={studentId} onChange={event => { setStudentId(event.target.value) }} />
                         </Typography>
                       </Paper>
                     </Grid>
@@ -125,7 +247,7 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Supervisor Email: ----------
+                          Supervisor Email:  -----------
                         </Typography>
 
                         <Typography
@@ -133,7 +255,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Supervisor UFID: ------
+                          UFID: {' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={facultyId} onChange={event => { setFacultyId(event.target.value) }} />
                         </Typography>
                       </Paper>
                     </Grid>
@@ -166,7 +294,7 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Proxy Name: ----------
+                          Proxy Name: Christophe Bobda
                         </Typography>
 
                         <Typography
@@ -174,7 +302,7 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Proxy Email: ----------
+                          Proxy Email: cbobda@ufl.edu
                         </Typography>
 
                         <Typography
@@ -182,7 +310,7 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Proxy UFID: ------
+                          UFID: ------
                         </Typography>
                       </Paper>
                     </Grid>
@@ -239,7 +367,7 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Available Hours: {docData.hours}
+                          Available Hours: {docData.hours[0]}
                         </Typography>
                       </Paper>
                     </Grid>
@@ -280,7 +408,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Starting Date: ---------
+                          Starting Date:  {' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={startDate} onChange={event => { setStartDate(event.target.value) }} />
                         </Typography>
 
                         <Typography
@@ -288,7 +422,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          End Date: ----------
+                          End Date:  {' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={endDate} onChange={event => { setEndDate(event.target.value) }} />
                         </Typography>
                       </Paper>
                     </Grid>
@@ -321,7 +461,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Working Title: -----------
+                          Working Title:   {' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={title} onChange={event => { setTitle(event.target.value) }} />
                         </Typography>
 
                         <Typography
@@ -394,7 +540,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Percentage: -------------
+                          Percentage:{' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={percentage} onChange={event => { setPercentage(event.target.value) }} />
                         </Typography>
 
                         <Typography
@@ -402,7 +554,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Hours: 15
+                          Hours:  {' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={docData.hours[0]} onChange={event => { setHours([event.target.value]) }} />
                         </Typography>
                       </Paper>
                     </Grid>
@@ -435,7 +593,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Annual Rate: ----------
+                          Annual Rate:{' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={annualRate} onChange={event => { setAnnualRate(event.target.value) }} />
                         </Typography>
 
                         <Typography
@@ -443,8 +607,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Biweekly Rate: -----------
-                        </Typography>
+                          Biweekly Rate:{' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={biweeklyRate} onChange={event => { setBiweeklyRate(event.target.value) }} />                        </Typography>
 
                         <Typography
                           marginLeft="20px"
@@ -459,7 +628,13 @@ export default function AppView({ uid }: AppViewProps) {
                           marginBottom="10px"
                           fontSize="15px"
                         >
-                          Target Amount: -----------
+                          Target Amount:{' '}
+                          <TextField size="small" sx={{
+                            width: '20ch',
+                            '& .MuiInputBase-input': {
+                              fontSize: '12px', // Adjust the font size for the input text
+                            },
+                          }} defaultValue={targetAmt} onChange={event => { setTargetAmt(event.target.value) }} />
                         </Typography>
                       </Paper>
                     </Grid>
@@ -467,16 +642,18 @@ export default function AppView({ uid }: AppViewProps) {
                 } else {
                   return (
                     <Grid key={value} item>
-                      <Paper
-                        elevation={3}
-                        sx={{
-                          height: 220,
-                          width: 300,
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-                          borderRadius: 4,
-                        }}
-                      />
+                      <Button variant="contained" size="large" sx={{ top: 180, left: 180 }} onClick={handleSave}>Save Edits</Button>
+
+                      {/* <Paper */}
+                      {/*   elevation={3} */}
+                      {/*   sx={{ */}
+                      {/*     height: 220, */}
+                      {/*     width: 300, */}
+                      {/*     backgroundColor: (theme) => */}
+                      {/*       theme.palette.mode === 'dark' ? '#1A2027' : '#fff', */}
+                      {/*     borderRadius: 4, */}
+                      {/*   }} */}
+                      {/* /> */}
                     </Grid>
                   );
                 }

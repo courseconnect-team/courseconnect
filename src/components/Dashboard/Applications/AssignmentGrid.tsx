@@ -130,26 +130,26 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-            firstName:
-              doc.data().name != undefined
-                ? doc.data().name.split(' ')[0]
-                : ' ',
-            lastName:
-              doc.data().name != undefined
-                ? doc.data().name.split(' ')[1]
-                : ' ',
-            year:
-              doc.data().semesters != undefined
-                ? doc.data().semesters[0].split(' ')[1]
-                : ' ',
-            fte: 15,
-            pname: 'DEPARTMENT TA/UPIS',
-            pid: '000108927',
-            hr: 15,
-          } as Assignment)
+        ({
+          id: doc.id,
+          ...doc.data(),
+          firstName:
+            doc.data().name != undefined
+              ? doc.data().name.split(' ')[0]
+              : ' ',
+          lastName:
+            doc.data().name != undefined
+              ? doc.data().name.split(' ')[1]
+              : ' ',
+          year:
+            doc.data().semesters != undefined
+              ? doc.data().semesters[0].split(' ')[1]
+              : ' ',
+          fte: 15,
+          pname: 'DEPARTMENT TA/UPIS',
+          pid: '000108927',
+          hr: 15,
+        } as Assignment)
       );
       setAssignmentData(data);
     });
@@ -480,7 +480,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
     },
     {
-      field: 'supervisorUfid',
+      field: 'supervisor_ufid',
       headerName: 'Supervisor UFID',
       width: 190,
       editable: true,
@@ -610,13 +610,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
     },
     {
-      field: 'none',
+      field: 'start_date',
       headerName: 'Starting Date',
       width: 100,
       editable: true,
     },
     {
-      field: 'ed',
+      field: 'end_date',
       headerName: 'End Date',
       width: 110,
       editable: true,
@@ -654,14 +654,14 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
 
     {
-      field: 'ar',
+      field: 'annual_rate',
       headerName: 'Annual Rate',
       width: 110,
       editable: true,
     },
 
     {
-      field: 'bwr',
+      field: 'biweekly_rate',
       headerName: 'Biweekly Rate',
       width: 110,
       editable: true,
@@ -674,14 +674,14 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
 
     {
-      field: 'ta',
+      field: 'target_amount',
       headerName: 'Target Amount',
       width: 110,
       editable: true,
     },
 
     {
-      field: 'wt',
+      field: 'title',
       headerName: 'Working Title',
       width: 110,
       editable: true,
@@ -750,8 +750,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-              theme.palette.action.selectedOpacity +
-              theme.palette.action.hoverOpacity
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
