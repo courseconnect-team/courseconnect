@@ -400,6 +400,10 @@
   position: relative;
   width: 451px;
 }
+.box .overlap2:hover{
+  cursor: pointer; 
+}
+
 
 .box .textwrapper16 {
   color: #ffffff;
