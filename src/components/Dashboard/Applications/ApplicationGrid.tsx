@@ -119,7 +119,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .doc(id.toString());
 
     const doc = await getDoc(statusRef);
-    setCodes(Object.entries(doc.data().courses).map(([key, value]) => key));
+    setCodes(
+      Object.entries(doc.data().courses)
+        .filter(([key, value]) => value != 'approved')
+        .map(([key, value]) => key)
+    );
     setSelectedUserGrid(id);
 
     setOpenAssignmentDialog(true);
@@ -175,7 +179,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .firestore()
         .collection('applications')
         .doc(student_uid.toString())
-        .update({ status: 'Admin_approved' });
+        .update({
+          status: 'Admin_approved',
+          [`courses.${valueRadio}`]: 'approved',
+        });
 
       // Get the current date in month/day/year format
       const current = new Date();
@@ -715,7 +722,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           ];
         }
 
-        const actions = [
+        return [
           <Button
             key="3"
             variant="outlined"
@@ -761,20 +768,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             onClick={(event) => handleOpenAssignmentDialog(id)}
             color="success"
           />,
+          <GridActionsCellItem
+            key="5"
+            icon={<ThumbDownOffAlt />}
+            label="Deny"
+            onClick={() => handleDenyAssignmentDialog(id)}
+            color="error"
+          />,
         ];
-        if (row.status === 'Submitted') {
-          actions.push(
-            <GridActionsCellItem
-              key="5"
-              icon={<ThumbDownOffAlt />}
-              label="Deny"
-              onClick={() => handleDenyAssignmentDialog(id)}
-              color="error"
-            />
-          );
-        }
-
-        return actions;
       },
     },
     {

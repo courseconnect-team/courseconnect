@@ -6,6 +6,24 @@
   overflow-x: hidden;
 }
 
+.login-low-fi .log-in-card-instance {
+  height: 799px;
+  position: absolute;
+  width: 543px;
+  left: 55% !important;
+  position: absolute !important;
+  top: 150px !important;
+}
+
+@media (max-width: 570px) {
+  .login-low-fi .log-in-card-instance {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    margin: 20px auto;
+  }
+}
+
 .login-low-fi .div-2 {
   background-color: #ffffff;
   height: 100%;
@@ -150,11 +168,6 @@
   width: 126px;
 }
 
-.login-low-fi .log-in-card-instance {
-  left: 100px !important;
-  position: absolute !important;
-  top: 10px !important;
-}
 
 .login-low-fi .overlap-wrapper {
   all: unset;

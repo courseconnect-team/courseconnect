@@ -204,7 +204,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
           Signup successfull!
         </Alert>
       </Snackbar>
-      <div className={styles.logincard}>
+      <div className={className}>
         <div className={styles.overlap}>
           <div className={styles.welcometocourse}>
             <span className={styles.textwrapper}>Welcome to </span>
@@ -263,6 +263,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </RadioGroup>
             </FormControl>
           </div>
+
           <div className={styles.departmentinput}>
             <div className={styles.departmentdropdown}>
               <div className={styles.textwrapper7}>Department</div>
@@ -398,6 +399,12 @@ export const SignUpCard = ({ className }: { className: any }) => {
               </div>
             </div>
           </div>
+          <div className={styles.facultytext}>
+            *If you are going to create a <strong>Faculty</strong> account,
+            please make sure to sign up using the same email that you use for
+            Onbase/Course Registration.
+          </div>
+
           <div className={styles.signinbutton}>
             <br />
             <button
