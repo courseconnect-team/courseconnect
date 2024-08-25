@@ -1,10 +1,7 @@
-import SignInForm from '@/components/SignIn/SignInForm';
-import scss from './Home.module.scss';
 import toast, { Toaster } from 'react-hot-toast';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 
 import { TopNavBar } from '@/components/TopNavBar/TopNavBar';
-import { LogInCard } from '@/components/LogInCard/LogInCard';
 import './style.css';
 import Link from 'next/link';
 import { SignUpCard } from '@/components/SignUpCard/SignUpCard';

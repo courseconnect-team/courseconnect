@@ -3,15 +3,6 @@
   width: 539px;
 }
 
-.box .logincard {
-  height: 799px;
-  position: absolute;
-  width: 543px;
-  left: 55% !important;
-  position: absolute !important;
-  top: 150px !important;
-}
-
 .box .overlap {
   background-color: #ffffff;
   border-radius: 40px;
@@ -409,6 +400,10 @@
   position: relative;
   width: 451px;
 }
+.box .overlap2:hover{
+  cursor: pointer; 
+}
+
 
 .box .textwrapper16 {
   color: #ffffff;

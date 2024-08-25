@@ -11,21 +11,15 @@ import DialogTitle from '@mui/material/DialogTitle';
 import handleSignIn from '../../firebase/auth/auth_signin_password';
 import { useState } from 'react';
 import './style.css';
-import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { TextField } from '@mui/material';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
+
 import FormControl from '@mui/material/FormControl';
 import { toast } from 'react-hot-toast';
 
-import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { useAuth } from '@/firebase/auth/auth_context';
 export const LogInCard = ({ className }: { className: any }) => {
   var res;
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState('');

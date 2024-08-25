@@ -204,7 +204,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
           Signup successfull!
         </Alert>
       </Snackbar>
-      <div className={styles.logincard}>
+      <div className={className}>
         <div className={styles.overlap}>
           <div className={styles.welcometocourse}>
             <span className={styles.textwrapper}>Welcome to </span>
