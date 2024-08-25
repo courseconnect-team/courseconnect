@@ -22,6 +22,8 @@ import {
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
 } from '@mui/x-data-grid';
+
+import EditIcon from '@mui/icons-material/Edit';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { alpha, styled } from '@mui/material/styles';
@@ -40,6 +42,7 @@ import {
 } from '@mui/material';
 import UnderDevelopment from '@/components/UnderDevelopment';
 import AssignView from './AssignView';
+import AssignViewOnly from './AssignViewOnly';
 
 interface Assignment {
   id: string;
@@ -95,6 +98,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
   // pop-up view setup
   const [open, setOpen] = React.useState(false);
+  const [openView, setOpenView] = React.useState(false);
   const [delDia, setDelDia] = React.useState(false);
   const [loading2, setLoading2] = React.useState(false);
   const [delId, setDelId] = React.useState<GridRowId>();
@@ -107,9 +111,19 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     setOpen(true);
   };
 
+  const handleClickViewGrid = (id: GridRowId) => {
+    setSelectedUserGrid(id);
+    setOpenView(true);
+  };
+
+
   const handleClose = () => {
     setOpen(false);
   };
+
+  const handleViewClose = () => {
+    setOpenView(false);
+  }
   const handleDeleteDiagClose = () => {
     setDelDia(false);
   };
@@ -423,11 +437,22 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             variant="outlined"
             color="inherit"
             size="small"
-            style={{ marginLeft: '0px', height: '25px', textTransform: 'none' }}
+            style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
             startIcon={<ZoomInIcon />}
-            onClick={(event) => handleClickOpenGrid(id)}
+            onClick={(event) => handleClickViewGrid(id)}
           >
             View
+          </Button>,
+          <Button
+            key="3"
+            variant="outlined"
+            color="inherit"
+            size="small"
+            style={{ marginLeft: '0px', height: '25px', textTransform: 'none' }}
+            startIcon={<EditIcon />}
+            onClick={(event) => handleClickOpenGrid(id)}
+          >
+            Edit
           </Button>,
 
           <Button
@@ -721,12 +746,16 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       },
     },
     {
-      field: 'Remote',
+      field: 'remote',
       headerName: 'Remote',
       width: 140,
       editable: false,
       valueFormatter: (value) => {
-        return 'No';
+        if (value.value === undefined) {
+          return 'No';
+        }
+
+        return value.value;
       },
     },
   ];
@@ -811,7 +840,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         <DialogTitle
           style={{ fontWeight: 'bold', fontSize: '25px', marginBottom: '10px' }}
         >
-          {'View Assignment Details'}
+          {'Edit Assignment Details'}
         </DialogTitle>
 
         <DialogContent sx={{ minWidth: '100%' }}>
@@ -820,6 +849,29 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             <div>
               {/* Display the user's application data in a different format */}
               <AssignView uid={selectedUserGrid as string} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        PaperProps={{ sx: { borderRadius: 4 } }}
+        maxWidth={'lg'}
+        open={openView}
+        onClose={handleViewClose}
+      >
+        <DialogTitle
+          style={{ fontWeight: 'bold', fontSize: '25px', marginBottom: '10px' }}
+        >
+          {'View Assignment Details'}
+        </DialogTitle>
+
+        <DialogContent sx={{ minWidth: '100%' }}>
+          {/* Display the application data of the selected user */}
+          {selectedUserGrid && (
+            <div>
+              {/* Display the user's application data in a different format */}
+              <AssignViewOnly uid={selectedUserGrid as string} />
             </div>
           )}
         </DialogContent>
