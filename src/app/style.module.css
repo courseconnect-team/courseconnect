@@ -7,6 +7,23 @@
   overflow-x: hidden;
 }
 
+/* Default styles for larger screens */
+.loginlowfi .logincardinstance {
+  left: 55% !important;
+  position: absolute !important;
+  top: 150px !important;
+}
+
+/* Styles for screens 570px and smaller */
+@media (max-width: 570px) {
+  .loginlowfi .logincardinstance {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    margin: 20px auto;
+  }
+}
+
 .loginlowfi .div2 {
   background-color: #ffffff;
   height: 100%;
@@ -152,11 +169,6 @@
   width: 126px;
 }
 
-.loginlowfi .logincardinstance {
-  left: 55% !important;
-  position: absolute !important;
-  top: 150px !important;
-}
 
 .loginlowfi .overlapwrapper {
   all: unset;
