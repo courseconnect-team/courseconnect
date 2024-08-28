@@ -98,6 +98,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     page: 0,
     pageSize: 25,
   });
+  const [hours, setHours] = React.useState(0);
 
   // application props
   const [applicationData, setApplicationData] = React.useState<Application[]>(
@@ -197,7 +198,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         name: doc.data()?.firstname + ' ' + doc.data()?.lastname,
         semesters: doc.data()?.available_semesters,
         department: doc.data()?.department,
-        hours: doc.data()?.available_hours,
+        hours: [hours],
         position: doc.data()?.position,
         degree: doc.data()?.degree,
       };
@@ -1129,7 +1130,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               <>
                 <DialogContentText>
                   Please select the course code to which the student shall be
-                  assigned.
+                  assigned and the hours the student will work.
                 </DialogContentText>
                 <br />
                 <FormControl required>
@@ -1150,6 +1151,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                       );
                     })}
                   </RadioGroup>
+                  < br />
+                  <TextField defaultValue={0} label="Hours" onChange={event => { setHours(event.target.value) }}> </TextField>
                 </FormControl>{' '}
               </>
             ) : (
