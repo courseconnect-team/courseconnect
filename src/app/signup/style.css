@@ -15,14 +15,6 @@
   top: 150px !important;
 }
 
-@media (max-width: 570px) {
-  .login-low-fi .log-in-card-instance {
-    position: relative !important;
-    left: 0 !important;
-    top: 0 !important;
-    margin: 20px auto;
-  }
-}
 
 .login-low-fi .div-2 {
   background-color: #ffffff;
@@ -228,7 +220,29 @@
 }
 
 @media (max-width: 570px) {
+  .login-low-fi .log-in-card-instance {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    margin: 20px auto;
+  }
+  .login-low-fi .connecting-bright{
+    display:none;
+  }
   .ece-logo-png-2 {
     display: none;
+  }
+  .login-low-fi .sign-in-title{
+      left:40px;
+  }
+  .login-low-fi .register-here-text{
+    left: 40px;
+  }
+  .login-low-fi .top-nav-bar-instance{
+    right: 50px;
+  }
+  .login-low-fi .sign-in-title .text-wrapper-10,
+  .login-low-fi .sign-in-title .text-wrapper-11{
+    width: 80%;
   }
 }

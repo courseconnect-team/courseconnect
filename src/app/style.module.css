@@ -7,22 +7,13 @@
   overflow-x: hidden;
 }
 
-/* Default styles for larger screens */
 .loginlowfi .logincardinstance {
-  left: 55% !important;
-  position: absolute !important;
-  top: 150px !important;
+  left: 55% ;
+  position: absolute ;
+  top: 150px ;
 }
 
-/* Styles for screens 570px and smaller */
-@media (max-width: 570px) {
-  .loginlowfi .logincardinstance {
-    position: relative !important;
-    left: 0 !important;
-    top: 0 !important;
-    margin: 20px auto;
-  }
-}
+
 
 .loginlowfi .div2 {
   background-color: #ffffff;
@@ -55,7 +46,10 @@
   position: absolute;
   top: 141px;
   width: 100%;
+  
 }
+
+
 
 .loginlowfi .connectingbright {
   color: #ffffff;
@@ -78,10 +72,6 @@
   letter-spacing: 0;
 }
 
-.loginlowfi .textwrapper9 {
-  font-family: "Poppins", Helvetica;
-  font-weight: 300;
-}
 
 .loginlowfi .signinto {
   height: 120px;
@@ -99,7 +89,6 @@
   left: 0;
   letter-spacing: 0;
   line-height: normal;
-  position: absolute;
   top: 0;
   white-space: nowrap;
 }
@@ -112,7 +101,6 @@
   left: 0;
   letter-spacing: 0;
   line-height: normal;
-  position: absolute;
   top: 48px;
   width: 549px;
 }
@@ -123,7 +111,6 @@
   position: absolute;
   top: 351px;
   width: 312px;
-
 }
 
 .loginlowfi .p {
@@ -210,7 +197,7 @@
 }
 
 .loginlowfi .topnavbarinstance {
-  right: 70px !important;
+  right: 70px ;
   position: absolute !important;
   top: 27px !important;
   z-index: 10;
@@ -234,4 +221,34 @@
   .ecelogopng2 {
     display: none;
   }
+}
+
+/* Styles for screens 570px and smaller */
+@media (max-width: 570px) {
+  .loginlowfi .signintitle .textwrapper11,
+  .loginlowfi .signintitle .textwrapper10{
+    width: 80%;
+  }
+
+ .loginlowfi .connectingbright {
+    display: none;
+  }
+  .loginlowfi .logincardinstance {
+    position: relative;
+    left: 0 ;
+    top: 0 ;
+    margin: 20px auto;
+  }
+  .loginlowfi .signintitle {
+    left: 40px;
+  }
+  .loginlowfi .registerheretext {
+    left: 40px;
+  }
+
+  .loginlowfi .topnavbarinstance {
+    right: 50px ;
+  }
+
+  
 }

@@ -1,10 +1,7 @@
 import { Toaster } from 'react-hot-toast';
-import { ApplyCard } from '@/components/ApplyCard/ApplyCard';
-import { StatusCard } from '@/components/StatusCard/StatusCard';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import { DashboardCard } from '@/components/DashboardCard/DashboardCard';
 import { Bio } from '@/components/Bio/Bio';
-import { Profile } from '@/components/Profile/Profile';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import styles from './style.module.css';
 import { VerifyEmailCard } from '@/components/VerifyEmailCard/VerifyEmailCard';
