@@ -118,4 +118,7 @@
   .ecelogopng2 {
     display: none;
   }
+  .container{
+    flex-direction: column;
+  }
 }
