@@ -388,8 +388,11 @@
   height: 53px;
   left: 44px;
   position: absolute;
-  top: 750px;
+  top: 775px;
   width: 453px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .box .overlap2 {
@@ -410,13 +413,11 @@
   font-family: "SF Pro Display-Medium", Helvetica;
   font-size: 16px;
   font-weight: 500;
-  left: 198px;
   letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  top: 15px;
+  line-height: normal;  
   white-space: nowrap;
-  width: 56px;
+  width: 100%;
+  text-align: center;
 }
 .box .facultytext{
   position:absolute;
@@ -429,4 +430,16 @@
   margin-left: 45px;
   margin-right: 45px;
 
+}
+
+
+@media (max-width: 570px) {
+  .box .facultytext{
+    max-width: 60%;
+  }
+  .box .signinbutton{
+    width: 400px;
+    top: 780px;
+    left: 13px;
+  }
 }
