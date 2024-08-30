@@ -34,6 +34,7 @@ import FormControl from '@mui/material/FormControl';
 import ListItemText from '@mui/material/ListItemText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -354,259 +355,232 @@ export default function Application() {
   return (
     <>
       <Toaster />
-      <div className={styles.studentlandingpage}>
-        <div className={styles.overlapwrapper}>
-          <div className={styles.overlap}>
-            <div className={styles.overlap2}>
-              <div className={styles.colorblockframe}>
-                <div className={styles.overlapgroup2}>
-                  <div className={styles.colorblock} />
-                  <img
-                    className={styles.GRADIENTS}
-                    alt="Gradients"
-                    src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                  />
-                  <div className={styles.glasscard} />
-                </div>
-              </div>
-              <EceLogoPng className={styles.ecelogopng2} />
-              <TopNavBarSigned className={styles.topnavbarsignedin} />
-              <div className={styles.textwrapper8}>Application</div>
-            </div>
-            <Container className="container" component="main" maxWidth="md">
-              <Snackbar
-                open={success}
-                autoHideDuration={3000}
-                onClose={handleSuccess}
+      <HeaderCard text="Application" />
+      <Container className="container" component="main" maxWidth="md">
+        <Snackbar
+          open={success}
+          autoHideDuration={3000}
+          onClose={handleSuccess}
+        >
+          <Alert severity="success" sx={{ width: '100%' }}>
+            Application submitted successfully!
+          </Alert>
+        </Snackbar>
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: '-350px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Box component="form" noValidate onSubmit={handleSubmit}>
+            <Grid item xs={12} sm={6} sx={{ marginTop: 45 }}>
+              <Typography align="center" component="h2" variant="h6">
+                Personal Information
+              </Typography>
+            </Grid>
+            <br />
+            <Grid container spacing={2} sx={{ marginTop: 0 }}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  autoComplete="given-name"
+                  name="firstName"
+                  variant="filled"
+                  required
+                  fullWidth
+                  id="firstName"
+                  label="First Name"
+                  autoFocus
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  variant="filled"
+                  id="lastName"
+                  label="Last Name"
+                  name="lastName"
+                  autoComplete="family-name"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  variant="filled"
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  helperText="Enter your UF email address. Example: gator@ufl.edu"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  variant="filled"
+                  name="phone-number"
+                  label="Phone Number"
+                  type="tel"
+                  id="phone-number"
+                  autoComplete="phone-number"
+                  helperText="Enter your phone number. Example: 123-456-7890"
+                />
+              </Grid>
+              <Grid
+                item
+                xs={22}
+                sm={116}
+                justifyContent="center"
+                alignItems="center"
               >
-                <Alert severity="success" sx={{ width: '100%' }}>
-                  Application submitted successfully!
-                </Alert>
-              </Snackbar>
-              <CssBaseline />
-              <Box
-                sx={{
-                  marginTop: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}
-              >
-                <Typography component="h1" variant="h5">
-                  TA/UPI/Grader Application
+                <DepartmentSelect />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <SemesterStatusSelect
+                  component={AdditionalSemesterPrompt}
+                  onValueChange={handleAdditionalPromptChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DegreeSelect />
+              </Grid>
+            </Grid>
+
+            <br />
+            <Typography
+              align="center"
+              component="h2"
+              variant="h6"
+              sx={{ m: 1 }}
+            >
+              Position Information
+            </Typography>
+            <br />
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Typography>
+                  Please select the position for which you are interested in
+                  applying.
                 </Typography>
-                <Box component="form" noValidate onSubmit={handleSubmit}>
-                  <Grid item xs={12} sm={6} sx={{ marginTop: 45 }}>
-                    <Typography align="center" component="h2" variant="h6">
-                      Personal Information
-                    </Typography>
-                  </Grid>
-                  <br />
-                  <Grid container spacing={2} sx={{ marginTop: 0 }}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        autoComplete="given-name"
-                        name="firstName"
-                        variant="filled"
-                        required
-                        fullWidth
-                        id="firstName"
-                        label="First Name"
-                        autoFocus
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        variant="filled"
-                        id="lastName"
-                        label="Last Name"
-                        name="lastName"
-                        autoComplete="family-name"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        variant="filled"
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
-                        helperText="Enter your UF email address. Example: gator@ufl.edu"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        variant="filled"
-                        name="phone-number"
-                        label="Phone Number"
-                        type="tel"
-                        id="phone-number"
-                        autoComplete="phone-number"
-                        helperText="Enter your phone number. Example: 123-456-7890"
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      xs={22}
-                      sm={116}
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      <DepartmentSelect />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <SemesterStatusSelect
-                        component={AdditionalSemesterPrompt}
-                        onValueChange={handleAdditionalPromptChange}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <DegreeSelect />
-                    </Grid>
-                  </Grid>
+                <PositionSelect />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Please select one or more options describing the number of
+                  hours per week you will be available.
+                </Typography>
+                <AvailabilityCheckbox name="availabilityCheckbox" />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Please list the course(s) for which you are applying. Ensure
+                  that you select the courses with your desired semester and
+                  instructor.
+                </Typography>
 
-                  <br />
-                  <Typography
-                    align="center"
-                    component="h2"
-                    variant="h6"
-                    sx={{ m: 1 }}
+                <FormControl variant="filled" fullWidth>
+                  <InputLabel
+                    id="demo-multiple-checkbox-label"
+                    variant="filled"
                   >
-                    Position Information
-                  </Typography>
-                  <br />
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Typography>
-                        Please select the position for which you are interested
-                        in applying.
-                      </Typography>
-                      <PositionSelect />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography>
-                        Please select one or more options describing the number
-                        of hours per week you will be available.
-                      </Typography>
-                      <AvailabilityCheckbox name="availabilityCheckbox" />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography>
-                        Please list the course(s) for which you are applying.
-                        Ensure that you select the courses with your desired
-                        semester and instructor.
-                      </Typography>
-
-                      <FormControl variant="filled" fullWidth>
-                        <InputLabel
-                          id="demo-multiple-checkbox-label"
-                          variant="filled"
-                        >
-                          Course(s)*
-                        </InputLabel>
-                        <Select
-                          variant="filled"
-                          labelId="demo-multiple-checkbox-label"
-                          id="course-prompt"
-                          name="course-prompt"
-                          multiple
-                          value={personName}
-                          onChange={handleChange}
-                          input={<FilledInput label="Tag" />}
-                          renderValue={(selected) => (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                gap: 0.5,
-                              }}
-                            >
-                              {selected.map((value) => (
-                                <Chip key={value} label={value} />
-                              ))}
-                            </Box>
-                          )}
-                          MenuProps={MenuProps}
-                          required
-                        >
-                          {names.map((name) => (
-                            <MenuItem key={name} value={name}>
-                              <Checkbox
-                                checked={personName.indexOf(name) > -1}
-                              />
-                              <ListItemText primary={name} />
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography>
-                        Please provide your most recently calculated cumulative
-                        UF GPA.
-                      </Typography>
-                      <GPA_Select />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography sx={{ paddingBottom: 2 }}>
-                        Please upload a google drive link to your resume.
-                      </Typography>
-                      <TextField
-                        required
-                        fullWidth
-                        variant="filled"
-                        id="resumeLink"
-                        label="Resume Link"
-                        name="resumeLink"
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Typography>
-                        Please describe your qualifications for the position and
-                        course(s) for which you are applying. <br />
-                        <em>
-                          If you have been a TA, UPI, or grader before, please
-                          mention the course(s) and teacher(s) for which you
-                          worked.
-                        </em>{' '}
-                        <br /> <br />
-                        Write about any relevant experience, such as teaching,
-                        tutoring, grading, or coursework. <br />
-                      </Typography>
-                      <TextField
-                        required
-                        fullWidth
-                        id="qualifications-prompt"
-                        name="qualifications-prompt"
-                        label="I am qualified because..."
-                        multiline
-                        rows={8}
-                        variant="filled"
-                      />
-                    </Grid>
-                    <Grid item xs={12}></Grid>
-                  </Grid>
-
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
+                    Course(s)*
+                  </InputLabel>
+                  <Select
+                    variant="filled"
+                    labelId="demo-multiple-checkbox-label"
+                    id="course-prompt"
+                    name="course-prompt"
+                    multiple
+                    value={personName}
+                    onChange={handleChange}
+                    input={<FilledInput label="Tag" />}
+                    renderValue={(selected) => (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 0.5,
+                        }}
+                      >
+                        {selected.map((value) => (
+                          <Chip key={value} label={value} />
+                        ))}
+                      </Box>
+                    )}
+                    MenuProps={MenuProps}
+                    required
                   >
-                    Submit
-                  </Button>
-                </Box>
-              </Box>
-            </Container>
-          </div>
-        </div>
-      </div>
+                    {names.map((name) => (
+                      <MenuItem key={name} value={name}>
+                        <Checkbox checked={personName.indexOf(name) > -1} />
+                        <ListItemText primary={name} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Please provide your most recently calculated cumulative UF
+                  GPA.
+                </Typography>
+                <GPA_Select />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography sx={{ paddingBottom: 2 }}>
+                  Please upload a google drive link to your resume.
+                </Typography>
+                <TextField
+                  required
+                  fullWidth
+                  variant="filled"
+                  id="resumeLink"
+                  label="Resume Link"
+                  name="resumeLink"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>
+                  Please describe your qualifications for the position and
+                  course(s) for which you are applying. <br />
+                  <em>
+                    If you have been a TA, UPI, or grader before, please mention
+                    the course(s) and teacher(s) for which you worked.
+                  </em>{' '}
+                  <br /> <br />
+                  Write about any relevant experience, such as teaching,
+                  tutoring, grading, or coursework. <br />
+                </Typography>
+                <TextField
+                  required
+                  fullWidth
+                  id="qualifications-prompt"
+                  name="qualifications-prompt"
+                  label="I am qualified because..."
+                  multiline
+                  rows={8}
+                  variant="filled"
+                />
+              </Grid>
+              <Grid item xs={12}></Grid>
+            </Grid>
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Submit
+            </Button>
+          </Box>
+        </Box>
+      </Container>
     </>
   );
 }

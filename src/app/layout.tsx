@@ -5,10 +5,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import darkTheme from './theme/darkTheme';
 import lightTheme from './theme/lightTheme';
-import Header from '@/components/Header/Header';
 
 const ColorModeContext = React.createContext({
-  toggleColorMode: () => { },
+  toggleColorMode: () => {},
 });
 
 export default function RootLayout({

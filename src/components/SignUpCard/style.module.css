@@ -438,8 +438,14 @@
     max-width: 60%;
   }
   .box .signinbutton{
-    width: 400px;
+    width: 350px;
     top: 780px;
-    left: 13px;
+    left: 50px;
   }
+  
+.box .lastnameinput {
+  left: 240px;
+  
+}
+
 }

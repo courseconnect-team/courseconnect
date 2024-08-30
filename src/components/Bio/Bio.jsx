@@ -18,8 +18,10 @@ export const Bio = ({ user, className }) => {
           </div>
         )}
       </div>
-      <div className={styles.textwrapper}> {user.displayName} </div>
-      <div className={styles.div}>{user.email}</div>
+      <div>
+        <div className={styles.textwrapper}> {user.displayName} </div>
+        <div className={styles.div}>{user.email}</div>
+      </div>
     </div>
   );
 };
