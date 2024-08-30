@@ -76,18 +76,18 @@ export default function DashboardWelcome(props: DashboardProps) {
                   <div className={styles.textwrapper8}>Home</div>
                 </div>
                 <div className={styles.container}>
-                  <Link href="/Profile">
-                    <DashboardCard
-                      text="Profile"
-                      className={styles}
-                      image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
-                    />
-                  </Link>
                   <Link href="/apply">
                     <DashboardCard
                       text="Apply"
                       image="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
                       className={styles}
+                    />
+                  </Link>
+                  <Link href="/Profile">
+                    <DashboardCard
+                      text="Profile"
+                      className={styles}
+                      image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
                     />
                   </Link>
                 </div>
@@ -200,13 +200,6 @@ export default function DashboardWelcome(props: DashboardProps) {
                   <div className={styles.textwrapper8}>Home</div>
                 </div>
                 <div className={styles.container}>
-                  <Link href="/Profile">
-                    <DashboardCard
-                      className={styles}
-                      text="Profile"
-                      image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
-                    />
-                  </Link>
                   <Link href="/status">
                     <DashboardCard
                       text="Status"
@@ -219,6 +212,13 @@ export default function DashboardWelcome(props: DashboardProps) {
                       text="Apply"
                       image="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
                       className={styles}
+                    />
+                  </Link>
+                  <Link href="/Profile">
+                    <DashboardCard
+                      className={styles}
+                      text="Profile"
+                      image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
                     />
                   </Link>
                 </div>

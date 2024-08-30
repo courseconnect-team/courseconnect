@@ -2,6 +2,9 @@
   height: 295px;
   position: relative;
   width: 408px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 
 .fullnameandbio .ellipse {
@@ -59,4 +62,5 @@
   position: absolute;
   top: 190px;
 }
+
 
