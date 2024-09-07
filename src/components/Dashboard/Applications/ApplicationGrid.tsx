@@ -394,7 +394,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const snapshot = await firebase
         .firestore()
         .collection('applications')
-        .doc(id.student_uid.toString())
+        .doc(id.toString())
         .get();
 
       if (snapshot.exists) {
@@ -493,24 +493,26 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
 
   // approve/deny click handlers
-  const handleDenyClick = (id: GridRowId) => {
+  const handleDenyClick = async (id: GridRowId) => {
     event.preventDefault();
     setLoading(true);
-    // Update the 'applications' collection
+
     try {
-      firebase
+      // Update the 'applications' collection in Firestore
+      await firebase
         .firestore()
         .collection('applications')
         .doc(id.toString())
-        .update({ status: 'Admin_denied' })
-        .then(() => {
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          console.error('Error updating application document: ', error);
-        });
-      handleDenyEmail(id);
+        .update({ status: 'Admin_denied' });
+
+      // Remove the denied row from the local state
+      setApplicationData((prevData) => {
+        const newData = prevData.filter((row) => row.id !== id);
+        return newData; // Only return the updated state without the denied row
+      });
+
+      await handleDenyEmail(id);
+      // Close the deny dialog
       handleCloseDenyDialog();
     } catch (error) {
       console.error('Error updating application document: ', error);
