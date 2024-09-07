@@ -156,7 +156,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleSubmitAssignment = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
-    event.preventDefault(); // Prevent the form from submitting the default way
+    event.preventDefault();
     setLoading(true);
 
     try {
@@ -494,21 +494,29 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   // approve/deny click handlers
   const handleDenyClick = (id: GridRowId) => {
+    event.preventDefault();
     setLoading(true);
     // Update the 'applications' collection
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString())
-      .update({ status: 'Admin_denied' })
-      .then(() => {
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error updating application document: ', error);
-      });
-    handleDenyEmail(id);
+    try {
+      firebase
+        .firestore()
+        .collection('applications')
+        .doc(id.toString())
+        .update({ status: 'Admin_denied' })
+        .then(() => {
+          setLoading(false);
+        })
+        .catch((error) => {
+          setLoading(false);
+          console.error('Error updating application document: ', error);
+        });
+      handleDenyEmail(id);
+      handleCloseDenyDialog();
+    } catch (error) {
+      console.error('Error updating application document: ', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleApproveClick = async (id: GridRowId) => {
@@ -1246,7 +1254,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 backgroundColor: '#5736ac',
                 color: '#ffffff',
               }}
-              onClick={() => handleDenyClick(deniedItemId)}
+              onClick={() => handleDenyClick(selectedUserGrid)}
             >
               Yes
             </Button>
