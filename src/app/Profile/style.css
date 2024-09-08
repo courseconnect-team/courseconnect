@@ -194,7 +194,8 @@
     display: none; /* Remove the divider on smaller screens */
   }
   .buttonContainerProfile{
-    margin-right: auto;
+    margin-left: 170px;
+  
   }
  
 }
