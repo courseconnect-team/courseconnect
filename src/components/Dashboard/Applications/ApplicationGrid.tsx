@@ -165,7 +165,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .firestore()
         .collection('applications')
         .doc(student_uid.toString());
-      const doc = await getDoc(statusRef);
+      let doc = await getDoc(statusRef);
 
       const courseDetails = firebase
         .firestore()
@@ -203,11 +203,36 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       };
 
       // Create the document within the "assignments" collection
-      await firebase
+      const assignmentRef = firebase
         .firestore()
         .collection('assignments')
-        .doc(assignmentObject.student_uid)
-        .set(assignmentObject);
+        .doc(assignmentObject.student_uid);
+
+      doc = await assignmentRef.get();
+      let uid = assignmentObject.student_uid;
+
+      if (doc.exists) {
+        let counter = 1;
+        let newRef = firebase
+          .firestore()
+          .collection('assignments')
+          .doc(`${uid}-${counter}`);
+
+        // Loop to check for the next available document ID
+        while ((await newRef.get()).exists) {
+          counter++;
+          newRef = firebase
+            .firestore()
+            .collection('assignments')
+            .doc(`${uid}-${counter}`);
+        }
+
+        // Create a new document with the updated UID and assignmentObject
+        await newRef.set(assignmentObject);
+      } else {
+        // Document does not exist, create the original document
+        await assignmentRef.set(assignmentObject);
+      }
 
       // Extract and process the professor emails
       const emailArray = courseDoc

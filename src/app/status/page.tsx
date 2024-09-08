@@ -14,7 +14,7 @@ import { useState } from 'react';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import { ApplicationStatusCardDenied } from '@/components/ApplicationStatusCardDenied/ApplicationStatusCardDenied';
 import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCardAccepted/ApplicationStatusCardAccepted';
-import styles from './style.module.css';
+import './style.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { getDoc } from 'firebase/firestore';
@@ -66,16 +66,36 @@ export default function Status() {
   const [courses, setCourses] = useState(null);
   const [adminDenied, setAdminDenied] = useState(false);
 
-  const [assignment, setAssignment] = useState(null);
+  const [assignment, setAssignment] = useState<string[]>([]);
 
   React.useEffect(() => {
     async function fetch() {
-      const statusRef2 = db.collection('assignments').doc(userId);
-      await getDoc(statusRef2).then((doc) => {
-        if (doc.data() != null && doc.data() != undefined) {
-          setAssignment(doc.data()?.class_codes);
+      let counter = 0; // Start counter at 0 (for the original userId)
+      let statusRef2 = db.collection('assignments').doc(userId); // Initial document reference
+      let assignmentArray = []; // Temporary array to store all class_codes
+
+      while (true) {
+        const doc = await statusRef2.get();
+
+        if (doc.exists) {
+          const classCodes = doc.data()?.class_codes;
+
+          // Append class_codes (string) to assignmentArray
+          if (classCodes) {
+            assignmentArray.push(classCodes); // Append string class_codes
+          }
+        } else {
+          break; // Stop when no more documents are found
         }
-      });
+
+        // Move to the next document (userId-1, userId-2, etc.)
+        counter++;
+        statusRef2 = db.collection('assignments').doc(`${userId}-${counter}`);
+      }
+
+      // Update the state with the final array after fetching all documents
+
+      setAssignment(assignmentArray);
 
       const statusRef = db.collection('applications').doc(userId);
       await getDoc(statusRef).then((doc) => {
@@ -96,7 +116,7 @@ export default function Status() {
     <>
       <Toaster />
       <HeaderCard text="Status" />
-      <Container className={styles.container} component="main" maxWidth="md">
+      <Container component="main" maxWidth="md">
         <CssBaseline />
         <Box
           sx={{
@@ -112,6 +132,7 @@ export default function Status() {
               Object.entries(courses).map(([key, value]) => (
                 <div key={key}>
                   <ApplicationStatusCardDenied
+                    className="application-status-card"
                     text="TA/UPI/Grader"
                     course={key}
                   />
@@ -120,20 +141,29 @@ export default function Status() {
                 </div>
               ))}
 
-            {assignment && !adminDenied && (
-              <ApplicationStatusCardAccepted
-                text="TA/UPI/Grader"
-                course={assignment}
-              />
-            )}
+            {assignment &&
+              !adminDenied &&
+              Object.entries(assignment).map(([key, value]) => (
+                <div key={key}>
+                  <ApplicationStatusCardAccepted
+                    className="application-status-card"
+                    text="TA/UPI/Grader"
+                    course={value}
+                  />
+                  <br />
+                </div>
+              ))}
 
             {courses &&
-              !assignment &&
               !adminDenied &&
               Object.entries(courses).map(([key, value]) => (
                 <div key={key}>
                   {value == 'applied' && (
-                    <ApplicationStatusCard text="TA/UPI/Grader" course={key} />
+                    <ApplicationStatusCard
+                      className="application-status-card"
+                      text="TA/UPI/Grader"
+                      course={key}
+                    />
                   )}
                   {value == 'denied' && (
                     <ApplicationStatusCardDenied
@@ -142,7 +172,11 @@ export default function Status() {
                     />
                   )}
                   {value == 'accepted' && (
-                    <ApplicationStatusCard text="TA/UPI/Grader" course={key} />
+                    <ApplicationStatusCard
+                      className="application-status-card"
+                      text="TA/UPI/Grader"
+                      course={key}
+                    />
                   )}
 
                   <br />

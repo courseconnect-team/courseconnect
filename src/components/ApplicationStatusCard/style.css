@@ -105,18 +105,6 @@
   width: 197px;
 }
 
-.status-card2 .text-wrapper-9 {
-  color: #000000;
-  font-family: "SF Pro Display-Regular", Helvetica;
-  font-size: 24px;
-  font-weight: 400;
-  left: 100px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  top: 10px;
-}
-
 .status-card2 .application-button {
   height: 43px;
   left: 454px;
@@ -149,4 +137,3 @@
   top: 11px;
   width: 182px;
 }
-

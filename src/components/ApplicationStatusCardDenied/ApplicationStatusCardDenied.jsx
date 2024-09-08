@@ -1,10 +1,10 @@
-import PropTypes from "prop-types";
-import React from "react";
-import "./style.css";
+import PropTypes from 'prop-types';
+import React from 'react';
+import './style.css';
 
-export const ApplicationStatusCardDenied = ({ text, course }) => {
+export const ApplicationStatusCardDenied = ({ text, course, className }) => {
   return (
-    <div className={`status-card`}>
+    <div className={`status-card ${className}`}>
       <div className="overlap">
         <div className="inner-content">
           <div className="text-wrapper-6">Application</div>
@@ -14,7 +14,15 @@ export const ApplicationStatusCardDenied = ({ text, course }) => {
         </div>
         <div className="overlap-2">
           <div className="div-wrapper">
-            <div style={{ color: "#6c6c6c", marginTop: "5px", marginLeft: "-99px" }}>{course}</div>
+            <div
+              style={{
+                color: '#6c6c6c',
+                marginTop: '5px',
+                marginLeft: '-99px',
+              }}
+            >
+              {course}
+            </div>
           </div>
           <div className="rectangle" />
         </div>
@@ -34,5 +42,9 @@ export const ApplicationStatusCardDenied = ({ text, course }) => {
 ApplicationStatusCardDenied.propTypes = {
   text: PropTypes.string,
   course: PropTypes.string,
+  className: PropTypes.string,
 };
 
+ApplicationStatusCardDenied.defaultProps = {
+  className: '', // Default to an empty string if no class is provided
+};

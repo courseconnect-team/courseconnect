@@ -369,7 +369,6 @@ export default function Application() {
         <CssBaseline />
         <Box
           sx={{
-            marginTop: '-350px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
