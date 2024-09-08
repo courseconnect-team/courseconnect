@@ -332,12 +332,12 @@ export default function Application() {
       typeof value === 'string' ? value.split(',') : value
     );
   };
-  const [names, setNames] = useState([]);
+  const [names, setNames] = useState<string[]>([]);
 
   React.useEffect(() => {
     async function fetchData() {
       try {
-        let data = [];
+        let data: string[] = [];
         await firebase
           .firestore()
           .collection('courses')
@@ -369,7 +369,6 @@ export default function Application() {
         <CssBaseline />
         <Box
           sx={{
-            marginTop: '-350px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -484,10 +483,7 @@ export default function Application() {
                 </Typography>
 
                 <FormControl variant="filled" fullWidth>
-                  <InputLabel
-                    id="demo-multiple-checkbox-label"
-                    variant="filled"
-                  >
+                  <InputLabel id="demo-multiple-checkbox-label">
                     Course(s)*
                   </InputLabel>
                   <Select
@@ -498,7 +494,7 @@ export default function Application() {
                     multiple
                     value={personName}
                     onChange={handleChange}
-                    input={<FilledInput label="Tag" />}
+                    input={<FilledInput />}
                     renderValue={(selected) => (
                       <Box
                         sx={{

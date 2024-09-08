@@ -49,14 +49,8 @@ export default function Profile(props: ProfileProps) {
   return (
     <>
       <HeaderCard text="Profile" />
-      <div style={{ display: 'flex' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            marginRight: '63px',
-          }}
-        >
+      <div className="profile-container">
+        <div className="profile-left-section">
           <div className="full-name-and-bio">
             <div className="ellipse">
               <div className="initials">
@@ -66,16 +60,16 @@ export default function Profile(props: ProfileProps) {
 
             <div className="text-wrapper">{user.displayName}</div>
             <div className="div">{user.email}</div>
-          </div>
-          <div style={{ alignSelf: 'flex-end' }}>
-            <DeleteUserButton open={open} setOpen={setOpen} />
+            <div style={{ alignSelf: 'flex-end', marginTop: '460px' }}>
+              <DeleteUserButton open={open} setOpen={setOpen} />
+            </div>
           </div>
         </div>
         <div className="rectangle1" />
 
-        <div style={{ marginRight: 'auto' }}>
+        <div className="buttonContainerProfile">
           <form onSubmit={handleSave}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="profileLineContainer">
               <div className="info">BASIC INFO</div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <Button
@@ -115,8 +109,7 @@ export default function Profile(props: ProfileProps) {
               <div className="firstName">First Name </div>
               <div className="lastName">Last Name</div>
             </div>
-
-            <div style={{ display: 'flex', marginTop: '12.71px' }}>
+            <div style={{ display: 'flex', flexDirection: 'row' }}>
               <div className="firstname-border">
                 <input
                   className="firstname-input"
@@ -127,6 +120,7 @@ export default function Profile(props: ProfileProps) {
                   value={updatedFirst}
                 />
               </div>
+
               <div className="lastname-border">
                 <input
                   className="lastname-input"

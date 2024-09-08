@@ -158,7 +158,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleSubmitAssignment = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
-    event.preventDefault(); // Prevent the form from submitting the default way
+    event.preventDefault();
     setLoading(true);
 
     try {
@@ -167,7 +167,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .firestore()
         .collection('applications')
         .doc(student_uid.toString());
-      const doc = await getDoc(statusRef);
+      let doc = await getDoc(statusRef);
 
       const courseDetails = firebase
         .firestore()
@@ -204,11 +204,36 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       };
 
       // Create the document within the "assignments" collection
-      await firebase
+      const assignmentRef = firebase
         .firestore()
         .collection('assignments')
-        .doc(assignmentObject.student_uid)
-        .set(assignmentObject);
+        .doc(assignmentObject.student_uid);
+
+      doc = await assignmentRef.get();
+      let uid = assignmentObject.student_uid;
+
+      if (doc.exists) {
+        let counter = 1;
+        let newRef = firebase
+          .firestore()
+          .collection('assignments')
+          .doc(`${uid}-${counter}`);
+
+        // Loop to check for the next available document ID
+        while ((await newRef.get()).exists) {
+          counter++;
+          newRef = firebase
+            .firestore()
+            .collection('assignments')
+            .doc(`${uid}-${counter}`);
+        }
+
+        // Create a new document with the updated UID and assignmentObject
+        await newRef.set(assignmentObject);
+      } else {
+        // Document does not exist, create the original document
+        await assignmentRef.set(assignmentObject);
+      }
 
       // Extract and process the professor emails
       const emailArray = courseDoc
@@ -395,7 +420,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const snapshot = await firebase
         .firestore()
         .collection('applications')
-        .doc(id.student_uid.toString())
+        .doc(id.toString())
         .get();
 
       if (snapshot.exists) {
@@ -492,22 +517,32 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
 
   // approve/deny click handlers
-  const handleDenyClick = (id: GridRowId) => {
+  const handleDenyClick = async (id: GridRowId) => {
+    event.preventDefault();
     setLoading(true);
-    // Update the 'applications' collection
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString())
-      .update({ status: 'Admin_denied' })
-      .then(() => {
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error updating application document: ', error);
+
+    try {
+      // Update the 'applications' collection in Firestore
+      await firebase
+        .firestore()
+        .collection('applications')
+        .doc(id.toString())
+        .update({ status: 'Admin_denied' });
+
+      // Remove the denied row from the local state
+      setApplicationData((prevData) => {
+        const newData = prevData.filter((row) => row.id !== id);
+        return newData; // Only return the updated state without the denied row
       });
-    handleDenyEmail(id);
+
+      await handleDenyEmail(id);
+      // Close the deny dialog
+      handleCloseDenyDialog();
+    } catch (error) {
+      console.error('Error updating application document: ', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleApproveClick = async (id: GridRowId) => {
@@ -1247,7 +1282,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 backgroundColor: '#5736ac',
                 color: '#ffffff',
               }}
-              onClick={() => handleDenyClick(deniedItemId)}
+              onClick={() => handleDenyClick(selectedUserGrid)}
             >
               Yes
             </Button>
