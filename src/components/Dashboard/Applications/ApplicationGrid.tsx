@@ -921,7 +921,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         },
       },
       {
-        field: 'id',
+        field: 'ufid',
         headerName: 'UFID',
         width: 100,
         editable: false,

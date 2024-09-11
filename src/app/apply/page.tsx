@@ -62,9 +62,8 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${
-    current.getMonth() + 1
-  }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -180,7 +179,7 @@ export default function Application() {
       firstname: formData.get('firstName') as string,
       lastname: formData.get('lastName') as string,
       email: formData.get('email') as string,
-      ufid: 'NA',
+      ufid: formData.get('ufid') as string,
       phonenumber: formData.get('phone-number') as string,
       gpa: formData.get('gpa-select') as string,
       department: formData.get('department-select') as string,
@@ -212,9 +211,14 @@ export default function Application() {
       toast.error('Please enter a valid last name!');
       setLoading(false);
       return;
+    } else if (applicationData.ufid == '') {
+      toast.error('Please enter a valid ufid!');
+      setLoading(false);
+      return;
     } else if (applicationData.phonenumber === '') {
       toast.error('Please enter a valid phone number!');
       setLoading(false);
+      return;
     } else if (
       applicationData.degree === null ||
       applicationData.degree === ''
@@ -415,6 +419,17 @@ export default function Application() {
                   name="email"
                   autoComplete="email"
                   helperText="Enter your UF email address. Example: gator@ufl.edu"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  variant="filled"
+                  id="ufid"
+                  label="UFID"
+                  name="ufid"
+                  helperText="Enter your UFID. Example: 12345678"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
