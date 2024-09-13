@@ -380,7 +380,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          marginTop: '-20px',
+          marginTop: '380px',
         }}
       >
         <div className="classe">

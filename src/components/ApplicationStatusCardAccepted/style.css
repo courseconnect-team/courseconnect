@@ -5,6 +5,8 @@
   height: 222px;
   position: relative;
   width: 716px;
+  margin-bottom: 18.75px;
+
 }
 
 .status-card3 .overlap {
@@ -95,7 +97,6 @@
   top: 92px;
   transform: rotate(90deg);
   width: 186px;
-
 }
 
 .status-card3 .inner-content-2 {

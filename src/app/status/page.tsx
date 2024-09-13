@@ -136,8 +136,6 @@ export default function Status() {
                     text="TA/UPI/Grader"
                     course={key}
                   />
-
-                  <br />
                 </div>
               ))}
 
@@ -150,7 +148,6 @@ export default function Status() {
                     text="TA/UPI/Grader"
                     course={value}
                   />
-                  <br />
                 </div>
               ))}
 
@@ -158,7 +155,7 @@ export default function Status() {
               !adminDenied &&
               Object.entries(courses).map(([key, value]) => (
                 <div key={key}>
-                  {value == 'applied' && (
+                  {(value == 'applied' || value == 'accepted') && (
                     <ApplicationStatusCard
                       className="application-status-card"
                       text="TA/UPI/Grader"
@@ -171,15 +168,6 @@ export default function Status() {
                       course={key}
                     />
                   )}
-                  {value == 'accepted' && (
-                    <ApplicationStatusCard
-                      className="application-status-card"
-                      text="TA/UPI/Grader"
-                      course={key}
-                    />
-                  )}
-
-                  <br />
                 </div>
               ))}
           </Box>
