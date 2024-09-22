@@ -22,6 +22,10 @@ export default function About() {
               src="https://c.animaapp.com/tY2yC3Jd/img/color-block-frame.png"
             />
             <div className={styles.signintitle}>
+              <div className={styles.signinto}>
+                <div className={styles.textwrapper10}>Welcome to</div>
+                <div className={styles.textwrapper11}>Course Connect</div>
+              </div>
               <p className={styles.connectingbright}>
                 <span className={styles.textwrapper8}>
                   Connecting Bright Minds for a Brighter Future
@@ -31,12 +35,6 @@ export default function About() {
                   <br />
                 </span>
               </p>
-              <div className={styles.signinto}>
-                <div className={styles.textwrapper10}>Welcome to</div>
-                <div className={styles.textwrapper11}>Course Connect</div>
-              </div>
-            </div>
-            <div className={styles.registerheretext}>
               <p className={styles.p}>
                 Course Connect is your all-in-one solution for managing the TA,
                 PI, and grader processes. Whether you are a student looking for
@@ -66,28 +64,27 @@ export default function About() {
               src="https://c.animaapp.com/1tYHWIVt/img/line-1-1.svg"
             />
           </div>
-          <Card
-            className={styles.studentcard}
-            rectangleClassName={styles.designcomponentinstancenode}
-            text="As a student, Course Connect provides you with the opportunity to apply for TA, PI, or grader positions. Submit your application through our intuitive interface and keep track of its status. You&#39;ll receive notifications when you are assigned to a course, ensuring that you stay informed every step of the way. Once assigned, you can easily access and view your course(s) as an employee, making it convenient to manage your responsibilities."
-            text1="Students"
-            imgLink="https://www.youtube.com/embed/yQgSf-3LCFE"
-          />
+          <div className={styles.cardholder}>
+            <Card
+              rectangleClassName={styles.designcomponentinstancenode}
+              text="As a student, Course Connect provides you with the opportunity to apply for TA, PI, or grader positions. Submit your application through our intuitive interface and keep track of its status. You&#39;ll receive notifications when you are assigned to a course, ensuring that you stay informed every step of the way. Once assigned, you can easily access and view your course(s) as an employee, making it convenient to manage your responsibilities."
+              text1="Students"
+              imgLink="https://www.youtube.com/embed/yQgSf-3LCFE"
+            />
 
-          <Card
-            className={styles.facultycard2}
-            rectangleClassName={styles.designcomponentinstancenode}
-            text="Course Connect empowers faculty members to effortlessly handle the application process for TA, PI, and grader positions. Receive applications from students, view them within our user-friendly platform, and make informed decisions by accepting or denying them. Furthermore, you can access a comprehensive overview of your course(s), including enrollment and other essential statistics. Stay organized with Course Connect."
-            text1="Faculty"
-            imgLink="https://www.youtube.com/embed/q2RQ3_6YW4U"
-          />
-          <Card
-            className={styles.administratorcard2}
-            rectangleClassName={styles.designcomponentinstancenode}
-            text="Course Connect simplifies the administrative tasks associated with managing users, courses, and applications. Our platform provides a centralized database with real-time connections, allowing administrators to efficiently create, view, update, and delete users, courses, and applications through neat tables. Accessing vital statistics about users, courses, and applications is just a click away."
-            text1="Administrators"
-            imgLink="https://www.youtube.com/embed/bJQ6bIeIq9s"
-          />
+            <Card
+              rectangleClassName={styles.designcomponentinstancenode}
+              text="Course Connect empowers faculty members to effortlessly handle the application process for TA, PI, and grader positions. Receive applications from students, view them within our user-friendly platform, and make informed decisions by accepting or denying them. Furthermore, you can access a comprehensive overview of your course(s), including enrollment and other essential statistics. Stay organized with Course Connect."
+              text1="Faculty"
+              imgLink="https://www.youtube.com/embed/q2RQ3_6YW4U"
+            />
+            <Card
+              rectangleClassName={styles.designcomponentinstancenode}
+              text="Course Connect simplifies the administrative tasks associated with managing users, courses, and applications. Our platform provides a centralized database with real-time connections, allowing administrators to efficiently create, view, update, and delete users, courses, and applications through neat tables. Accessing vital statistics about users, courses, and applications is just a click away."
+              text1="Administrators"
+              imgLink="https://www.youtube.com/embed/bJQ6bIeIq9s"
+            />
+          </div>
         </div>
       </div>
     </>
