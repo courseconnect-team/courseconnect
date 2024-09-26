@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Toaster, toast } from 'react-hot-toast';
+
 import { useState, useEffect } from 'react';
 import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
@@ -32,6 +33,7 @@ export default function User() {
   const [role, loading, error] = GetUserRole(user?.uid);
   const [semester, setSemester] = useState<string>('');
   const [menu, setMenu] = useState<string[]>([]);
+
   const [processing, setProcessing] = useState(false);
   const [newSem, setNewSem] = useState('');
   const [open, setOpen] = useState(false);
@@ -92,13 +94,13 @@ export default function User() {
   const db = firebase.firestore();
 
   const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      setProcessing(true);
-      const toastId = toast.loading(
-        'Processing course data. This may take a couple minutes.',
-        { duration: 300000000 }
-      );
+    setProcessing(true);
+    const toastId = toast.loading(
+      'Processing course data. This may take a couple minutes.',
+      { duration: 300000000 }
+    );
 
+    try {
       const file = e.target.files?.[0];
       if (!file) return;
 
@@ -136,6 +138,8 @@ export default function User() {
     } catch (err) {
       console.log(err);
       setProcessing(false);
+      toast.dismiss(toastId);
+      toast.error('Data upload failed.', { duration: 2000 });
     }
   };
 
@@ -278,6 +282,7 @@ export default function User() {
                 width: '100%',
               }}
             >
+
               <Box sx={{ minWidth: 120 }} />
               <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
                 <input
