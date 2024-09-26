@@ -247,7 +247,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
                               variant="body2"
                               className="text-highlight"
                             >
-                              {ta.email}
+                              {ta.email != 'undef' ? ta.email : 'Missing'}
                             </Typography>
                           </CardContent>
                         </Card>
