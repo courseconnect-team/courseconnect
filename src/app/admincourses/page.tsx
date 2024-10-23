@@ -119,15 +119,15 @@ export default function User() {
         await firebase
           .firestore()
           .collection('courses')
-          .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_25']}`)
+          .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_22']}`)
           .set({
-            professor_emails: row['__EMPTY_26'] ?? 'undef',
-            professor_names: row['__EMPTY_25'] ?? 'undef',
+            professor_emails: row['__EMPTY_23'] ?? 'undef',
+            professor_names: row['__EMPTY_22'] ?? 'undef',
             code: row['__EMPTY_5'] ?? 'undef',
-            credits: row['__EMPTY_12'] ?? 'undef',
-            enrollment_cap: row['__EMPTY_27'] ?? 'undef',
-            enrolled: row['__EMPTY_29'] ?? 'undef',
-            title: row['__EMPTY_24'] ?? 'undef',
+            credits: row['__EMPTY_9'] ?? 'undef',
+            enrollment_cap: row['__EMPTY_24'] ?? 'undef',
+            enrolled: row['__EMPTY_26'] ?? 'undef',
+            title: row['__EMPTY_21'] ?? 'undef',
             semester: semester,
           });
       }
