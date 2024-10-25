@@ -129,19 +129,6 @@ export default function FacultyCourses() {
     }
   };
 
-  const mapElement = (courses: CourseType[], onGoing: boolean) => {
-    return courses.map((val) => (
-      <div key={val.id}>
-        <SmallClassCard
-          pathname={`/course/${encodeURIComponent(val.id)}`}
-          courseName={val.code}
-          courseId={val.id}
-          className="class"
-          onGoing={onGoing}
-        />
-      </div>
-    ));
-  };
   return (
     <>
       <Toaster />
@@ -151,22 +138,47 @@ export default function FacultyCourses() {
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
             flexDirection: 'column',
             marginLeft: '20px',
           }}
         >
           <div className="text-wrapper-11 courses">My courses:</div>
           {courses.length !== 0 && (
-            <div className="class-cards-container">
-              {mapElement(courses, true)}
+            <div
+              className="class-cards-container"
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '10px',
+                minWidth: '630px',
+                maxWidth: '100px',
+              }}
+            >
+              {courses.map((course, index) => (
+                <div
+                  key={index}
+                  style={{
+                    flex: '1 1 calc(33.33% - 10px)', // Adjusts for three cards per row
+                    maxWidth: 'calc(33.33% - 10px)',
+                  }}
+                >
+                  <SmallClassCard
+                    pathname={`/course/${encodeURIComponent(course.id)}`}
+                    courseName={course.code}
+                    courseId={course.id}
+                    className="class"
+                    onGoing={true}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </div>
+
         <div
           style={{
-            paddingRight: 'auto',
             marginTop: '15px',
+            width: '700px',
           }}
         >
           <div className="text-past">Past Courses:</div>
@@ -177,7 +189,24 @@ export default function FacultyCourses() {
 
           {pastCourses.length !== 0 && (
             <div className="class-cards-container1">
-              {mapElement(pastCourses, false)}
+              {pastCourses.map((course, index) => (
+                <div
+                  key={index}
+                  style={{
+                    flex: '1 1 calc(33.33% - 10px)', // Adjusts for three cards per row
+                    maxWidth: '200px',
+                    marginBottom: '-120px', // Adjust this percentage as needed
+                  }}
+                >
+                  <SmallClassCard
+                    pathname={`/course/${encodeURIComponent(course.id)}`}
+                    courseName={course.code}
+                    courseId={course.id}
+                    className="class"
+                    onGoing={false}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </div>
