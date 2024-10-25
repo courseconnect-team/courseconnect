@@ -47,6 +47,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FacultyStats from '@/components/Dashboard/Users/FacultyStats';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 
 export default function User() {
   const { user } = useAuth();
@@ -67,7 +68,6 @@ export default function User() {
       'Processing course data. This may take a couple minutes.',
       { duration: 300000000 }
     );
-
 
     try {
       const val = e.target.files[0];
@@ -93,14 +93,14 @@ export default function User() {
       for (let i = 0; i < data.length; i++) {
         await firebase
           .firestore()
-          .collection('faculty-stats')
+          .collection('faculty')
           .doc(
             data[i]['__EMPTY_5'] +
-            ' (' +
-            semester +
-            ') ' +
-            ': ' +
-            data[i]['__EMPTY_22']
+              ' (' +
+              semester +
+              ') ' +
+              ': ' +
+              data[i]['__EMPTY_22']
           )
           .set({
             professor_emails:
@@ -154,7 +154,7 @@ export default function User() {
 
     const querySnapshot = await firebase
       .firestore()
-      .collection('faculty-stats')
+      .collection('faculty')
       .get();
     querySnapshot.forEach((doc) => doc.ref.delete());
 
@@ -165,77 +165,53 @@ export default function User() {
 
   return (
     <>
+      <HeaderCard text="Faculty Statistics" />
       <Toaster />
-      <div className={styles.studentlandingpage}>
-        <div className={styles.overlapwrapper}>
-          <div className={styles.overlap}>
-            <div className={styles.overlap2}>
-              <div className={styles.colorblockframe}>
-                <div className={styles.overlapgroup2}>
-                  <div className={styles.colorblock} />
-                  <img
-                    className={styles.GRADIENTS}
-                    alt="Gradients"
-                    src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                  />
-                  <div className={styles.glasscard} />
-                </div>
-              </div>
-              <EceLogoPng className={styles.ecelogopng2} />
-              <TopNavBarSigned className={styles.topnavbarsignedin} />
-              <div className={styles.textwrapper8}>Statistics</div>
-            </div>
-
-            <CssBaseline />
-            <Box
-              sx={{
-                marginTop: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
-              }}
+      <Box
+        sx={{
+          marginTop: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
+          <input
+            style={{ display: 'none' }}
+            id="raised-button-file"
+            multiple
+            type="file"
+            onChange={readExcelFile}
+            onClick={(event) => (event.currentTarget.value = '')}
+          />
+          <label htmlFor="raised-button-file">
+            <Button
+              sx={{ ml: 15, mt: 1.5 }}
+              style={{ textTransform: 'none' }}
+              variant="contained"
+              component="span"
+              startIcon={<FileUploadOutlined />}
             >
+              Upload Semester Data
+            </Button>
+          </label>
+          <Button
+            sx={{ ml: 10, mt: 1.5 }}
+            onClick={handleClear}
+            style={{ textTransform: 'none' }}
+            variant="contained"
+            component="span"
+            startIcon={<DeleteOutline />}
+          >
+            Clear Semester Data
+          </Button>
+          <br />
+          <br />
 
-              <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
-                <input
-                  style={{ display: 'none' }}
-                  id="raised-button-file"
-                  multiple
-                  type="file"
-                  onChange={readExcelFile}
-                  onClick={(event) => (event.currentTarget.value = '')}
-                />
-                <label htmlFor="raised-button-file">
-                  <Button
-                    sx={{ ml: 15, mt: 1.5 }}
-                    style={{ textTransform: 'none' }}
-                    variant="contained"
-                    component="span"
-                    startIcon={<FileUploadOutlined />}
-                  >
-                    Upload Semester Data
-                  </Button>
-                </label>
-                <Button
-                  sx={{ ml: 10, mt: 1.5 }}
-                  onClick={handleClear}
-                  style={{ textTransform: 'none' }}
-                  variant="contained"
-                  component="span"
-                  startIcon={<DeleteOutline />}
-                >
-                  Clear Semester Data
-                </Button>
-                <br />
-                <br />
-
-                <FacultyStats userRole={role as string} />
-              </Box>
-            </Box>
-          </div>
-        </div>
-      </div >
+          <FacultyStats userRole={role as string} />
+        </Box>
+      </Box>
     </>
   );
 }

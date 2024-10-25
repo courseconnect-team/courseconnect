@@ -11,20 +11,43 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default function FacultyApplication() {
   const auth = getAuth();
-  const [semester, setSemester] = useState('Fall 2024');
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  const currentSemester =
+    currentMonth < 5 ? 'Spring' : currentMonth < 8 ? 'Summer' : 'Fall';
+  const [semester, setSemester] = useState(`${currentSemester} ${currentYear}`);
   const [courses, setCourses] = useState<[string, any][]>([]);
   const db = firebase.firestore();
 
-  // Reactively listen to auth state changes
+  const generateSemesterNames = (
+    currentSem: string,
+    currentYr: number
+  ): string[] => {
+    const names = [`${currentSemester} ${currentYear}`];
+    let semesters = currentSem;
+    let years = currentYr;
+
+    for (let i = 0; i < 2; i++) {
+      if (semesters === 'Spring') {
+        semesters = 'Summer';
+      } else if (semesters === 'Summer') {
+        semesters = 'Fall';
+      } else {
+        semesters = 'Spring';
+        years = years + 1;
+      }
+      names.push(`${semesters} ${years}`);
+    }
+    return names;
+  };
+  const [semesterNames, setSemesterNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    setSemesterNames(generateSemesterNames(currentSemester, currentYear));
+  }, []);
+
   const user = auth.currentUser;
   const uemail = user?.email;
-
-  const formatSeasonYear = (sem: string): string => {
-    const parts = sem.split(' ');
-    const season = parts[0].toLowerCase();
-    const yearShort = parts[1].substring(2);
-    return `${season}${yearShort}`;
-  };
 
   const getCourses = async (semester: string): Promise<[string, any][]> => {
     try {
@@ -81,6 +104,7 @@ export default function FacultyApplication() {
             <SemesterSelect
               semester={semester}
               setSemester={setSemester}
+              names={semesterNames}
             ></SemesterSelect>
           </div>
         </div>

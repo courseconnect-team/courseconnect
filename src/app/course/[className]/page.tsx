@@ -8,7 +8,8 @@ import 'firebase/firestore';
 import CourseDetails from '@/components/CourseDetails/CourseDetails';
 import { getAuth } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { LinearProgress } from '@mui/material';
 
 interface pageProps {
   params: { semester: string; collection: string; courseCode: string };
@@ -43,10 +44,9 @@ interface CourseDetails {
 const StatisticsPage: FC<pageProps> = ({ params }) => {
   const auth = getAuth();
   const user = auth.currentUser;
-  const router = useRouter();
   const searchParams = useSearchParams();
   const courseId = searchParams.get('courseId');
-
+  const onGoing = searchParams.get('onGoing');
   const {
     role,
     loading: roleLoading,
@@ -60,7 +60,9 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
   ): Promise<CourseDetails | null> => {
     try {
       const db = firebase.firestore(); // Use the existing Firestore instance
-      const doc = await db.collection('past-courses').doc(courseId).get();
+      const doc = onGoing
+        ? await db.collection('courses').doc(courseId).get()
+        : await db.collection('past-courses').doc(courseId).get();
 
       if (doc.exists) {
         const data = doc.data();
@@ -113,7 +115,7 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
   }
 
   if (roleLoading || !role || (role !== 'faculty' && role !== 'admin')) {
-    return <p>Loading...</p>;
+    return <LinearProgress />;
   }
 
   return (

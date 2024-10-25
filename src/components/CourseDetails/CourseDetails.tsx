@@ -196,7 +196,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
           {/* TAs Section */}
           <Grid item xs={12} md={9}>
             <Typography variant="h6" gutterBottom>
-              TAs:
+              {TAs.length > 0 ? 'TAs:' : 'No TAs assigned'}
             </Typography>
             <Grid>
               <div

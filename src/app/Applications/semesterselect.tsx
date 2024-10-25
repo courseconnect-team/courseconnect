@@ -18,24 +18,18 @@ const MenuProps = {
   },
 };
 
-const names = [
-  'Fall 2024',
-  'Spring 2025',
-  'Summer 2025',
-  // Add more names if necessary
-];
-
 interface PageProps {
   semester: string;
   setSemester: (value: string) => void;
+  names: string[];
 }
 
 const SemesterSelect: React.FunctionComponent<PageProps> = ({
   semester,
   setSemester,
+  names,
 }) => {
   const [personName, setPersonName] = React.useState<string>('');
-
   const handleChange = (event: SelectChangeEvent<string>) => {
     setPersonName(event.target.value as string);
   };

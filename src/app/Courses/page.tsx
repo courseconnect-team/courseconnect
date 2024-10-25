@@ -15,6 +15,7 @@ interface CourseType {
   code: string;
   courseId: string;
 }
+
 export default function FacultyCourses() {
   const auth = getAuth();
   const [courses, setCourses] = useState<CourseType[]>([]);
@@ -49,7 +50,7 @@ export default function FacultyCourses() {
   const getCourses = async (): Promise<CourseType[]> => {
     try {
       const snapshot = await db
-        .collection('past-courses')
+        .collection('courses')
         .where('professor_emails', '==', uemail)
         .get();
 
@@ -70,6 +71,7 @@ export default function FacultyCourses() {
       return [];
     }
   };
+
   const getPastCourses = async (
     selectedYear: number
   ): Promise<CourseType[]> => {
@@ -127,7 +129,7 @@ export default function FacultyCourses() {
     }
   };
 
-  const mapElement = (courses: CourseType[]) => {
+  const mapElement = (courses: CourseType[], onGoing: boolean) => {
     return courses.map((val) => (
       <div key={val.id}>
         <SmallClassCard
@@ -135,6 +137,7 @@ export default function FacultyCourses() {
           courseName={val.code}
           courseId={val.id}
           className="class"
+          onGoing={onGoing}
         />
       </div>
     ));
@@ -155,10 +158,11 @@ export default function FacultyCourses() {
         >
           <div className="text-wrapper-11 courses">My courses:</div>
           {courses.length !== 0 && (
-            <div className="class-cards-container">{mapElement(courses)}</div>
+            <div className="class-cards-container">
+              {mapElement(courses, true)}
+            </div>
           )}
         </div>
-
         <div
           style={{
             paddingRight: 'auto',
@@ -173,7 +177,7 @@ export default function FacultyCourses() {
 
           {pastCourses.length !== 0 && (
             <div className="class-cards-container1">
-              {mapElement(pastCourses)}
+              {mapElement(pastCourses, false)}
             </div>
           )}
         </div>

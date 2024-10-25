@@ -2,12 +2,18 @@ import React from 'react';
 import Link from 'next/link';
 import './style.css';
 
-const SmallClassCard = ({ className, courseName, courseId, pathname }) => {
+const SmallClassCard = ({
+  className,
+  courseName,
+  courseId,
+  pathname,
+  onGoing,
+}) => {
   return (
     <Link
       href={{
         pathname: pathname,
-        query: { courseId },
+        query: { courseId, onGoing },
       }}
       prefetch={false}
       passHref

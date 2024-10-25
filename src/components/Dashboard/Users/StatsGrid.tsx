@@ -1,14 +1,12 @@
+// components/StatsGrid.tsx
 'use client';
+
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
+import ZoomIn from '@mui/icons-material/ZoomIn';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
 import {
   GridRowModesModel,
-  GridRowsProp,
-  GridRowModes,
   GridToolbarContainer,
   GridToolbarExport,
   GridToolbarFilterButton,
@@ -29,44 +27,29 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  TextField,
+  LinearProgress,
+  Button,
 } from '@mui/material';
-import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
-import firebase from '@/firebase/firebase_config';
-import 'firebase/firestore';
-import { LinearProgress, Button } from '@mui/material';
+import Link from 'next/link';
+import {
+  useFacultyStats,
+  useDeleteFacultyStat,
+  useUpdateFacultyStat,
+} from '@/hooks/useFacultyStats';
+import { User } from '@/types/User';
 import { alpha, styled } from '@mui/material/styles';
-import { ZoomIn } from '@mui/icons-material';
-
-interface User {
-  id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-  department: string;
-  role: string;
-  ufid: string;
-  isNew?: boolean;
-  mode?: 'edit' | 'view' | undefined;
-}
 
 interface EditToolbarProps {
-  setUserData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
   setRowModesModel: (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel
   ) => void;
 }
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setUserData, setRowModesModel } = props;
-
-  // Add state to control the dialog open status
-  const [open, setOpen] = React.useState(false);
+  const { setRowModesModel } = props;
 
   return (
     <GridToolbarContainer>
-      {/* Include your Dialog component here and pass the open state and setOpen function as props */}
       <GridToolbarExport style={{ color: '#562EBA' }} />
       <GridToolbarFilterButton style={{ color: '#562EBA' }} />
       <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
@@ -80,34 +63,20 @@ interface UserGridProps {
 
 export default function StatsGrid(props: UserGridProps) {
   const { userRole } = props;
-  const [userData, setUserData] = React.useState<User[]>([]);
-  const [open, setOpen] = React.useState(false);
+  const { data, isLoading, error } = useFacultyStats();
+  const deleteMutation = useDeleteFacultyStat();
+  const updateMutation = useUpdateFacultyStat();
+
   const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState();
+  const [delId, setDelId] = React.useState<string | undefined>();
 
-  React.useEffect(() => {
-    const usersRef = firebase.firestore().collection('faculty-stats');
-    const unsubscribe = usersRef.onSnapshot((querySnapshot) => {
-      const data = querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            fullname: doc.data().firstname + ' ' + doc.data().lastname,
-            ...doc.data(),
-          } as unknown as User)
-      );
-
-      setUserData(data);
-    });
-
-    return () => unsubscribe();
-  }, []);
-  const handleDeleteDiagClose = () => {
-    setDelDia(false);
-  };
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+  const handleDeleteDiagClose = () => {
+    setDelDia(false);
+  };
 
   const handleRowEditStop: GridEventListener<'rowEditStop'> = (
     params,
@@ -118,62 +87,37 @@ export default function StatsGrid(props: UserGridProps) {
     }
   };
 
-  const handleEditClick = (id: GridRowId) => () => {
-    // setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
-
   const handleSaveClick = (id: GridRowId) => () => {
-    console.log('Clicked Save for ID:', id);
-    console.log('Current userData:', userData);
-
-    const updatedRow = userData.find((row) => row.id === id);
+    const updatedRow = data?.find((row) => row.id === id);
     if (updatedRow) {
-      firebase
-        .firestore()
-        .collection('users')
-        .doc(id.toString())
-        .update(updatedRow)
-        .then(() => {
-          console.log('Document successfully updated!');
-          setRowModesModel({
-            ...rowModesModel,
-            [id]: { mode: GridRowModes.View },
-          });
-        })
-        .catch((error) => {
-          console.error('Error updating document: ', error);
-        });
+      updateMutation.mutate(updatedRow);
+      setRowModesModel({
+        ...rowModesModel,
+        [id]: { mode: GridRowModes.View },
+      });
     } else {
       console.error('No matching user data found for id: ', id);
     }
   };
 
   const handleDel = (id: GridRowId) => () => {
-    setDelId(id);
+    setDelId(id.toString());
     setDelDia(true);
   };
 
-  const handleDeleteClick = (id: GridRowId) => {
-    firebase
-      .firestore()
-      .collection('users')
-      .doc(id.toString())
-      .delete()
-      .then(() => {
-        deleteUserHTTPRequest(id.toString());
-        setUserData(userData.filter((row) => row.id !== id));
-      })
-      .catch((error) => {
-        console.error('Error removing document: ', error);
-      });
+  const handleDeleteClick = (id: string) => {
+    deleteMutation.mutate(id);
+    // deleteUserHTTPRequest(id); // Remove if redundant, as React Query handles refetching
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(delId.toString());
-    handleDeleteClick(delId);
+    if (delId) {
+      handleDeleteClick(delId);
+    }
     setDelDia(false);
   };
+
   function CustomToolbar() {
     const apiRef = useGridApiContext();
 
@@ -185,19 +129,9 @@ export default function StatsGrid(props: UserGridProps) {
   }
 
   const handleCancelClick = (id: GridRowId) => () => {
-    const editedRow = userData.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      firebase
-        .firestore()
-        .collection('users')
-        .doc(id.toString())
-        .delete()
-        .then(() => {
-          setUserData(userData.filter((row) => row.id !== id));
-        })
-        .catch((error) => {
-          console.error('Error removing document: ', error);
-        });
+    const editedRow = data?.find((row) => row.id === id);
+    if (editedRow && editedRow.isNew) {
+      deleteMutation.mutate(id);
     } else {
       setRowModesModel({
         ...rowModesModel,
@@ -206,45 +140,14 @@ export default function StatsGrid(props: UserGridProps) {
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
+  const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...(newRow as User), isNew: false };
-    if (updatedRow) {
-      if (updatedRow.isNew) {
-        return firebase
-          .firestore()
-          .collection('users')
-          .add(updatedRow)
-          .then(() => {
-            setUserData(
-              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
-            );
-            return updatedRow;
-          })
-          .catch((error) => {
-            console.error('Error adding document: ', error);
-            throw error;
-          });
-      } else {
-        return firebase
-          .firestore()
-          .collection('users')
-          .doc(updatedRow.id)
-          .update(updatedRow)
-          .then(() => {
-            setUserData(
-              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
-            );
-            return updatedRow;
-          })
-          .catch((error) => {
-            console.error('Error updating document: ', error);
-            throw error;
-          });
-      }
-    } else {
-      return Promise.reject(
-        new Error('No matching user data found for id: ' + newRow.id)
-      );
+    try {
+      await updateMutation.mutateAsync(updatedRow);
+      return updatedRow;
+    } catch (error) {
+      console.error('Error updating row:', error);
+      throw error;
     }
   };
 
@@ -257,45 +160,29 @@ export default function StatsGrid(props: UserGridProps) {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 100,
+      width: 200,
       cellClassName: 'actions',
       getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              key="1"
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{
-                color: '#562EBA',
-              }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              key="2"
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
         return [
           <Button
-            key="8"
+            key={`view-${id}`}
             variant="outlined"
             color="inherit"
             size="small"
             style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
             startIcon={<ZoomIn />}
-            onClick={handleEditClick(id)}
+            component={Link}
+            href={`/faculty/${id}`} // Fixed template literal
           >
             View
           </Button>,
+          <GridActionsCellItem
+            key={`delete-${id}`}
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={handleDel(id)}
+            color="inherit"
+          />,
         ];
       },
     },
@@ -324,25 +211,22 @@ export default function StatsGrid(props: UserGridProps) {
       editable: true,
     },
     { field: 'cd', headerName: 'Credit Deficit', width: 150, editable: true },
-
     { field: 'ce', headerName: 'Credit Excess', width: 150, editable: true },
-
     {
       field: 'tot',
       headerName: 'Total Classes Taught (3yrs)',
       width: 200,
       editable: true,
     },
-
     {
       field: 'acu3',
       headerName: 'Average Course Units',
       width: 170,
       editable: true,
     },
-
     { field: 'lc', headerName: 'Lab Courses', width: 150, editable: true },
   ];
+
   const ODD_OPACITY = 0.2;
 
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
@@ -377,6 +261,15 @@ export default function StatsGrid(props: UserGridProps) {
       },
     },
   }));
+
+  if (isLoading) {
+    return <LinearProgress />;
+  }
+
+  if (error) {
+    return <div>Error loading data</div>;
+  }
+
   return (
     <Box
       sx={{
@@ -414,7 +307,7 @@ export default function StatsGrid(props: UserGridProps) {
         >
           Delete User
         </DialogTitle>
-        <form onSubmit={(e) => handleSubmit(e)}>
+        <form onSubmit={handleSubmit}>
           <DialogContent>
             <DialogContentText
               style={{
@@ -477,14 +370,14 @@ export default function StatsGrid(props: UserGridProps) {
         </form>
       </Dialog>
       <StripedDataGrid
-        rows={userData}
+        rows={data || []}
         columns={columns}
-        slots={{
-          toolbar: EditToolbar,
-          loadingOverlay: LinearProgress,
+        components={{
+          Toolbar: EditToolbar,
+          LoadingOverlay: LinearProgress,
         }}
-        slotProps={{
-          toolbar: { setUserData, setRowModesModel },
+        componentsProps={{
+          toolbar: { setRowModesModel },
         }}
         editMode="row"
         rowModesModel={rowModesModel}
