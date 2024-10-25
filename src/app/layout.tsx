@@ -5,6 +5,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import darkTheme from './theme/darkTheme';
 import lightTheme from './theme/lightTheme';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 const ColorModeContext = React.createContext({
   toggleColorMode: () => {},
@@ -24,7 +27,6 @@ export default function RootLayout({
     }),
     []
   );
-
   const darkThemeChosen = React.useMemo(
     () =>
       createTheme({
@@ -58,17 +60,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ColorModeContext.Provider value={colorMode}>
-          <ThemeProvider
-            theme={mode === 'dark' ? darkThemeChosen : lightThemeChosen}
-          >
-            <AuthProvider>
-              <CssBaseline />
-              {/*<Header ColorModeContext={ColorModeContext} />*/}
-              {children}
-            </AuthProvider>
-          </ThemeProvider>
-        </ColorModeContext.Provider>
+        <QueryClientProvider client={queryClient}>
+          <ColorModeContext.Provider value={colorMode}>
+            <ThemeProvider
+              theme={mode === 'dark' ? darkThemeChosen : lightThemeChosen}
+            >
+              <AuthProvider>
+                <CssBaseline />
+                {/*<Header ColorModeContext={ColorModeContext} />*/}
+                {children}
+              </AuthProvider>
+            </ThemeProvider>
+          </ColorModeContext.Provider>
+        </QueryClientProvider>
       </body>
     </html>
   );

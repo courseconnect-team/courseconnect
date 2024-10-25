@@ -7,28 +7,28 @@ import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
 
 interface EnrollmentInfoProps extends CircularProgressProps {
-  students: number;
-  capacity: number;
+  current: number;
+  total: number;
 }
 
-const EnrollmentInfo: React.FC<EnrollmentInfoProps> = (props) => {
-  const { students, capacity, ...circularProgressProps } = props;
-  const percentage = capacity === 0 ? 0 : (students / capacity) * 100;
-
+const CourseUnitInfo: React.FC<EnrollmentInfoProps> = (props) => {
+  const { current, total, ...circularProgressProps } = props;
+  const percentage = (current / total) * 100;
+  const units = current.toString().padStart(2, '0');
   return (
     <Box sx={{ padding: '16px', borderRadius: '12px', boxShadow: 1 }}>
       <Typography variant="h6" gutterBottom>
-        Students Enrolled
+        Course Units
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-          {students}
+          {units}
         </Typography>
         <Typography variant="body1" sx={{ ml: 1, color: 'text.secondary' }}>
-          students
+          CU
         </Typography>
         <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
-          of {capacity} cap
+          of {total} CU
         </Typography>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
@@ -68,17 +68,17 @@ const EnrollmentInfo: React.FC<EnrollmentInfoProps> = (props) => {
               color="text.secondary"
               fontSize="20px"
             >
-              {'Student Enrolled'}
+              {'accumulated'}
             </Typography>
           </Box>
         </Box>
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="body2" color="text.secondary">
-          Students enrolled
+          Course Units Accumulated
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {students} students
+          {units} CU
         </Typography>
       </Box>
       <LinearProgress
@@ -90,4 +90,4 @@ const EnrollmentInfo: React.FC<EnrollmentInfoProps> = (props) => {
   );
 };
 
-export default EnrollmentInfo;
+export default CourseUnitInfo;
