@@ -46,7 +46,7 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
   const user = auth.currentUser;
   const searchParams = useSearchParams();
   const courseId = searchParams.get('courseId');
-  const onGoing = searchParams.get('onGoing');
+  const onGoing = searchParams.get('onGoing') === 'true';
   const {
     role,
     loading: roleLoading,
@@ -60,10 +60,9 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
   ): Promise<CourseDetails | null> => {
     try {
       const db = firebase.firestore(); // Use the existing Firestore instance
-      const doc =
-        onGoing === 'true'
-          ? await db.collection('courses').doc(courseId).get()
-          : await db.collection('past-courses').doc(courseId).get();
+      const doc = onGoing
+        ? await db.collection('courses').doc(courseId).get()
+        : await db.collection('past-courses').doc(courseId).get();
       if (doc.exists) {
         const data = doc.data();
         return {

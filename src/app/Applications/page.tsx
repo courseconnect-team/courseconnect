@@ -16,7 +16,7 @@ export default function FacultyApplication() {
   const currentSemester =
     currentMonth < 5 ? 'Spring' : currentMonth < 8 ? 'Summer' : 'Fall';
   const [semester, setSemester] = useState(`${currentSemester} ${currentYear}`);
-  const [courses, setCourses] = useState<[string, any][]>([]);
+  const [courses, setCourses] = useState<[string, any, string][]>([]);
   const db = firebase.firestore();
 
   const generateSemesterNames = (
@@ -49,7 +49,9 @@ export default function FacultyApplication() {
   const user = auth.currentUser;
   const uemail = user?.email;
 
-  const getCourses = async (semester: string): Promise<[string, any][]> => {
+  const getCourses = async (
+    semester: string
+  ): Promise<[string, any, string][]> => {
     try {
       const snapshot = await db
         .collection(`courses`)
@@ -58,10 +60,17 @@ export default function FacultyApplication() {
         .get();
 
       const filteredDocs = snapshot.docs.filter(
-        (doc) => doc.data().code !== null && doc.data().code !== undefined
+        (doc) =>
+          doc.data().code !== null &&
+          doc.data().code !== undefined &&
+          doc.data().title !== undefined
       );
 
-      return filteredDocs.map((doc) => [doc.id, doc.data().code]);
+      return filteredDocs.map((doc) => [
+        doc.id,
+        doc.data().code,
+        doc.data().title,
+      ]);
     } catch (error) {
       console.error(`Error getting courses:`, error);
       alert('Error getting courses:');
@@ -86,7 +95,12 @@ export default function FacultyApplication() {
     return courses.map((val) => {
       return (
         <div key={val[0]}>
-          <ClassCard courseName={val[1]} courseId={val[0]} className="class" />
+          <ClassCard
+            courseName={val[1]}
+            courseId={val[0]}
+            courseTitle={val[2]}
+            className="class"
+          />
         </div>
       );
     });
