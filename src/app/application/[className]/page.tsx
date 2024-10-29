@@ -14,6 +14,7 @@ import ApplicantCardApprove from '@/components/ApplicantCardApprove/ApplicantCar
 import ApplicantCardDeny from '@/components/ApplicantCardDeny/ApplicantCardDeny';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
+import { useSearchParams } from 'next/navigation';
 
 interface pageProps {
   params: { className: string; semester: string };
@@ -89,6 +90,8 @@ const CoursePage: FC<pageProps> = ({ params }) => {
   const [upiData, setupiData] = useState<applicationData[]>([]);
   const [graderData, setgraderData] = useState<applicationData[]>([]);
   const [selection, setSelection] = useState<string>('Review');
+  const searchParams = useSearchParams();
+  const courseTitle = searchParams.get('courseTitle');
 
   const toggleSelection = (select: string): void => {
     setSelection(select);
@@ -384,7 +387,13 @@ const CoursePage: FC<pageProps> = ({ params }) => {
         }}
       >
         <div className="classe">
-          {className.substring(0, className.indexOf(')')) + ')'}
+          {className.substring(0, className.indexOf(' ')) +
+            ': ' +
+            courseTitle +
+            className.substring(
+              className.indexOf(' '),
+              className.indexOf(')') + 1
+            )}
         </div>
       </div>
       <div

@@ -3,12 +3,12 @@ import React from 'react';
 import Link from 'next/link';
 import './style.css';
 
-const ClassCard = ({ className, courseName, courseId }) => {
+const ClassCard = ({ className, courseName, courseId, courseTitle }) => {
   return (
     <Link
       href={{
         pathname: `/application/${encodeURIComponent(courseId)}`,
-        query: { data: courseId },
+        query: { data: courseId, courseTitle },
       }}
       passHref
     >
