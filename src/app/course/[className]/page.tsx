@@ -60,10 +60,10 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
   ): Promise<CourseDetails | null> => {
     try {
       const db = firebase.firestore(); // Use the existing Firestore instance
-      const doc = onGoing
-        ? await db.collection('courses').doc(courseId).get()
-        : await db.collection('past-courses').doc(courseId).get();
-
+      const doc =
+        onGoing === 'true'
+          ? await db.collection('courses').doc(courseId).get()
+          : await db.collection('past-courses').doc(courseId).get();
       if (doc.exists) {
         const data = doc.data();
         return {
