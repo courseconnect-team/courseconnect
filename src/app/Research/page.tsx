@@ -1,7 +1,9 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import { Bio } from '@/components/Bio/Bio';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
 interface ResearchPageProps {
   user: {
@@ -11,26 +13,26 @@ interface ResearchPageProps {
   };
 }
 
-const ResearchPage: React.FC<ResearchPageProps> = ({ user }) => {
+const ResearchPage: React.FC<ResearchPageProps> = () => {
+  const auth = getAuth();
+  const user = auth.currentUser;
   const {
     role,
     loading: roleLoading,
     error: roleError,
   } = useUserRole(user?.uid);
 
-  if (roleLoading) {
-    return <div>Loading user role...</div>;
-  }
-
   if (roleError) {
-    return <div>Error loading user role</div>;
+    return <p>Error loading role</p>;
   }
 
+  if (!user) {
+    return <p>Please sign in.</p>;
+  }
   return (
     <>
       <Toaster />
-      <HeaderCard text="Courses" />
-      <Bio user={user} className="full-name-and-bio-instance" />
+      <HeaderCard text="Research Job Board" />
       <div className="page-container">
         {role === 'faculty' && (
           <div className="faculty-component">
