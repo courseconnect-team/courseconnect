@@ -14,24 +14,22 @@ export const SemesterTimeline = ({
 }: TimelineProps): JSX.Element => {
   return (
     <div className="tab-bar">
-      <div
-        className={`element-years ${selectedSemester === 0 ? 'selected' : ''}`}
-        onClick={() => setSelectedSemester(0)}
-      >
-        <div className="div">
-          <div className="text-wrapper-3">{curSemester}</div>
-          <div className="text-wrapper-4">Current Semester</div>
+      {semesters.map((semester, index) => (
+        <div
+          key={index}
+          className={`element-years ${
+            selectedSemester === index ? 'selected' : ''
+          }`}
+          onClick={() => setSelectedSemester(index)}
+        >
+          <div className="div">
+            <div className="text-wrapper-3">{semester}</div>
+            <div className="text-wrapper-4">
+              {index === 0 ? 'Current Semester' : 'Past Semester'}
+            </div>
+          </div>
         </div>
-      </div>
-      <div
-        className={`element-years ${selectedSemester === 1 ? 'selected' : ''}`}
-        onClick={() => setSelectedSemester(1)}
-      >
-        <div className="div">
-          <div className="text-wrapper-3">{nextSemester}</div>
-          <div className="text-wrapper-4">Next Semester</div>
-        </div>
-      </div>
+      ))}
     </div>
   );
 };
