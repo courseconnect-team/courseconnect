@@ -26,16 +26,16 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { DeleteOutline, FileUploadOutlined } from '@mui/icons-material';
+import { DeleteOutline, FileUploadOutlined, HideSource, Visibility, VisibilityOff } from '@mui/icons-material';
 
 export default function User() {
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
-  const [semester, setSemester] = useState<string>('');
+  const [semester, setSemester] = useState<string>('Fall 2024');
   const [menu, setMenu] = useState<string[]>([]);
-
+  const [semesterHidden, setSemesterHidden] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [newSem, setNewSem] = useState('');
+  const [newSem, setNewSem] = useState(false);
   const [open, setOpen] = useState(false);
 
   const handleClose = () => {
@@ -49,7 +49,7 @@ export default function User() {
       .firestore()
       .collection('semesters')
       .doc(newSem)
-      .set({ semester: newSem });
+      .set({ semester: newSem, hidden: false });
     setSemester(newSem);
     setOpen(false);
   };
@@ -70,7 +70,22 @@ export default function User() {
       setMenu(arr);
     };
 
+    const setHidden = async () => {
+      const doc = await firebase
+        .firestore()
+        .collection('semesters')
+        .doc(semester)
+        .get();
+      if (doc.data()?.hidden) {
+        setSemesterHidden(doc.data().hidden);
+      } else {
+        setSemesterHidden(false);
+      }
+    };
+
     updateMenu();
+    setHidden();
+    console.log(semesterHidden);
   }, [semester, processing]);
 
   const handleDeleteSem = async () => {
@@ -91,6 +106,24 @@ export default function User() {
     toast.success('Semester data cleared!');
     toast.dismiss(toastId);
   };
+
+  const handleSemesterHiddenToggle = async () => {
+    setProcessing(true);
+    const toastId = toast.loading(
+      'Toggling semester visibility. This may take a couple minutes.',
+      { duration: 30000000 }
+    );
+
+    await firebase
+      .firestore()
+      .collection('semesters')
+      .doc(semester)
+      .set({ hidden: !semesterHidden }, { merge: true });
+
+    setProcessing(false);
+    toast.success('Semester visibility toggled!');
+    toast.dismiss(toastId);
+  }
   const db = firebase.firestore();
 
   const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,15 +158,15 @@ export default function User() {
         await firebase
           .firestore()
           .collection('courses')
-          .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_25']}`)
+          .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_22']}`)
           .set({
-            professor_emails: emailArray, // Set as an array
+            professor_emails: emailArray,
             professor_names: row['__EMPTY_25'] ?? 'undef',
             code: row['__EMPTY_5'] ?? 'undef',
-            credits: row['__EMPTY_12'] ?? 'undef',
-            enrollment_cap: row['__EMPTY_27'] ?? 'undef',
-            enrolled: row['__EMPTY_29'] ?? 'undef',
-            title: row['__EMPTY_24'] ?? 'undef',
+            credits: row['__EMPTY_9'] ?? 'undef',
+            enrollment_cap: row['__EMPTY_24'] ?? 'undef',
+            enrolled: row['__EMPTY_26'] ?? 'undef',
+            title: row['__EMPTY_21'] ?? 'undef',
             semester: semester,
           });
       }
@@ -319,7 +352,17 @@ export default function User() {
                 >
                   Clear Semester Data
                 </Button>
-                <FormControl sx={{ ml: 70, mb: 5, minWidth: 140 }}>
+                <Button
+                  sx={{ ml: 10, mt: 1.5 }}
+                  onClick={handleSemesterHiddenToggle}
+                  style={{ textTransform: 'none' }}
+                  variant="contained"
+                  component="span"
+                  startIcon={semesterHidden ? <Visibility /> : <VisibilityOff />}
+                >
+                  {semesterHidden ? "Unhide" : "Hide"} Semester Data
+                </Button>
+                <FormControl sx={{ ml: 40, mb: 5, minWidth: 140 }}>
                   <InputLabel id="demo-simple-select-label">
                     Semester
                   </InputLabel>
