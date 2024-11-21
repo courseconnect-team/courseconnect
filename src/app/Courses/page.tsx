@@ -28,7 +28,7 @@ export default function FacultyCourses() {
   const [groupedCourses, setGroupedCourses] = useState<
     Map<string, CourseType[]>
   >(new Map());
-
+  const [semesterArray, setSemesterArray] = useState<string[]>([]);
   const user = auth.currentUser;
   const uemail = user?.email;
 
@@ -59,17 +59,21 @@ export default function FacultyCourses() {
           courseMap.get(course.semester)?.push(course);
         });
         setGroupedCourses(courseMap);
+        const semesterKeys = Array.from(courseMap.keys());
+        const order = ['Fall', 'Spring', 'Summer'];
+        const sortedSemesterKeys = semesterKeys.sort(
+          (a, b) =>
+            order.indexOf(a.split(' ')[0]) - order.indexOf(b.split(' ')[0])
+        );
+        setSemesterArray(sortedSemesterKeys);
       } catch (error) {}
     };
     fetchCourses();
   }, [uemail]);
 
   useEffect(() => {
-    if (selectedSemester) {
-      const semesterKeys = Array.from(groupedCourses.keys());
-      setCourses(groupedCourses.get(semesterKeys[selectedSemester]) || []);
-    }
-  }, [selectedSemester, groupedCourses]);
+    setCourses(groupedCourses.get(semesterArray[selectedSemester]) || []);
+  }, [selectedSemester]);
 
   useEffect(() => {
     const fetchPastCourses = async () => {
@@ -78,61 +82,6 @@ export default function FacultyCourses() {
     };
     fetchPastCourses();
   }, [selectedYear]);
-
-  const convertToSem = (semester: string) => {
-    let val = 0;
-    const [sem, year] = semester.split(' ');
-    switch (sem.toLowerCase()) {
-      case 'spring':
-        val = 1;
-        break;
-      case 'summer':
-        val = 2;
-        break;
-      case 'fall':
-        val = 3;
-        break;
-    }
-    return parseInt(year) * 10 + val;
-  };
-
-  const getCoursesBySemester = async (): Promise<CourseType[]> => {
-    try {
-      const snapshot = await db
-        .collection('courses')
-        .where('professor_emails', 'array-contains', uemail)
-        .get();
-
-      const filteredDocs = snapshot.docs.filter(
-        (doc) => doc.data().code !== null && doc.data().code !== undefined
-      );
-
-      const coursesWithSemester = filteredDocs.map((doc) => {
-        const calculated = convertToSem(doc.data().semester);
-        return {
-          id: doc.id,
-          code: doc.data().code,
-          courseId: doc.data().class_number,
-          semester: doc.data().semester,
-          calculated,
-        };
-      });
-
-      const sortedCourses = coursesWithSemester.sort(
-        (a, b) => b.calculated - a.calculated
-      );
-
-      const uniqueSemesterValues = Array.from(
-        new Set(sortedCourses.map((course) => course.semester))
-      );
-
-      return uniqueSemesterValues;
-    } catch (error) {
-      console.error('Error getting courses:', error);
-      alert('Error getting courses');
-      return [];
-    }
-  };
 
   const getPastCourses = async (
     selectedYear: number
@@ -144,19 +93,19 @@ export default function FacultyCourses() {
       const springQuery = db
         .collection('past-courses')
         .where('semester', '==', `Spring ${year}`)
-        .where('professor_emails', 'array-contains', uemail)
+        .where('professor_emails', '==', uemail)
         .get();
 
       const fallQuery = db
         .collection('past-courses')
         .where('semester', '==', `Fall ${year}`)
-        .where('professor_emails', 'array-contains', uemail)
+        .where('professor_emails', '==', uemail)
         .get();
 
       const summerQuery = db
         .collection('past-courses')
         .where('semester', '==', `Summer ${year}`)
-        .where('professor_emails', 'array-contains', uemail)
+        .where('professor_emails', '==', uemail)
         .get();
 
       const [springSnapshot, fallSnapshot, summerSnapshot] = await Promise.all([
@@ -227,11 +176,13 @@ export default function FacultyCourses() {
           }}
         >
           <div className="text-wrapper-11 courses">My courses:</div>
-          <SemesterTimeline
-            semesters={Array.from(groupedCourses.keys())}
-            selectedSemester={selectedSemester}
-            setSelectedSemester={setSelectedSemester}
-          />
+          {semesterArray.length > 0 && (
+            <SemesterTimeline
+              semesters={semesterArray}
+              selectedSemester={selectedSemester}
+              setSelectedSemester={setSelectedSemester}
+            />
+          )}
           {courses.length !== 0 && (
             <div
               className="class-cards-container"
@@ -260,6 +211,27 @@ export default function FacultyCourses() {
                   />
                 </div>
               ))}
+            </div>
+          )}
+          {courses.length === 0 && (
+            <div
+              style={{
+                marginTop: '10px',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                maxWidth: '600px',
+                textAlign: 'center',
+                color: 'rgba(0, 0, 0, 0.43)',
+                fontSize: 17,
+                fontFamily: 'SF Pro Display',
+                fontWeight: '500',
+                padding: '0 20px',
+              }}
+            >
+              Currently, no courses have been assigned to you yet. Please wait
+              until an admin assigns your courses. Once your courses are
+              assigned, you&apos;ll be able to access applicants for those
+              classes.{' '}
             </div>
           )}
         </div>
@@ -301,25 +273,6 @@ export default function FacultyCourses() {
           )}
         </div>
       </div>
-
-      {courses.length === 0 && (
-        <div
-          style={{
-            marginTop: '162px',
-            marginLeft: '227px',
-            marginRight: '227px',
-            textAlign: 'center',
-            color: 'rgba(0, 0, 0, 0.43)',
-            fontSize: 17,
-            fontFamily: 'SF Pro Display',
-            fontWeight: '500',
-          }}
-        >
-          Currently, no courses have been assigned to you yet. Please wait until
-          an admin assigns your courses. Once your courses are assigned,
-          you&apos;ll be able to access applicants for those classes.
-        </div>
-      )}
     </>
   );
 }

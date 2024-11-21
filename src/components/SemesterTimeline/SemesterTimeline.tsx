@@ -25,7 +25,7 @@ export const SemesterTimeline = ({
           <div className="div">
             <div className="text-wrapper-3">{semester}</div>
             <div className="text-wrapper-4">
-              {index === 0 ? 'Current Semester' : 'Past Semester'}
+              {index === 0 ? 'Current Semester' : 'Upcoming Semester'}
             </div>
           </div>
         </div>
