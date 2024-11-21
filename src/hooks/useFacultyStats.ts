@@ -55,7 +55,6 @@ const useFacultyStats = () => {
       (querySnapshot) => {
         const data = querySnapshot.docs.map((doc) => {
           const docData = doc.data();
-
           return {
             id: doc.id,
             accumulatedUnits: docData.accumulatedUnits ?? 0,

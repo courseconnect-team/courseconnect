@@ -149,13 +149,19 @@ export default function User() {
       for (const row of data) {
         console.log(row);
 
+        const rawEmails = row['__EMPTY_26'] ?? 'undef';
+        const emailArray =
+          rawEmails === 'undef'
+            ? []
+            : rawEmails.split(';').map((email: string) => email.trim());
+
         await firebase
           .firestore()
           .collection('courses')
           .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_22']}`)
           .set({
-            professor_emails: row['__EMPTY_23'] ?? 'undef',
-            professor_names: row['__EMPTY_22'] ?? 'undef',
+            professor_emails: emailArray,
+            professor_names: row['__EMPTY_25'] ?? 'undef',
             code: row['__EMPTY_5'] ?? 'undef',
             credits: row['__EMPTY_9'] ?? 'undef',
             enrollment_cap: row['__EMPTY_24'] ?? 'undef',
@@ -315,7 +321,6 @@ export default function User() {
                 width: '100%',
               }}
             >
-
               <Box sx={{ minWidth: 120 }} />
               <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
                 <input

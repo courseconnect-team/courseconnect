@@ -56,7 +56,7 @@ export default function FacultyApplication() {
       const snapshot = await db
         .collection(`courses`)
         .where('semester', '==', semester)
-        .where('professor_emails', '==', uemail) // Check if the current user is the instructor
+        .where('professor_emails', 'array-contains', uemail) // Check if the current user is the instructor
         .get();
 
       const filteredDocs = snapshot.docs.filter(
