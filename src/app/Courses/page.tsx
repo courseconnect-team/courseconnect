@@ -21,6 +21,8 @@ export default function FacultyCourses() {
   const auth = getAuth();
   const [courses, setCourses] = useState<CourseType[]>([]);
   const [pastCourses, setPastCourses] = useState<CourseType[]>([]);
+  const [loading, setLoading] = useState(true); // Loading state for courses
+  const [loadingPastCourses, setLoadingPastCourses] = useState(true); // Loading state for past courses
 
   const db = firebase.firestore();
   const [selectedYear, setSelectedYear] = useState<number>(1);
@@ -35,6 +37,7 @@ export default function FacultyCourses() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
+        setLoading(true);
         const snapshot = await db
           .collection('courses')
           .where('professor_emails', 'array-contains', uemail)
@@ -58,6 +61,7 @@ export default function FacultyCourses() {
           }
           courseMap.get(course.semester)?.push(course);
         });
+
         setGroupedCourses(courseMap);
         const semesterKeys = Array.from(courseMap.keys());
         const order = ['Fall', 'Spring', 'Summer'];
@@ -66,19 +70,30 @@ export default function FacultyCourses() {
             order.indexOf(a.split(' ')[0]) - order.indexOf(b.split(' ')[0])
         );
         setSemesterArray(sortedSemesterKeys);
-      } catch (error) {}
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchCourses();
   }, [uemail]);
 
   useEffect(() => {
     setCourses(groupedCourses.get(semesterArray[selectedSemester]) || []);
-  }, [selectedSemester]);
+  }, [selectedSemester, groupedCourses]);
 
   useEffect(() => {
     const fetchPastCourses = async () => {
-      const pastCourses = await getPastCourses(selectedYear);
-      setPastCourses(pastCourses);
+      try {
+        setLoadingPastCourses(true); // Start loading past courses
+        const pastCourses = await getPastCourses(selectedYear);
+        setPastCourses(pastCourses);
+      } catch (error) {
+        console.error('Error fetching past courses:', error);
+      } finally {
+        setLoadingPastCourses(false); // End loading past courses
+      }
     };
     fetchPastCourses();
   }, [selectedYear]);
@@ -183,7 +198,7 @@ export default function FacultyCourses() {
               setSelectedSemester={setSelectedSemester}
             />
           )}
-          {courses.length !== 0 && (
+          {loading ? null : courses.length !== 0 ? (
             <div
               className="class-cards-container"
               style={{
@@ -212,8 +227,7 @@ export default function FacultyCourses() {
                 </div>
               ))}
             </div>
-          )}
-          {courses.length === 0 && (
+          ) : (
             <div
               style={{
                 marginTop: '10px',
@@ -248,7 +262,9 @@ export default function FacultyCourses() {
             setSelectedYear={setSelectedYear}
           />
 
-          {pastCourses.length !== 0 && (
+          {loadingPastCourses ? (
+            <div>Loading past courses...</div>
+          ) : pastCourses.length !== 0 ? (
             <div className="class-cards-container1">
               {pastCourses.map((course, index) => (
                 <div
@@ -270,6 +286,8 @@ export default function FacultyCourses() {
                 </div>
               ))}
             </div>
+          ) : (
+            <div>No past courses available.</div>
           )}
         </div>
       </div>
