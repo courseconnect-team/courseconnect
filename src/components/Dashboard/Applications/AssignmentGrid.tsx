@@ -510,19 +510,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 190,
       editable: true,
     },
-    {
-      field: 'supervisorEmail',
-      headerName: 'Supervisor Email',
-      width: 190,
-      editable: true,
-      valueGetter: (params) => {
-        if (params.row.class_codes != undefined) {
-          return courseEmailMap.get(params.row.class_codes);
-        } else {
-          return ' ';
-        }
-      },
-    },
+
     {
       field: 'sf',
       headerName: 'Supervisor First Name',
@@ -545,7 +533,19 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           ? params.row.class_codes.split(' ')[4].split(',')[0]
           : ' ',
     },
-
+    {
+      field: 'supervisorEmail',
+      headerName: 'Supervisor Email',
+      width: 190,
+      editable: true,
+      valueGetter: (params) => {
+        if (params.row.class_codes != undefined) {
+          return courseEmailMap.get(params.row.class_codes);
+        } else {
+          return ' ';
+        }
+      },
+    },
     {
       field: 'proxyUfid',
       headerName: 'Proxy UFID',

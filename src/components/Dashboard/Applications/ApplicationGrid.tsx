@@ -201,6 +201,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         hours: [hours],
         position: doc.data()?.position,
         degree: doc.data()?.degree,
+        ufid: doc.data()?.ufid,
       };
 
       // Create the document within the "assignments" collection
