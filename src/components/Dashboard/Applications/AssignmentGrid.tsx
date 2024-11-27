@@ -605,11 +605,15 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 110,
       editable: true,
     },
+
     {
       field: 'semesters',
       headerName: 'Semester',
       width: 110,
       editable: true,
+      valueGetter: (value) => {
+        return value.value;
+      },
       valueFormatter: (value) => {
         const val = value.value;
         try {
@@ -626,6 +630,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           return 'FALL';
         }
       },
+
+
+
     },
 
     {
