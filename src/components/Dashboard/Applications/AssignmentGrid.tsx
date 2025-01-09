@@ -116,14 +116,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     setOpenView(true);
   };
 
-
   const handleClose = () => {
     setOpen(false);
   };
 
   const handleViewClose = () => {
     setOpenView(false);
-  }
+  };
   const handleDeleteDiagClose = () => {
     setDelDia(false);
   };
@@ -144,26 +143,26 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-          firstName:
-            doc.data().name != undefined
-              ? doc.data().name.split(' ')[0]
-              : ' ',
-          lastName:
-            doc.data().name != undefined
-              ? doc.data().name.split(' ')[1]
-              : ' ',
-          year:
-            doc.data().semesters != undefined
-              ? doc.data().semesters[0].split(' ')[1]
-              : ' ',
-          fte: 15,
-          pname: 'DEPARTMENT TA/UPIS',
-          pid: '000108927',
-          hr: 15,
-        } as Assignment)
+          ({
+            id: doc.id,
+            ...doc.data(),
+            firstName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[0]
+                : ' ',
+            lastName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[1]
+                : ' ',
+            year:
+              doc.data().semesters != undefined
+                ? doc.data().semesters[0].split(' ')[1]
+                : ' ',
+            fte: 15,
+            pname: 'DEPARTMENT TA/UPIS',
+            pid: '000108927',
+            hr: 15,
+          } as Assignment)
       );
       setAssignmentData(data);
     });
@@ -510,19 +509,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 190,
       editable: true,
     },
-    {
-      field: 'supervisorEmail',
-      headerName: 'Supervisor Email',
-      width: 190,
-      editable: true,
-      valueGetter: (params) => {
-        if (params.row.class_codes != undefined) {
-          return courseEmailMap.get(params.row.class_codes);
-        } else {
-          return ' ';
-        }
-      },
-    },
+
     {
       field: 'sf',
       headerName: 'Supervisor First Name',
@@ -545,7 +532,19 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           ? params.row.class_codes.split(' ')[4].split(',')[0]
           : ' ',
     },
-
+    {
+      field: 'supervisorEmail',
+      headerName: 'Supervisor Email',
+      width: 190,
+      editable: true,
+      valueGetter: (params) => {
+        if (params.row.class_codes != undefined) {
+          return courseEmailMap.get(params.row.class_codes);
+        } else {
+          return ' ';
+        }
+      },
+    },
     {
       field: 'proxyUfid',
       headerName: 'Proxy UFID',
@@ -605,11 +604,15 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 110,
       editable: true,
     },
+
     {
       field: 'semesters',
       headerName: 'Semester',
       width: 110,
       editable: true,
+      valueGetter: (value) => {
+        return value.value;
+      },
       valueFormatter: (value) => {
         const val = value.value;
         try {
@@ -779,8 +782,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {

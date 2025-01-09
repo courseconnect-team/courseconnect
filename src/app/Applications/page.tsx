@@ -113,7 +113,9 @@ export default function FacultyApplication() {
       <div className="page-container">
         <div className="text-wrapper-11 ta">TA/UPI/Grader Applications</div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div className="text-wrapper-11 courses">My courses:</div>
+          <div className="text-wrapper-11 courses">
+            Applications sorted by course:
+          </div>
           <div style={{ marginRight: '35px' }}>
             <SemesterSelect
               semester={semester}

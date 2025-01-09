@@ -187,8 +187,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
       // Get the current date in month/day/year format
       const current = new Date();
-      const current_date = `${current.getMonth() + 1
-        }-${current.getDate()}-${current.getFullYear()}`;
+      const current_date = `${
+        current.getMonth() + 1
+      }-${current.getDate()}-${current.getFullYear()}`;
 
       const assignmentObject = {
         date: current_date as string,
@@ -201,6 +202,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         hours: [hours],
         position: doc.data()?.position,
         degree: doc.data()?.degree,
+        ufid: doc.data()?.ufid,
       };
 
       // Create the document within the "assignments" collection
@@ -340,7 +342,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     if (userRole === 'admin') {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
-          .filter(function(doc) {
+          .filter(function (doc) {
             if (doc.data().status != 'Admin_denied') {
               if (
                 doc.data().status == 'Admin_approved' &&
@@ -355,16 +357,16 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           })
           .map(
             (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-              courses: Object.entries(doc.data().courses)
-                .filter(([key, value]) => value == 'accepted')
-                .map(([key, value]) => key),
-              allcourses: Object.entries(doc.data().courses).map(
-                ([key, value]) => key
-              ),
-            } as Application)
+              ({
+                id: doc.id,
+                ...doc.data(),
+                courses: Object.entries(doc.data().courses)
+                  .filter(([key, value]) => value == 'accepted')
+                  .map(([key, value]) => key),
+                allcourses: Object.entries(doc.data().courses).map(
+                  ([key, value]) => key
+                ),
+              } as Application)
           );
         setApplicationData(data);
       });
@@ -392,10 +394,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       applicationsRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Application)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Application)
         );
         setApplicationData(data);
       });
@@ -437,8 +439,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type: 'applicationStatusDenied',
               data: {
                 user: {
-                  name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
-                    }`.trim(),
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
                   email: applicationData.email,
                 },
                 position: applicationData.position,
@@ -491,8 +494,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
               type: 'applicationStatusApproved',
               data: {
                 user: {
-                  name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
-                    }`.trim(),
+                  name: `${applicationData.firstname ?? ''} ${
+                    applicationData.lastname ?? ''
+                  }`.trim(),
                   email: applicationData.email,
                 },
                 position: assignmentData.position,
@@ -983,8 +987,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
@@ -1186,8 +1190,16 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                       );
                     })}
                   </RadioGroup>
-                  < br />
-                  <TextField defaultValue={0} label="Hours" onChange={event => { setHours(event.target.value) }}> </TextField>
+                  <br />
+                  <TextField
+                    defaultValue={0}
+                    label="Hours"
+                    onChange={(event) => {
+                      setHours(event.target.value);
+                    }}
+                  >
+                    {' '}
+                  </TextField>
                 </FormControl>{' '}
               </>
             ) : (
