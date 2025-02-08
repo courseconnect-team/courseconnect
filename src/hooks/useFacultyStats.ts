@@ -7,12 +7,11 @@ import { useEffect } from 'react';
 import { FacultyStats } from '@/types/User';
 // Fetch function using Firestore's get method
 
-const fetchFacultyStats = async (): Promise<FacultyStats[]> => {
+const fetchFacultyStats = async (): Promise<Record<string, FacultyStats>> => {
   const snapshot = await firebase.firestore().collection('faculty').get();
-  const data = snapshot.docs.map((doc) => {
+  const data = snapshot.docs.reduce((acc, doc) => {
     const docData = doc.data();
-
-    return {
+    acc[doc.id] = {
       id: doc.id,
       accumulatedUnits: docData.accumulatedUnits ?? 0,
       assignedUnits: docData.assignedUnits ?? 0,
@@ -29,7 +28,9 @@ const fetchFacultyStats = async (): Promise<FacultyStats[]> => {
       isNew: false,
       mode: 'view',
     };
-  }) as FacultyStats[];
+    return acc;
+  }, {} as Record<string, FacultyStats>);
+
   return data;
 };
 
@@ -48,14 +49,13 @@ const updateFacultyStat = async (stat: FacultyStats): Promise<void> => {
 const useFacultyStats = () => {
   const queryClient = useQueryClient();
 
-  // Set up the real-time listener
   useEffect(() => {
     const statsRef = firebase.firestore().collection('faculty');
     const unsubscribe = statsRef.onSnapshot(
       (querySnapshot) => {
-        const data = querySnapshot.docs.map((doc) => {
+        const newData = querySnapshot.docs.reduce((acc, doc) => {
           const docData = doc.data();
-          return {
+          acc[doc.id] = {
             id: doc.id,
             accumulatedUnits: docData.accumulatedUnits ?? 0,
             assignedUnits: docData.assignedUnits ?? 0,
@@ -72,18 +72,20 @@ const useFacultyStats = () => {
             isNew: false,
             mode: 'view',
           };
-        }) as FacultyStats[];
+          return acc;
+        }, {} as Record<string, FacultyStats>);
 
-        // Update React Query's cache
-        queryClient.setQueryData(['facultyStats'], data);
+        // Compare the new data with existing cache
+        const existingData = queryClient.getQueryData(['facultyStats']);
+        if (JSON.stringify(existingData) !== JSON.stringify(newData)) {
+          queryClient.setQueryData(['facultyStats'], newData);
+        }
       },
       (error) => {
         console.error('Error fetching faculty stats: ', error);
-        // Optionally, handle errors here (e.g., set an error state)
       }
     );
 
-    // Cleanup listener on unmount
     return () => unsubscribe();
   }, [queryClient]);
 

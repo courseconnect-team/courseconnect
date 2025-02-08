@@ -27,3 +27,9 @@ export interface FacultyStats {
   isNew?: boolean; // Optional, used for UI state
   mode?: 'view' | 'edit'; // Optional, used for UI state
 }
+export interface CourseType {
+  id: string;
+  code: string;
+  courseId: string;
+  semester?: string;
+}

@@ -10,19 +10,12 @@ import { getAuth } from 'firebase/auth';
 import { Bio } from '@/components/Bio/Bio';
 import { Timeline } from '@/components/Timeline/Timeline';
 import { SemesterTimeline } from '@/components/SemesterTimeline/SemesterTimeline';
-interface CourseType {
-  id: string;
-  code: string;
-  courseId: string;
-  semester: string;
-}
-
+import useFetchPastCourses from '@/hooks/usePastCourses';
+import { CourseType } from '@/types/User';
 export default function FacultyCourses() {
   const auth = getAuth();
   const [courses, setCourses] = useState<CourseType[]>([]);
-  const [pastCourses, setPastCourses] = useState<CourseType[]>([]);
   const [loading, setLoading] = useState(true); // Loading state for courses
-  const [loadingPastCourses, setLoadingPastCourses] = useState(true); // Loading state for past courses
 
   const db = firebase.firestore();
   const [selectedYear, setSelectedYear] = useState<number>(1);
@@ -33,6 +26,10 @@ export default function FacultyCourses() {
   const [semesterArray, setSemesterArray] = useState<string[]>([]);
   const user = auth.currentUser;
   const uemail = user?.email;
+  const { pastCourses, loadingPast, error } = useFetchPastCourses(
+    selectedYear,
+    uemail
+  );
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -82,100 +79,6 @@ export default function FacultyCourses() {
   useEffect(() => {
     setCourses(groupedCourses.get(semesterArray[selectedSemester]) || []);
   }, [selectedSemester, groupedCourses]);
-
-  useEffect(() => {
-    const fetchPastCourses = async () => {
-      try {
-        setLoadingPastCourses(true); // Start loading past courses
-        const pastCourses = await getPastCourses(selectedYear);
-        setPastCourses(pastCourses);
-      } catch (error) {
-        console.error('Error fetching past courses:', error);
-      } finally {
-        setLoadingPastCourses(false); // End loading past courses
-      }
-    };
-    fetchPastCourses();
-  }, [selectedYear]);
-
-  const getPastCourses = async (
-    selectedYear: number
-  ): Promise<CourseType[]> => {
-    try {
-      const currentYear = new Date().getFullYear();
-      const year = currentYear - selectedYear;
-
-      const springQuery = db
-        .collection('past-courses')
-        .where('semester', '==', `Spring ${year}`)
-        .where('professor_emails', '==', uemail)
-        .get();
-
-      const fallQuery = db
-        .collection('past-courses')
-        .where('semester', '==', `Fall ${year}`)
-        .where('professor_emails', '==', uemail)
-        .get();
-
-      const summerQuery = db
-        .collection('past-courses')
-        .where('semester', '==', `Summer ${year}`)
-        .where('professor_emails', '==', uemail)
-        .get();
-
-      const [springSnapshot, fallSnapshot, summerSnapshot] = await Promise.all([
-        springQuery,
-        fallQuery,
-        summerQuery,
-      ]);
-
-      const courses: CourseType[] = [];
-
-      const springFilter = springSnapshot.docs.filter(
-        (doc) => doc.data().code !== null && doc.data().code !== undefined
-      );
-      springFilter.forEach((doc) => {
-        courses.push({
-          id: doc.id,
-          code: doc.data().code,
-          courseId: doc.data().class_number,
-          semester: 'S',
-        });
-      });
-
-      const fallFilter = fallSnapshot.docs.filter(
-        (doc) => doc.data().code !== null && doc.data().code !== undefined
-      );
-
-      fallFilter.forEach((doc) => {
-        courses.push({
-          id: doc.id,
-          code: doc.data().code,
-          courseId: doc.data().class_number,
-          semester: 'F',
-        });
-      });
-
-      const summerFilter = summerSnapshot.docs.filter(
-        (doc) => doc.data().code !== null && doc.data().code !== undefined
-      );
-
-      summerFilter.forEach((doc) => {
-        courses.push({
-          id: doc.id,
-          code: doc.data().code,
-          courseId: doc.data().class_number,
-          semester: 'R',
-        });
-      });
-
-      return courses;
-    } catch (error) {
-      console.error('Error getting courses:', error);
-      alert('Error getting courses');
-      return [];
-    }
-  };
 
   return (
     <>
@@ -262,7 +165,7 @@ export default function FacultyCourses() {
             setSelectedYear={setSelectedYear}
           />
 
-          {loadingPastCourses ? (
+          {loadingPast ? (
             <div>Loading past courses...</div>
           ) : pastCourses.length !== 0 ? (
             <div className="class-cards-container1">
