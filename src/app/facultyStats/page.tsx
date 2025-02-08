@@ -62,7 +62,6 @@ export default function User() {
 
   const readExcelFile = async (e) => {
     // https://docs.sheetjs.com/docs/demos/local/file/
-    console.log('ACTIVE');
     setProcessing(true);
     const toastId = toast.loading(
       'Processing course data. This may take a couple minutes.',
@@ -91,50 +90,26 @@ export default function User() {
       console.log(data.length);
 
       for (let i = 0; i < data.length; i++) {
+        if (data[i]['__EMPTY_1'] == undefined) {
+          continue;
+        }
         await firebase
           .firestore()
           .collection('faculty')
           .doc(
-            data[i]['__EMPTY_5'] +
-              ' (' +
-              semester +
-              ') ' +
-              ': ' +
-              data[i]['__EMPTY_22']
+            data[i]['__EMPTY_1']
           )
           .set({
-            professor_emails:
-              data[i]['__EMPTY_23'] == undefined
+            instructor:
+              data[i]['__EMPTY_1'] == undefined
                 ? 'undef'
-                : data[i]['__EMPTY_23'],
-            professor_names:
-              data[i]['__EMPTY_22'] == undefined
-                ? 'undef'
-                : data[i]['__EMPTY_22'],
-            code:
-              data[i]['__EMPTY_5'] == undefined
-                ? 'undef'
-                : data[i]['__EMPTY_5'],
-            credits:
-              data[i]['__EMPTY_9'] == undefined
-                ? 'undef'
-                : data[i]['__EMPTY_9'],
-            enrollment_cap:
-              data[i]['__EMPTY_24'] == undefined
-                ? 'undef'
-                : data[i]['__EMPTY_24'],
-            enrolled:
-              data[i]['__EMPTY_26'] == undefined
-                ? 'undef'
-                : data[i]['__EMPTY_26'],
-            title:
-              data[i]['__EMPTY_21'] == undefined
-                ? 'undef'
-                : data[i]['__EMPTY_21'],
-            semester: semester,
+                : data[i]['__EMPTY_1'],
+            research_level:
+              data[i]['__EMPTY_28'] == undefined
+                ? 'None'
+                : data[i]['__EMPTY_28'],
           });
 
-        console.log(data[i]['__EMPTY_5']);
       }
       setProcessing(false);
       toast.dismiss(toastId);
