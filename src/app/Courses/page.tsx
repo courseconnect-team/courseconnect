@@ -1,6 +1,6 @@
 'use client';
 import './style.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Toaster } from 'react-hot-toast';
 import SmallClassCard from '@/components/SmallClassCard/SmallClassCard';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
@@ -33,7 +33,9 @@ export default function FacultyCourses() {
       JSON.stringify(selectedSemesters)
     );
   }, [selectedSemesters]);
-
+  const selectedSemesterValues = useMemo(() => {
+    return selectedSemesters.map((option) => option.value);
+  }, [selectedSemesters]);
   const [groupedCourses, setGroupedCourses] = useState<
     Map<string, CourseType[]>
   >(new Map());
@@ -41,7 +43,7 @@ export default function FacultyCourses() {
   const user = auth.currentUser;
   const uemail = user?.email;
   const { pastCourses, loadingPast, error } = useFetchPastCourses(
-    selectedSemesters.map((option) => option.value),
+    selectedSemesterValues,
     uemail
   );
 
@@ -181,15 +183,22 @@ export default function FacultyCourses() {
           {loadingPast ? (
             <div>Loading past courses...</div>
           ) : pastCourses.length !== 0 ? (
-            <div className="class-cards-container1">
+            <div
+              className="class-cards-container"
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '10px',
+                minWidth: '630px',
+                maxWidth: '100px',
+              }}
+            >
               {pastCourses.map((course, index) => (
                 <div
                   key={index}
                   style={{
                     flex: '1 1 calc(33.33% - 10px)', // Adjusts for three cards per row
-                    maxWidth: '200px',
-                    marginBottom: '-120px', // Adjust this percentage as needed
-                    marginLeft: '11px',
+                    maxWidth: 'calc(33.33% - 10px)',
                   }}
                 >
                   <SmallClassCard
