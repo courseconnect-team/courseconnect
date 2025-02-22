@@ -1,73 +1,77 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import firebase from '@/firebase/firebase_config';
 import { CourseType } from '@/types/User';
+
 const useFetchPastCourses = (
-  selectedYear: number,
+  selectedYears: string[],
   uemail: string | null | undefined
 ) => {
-  const [pastCourses, setCourses] = useState<CourseType[]>([]);
+  const [pastCourses, setPastCourses] = useState<CourseType[]>([]);
   const [loadingPast, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const db = firebase.firestore();
+  const coursesCache = useRef<{ [semester: string]: CourseType[] }>({});
 
   useEffect(() => {
     const fetchPastCourses = async () => {
+      // If no email or no selected semester, clear courses and exit.
+      if (!uemail || selectedYears.length === 0) {
+        setPastCourses([]);
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
 
-        const currentYear = new Date().getFullYear();
-        const year = currentYear - selectedYear;
-
-        // Helper function to filter and map documents
+        // Helper function to process each Firestore snapshot.
         const processSnapshot = (
-          snapshot: any,
-          semesterCode: string
+          snapshot: firebase.firestore.QuerySnapshot,
+          semester: string
         ): CourseType[] => {
-          return snapshot.docs
-            .filter((doc: any) => {
+          const courses = snapshot.docs
+            .filter((doc) => {
               const data = doc.data();
-              return data.code !== null && data.code !== undefined;
+              return data.code != null;
             })
-            .map((doc: any) => {
+            .map((doc) => {
               const data = doc.data();
               return {
                 id: doc.id,
                 code: data.code,
                 courseId: data.class_number,
-                semester: semesterCode,
-              };
+                semester,
+              } as CourseType;
             });
+          // Cache the courses for this semester.
+          coursesCache.current[semester] = courses;
+          return courses;
         };
 
-        // Create and execute queries
-        const [springSnapshot, fallSnapshot, summerSnapshot] =
-          await Promise.all([
-            db
-              .collection('past-courses')
-              .where('semester', '==', `Spring ${year}`)
-              .where('professor_emails', '==', uemail)
-              .get(),
-            db
-              .collection('past-courses')
-              .where('semester', '==', `Fall ${year}`)
-              .where('professor_emails', '==', uemail)
-              .get(),
-            db
-              .collection('past-courses')
-              .where('semester', '==', `Summer ${year}`)
-              .where('professor_emails', '==', uemail)
-              .get(),
-          ]);
+        // Create a promise for each semester.
+        const queryPromises = selectedYears.map((semester) => {
+          if (coursesCache.current[semester]) {
+            // Return cached data if it exists.
+            return Promise.resolve(coursesCache.current[semester]);
+          }
 
-        // Process snapshots
-        const allCourses = [
-          ...processSnapshot(springSnapshot, 'S'),
-          ...processSnapshot(fallSnapshot, 'F'),
-          ...processSnapshot(summerSnapshot, 'R'),
-        ];
+          return db
+            .collection('past-courses')
+            .where('semester', '==', semester)
+            .where('professor_emails', '==', uemail)
+            .get()
+            .then((snapshot) => processSnapshot(snapshot, semester))
+            .catch((error) => {
+              console.error(`Error fetching courses for ${semester}:`, error);
+              return []; // Return empty array for this semester on error.
+            });
+        });
 
-        setCourses(allCourses);
+        // Wait for all queries to complete.
+        const coursesPerSemester = await Promise.all(queryPromises);
+        // Flatten the array of arrays into one array.
+        const allCourses = coursesPerSemester.flat();
+        setPastCourses(allCourses);
       } catch (err) {
         console.error(err);
         setError('Failed to fetch courses. Please try again later.');
@@ -77,7 +81,7 @@ const useFetchPastCourses = (
     };
 
     fetchPastCourses();
-  }, [selectedYear, uemail]);
+  }, [JSON.stringify(selectedYears), uemail]); // Use a stable dependency for selectedYears
 
   return { pastCourses, loadingPast, error };
 };

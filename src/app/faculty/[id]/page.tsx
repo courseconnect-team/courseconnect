@@ -8,7 +8,6 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import FacultyDetails from '@/components/FacultyDetails/FacultyDetails';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
-import { Timeline } from '@/components/Timeline/Timeline';
 import SmallClassCard from '@/components/SmallClassCard/SmallClassCard';
 import { FacultyStats } from '@/types/User';
 import { useFacultyStats } from '@/hooks/useFacultyStats';
@@ -119,10 +118,6 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
               labCourse={facultyData.labCourse}
               id={''}
             >
-              <Timeline
-                selectedYear={selectedYear}
-                setSelectedYear={setSelectedYear}
-              />
               {pastCourses.length !== 0 && (
                 <div className="class-cards-container1">
                   {mapElement(pastCourses)}

@@ -33,3 +33,7 @@ export interface CourseType {
   courseId: string;
   semester?: string;
 }
+export type SelectSemester = {
+  value: string;
+  label: string;
+};

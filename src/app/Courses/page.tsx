@@ -8,18 +8,23 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { Bio } from '@/components/Bio/Bio';
-import { Timeline } from '@/components/Timeline/Timeline';
+import makeAnimated from 'react-select/animated';
 import { SemesterTimeline } from '@/components/SemesterTimeline/SemesterTimeline';
 import useFetchPastCourses from '@/hooks/usePastCourses';
 import { CourseType } from '@/types/User';
+import SemesterSelection from '@/components/SemesterSelection/SemesterSelection';
+import { SelectSemester } from '@/types/User';
+import Select from 'react-select/dist/declarations/src/Select';
 export default function FacultyCourses() {
   const auth = getAuth();
   const [courses, setCourses] = useState<CourseType[]>([]);
   const [loading, setLoading] = useState(true); // Loading state for courses
 
   const db = firebase.firestore();
-  const [selectedYear, setSelectedYear] = useState<number>(1);
   const [selectedSemester, setSelectedSemester] = useState<number>(0);
+  const [selectedSemesters, setSelectedSemesters] = useState<SelectSemester[]>(
+    []
+  );
   const [groupedCourses, setGroupedCourses] = useState<
     Map<string, CourseType[]>
   >(new Map());
@@ -27,7 +32,7 @@ export default function FacultyCourses() {
   const user = auth.currentUser;
   const uemail = user?.email;
   const { pastCourses, loadingPast, error } = useFetchPastCourses(
-    selectedYear,
+    selectedSemesters.map((option) => option.value),
     uemail
   );
 
@@ -90,7 +95,6 @@ export default function FacultyCourses() {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            marginLeft: '20px',
           }}
         >
           <div className="text-wrapper-11 courses">My courses:</div>
@@ -155,14 +159,14 @@ export default function FacultyCourses() {
 
         <div
           style={{
-            marginTop: '15px',
-            width: '700px',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <div className="text-past">Past Courses:</div>
-          <Timeline
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
+          <SemesterSelection
+            selectedSemesters={selectedSemesters}
+            setSelectedSemesters={setSelectedSemesters}
           />
 
           {loadingPast ? (
@@ -181,7 +185,7 @@ export default function FacultyCourses() {
                 >
                   <SmallClassCard
                     pathname={`/course/${encodeURIComponent(course.id)}`}
-                    courseName={course.code + ' ' + course.semester}
+                    courseName={course.code}
                     courseId={course.id}
                     className="class"
                     onGoing={false}
