@@ -259,6 +259,18 @@ export default function DashboardWelcome(props: DashboardProps) {
                     text="Courses"
                   />
                 </Link>
+                <Link
+                  href={{
+                    pathname: '/faculty',
+                    query: { id: 'JWqJHybgfKMIcR0Nci3W' },
+                  }}
+                >
+                  <DashboardCard
+                    className={styles}
+                    image="https://c.animaapp.com/ebG6M1rL/img/apply.svg"
+                    text="Stats"
+                  />
+                </Link>
                 <Link href="/Profile">
                   <DashboardCard
                     className={styles}

@@ -15,3 +15,13 @@ export interface FacultyStats {
   instructor: string;
   research_level: string;
 }
+export interface CourseType {
+  id: string;
+  code: string;
+  courseId: string;
+  semester?: string;
+}
+export type SelectSemester = {
+  value: string;
+  label: string;
+};

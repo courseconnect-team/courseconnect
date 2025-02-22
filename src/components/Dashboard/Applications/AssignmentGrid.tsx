@@ -116,14 +116,13 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     setOpenView(true);
   };
 
-
   const handleClose = () => {
     setOpen(false);
   };
 
   const handleViewClose = () => {
     setOpenView(false);
-  }
+  };
   const handleDeleteDiagClose = () => {
     setDelDia(false);
   };
@@ -144,26 +143,26 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-          firstName:
-            doc.data().name != undefined
-              ? doc.data().name.split(' ')[0]
-              : ' ',
-          lastName:
-            doc.data().name != undefined
-              ? doc.data().name.split(' ')[1]
-              : ' ',
-          year:
-            doc.data().semesters != undefined
-              ? doc.data().semesters[0].split(' ')[1]
-              : ' ',
-          fte: 15,
-          pname: 'DEPARTMENT TA/UPIS',
-          pid: '000108927',
-          hr: 15,
-        } as Assignment)
+          ({
+            id: doc.id,
+            ...doc.data(),
+            firstName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[0]
+                : ' ',
+            lastName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[1]
+                : ' ',
+            year:
+              doc.data().semesters != undefined
+                ? doc.data().semesters[0].split(' ')[1]
+                : ' ',
+            fte: 15,
+            pname: 'DEPARTMENT TA/UPIS',
+            pid: '000108927',
+            hr: 15,
+          } as Assignment)
       );
       setAssignmentData(data);
     });
@@ -630,9 +629,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           return 'FALL';
         }
       },
-
-
-
     },
 
     {
@@ -786,8 +782,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
