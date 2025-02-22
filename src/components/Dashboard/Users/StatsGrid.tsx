@@ -193,38 +193,44 @@ export default function StatsGrid(props: UserGridProps) {
       editable: false,
     },
     {
-      field: 'ral',
+      field: 'research_level',
       headerName: 'Research Activity Level',
       width: 200,
       editable: false,
     },
     {
-      field: 'acu1',
-      headerName: 'Assigned Course Units',
+      field: 'teaching_load',
+      headerName: 'Teaching Load',
       width: 200,
       editable: false,
     },
-    {
-      field: 'acu2',
-      headerName: 'Accumulated Course Credits',
-      width: 220,
-      editable: true,
-    },
-    { field: 'cd', headerName: 'Credit Deficit', width: 150, editable: true },
-    { field: 'ce', headerName: 'Credit Excess', width: 150, editable: true },
-    {
-      field: 'tot',
-      headerName: 'Total Classes Taught (3yrs)',
-      width: 200,
-      editable: true,
-    },
-    {
-      field: 'acu3',
-      headerName: 'Average Course Units',
-      width: 170,
-      editable: true,
-    },
-    { field: 'lc', headerName: 'Lab Courses', width: 150, editable: true },
+    // {
+    //   field: 'teaching_load',
+    //   headerName: 'Teaching Load',
+    //   width: 200,
+    //   editable: false,
+    // },
+    // {
+    //   field: 'acu2',
+    //   headerName: 'Accumulated Course Credits',
+    //   width: 220,
+    //   editable: true,
+    // },
+    // { field: 'cd', headerName: 'Credit Deficit', width: 150, editable: true },
+    // { field: 'ce', headerName: 'Credit Excess', width: 150, editable: true },
+    // {
+    //   field: 'tot',
+    //   headerName: 'Total Classes Taught (3yrs)',
+    //   width: 200,
+    //   editable: true,
+    // },
+    // {
+    //   field: 'acu3',
+    //   headerName: 'Average Course Units',
+    //   width: 170,
+    //   editable: true,
+    // },
+    // { field: 'lc', headerName: 'Lab Courses', width: 150, editable: true },
   ];
 
   const ODD_OPACITY = 0.2;
@@ -247,8 +253,8 @@ export default function StatsGrid(props: UserGridProps) {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
-              theme.palette.action.selectedOpacity +
-              theme.palette.action.hoverOpacity
+            theme.palette.action.selectedOpacity +
+            theme.palette.action.hoverOpacity
           ),
           // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
@@ -380,6 +386,7 @@ export default function StatsGrid(props: UserGridProps) {
           toolbar: { setRowModesModel },
         }}
         editMode="row"
+        getRowId={(row) => row.instructor}
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
