@@ -8,13 +8,11 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { Bio } from '@/components/Bio/Bio';
-import makeAnimated from 'react-select/animated';
 import { SemesterTimeline } from '@/components/SemesterTimeline/SemesterTimeline';
 import useFetchPastCourses from '@/hooks/usePastCourses';
 import { CourseType } from '@/types/User';
 import SemesterSelection from '@/components/SemesterSelection/SemesterSelection';
 import { SelectSemester } from '@/types/User';
-import Select from 'react-select/dist/declarations/src/Select';
 export default function FacultyCourses() {
   const auth = getAuth();
   const [courses, setCourses] = useState<CourseType[]>([]);
@@ -23,8 +21,19 @@ export default function FacultyCourses() {
   const db = firebase.firestore();
   const [selectedSemester, setSelectedSemester] = useState<number>(0);
   const [selectedSemesters, setSelectedSemesters] = useState<SelectSemester[]>(
-    []
+    () => {
+      const stored = localStorage.getItem('selectedSemesters');
+      return stored ? JSON.parse(stored) : [];
+    }
   );
+
+  useEffect(() => {
+    localStorage.setItem(
+      'selectedSemesters',
+      JSON.stringify(selectedSemesters)
+    );
+  }, [selectedSemesters]);
+
   const [groupedCourses, setGroupedCourses] = useState<
     Map<string, CourseType[]>
   >(new Map());
