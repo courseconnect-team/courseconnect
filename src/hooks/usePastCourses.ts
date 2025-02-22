@@ -81,7 +81,7 @@ const useFetchPastCourses = (
     };
 
     fetchPastCourses();
-  }, [JSON.stringify(selectedYears), uemail]); // Use a stable dependency for selectedYears
+  }, [selectedYears, uemail]); // Use a stable dependency for selectedYears
 
   return { pastCourses, loadingPast, error };
 };

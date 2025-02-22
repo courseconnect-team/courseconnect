@@ -59,14 +59,7 @@
   }
 }
 
-.class-cards-container1 {
-  display: flex;
-  margin-top: 8px;
-  height: 100%;
-  margin-left: -18px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+
 
 .class-cards-container {
   display: flex;
