@@ -60,7 +60,7 @@ export default function Profile(props: ProfileProps) {
 
             <div className="text-wrapper">{user.displayName}</div>
             <div className="div">{user.email}</div>
-            <div style={{ alignSelf: 'flex-end', marginTop: '460px' }}>
+            <div style={{ marginTop: '15px' }}>
               <DeleteUserButton open={open} setOpen={setOpen} />
             </div>
           </div>

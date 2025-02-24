@@ -7,29 +7,46 @@ import { useEffect } from 'react';
 import { FacultyStats } from '@/types/User';
 // Fetch function using Firestore's get method
 
-const fetchFacultyStats = async (): Promise<FacultyStats[]> => {
+const fetchFacultyStats = async (): Promise<Record<string, FacultyStats>> => {
   const snapshot = await firebase.firestore().collection('faculty').get();
+//   const data = snapshot.docs.reduce((acc, doc) => {
+//     const docData = doc.data();
+//     acc[doc.id] = {
+//       id: doc.id,
+//       accumulatedUnits: docData.accumulatedUnits ?? 0,
+//       assignedUnits: docData.assignedUnits ?? 0,
+//       averageUnits: docData.averageUnits ?? 0,
+//       creditDeficit: docData.creditDeficit ?? 0,
+//       creditExcess: docData.creditExcess ?? 0,
+//       email: docData.email ?? '',
+//       firstname: docData.firstname ?? '',
+//       labCourse: docData.labCourse ?? false,
+//       lastname: docData.lastname ?? '',
+//       researchActivity: docData.research ?? '',
+//       classesTaught: docData.totalClasses ?? 0,
+//       ufid: docData.ufid ?? 0,
+//       isNew: false,
+//       mode: 'view',
   const data = snapshot.docs.map((doc) => {
-    const docData = doc.data();
+    const { id, instructor, research_level } = doc.data();
+    let load = 18;
+    if (research_level == "Low") {
+      load = 12;
+    } else if (research_level == "Mid") {
+      load = 9;
+    } else if (research_level == "High") {
+      load = 6;
+    }
 
     return {
-      id: doc.id,
-      accumulatedUnits: docData.accumulatedUnits ?? 0,
-      assignedUnits: docData.assignedUnits ?? 0,
-      averageUnits: docData.averageUnits ?? 0,
-      creditDeficit: docData.creditDeficit ?? 0,
-      creditExcess: docData.creditExcess ?? 0,
-      email: docData.email ?? '',
-      firstname: docData.firstname ?? '',
-      labCourse: docData.labCourse ?? false,
-      lastname: docData.lastname ?? '',
-      researchActivity: docData.research ?? '',
-      classesTaught: docData.totalClasses ?? 0,
-      ufid: docData.ufid ?? 0,
-      isNew: false,
-      mode: 'view',
+      id: id,
+      instructor: instructor,
+      research_level: research_level,
+      teaching_load: load,
     };
-  }) as FacultyStats[];
+    return acc;
+  }, {} as Record<string, FacultyStats>);
+
   return data;
 };
 
@@ -48,42 +65,61 @@ const updateFacultyStat = async (stat: FacultyStats): Promise<void> => {
 const useFacultyStats = () => {
   const queryClient = useQueryClient();
 
-  // Set up the real-time listener
   useEffect(() => {
     const statsRef = firebase.firestore().collection('faculty');
     const unsubscribe = statsRef.onSnapshot(
       (querySnapshot) => {
+//         const newData = querySnapshot.docs.reduce((acc, doc) => {
+//           const docData = doc.data();
+//           acc[doc.id] = {
+//             id: doc.id,
+//             accumulatedUnits: docData.accumulatedUnits ?? 0,
+//             assignedUnits: docData.assignedUnits ?? 0,
+//             averageUnits: docData.averageUnits ?? 0,
+//             creditDeficit: docData.creditDeficit ?? 0,
+//             creditExcess: docData.creditExcess ?? 0,
+//             email: docData.email ?? '',
+//             firstname: docData.firstname ?? '',
+//             labCourse: docData.labCourse ?? false,
+//             lastname: docData.lastname ?? '',
+//             researchActivity: docData.research ?? '',
+//             classesTaught: docData.totalClasses ?? 0,
+//             ufid: docData.ufid ?? 0,
+//             isNew: false,
+//             mode: 'view',
+//           };
+//           return acc;
+//         }, {} as Record<string, FacultyStats>);
         const data = querySnapshot.docs.map((doc) => {
-          const docData = doc.data();
+          const { id, instructor, research_level } = doc.data();
+          let load = 18;
+          if (research_level == "Low") {
+            load = 12;
+          } else if (research_level == "Mid") {
+            load = 9;
+          } else if (research_level == "High") {
+            load = 6;
+          }
+
           return {
-            id: doc.id,
-            accumulatedUnits: docData.accumulatedUnits ?? 0,
-            assignedUnits: docData.assignedUnits ?? 0,
-            averageUnits: docData.averageUnits ?? 0,
-            creditDeficit: docData.creditDeficit ?? 0,
-            creditExcess: docData.creditExcess ?? 0,
-            email: docData.email ?? '',
-            firstname: docData.firstname ?? '',
-            labCourse: docData.labCourse ?? false,
-            lastname: docData.lastname ?? '',
-            researchActivity: docData.research ?? '',
-            classesTaught: docData.totalClasses ?? 0,
-            ufid: docData.ufid ?? 0,
-            isNew: false,
-            mode: 'view',
+            id: id,
+            instructor: instructor,
+            research_level: research_level,
+            teaching_load: load,
           };
         }) as FacultyStats[];
 
-        // Update React Query's cache
-        queryClient.setQueryData(['facultyStats'], data);
+        // Compare the new data with existing cache
+        const existingData = queryClient.getQueryData(['facultyStats']);
+        if (JSON.stringify(existingData) !== JSON.stringify(newData)) {
+          queryClient.setQueryData(['facultyStats'], newData);
+        }
       },
       (error) => {
         console.error('Error fetching faculty stats: ', error);
-        // Optionally, handle errors here (e.g., set an error state)
       }
     );
 
-    // Cleanup listener on unmount
     return () => unsubscribe();
   }, [queryClient]);
 

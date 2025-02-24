@@ -13,6 +13,7 @@
 .studentlandingpage .overlap {
   position: absolute;
   width: 100%;
+  
 }
 
 .studentlandingpage .overlap2 {
@@ -110,9 +111,12 @@
   left: 50%;
   gap: 50px;
   top: 600px;
+  margin-bottom: 50px;
+  
   transform: translateY(-50%);
   transform: translateX(-50%);
 }
+
 
 @media (max-width: 570px) {
   .ecelogopng2 {
