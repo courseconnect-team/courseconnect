@@ -176,15 +176,15 @@ export default function Application() {
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
-      firstname: formData.get('firstName') as string,
-      lastname: formData.get('lastName') as string,
-      email: formData.get('email') as string,
-      ufid: formData.get('ufid') as string,
-      phonenumber: formData.get('phone-number') as string,
+      firstname: formData.get('firstName') as string || '',
+      lastname: formData.get('lastName') as string || '',
+      email: formData.get('email') as string || '',
+      ufid: formData.get('ufid') as string || '',
+      phonenumber: formData.get('phone-number') as string || '',
       gpa: formData.get('gpa-select') as string,
-      department: formData.get('department-select') as string,
-      degree: formData.get('degrees-radio-group') as string,
-      semesterstatus: formData.get('semstatus-radio-group') as string,
+      department: formData.get('department-select') as string || '',
+      degree: formData.get('degrees-radio-group') as string || '',
+      semesterstatus: formData.get('semstatus-radio-group') as string || '',
       additionalprompt: additionalPromptValue,
       nationality: nationality as string,
       englishproficiency: 'NA',
@@ -395,98 +395,11 @@ export default function Application() {
           }}
         >
           <Box component="form" noValidate onSubmit={handleSubmit}>
-            <Grid item xs={12} sm={6} sx={{ marginTop: 45 }}>
-              <Typography align="center" component="h2" variant="h6">
-                Personal Information
-              </Typography>
-            </Grid>
-            <br />
-            <Grid container spacing={2} sx={{ marginTop: 0 }}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  variant="filled"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  variant="filled"
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  variant="filled"
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  helperText="Enter your UF email address. Example: gator@ufl.edu"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  variant="filled"
-                  id="ufid"
-                  label="UFID"
-                  name="ufid"
-                  helperText="Enter your UFID. Example: 12345678"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  variant="filled"
-                  name="phone-number"
-                  label="Phone Number"
-                  type="tel"
-                  id="phone-number"
-                  autoComplete="phone-number"
-                  helperText="Enter your phone number. Example: 123-456-7890"
-                />
-              </Grid>
-              <Grid
-                item
-                xs={22}
-                sm={116}
-                justifyContent="center"
-                alignItems="center"
-              >
-                <DepartmentSelect />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <SemesterStatusSelect
-                  component={AdditionalSemesterPrompt}
-                  onValueChange={handleAdditionalPromptChange}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <DegreeSelect />
-              </Grid>
-            </Grid>
-
-            <br />
             <Typography
               align="center"
               component="h2"
               variant="h6"
-              sx={{ m: 1 }}
+              sx={{ marginTop: 45 }}
             >
               Position Information
             </Typography>
