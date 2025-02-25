@@ -1,63 +1,32 @@
 'use client';
 import * as React from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import Avatar from '@mui/material/Avatar';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import { DeleteOutline, FileUploadOutlined } from '@mui/icons-material';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import DepartmentSelect from '@/components/FormUtil/DepartmentSelect';
-import GPA_Select from '@/components/FormUtil/GPASelect';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import DegreeSelect from '@/components/FormUtil/DegreeSelect';
-import SemesterStatusSelect from '@/components/FormUtil/SemesterStatusSelect';
-import NationalitySelect from '@/components/FormUtil/NationalitySelect';
-import ProficiencySelect from '@/components/FormUtil/ProficiencySelect';
-import PositionSelect from '@/components/FormUtil/PositionSelect';
-import AvailabilityCheckbox from '@/components/FormUtil/AvailabilityCheckbox';
-import SemesterCheckbox from '@/components/FormUtil/SemesterCheckbox';
-import AdditionalSemesterPrompt from '@/components/FormUtil/AddtlSemesterPrompt';
-import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
-import { LinearProgress } from '@mui/material';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { ApplicationStatusCard } from '@/components/ApplicationStatusCard/ApplicationStatusCard';
 import { useState } from 'react';
-import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
-import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
-import Users from '@/components/Dashboard/Users/Users';
-
 import GetUserRole from '@/firebase/util/GetUserRole';
-import GetUserUfid from '@/firebase/util/GetUserUfid';
-import { ApplicationStatusCardDenied } from '@/components/ApplicationStatusCardDenied/ApplicationStatusCardDenied';
-
-import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCardAccepted/ApplicationStatusCardAccepted';
-import styles from './style.module.css';
 import 'firebase/firestore';
-
 import firebase from '@/firebase/firebase_config';
 import { read, utils, writeFile, readFile } from 'xlsx';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FacultyStats from '@/components/Dashboard/Users/FacultyStats';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 
 export default function User() {
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
-  const [activeComponent, setActiveComponent] = React.useState('welcome');
-  const [semester, setSemester] = React.useState('Fall 2024');
-
+  const [open, setOpen] = React.useState(false);
   const [processing, setProcessing] = useState(false);
-  const handleChange = (event: SelectChangeEvent) => {
-    setSemester(event.target.value as string);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    handleClear();
   };
 
   const readExcelFile = async (e) => {
@@ -173,7 +142,7 @@ export default function User() {
           </label>
           <Button
             sx={{ ml: 10, mt: 1.5 }}
-            onClick={handleClear}
+            onClick={() => setOpen(true)}
             style={{ textTransform: 'none' }}
             variant="contained"
             component="span"
@@ -185,6 +154,24 @@ export default function User() {
           <br />
 
           <FacultyStats userRole={role as string} />
+          <Dialog style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
+            style: { borderRadius: 20 }
+          }} open={open} onClose={() => setOpen(false)} >
+            <DialogTitle style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>Delete Applicant</DialogTitle>
+            <form onSubmit={handleSubmit}>
+              <DialogContent>
+                <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "24px", color: "black" }}>
+                  Are you sure you want to clear all existing faculty statistics?
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions style={{ marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap: "93px" }}>
+                <Button variant="outlined" style={{ fontSize: "17px", marginLeft: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac', borderWidth: "3px" }} onClick={() => setOpen(false)}>Cancel</Button>
+
+                <Button variant="contained" style={{ fontSize: "17px", marginRight: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff' }} type="submit">Delete</Button>
+              </DialogActions>
+            </form>
+          </Dialog>
+
         </Box>
       </Box>
     </>
