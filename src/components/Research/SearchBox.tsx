@@ -2,13 +2,14 @@ import React from 'react';
 import { Box, InputBase, SxProps, Theme } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-
 interface SearchBoxProps {
   placeholder?: string;
   sx?: SxProps<Theme>;
+  researchListingsFunc: () => Promise<void>;
 }
 
-const SearchBox: React.FC<SearchBoxProps> = ({ placeholder = 'Hinted search text', sx }) => {
+const SearchBox: React.FC<SearchBoxProps> = ({ placeholder = 'Hinted search text', sx, researchListingsFunc }) => {
+
   return (
     <Box
       sx={{
@@ -35,7 +36,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ placeholder = 'Hinted search text
           },
         }}
       />
-      <SearchIcon sx={{ ml: 1 }} />
+      <SearchIcon sx={{ ml: 1 }} onClick={() => researchListingsFunc()}/>
     </Box>
   );
 };
