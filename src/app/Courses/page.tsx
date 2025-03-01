@@ -13,6 +13,7 @@ import useFetchPastCourses from '@/hooks/usePastCourses';
 import { CourseType } from '@/types/User';
 import SemesterSelection from '@/components/SemesterSelection/SemesterSelection';
 import { SelectSemester } from '@/types/User';
+
 export default function FacultyCourses() {
   const auth = getAuth();
   const [courses, setCourses] = useState<CourseType[]>([]);
@@ -136,7 +137,6 @@ export default function FacultyCourses() {
                   }}
                 >
                   <SmallClassCard
-                    pathname={`/course/${encodeURIComponent(course.id)}`}
                     courseName={course.code}
                     courseId={course.id}
                     className="class"
@@ -202,7 +202,6 @@ export default function FacultyCourses() {
                   }}
                 >
                   <SmallClassCard
-                    pathname={`/course/${encodeURIComponent(course.id)}`}
                     courseName={course.code}
                     courseId={course.id}
                     className="class"

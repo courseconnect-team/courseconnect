@@ -4,6 +4,7 @@
   justify-content: center;
   position: absolute;
   width: 100%;
+  height: 100%;
 }
 
 .studentlandingpage .overlapwrapper {
@@ -110,11 +111,9 @@
   position: absolute;
   left: 50%;
   gap: 50px;
-  top: 600px;
-  margin-bottom: 50px;
-  
-  transform: translateY(-50%);
-  transform: translateX(-50%);
+  top: 700px;
+  transform: translate(-50%, -50%);
+
 }
 
 
