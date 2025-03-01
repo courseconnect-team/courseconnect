@@ -26,7 +26,14 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { DeleteOutline, FileUploadOutlined, HideSource, Visibility, VisibilityOff } from '@mui/icons-material';
+import {
+  DeleteOutline,
+  FileUploadOutlined,
+  HideSource,
+  Visibility,
+  VisibilityOff,
+} from '@mui/icons-material';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 
 export default function User() {
   const { user } = useAuth();
@@ -123,7 +130,7 @@ export default function User() {
     setProcessing(false);
     toast.success('Semester visibility toggled!');
     toast.dismiss(toastId);
-  }
+  };
   const db = firebase.firestore();
 
   const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -293,105 +300,86 @@ export default function User() {
             </DialogActions>
           </form>
         </Dialog>
-        <div className={styles.overlapwrapper}>
-          <div className={styles.overlap}>
-            <div className={styles.overlap2}>
-              <div className={styles.colorblockframe}>
-                <div className={styles.overlapgroup2}>
-                  <div className={styles.colorblock} />
-                  <img
-                    className={styles.GRADIENTS}
-                    alt="Gradients"
-                    src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                  />
-                  <div className={styles.glasscard} />
-                </div>
-              </div>
-              <EceLogoPng className={styles.ecelogopng2} />
-              <TopNavBarSigned className={styles.topnavbarsignedin} />
-              <div className={styles.textwrapper8}>Courses</div>
-            </div>
-            <CssBaseline />
-            <Box
-              sx={{
-                marginTop: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
-              }}
-            >
-              <Box sx={{ minWidth: 120 }} />
-              <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
-                <input
-                  style={{ display: 'none' }}
-                  id="raised-button-file"
-                  multiple
-                  type="file"
-                  onChange={readExcelFile}
-                  onClick={(event) => (event.currentTarget.value = '')}
-                />
-                <label htmlFor="raised-button-file">
-                  <Button
-                    sx={{ ml: 40, mt: 1.5 }}
-                    style={{ textTransform: 'none' }}
-                    variant="contained"
-                    component="span"
-                    startIcon={<FileUploadOutlined />}
-                  >
-                    Upload Semester Data
-                  </Button>
-                </label>
+        <div className={styles.adminCoursesWrapper}>
+          <HeaderCard text="Courses" />
+          <CssBaseline />
+          <Box
+            sx={{
+              marginTop: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Box sx={{ minWidth: 120 }} />
+            <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
+              <input
+                style={{ display: 'none' }}
+                id="raised-button-file"
+                multiple
+                type="file"
+                onChange={readExcelFile}
+                onClick={(event) => (event.currentTarget.value = '')}
+              />
+              <label htmlFor="raised-button-file">
                 <Button
-                  sx={{ ml: 10, mt: 1.5 }}
-                  onClick={handleDeleteSem}
+                  sx={{ ml: 40, mt: 1.5 }}
                   style={{ textTransform: 'none' }}
                   variant="contained"
                   component="span"
-                  startIcon={<DeleteOutline />}
+                  startIcon={<FileUploadOutlined />}
                 >
-                  Clear Semester Data
+                  Upload Semester Data
                 </Button>
-                <Button
-                  sx={{ ml: 10, mt: 1.5 }}
-                  onClick={handleSemesterHiddenToggle}
-                  style={{ textTransform: 'none' }}
-                  variant="contained"
-                  component="span"
-                  startIcon={semesterHidden ? <Visibility /> : <VisibilityOff />}
+              </label>
+              <Button
+                sx={{ ml: 10, mt: 1.5 }}
+                onClick={handleDeleteSem}
+                style={{ textTransform: 'none' }}
+                variant="contained"
+                component="span"
+                startIcon={<DeleteOutline />}
+              >
+                Clear Semester Data
+              </Button>
+              <Button
+                sx={{ ml: 10, mt: 1.5 }}
+                onClick={handleSemesterHiddenToggle}
+                style={{ textTransform: 'none' }}
+                variant="contained"
+                component="span"
+                startIcon={semesterHidden ? <Visibility /> : <VisibilityOff />}
+              >
+                {semesterHidden ? 'Unhide' : 'Hide'} Semester Data
+              </Button>
+              <FormControl sx={{ ml: 40, mb: 5, minWidth: 140 }}>
+                <InputLabel id="demo-simple-select-label">Semester</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={semester}
+                  label="Semester"
+                  onChange={handleChange}
                 >
-                  {semesterHidden ? "Unhide" : "Hide"} Semester Data
-                </Button>
-                <FormControl sx={{ ml: 40, mb: 5, minWidth: 140 }}>
-                  <InputLabel id="demo-simple-select-label">
-                    Semester
-                  </InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={semester}
-                    label="Semester"
-                    onChange={handleChange}
-                  >
-                    {menu.map((i) => (
-                      <MenuItem key={i} value={i}>
-                        {i}
-                      </MenuItem>
-                    ))}
-                    <MenuItem value={'New Semester'}>
-                      Create New Semester
+                  {menu.map((i) => (
+                    <MenuItem key={i} value={i}>
+                      {i}
                     </MenuItem>
-                  </Select>
-                </FormControl>
-                <br />
-                <Courses
-                  userRole={role as string}
-                  semester={semester}
-                  processing={processing}
-                />
-              </Box>
+                  ))}
+                  <MenuItem value={'New Semester'}>
+                    Create New Semester
+                  </MenuItem>
+                </Select>
+              </FormControl>
+              <br />
+              <Courses
+                userRole={role as string}
+                semester={semester}
+                processing={processing}
+              />
             </Box>
-          </div>
+          </Box>
         </div>
       </div>
     </>

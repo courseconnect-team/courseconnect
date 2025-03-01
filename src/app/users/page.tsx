@@ -45,6 +45,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 
 export default function User() {
   const { user } = useAuth();
@@ -127,43 +128,22 @@ export default function User() {
   return (
     <>
       <Toaster />
-      <div className={styles.studentlandingpage}>
-        <div className={styles.overlapwrapper}>
-          <div className={styles.overlap}>
-            <div className={styles.overlap2}>
-              <div className={styles.colorblockframe}>
-                <div className={styles.overlapgroup2}>
-                  <div className={styles.colorblock} />
-                  <img
-                    className={styles.GRADIENTS}
-                    alt="Gradients"
-                    src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                  />
-                  <div className={styles.glasscard} />
-                </div>
-              </div>
-              <EceLogoPng className={styles.ecelogopng2} />
-              <TopNavBarSigned className={styles.topnavbarsignedin} />
-              <div className={styles.textwrapper8}>Users</div>
-            </div>
+      <HeaderCard text="users" />
 
-            <CssBaseline />
-            <Box
-              sx={{
-                marginTop: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
-              }}
-            >
-              <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
-                <Users userRole={role as string} />
-              </Box>
-            </Box>
-          </div>
-        </div>
-      </div>
+      <CssBaseline />
+      <Box
+        sx={{
+          marginTop: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
+          <Users userRole={role as string} />
+        </Box>
+      </Box>
     </>
   );
 }

@@ -5,28 +5,35 @@ import Typography from '@mui/material/Typography';
 
 export default function Breadcrumb() {
   const pathname = usePathname();
-  const pathSegments = pathname.split('/').filter((seg) => seg);
+  const pathSegments = pathname.split('/').filter(Boolean);
+  const breadcrumbs = pathSegments.slice(0, -1).map((segment) => {
+    const rawLabel = segment.split('%')[0];
+    const label = rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
+    return {
+      href: `/${segment}`,
+      label,
+    };
+  });
 
+  const lastItem = pathSegments[pathSegments.length - 1].split('%')[0];
   return (
     <Breadcrumbs aria-label="breadcrumb">
       <Link underline="hover" color="inherit" href="/dashboard">
         Home
       </Link>
-      {pathSegments.slice(0, -1).map((segment) => (
+      {breadcrumbs.map((crumb) => (
         <Link
           underline="hover"
           color="inherit"
-          href={`/${segment}`}
-          key={segment}
+          href={crumb.href}
+          key={crumb.href}
         >
-          {segment.split('%')[0]}
+          {crumb.label}
         </Link>
       ))}
-      <Typography sx={{ color: 'text.primary' }}>
-        {' '}
-        {pathSegments.length > 0 &&
-          pathSegments[pathSegments.length - 1].split('%')[0]}
-      </Typography>
+      {lastItem && (
+        <Typography sx={{ color: 'text.primary' }}>{lastItem}</Typography>
+      )}
     </Breadcrumbs>
   );
 }

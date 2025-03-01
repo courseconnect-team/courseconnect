@@ -2,11 +2,11 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
-  width: 100%;
+ 
 }
 
 
-.studentlandingpage .overlapwrapper {
+.studentlandingpage .adminCoursesWrapper {
   height: 1024px;
   width: 100%;
 }
@@ -55,6 +55,7 @@
   position: absolute;
   top: 0;
   width: 100%;
+  flex-direction: column;
 }
 
 .studentlandingpage .glasscard {
