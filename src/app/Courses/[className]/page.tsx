@@ -124,7 +124,7 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
           <HeaderCard text="Courses" />
           <div
             style={{
-              marginTop: '380px',
+              marginTop: '400px',
             }}
           >
             <CourseDetails

@@ -76,7 +76,7 @@ export default function DashboardWelcome(props: DashboardProps) {
                   <div className={styles.textwrapper8}>Home</div>
                 </div>
                 <div className={styles.container}>
-                  <Link href="/apply">
+                  <Link href="/Apply">
                     <DashboardCard
                       text="Apply"
                       image="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
@@ -200,14 +200,14 @@ export default function DashboardWelcome(props: DashboardProps) {
                   <div className={styles.textwrapper8}>Home</div>
                 </div>
                 <div className={styles.container}>
-                  <Link href="/status">
+                  <Link href="/Status">
                     <DashboardCard
                       text="Status"
                       image="https://c.animaapp.com/VgdBzw39/img/status-1@2x.png"
                       className={styles}
                     />
                   </Link>
-                  <Link href="/apply">
+                  <Link href="/Apply">
                     <DashboardCard
                       text="Apply"
                       image="https://c.animaapp.com/vYQBTcnO/img/apply@2x.png"
