@@ -2,17 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import './style.css';
 
-const SmallClassCard = ({
-  className,
-  courseName,
-  courseId,
-  pathname,
-  onGoing,
-}) => {
+const SmallClassCard = ({ className, courseName, courseId, onGoing }) => {
   return (
     <Link
       href={{
-        pathname: pathname,
+        pathname: `/Courses/${encodeURIComponent(courseId)}`,
         query: { courseId, onGoing },
       }}
       prefetch={false}

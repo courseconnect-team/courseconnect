@@ -7,7 +7,7 @@ const ClassCard = ({ className, courseName, courseId, courseTitle }) => {
   return (
     <Link
       href={{
-        pathname: `/application/${encodeURIComponent(courseId)}`,
+        pathname: `/Applications/${encodeURIComponent(courseId)}`,
         query: { data: courseId, courseTitle },
       }}
       passHref

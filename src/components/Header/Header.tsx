@@ -13,7 +13,6 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import ThemeToggleButton from '../ThemeInteraction/ThemeToggleButton';
 import scss from './Header.module.scss';
-
 import UserIcon from './UserIcon';
 import handleSignOut from '@/firebase/auth/auth_signout';
 

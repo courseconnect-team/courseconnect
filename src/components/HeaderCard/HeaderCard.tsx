@@ -1,8 +1,9 @@
 // components/HeaderCard/HeaderCard.tsx
-import React, { FC } from "react";
-import {EceLogoPng} from "@/components/EceLogoPng/EceLogoPng";
-import {TopNavBarSigned} from "@/components/TopNavBarSigned/TopNavBarSigned";
-import "./style.css";
+import React, { FC } from 'react';
+import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
+import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
+import './style.css';
+import Breadcrumb from '../Breadcrumb/Breadcrumb';
 
 interface HeaderCardProps {
   text: string;
@@ -30,6 +31,9 @@ const HeaderCard: FC<HeaderCardProps> = ({ text }) => {
           <TopNavBarSigned className="top-nav-bar-signed-in" />
           <div className="text-wrapper-10">{text}</div>
         </div>
+      </div>
+      <div className="crumbs">
+        <Breadcrumb />
       </div>
     </div>
   );
