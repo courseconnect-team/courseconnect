@@ -311,3 +311,4 @@ export const deleteUserFromID = functions.https.onRequest(
     }
   }
 );
+module.exports = { db, auth }; // this is needed to export the db to work with an API for the research job board

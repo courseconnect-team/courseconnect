@@ -1,7 +1,7 @@
 'use client';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
@@ -9,10 +9,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import handleSignIn from '../../firebase/auth/auth_signin_password';
-import { useState } from 'react';
 import './style.css';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { TextField } from '@mui/material';
+import { TextField, IconButton, InputAdornment } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 import FormControl from '@mui/material/FormControl';
 import { toast } from 'react-hot-toast';
@@ -25,46 +25,43 @@ export const LogInCard = ({ className }: { className: any }) => {
   const [email, setEmail] = useState('');
   const [emailVal, setEmailVal] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [open, setOpen] = React.useState(false);
+
   const handleClose = () => {
     setOpen(false);
   };
 
   const handleForgotPassword = (e: any) => {
-    //handleSignOut();
     e.preventDefault();
     const auth = getAuth();
     sendPasswordResetEmail(auth, emailVal)
       .then(() => {
-        // Password reset email sent!
-        // ..
         toast.success('Password reset email sent!');
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        // ..
         console.log(error);
       });
     setOpen(false);
   };
-  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref
-  ) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-  });
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
   const handleSubmit = async (event: any) => {
     setLoading(true);
     event.preventDefault();
     res = await handleSignIn(email, password);
-    // Loading bar toggle
     if (!res) {
       setLoading(false);
     } else {
       setSuccess(true);
     }
   };
+
   return (
     <div className={`log-in-card ${className}`}>
       <Dialog
@@ -107,7 +104,6 @@ export const LogInCard = ({ className }: { className: any }) => {
             </DialogContentText>
             <br />
             <br />
-
             <FormControl required>
               <TextField
                 style={{ left: '160px' }}
@@ -149,7 +145,6 @@ export const LogInCard = ({ className }: { className: any }) => {
             >
               Cancel
             </Button>
-
             <Button
               variant="contained"
               style={{
@@ -209,6 +204,17 @@ export const LogInCard = ({ className }: { className: any }) => {
                 variant="standard"
                 InputProps={{
                   disableUnderline: true,
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
                 className="text-wrapper-3"
                 placeholder="Password"
@@ -216,7 +222,7 @@ export const LogInCard = ({ className }: { className: any }) => {
                 required
                 fullWidth
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setPassword(event.target.value);
