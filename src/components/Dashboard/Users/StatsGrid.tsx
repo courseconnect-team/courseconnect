@@ -311,7 +311,7 @@ export default function StatsGrid(props: UserGridProps) {
             fontWeight: '540',
           }}
         >
-          Delete User
+          Delete Instructor
         </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
@@ -324,7 +324,7 @@ export default function StatsGrid(props: UserGridProps) {
                 color: 'black',
               }}
             >
-              Are you sure you want to delete this user?
+              Are you sure you want to delete this instructor?
             </DialogContentText>
           </DialogContent>
           <DialogActions
