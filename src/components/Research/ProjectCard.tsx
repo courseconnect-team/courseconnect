@@ -1,5 +1,5 @@
 // components/HeaderCard/HeaderCard.tsx
-import React, { FC } from "react"; import {
+import React, { FC, ReactNode } from "react"; import {
     Box,
     Button,
     Card,
@@ -25,6 +25,7 @@ interface ProjectCardProps {
     application_requirements: string;
     application_deadline: string;
     website: string;
+    children: ReactNode;
 }
 
 const ProjectCard: FC<ProjectCardProps> = ({
@@ -41,6 +42,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
     application_requirements,
     application_deadline,
     website,
+    children
 }) => {
     const [expanded, setExpanded] = React.useState(false);
     const handleToggleExpand = () => {
@@ -113,11 +115,7 @@ const ProjectCard: FC<ProjectCardProps> = ({
                     </>
                 )}
                 <Box height="20px" />
-                <Box>
-                    <Button variant="contained" size="small" sx={{ backgroundColor: "black", color: "white" }}>
-                        Apply Now
-                    </Button>
-                </Box>
+                {children}
             </CardContent>
         </Card>
 

@@ -21,11 +21,13 @@ import {
   CardActions,
   Typography,
   Grid,
+  Link,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ProjectCard from '@/components/Research/ProjectCard';
 import SearchBox from '@/components/Research/SearchBox';
 import firebase from '@/firebase/firebase_config';
+import MyModal from '@/components/Research/Modal';
 interface ResearchPageProps {
   user: {
     uid: string;
@@ -87,144 +89,169 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   }
 
   const getResearchListings = async () => {
-    console.log(department, studentLevel, termsAvailable);
     let collectionRef: firebase.firestore.Query<firebase.firestore.DocumentData> = firebase.firestore().collection("research-listings");
     if (department) {
       collectionRef = collectionRef.where('department', '==', department);
     }
     if (studentLevel) {
-      collectionRef = collectionRef.where('student_level.'+studentLevel, '==', true);
+      collectionRef = collectionRef.where('student_level.' + studentLevel, '==', true);
     }
     if (termsAvailable) {
-      collectionRef = collectionRef.where('terms_available.'+termsAvailable, '==', true);
+      collectionRef = collectionRef.where('terms_available.' + termsAvailable, '==', true);
     }
-    let snapshot = await collectionRef.get();  
+    let snapshot = await collectionRef.get();
     // Execute the query.
     let researchListings: ResearchListing[] = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
     }));
     setResearchListings(researchListings);
-    console.log(researchListings);
   }
 
   return (
     <>
       <Toaster />
-      <HeaderCard text="Research Job Board" />
       {roleLoading ? <><h1>loading</h1></> : (
         <>
           {role === 'student_applying' && (
-            <Box
-              marginLeft="5%"
-              marginRight="5%"
-            >
-              <Box
-                marginTop="380px"
-                justifyContent="space-between"
-                display="flex"
-                flexWrap="wrap"
-              >
-                <SearchBox sx={{minWidth: 800, width:"60%"}} researchListingsFunc={()=> getResearchListings()}/>
+            <>
+              <HeaderCard text="Applications" />
+              <Box sx={{ p: 3 }}>
+                {/* Top-level heading */}
+                <Typography variant="h4" gutterBottom>
+                  Research
+                </Typography>
 
-                {/* Department dropdown */}
-                <FormControl variant="outlined" sx={{ minWidth: 200, width:"10%" }}>
-                  <InputLabel>Department</InputLabel>
-                  <Select
-                    value={department}
-                    onChange={(e) => setDepartment(e.target.value)}
-                    label="Department"
-                  >
-                    <MenuItem value="">None</MenuItem>
-                    <MenuItem value="CISE">CISE</MenuItem>
-                    <MenuItem value="TEST">TEST</MenuItem>
-                  </Select>
-                </FormControl>
+                {/* Container for "My Positions" and the button */}
+                <Box
+                  marginTop="380px"
+                  justifyContent="space-between"
+                  display="flex"
+                  flexWrap="wrap"
+                >
+                  {/* Left side: "My Positions" and link/label */}
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      My Positions:
+                    </Typography>
+                  </Box>
 
-                {/* Student Level dropdown */}
-                <FormControl variant="outlined" sx={{ minWidth: 200, width:"10%" }}>
-                  <InputLabel>Student Level</InputLabel>
-                  <Select
-                    value={studentLevel}
-                    onChange={(e) => setStudentLevel(e.target.value)}
-                    label="Student Level"
+                  {/* Right side: "Create New Position" button */}
+                  {/*
+                  <Button sx={{
+                    backgroundColor: '#FFFFFF',
+                    color: '#555555',
+                    borderRadius: 9999,
+                    boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.1)',
+                    textTransform: 'none',
+                    padding: '8px 24px',
+                    fontWeight: 500,
+                    '&:hover': {
+                      backgroundColor: '#f7f7f7',
+                      boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.15)',
+                    },
+                  }}>
+                    Create New Position
+                  </Button>
+                  */}
+                  <MyModal onSubmitSuccess={getResearchListings}/>
+                  <Grid container
+                    spacing={5}
+                    marginTop="10px"
+                    marginLeft="5%"
+                    marginRight="5%"
                   >
-                    <MenuItem value="">None</MenuItem>
-                    <MenuItem value="freshman">freshman</MenuItem>
-                    <MenuItem value="sophmore">sophmore</MenuItem>
-                    <MenuItem value="junior">junior</MenuItem>
-                    <MenuItem value="senior">senior</MenuItem>
-                  </Select>
-                </FormControl>
+                    {researchListings.map((item, index) => {
+                      let projectCardObj = {
+                        project_title: item.project_title,
+                        department: item.department,
+                        faculty_mentor: item.faculty_mentor,
+                        terms_available: "",
+                        student_level: "",
+                        project_description: item.project_description,
+                        phd_student_mentor: item.phd_student_mentor,
+                        prerequisites: item.prerequisites,
+                        credit: item.credit,
+                        stipend: item.stipend,
+                        application_requirements: item.application_requirements,
+                        application_deadline: item.application_deadline,
+                        website: item.website
+                      }
+                      var studentLevelCounter = 0
+                      for (const [key, value] of Object.entries(item.student_level)) {
+                        if (studentLevelCounter == 0) {
+                          projectCardObj.student_level += key
+                        } else if (value) {
+                          projectCardObj.student_level += ", " + key
+                        }
+                        studentLevelCounter += 1
+                      }
 
-                {/* Terms Available dropdown */}
-                <FormControl variant="outlined" sx={{ minWidth: 200, width:"10%" }}>
-                  <InputLabel>Terms Available</InputLabel>
-                  <Select
-                    value={termsAvailable}
-                    onChange={(e) => setTermsAvailable(e.target.value)}
-                    label="Terms Available"
-                  >
-                    <MenuItem value="">None</MenuItem>
-                    <MenuItem value="fall">Fall</MenuItem>
-                    <MenuItem value="spring">Spring</MenuItem>
-                    <MenuItem value="summer">Summer</MenuItem>
-                  </Select>
-                </FormControl>
+                      var termsCounter = 0
+                      for (const [key, value] of Object.entries(item.terms_available)) {
+                        if (termsCounter == 0) {
+                          projectCardObj.terms_available += key
+                        } else if (value) {
+                          projectCardObj.terms_available += ", " + key
+                        }
+                        termsCounter += 1
+                      }
+
+
+                      return (
+                        <Grid item md={12} alignItems="flex-start">
+                          <ProjectCard key={index} {...projectCardObj}>
+                            <Box
+                              justifyContent="space-between"
+                              display="flex"
+                              flexWrap="wrap"
+                            >
+                              <Button
+                                sx={{
+                                  backgroundColor: '#5A41D8',    // Approx. purple
+                                  color: '#FFFFFF',
+                                  textTransform: 'none',        // Keep text as-is
+                                  borderRadius: '12px',         // Rounded corners
+                                  boxShadow: '0px 0px 8px #E5F0DC', // Subtle greenish glow
+                                  fontWeight: 500,
+                                  // Keep hover state consistent, or adjust to your preference
+                                  '&:hover': {
+                                    backgroundColor: '#5A41D8',
+                                    boxShadow: '0px 0px 8px #E5F0DC',
+                                  },
+                                }}>
+                                Edit Posting
+                              </Button>
+                              <Button
+                                sx={{
+                                  backgroundColor: '#5A41D8',    // Approx. purple
+                                  color: '#FFFFFF',
+                                  textTransform: 'none',        // Keep text as-is
+                                  borderRadius: '12px',         // Rounded corners
+                                  boxShadow: '0px 0px 8px #E5F0DC', // Subtle greenish glow
+                                  fontWeight: 500,
+                                  // Keep hover state consistent, or adjust to your preference
+                                  '&:hover': {
+                                    backgroundColor: '#5A41D8',
+                                    boxShadow: '0px 0px 8px #E5F0DC',
+                                  },
+                                }}>
+                                Show Applications
+                              </Button>
+                            </Box>
+                          </ProjectCard>
+                        </Grid>
+                      )
+                    })}
+                  </Grid>
+                </Box>
 
               </Box>
-              <Grid container
-                spacing={5}
-                marginTop="10px"
-              >
-                {researchListings.map((item, index) => {
-                  let projectCardObj = {
-                    project_title: item.project_title,
-                    department: item.department,
-                    faculty_mentor: item.faculty_mentor,
-                    terms_available: "",
-                    student_level: "",
-                    project_description: item.project_description,
-                    phd_student_mentor: item.phd_student_mentor,
-                    prerequisites: item.prerequisites,
-                    credit: item.credit,
-                    stipend: item.stipend,
-                    application_requirements: item.application_requirements,
-                    application_deadline: item.application_deadline,
-                    website: item.website
-                  }
-                  var studentLevelCounter = 0
-                  for (const [key, value] of Object.entries(item.student_level)) {
-                    if (studentLevelCounter == 0) {
-                      projectCardObj.student_level += key
-                    } else if (value) {
-                      projectCardObj.student_level += ", "+key
-                    }
-                    studentLevelCounter+=1
-                  }
-
-                  var termsCounter = 0
-                  for (const [key, value] of Object.entries(item.terms_available)) {
-                    if (termsCounter == 0) {
-                      projectCardObj.terms_available += key
-                    } else if (value) {
-                      projectCardObj.terms_available += ", "+key
-                    }
-                    termsCounter+=1
-                  }
-                  
-
-                  return (
-                  
-                  <Grid item md={6} alignItems="flex-start">
-                    <ProjectCard key={index} {...projectCardObj} />
-                  </Grid>
-                )})}
-              </Grid>
-            </Box>
+            </>
           )}
         </>
-      )}
+      )
+      }
     </>
   );
 };
