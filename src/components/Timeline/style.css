@@ -1,0 +1,60 @@
+tab-bar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 650px; /* Set a fixed width */
+    height: 80px; /* Set a fixed height */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .element-year, .element-years {
+    cursor: pointer;
+    padding: 0px 69px;
+    text-align: center;
+    position: relative;
+  
+  }
+  
+  .element-year:hover, .element-years:hover {
+    background-color: #f0f0f0;
+    border-radius: 16px;
+  
+  }
+  
+  .element-year.selected, .element-years.selected {
+    font-weight: bold;
+  }
+  
+  .element-year.selected::after, .element-years.selected::after {
+    content: '';
+    display: block;
+    width: 130%;
+    height: 6px;
+    background-color:  #562eba;
+    left: 0;
+    margin-left: -10px;
+    margin-top: -5px;
+    border-radius: 4.27px;
+  }
+  
+  .div {
+    margin: 10px;
+  }
+  
+  .text-wrapper, .text-wrapper-3 {
+    font-size: 24px;
+    margin-bottom: 1px;
+  }
+  
+  .text-wrapper-2, .text-wrapper-4 {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .selected-year-info {
+    margin-top: 20px;
+    font-size: 18px;
+  }

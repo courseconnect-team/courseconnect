@@ -35,7 +35,7 @@ const EnrollmentInfo: React.FC<EnrollmentInfoProps> = (props) => {
         <Box sx={{ position: 'relative', display: 'inline-flex' }}>
           <CircularProgress
             variant="determinate"
-            value={percentage}
+            value={percentage >= 100 ? 100 : percentage}
             size={250}
             thickness={4}
             {...circularProgressProps}
@@ -83,7 +83,7 @@ const EnrollmentInfo: React.FC<EnrollmentInfoProps> = (props) => {
       </Box>
       <LinearProgress
         variant="determinate"
-        value={percentage}
+        value={percentage >= 100 ? 100 : percentage}
         sx={{ height: '8px', borderRadius: '4px', color: '#562EBA' }}
       />
     </Box>

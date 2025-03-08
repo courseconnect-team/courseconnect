@@ -262,7 +262,6 @@ export default function DashboardWelcome(props: DashboardProps) {
                 <Link
                   href={{
                     pathname: '/faculty',
-                    query: { id: 'JWqJHybgfKMIcR0Nci3W' },
                   }}
                 >
                   <DashboardCard
