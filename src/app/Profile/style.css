@@ -13,9 +13,9 @@
 }
 
 .full-name-and-bio {
-  max-height: 400px;
+  height: 295px;
   position: relative;
-  width: 400px;
+  width: 408px;
   margin-top: -135px;
   margin-left: 34%;
   display: flex;
@@ -27,9 +27,9 @@
   background-color: #9d9d9d;
   border: 5px solid;
   border-color: #ffffff;
-  border-radius: 50%;
+  border-radius: 100px;
   height: 200px;
-  width: 200px;
+  width: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,6 +38,7 @@
 .initials {
   color: #ffffff;
   font-size: 100px;
+  margin-left:10px;
 }
 .buttonContainerProfile{
   margin-right: 217px;
@@ -156,10 +157,6 @@
     margin-top: 100px;
     margin-left: 50px;
   }
-  .initials {
-    color: #ffffff;
-    font-size: 70px;
-  }
  
   .full-name-and-bio {
     margin-top: 175px;
@@ -175,7 +172,7 @@
 
   .full-name-and-bio .ellipse {
     width: 155px;
-    height: 155px;
+    height: 150px;
   }
 
   .full-name-and-bio .text-wrapper {
