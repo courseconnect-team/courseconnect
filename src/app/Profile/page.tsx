@@ -22,6 +22,14 @@ export default function Profile(props: ProfileProps) {
 
   const [updatedFirst, setUpdatedFirst] = useState('');
   const [updatedLast, setUpdatedLast] = useState('');
+
+  // need to add email 
+  // add gpa 
+  // add department 
+  // add phone number
+  // add graduation semester and date
+
+  const [isEditing, setIsEditing] = useState(false);
   const [open, setOpen] = React.useState(false);
 
   const handleSave = async (e: any) => {
@@ -31,6 +39,7 @@ export default function Profile(props: ProfileProps) {
         await updateProfile(user, {
           displayName: `${updatedFirst} ${updatedLast}`,
         });
+        setIsEditing(false); 
         window.location.reload();
         alert('Profile updated successfully');
       } catch (error) {
@@ -41,9 +50,11 @@ export default function Profile(props: ProfileProps) {
       alert('First name and last name cannot be empty.');
     }
   };
+
   const handleCancel = () => {
     setUpdatedFirst('');
     setUpdatedLast('');
+    setIsEditing(false);
   };
 
   return (
@@ -71,42 +82,62 @@ export default function Profile(props: ProfileProps) {
           <form onSubmit={handleSave}>
             <div className="profileLineContainer">
               <div className="info">BASIC INFO</div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <Button
-                  style={{
-                    borderRadius: '10px',
-                    height: '37px',
-                    width: '71px',
-                    textTransform: 'none',
-                    fontFamily: 'SF Pro Display-Bold , Helvetica',
-                    borderColor: '#5736ac',
-                    color: '#5736ac',
-                  }}
-                  variant="outlined"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  style={{
-                    borderRadius: '10px',
-                    height: '37px',
-                    width: '71px',
-                    textTransform: 'none',
-                    fontFamily: 'SF Pro Display-Bold , Helvetica',
-                    backgroundColor: '#5736ac',
-                    color: '#ffffff',
-                  }}
-                  type="submit"
-                  variant="contained"
-                >
-                  Save
-                </Button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                {!isEditing ? (
+                    <Button
+                      style={{
+                        borderRadius: '10px',
+                        height: '37px',
+                        width: '71px',
+                        textTransform: 'none',
+                        fontFamily: 'SF Pro Display-Bold , Helvetica',
+                        backgroundColor: '#5736ac',
+                        color: '#ffffff',
+                      }}
+                      variant="contained"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Edit
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        style={{
+                          borderRadius: '10px',
+                          height: '37px',
+                          width: '71px',
+                          textTransform: 'none',
+                          fontFamily: 'SF Pro Display-Bold , Helvetica',
+                          borderColor: '#5736ac',
+                          color: '#5736ac',
+                        }}
+                        variant="outlined"
+                        onClick={handleCancel}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        style={{
+                          borderRadius: '10px',
+                          height: '37px',
+                          width: '71px',
+                          textTransform: 'none',
+                          fontFamily: 'SF Pro Display-Bold , Helvetica',
+                          backgroundColor: '#5736ac',
+                          color: '#ffffff',
+                        }}
+                        type="submit"
+                        variant="contained"
+                      >
+                        Save
+                      </Button>
+                    </>
+                  )}
               </div>
             </div>
             <div className="rectangle2" />
             <div style={{ display: 'flex', marginTop: '41.57px' }}>
-              <div className="firstName">First Name </div>
+              <div className="firstName">First Name</div>
               <div className="lastName">Last Name</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'row' }}>
@@ -118,6 +149,7 @@ export default function Profile(props: ProfileProps) {
                   style={{ paddingLeft: '20px' }}
                   onChange={(e) => setUpdatedFirst(e.target.value)}
                   value={updatedFirst}
+                  disabled={!isEditing}
                 />
               </div>
 
@@ -129,6 +161,7 @@ export default function Profile(props: ProfileProps) {
                   style={{ paddingLeft: '20px' }}
                   value={updatedLast}
                   onChange={(e) => setUpdatedLast(e.target.value)}
+                  disabled={!isEditing}
                 />
               </div>
             </div>
