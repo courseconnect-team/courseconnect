@@ -13,6 +13,7 @@ interface ProfileProps {
 
 export default function Profile(props: ProfileProps) {
   const { user } = useAuth();
+  // console.log('user', user);
 
   const nameParts = user.displayName.split(' ');
 
@@ -78,7 +79,7 @@ export default function Profile(props: ProfileProps) {
         </div>
         <div className="rectangle1" />
 
-        <div className="buttonContainerProfile">
+        <div className="buttonContainerProfile" >
           <form onSubmit={handleSave}>
             <div className="profileLineContainer">
               <div className="info">BASIC INFO</div>
@@ -135,6 +136,8 @@ export default function Profile(props: ProfileProps) {
                   )}
               </div>
             </div>
+
+
             <div className="rectangle2" />
             <div style={{ display: 'flex', marginTop: '41.57px' }}>
               <div className="firstName">First Name</div>
@@ -142,15 +145,21 @@ export default function Profile(props: ProfileProps) {
             </div>
             <div style={{ display: 'flex', flexDirection: 'row' }}>
               <div className="firstname-border">
-                <input
-                  className="firstname-input"
-                  type="text"
-                  placeholder="First Name"
-                  style={{ paddingLeft: '20px' }}
-                  onChange={(e) => setUpdatedFirst(e.target.value)}
-                  value={updatedFirst}
-                  disabled={!isEditing}
-                />
+                {!isEditing ? (
+                  <div style={{ paddingRight: '160px' }}>
+                    {firstName}
+                  </div>
+                ): (
+                  <input
+                    className="firstname-input"
+                    type="text"
+                    placeholder="First Name"
+                    style={{ paddingLeft: '20px' }}
+                    onChange={(e) => setUpdatedFirst(e.target.value)}
+                    value={updatedFirst}
+                  />
+                )}
+                
               </div>
 
               <div className="lastname-border">
