@@ -5,13 +5,16 @@ import {
     DialogContent,
     DialogActions,
     Button,
-    TextField
+    TextField,
+    SxProps
 } from '@mui/material';
 import firebase from '@/firebase/firebase_config';
 import { collection, addDoc } from "firebase/firestore";
+import { Theme } from '@emotion/react';
 
 /** Define an interface that matches your JSON keys (without using any values). */
 interface FormData {
+    id: string;
     project_title: string;
     department: string;
     faculty_mentor: string;
@@ -28,27 +31,16 @@ interface FormData {
 }
 
 /** Initialize all fields to empty strings. */
-const initialFormData: FormData = {
-    project_title: '',
-    department: '',
-    faculty_mentor: '',
-    phd_student_mentor: '',
-    terms_available: '',
-    student_level: '',
-    prerequisites: '',
-    credit: '',
-    stipend: '',
-    application_requirements: '',
-    application_deadline: '',
-    website: '',
-    project_description: ''
-};
-interface MyModalProps {
+interface ResearchModal {
     onSubmitSuccess: () => void;
-  }
-const MyModal: React.FC<MyModalProps> = ({ onSubmitSuccess }) => {
+    currentFormData: FormData;
+    buttonStyle?: SxProps<Theme>;
+    buttonText: string;
+    firebaseQuery: (formData: any) => Promise<void>;
+}
+const ResearchModal: React.FC<ResearchModal> = ({ onSubmitSuccess, currentFormData, buttonStyle, buttonText, firebaseQuery}) => {
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState<FormData>(initialFormData);
+    const [formData, setFormData] = useState<FormData>(currentFormData);
 
     /** Opens the dialog (modal). */
     const handleOpen = () => {
@@ -77,41 +69,24 @@ const MyModal: React.FC<MyModalProps> = ({ onSubmitSuccess }) => {
         console.log('Form submitted:', formData);
 
         // Reset form data only on submit
-        try {
-            const docRef = await addDoc(collection(firebase.firestore(), "research-listings"), formData);
-            console.log("Document written with ID: ", docRef.id);
-          } catch (e) {
-            console.error("Error adding document: ", e);
-          }
+        firebaseQuery(formData);
         // Close the modal
         onSubmitSuccess();
-        setFormData(initialFormData);
+        setFormData(currentFormData);
         handleClose();
     };
 
     return (
         <div>
             {/* Button to open the modal */}
-            <Button 
-            onClick={handleOpen}
-            sx={{
-                backgroundColor: '#FFFFFF',
-                color: '#555555',
-                borderRadius: 9999,
-                boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.1)',
-                textTransform: 'none',
-                padding: '8px 24px',
-                fontWeight: 500,
-                '&:hover': {
-                    backgroundColor: '#f7f7f7',
-                    boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.15)',
-                },
-            }}>
-                Create New Position
+            <Button
+                onClick={handleOpen}
+                sx={buttonStyle}>
+                {buttonText}
             </Button>
 
             <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-                <DialogTitle>Create Position</DialogTitle>
+                <DialogTitle>{buttonText}</DialogTitle>
                 <DialogContent>
                     {/* Render each field as a TextField, using the JSON keys as "name" */}
                     <TextField
@@ -232,4 +207,4 @@ const MyModal: React.FC<MyModalProps> = ({ onSubmitSuccess }) => {
     );
 };
 
-export default MyModal;
+export default ResearchModal;

@@ -5,6 +5,7 @@ import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import { Bio } from '@/components/Bio/Bio';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { testData } from './testdata';
 import {
   Box,
@@ -27,7 +28,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ProjectCard from '@/components/Research/ProjectCard';
 import SearchBox from '@/components/Research/SearchBox';
 import firebase from '@/firebase/firebase_config';
-import MyModal from '@/components/Research/Modal';
+import ResearchModal from '@/components/Research/Modal';
 interface ResearchPageProps {
   user: {
     uid: string;
@@ -108,6 +109,27 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
     setResearchListings(researchListings);
   }
 
+  const postNewResearchPosition = async (formData: any) => {
+    try {
+      const docRef = await addDoc(collection(firebase.firestore(), "research-listings"), formData);
+      console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+      console.error("Error adding document: ", e);
+  }
+  }
+
+  const patchResearchPosting = async (formData: any) => {
+    console.log("formData: ", formData);
+    const docRef = doc(firebase.firestore(), "research-listings", formData.id);
+    try {
+      // This updates only the specified fields without overwriting the entire document.
+      await updateDoc(docRef, formData);
+      console.log("Document updated successfully!");
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
+  }
+
   return (
     <>
       <Toaster />
@@ -135,26 +157,40 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
                       My Positions:
                     </Typography>
                   </Box>
-
-                  {/* Right side: "Create New Position" button */}
-                  {/*
-                  <Button sx={{
-                    backgroundColor: '#FFFFFF',
-                    color: '#555555',
-                    borderRadius: 9999,
-                    boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.1)',
-                    textTransform: 'none',
-                    padding: '8px 24px',
-                    fontWeight: 500,
-                    '&:hover': {
-                      backgroundColor: '#f7f7f7',
-                      boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.15)',
-                    },
-                  }}>
-                    Create New Position
-                  </Button>
-                  */}
-                  <MyModal onSubmitSuccess={getResearchListings}/>
+                  <ResearchModal onSubmitSuccess={getResearchListings}
+                    firebaseQuery={postNewResearchPosition}
+                    buttonText="Create New Position"
+                    currentFormData={
+                      {
+                        id: '',
+                        project_title: '',
+                        department: '',
+                        faculty_mentor: '',
+                        phd_student_mentor: '',
+                        terms_available: '',
+                        student_level: '',
+                        prerequisites: '',
+                        credit: '',
+                        stipend: '',
+                        application_requirements: '',
+                        application_deadline: '',
+                        website: '',
+                        project_description: ''
+                      }
+                    }
+                    buttonStyle={{
+                      backgroundColor: '#FFFFFF',
+                      color: '#555555',
+                      borderRadius: 9999,
+                      boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.1)',
+                      textTransform: 'none',
+                      padding: '8px 24px',
+                      fontWeight: 500,
+                      '&:hover': {
+                        backgroundColor: '#f7f7f7',
+                        boxShadow: '0px 0px 8px rgba(0, 0, 0, 0.15)',
+                      },
+                    }} />
                   <Grid container
                     spacing={5}
                     marginTop="10px"
@@ -206,8 +242,28 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
                               display="flex"
                               flexWrap="wrap"
                             >
-                              <Button
-                                sx={{
+                              <ResearchModal onSubmitSuccess={getResearchListings}
+                                firebaseQuery={patchResearchPosting}
+                                buttonText="Edit Posting"
+                                currentFormData={
+                                  {
+                                    id: item.id,
+                                    project_title: projectCardObj.project_title,
+                                    department: projectCardObj.department,
+                                    faculty_mentor: projectCardObj.faculty_mentor,
+                                    phd_student_mentor: projectCardObj.phd_student_mentor,
+                                    terms_available: projectCardObj.terms_available,
+                                    student_level: projectCardObj.student_level,
+                                    prerequisites: projectCardObj.prerequisites,
+                                    credit: projectCardObj.credit,
+                                    stipend: projectCardObj.stipend,
+                                    application_requirements: projectCardObj.application_requirements,
+                                    application_deadline: projectCardObj.application_deadline,
+                                    website: projectCardObj.website,
+                                    project_description: projectCardObj.project_description
+                                  }
+                                }
+                                buttonStyle={{
                                   backgroundColor: '#5A41D8',    // Approx. purple
                                   color: '#FFFFFF',
                                   textTransform: 'none',        // Keep text as-is
@@ -219,9 +275,7 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
                                     backgroundColor: '#5A41D8',
                                     boxShadow: '0px 0px 8px #E5F0DC',
                                   },
-                                }}>
-                                Edit Posting
-                              </Button>
+                                }} />
                               <Button
                                 sx={{
                                   backgroundColor: '#5A41D8',    // Approx. purple
