@@ -86,10 +86,10 @@ export default function Profile(props: ProfileProps) {
       <div className="layout">
         <div className="left-section">
           <div className="full-name-and-bio">
-            <div className="ellipse">
+            <div className="profile-image">
               {firstName[0].toUpperCase() + lastName[0].toUpperCase()}
             </div>
-            <div className="text-wrapper">{user.displayName}</div>
+            <div className="name">{user.displayName}</div>
             <div className="email-address">{user.email}</div>
             <DeleteUserButton open={open} setOpen={setOpen}/>
           </div>

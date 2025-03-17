@@ -31,7 +31,7 @@
   row-gap: 16px;
 }
 
-.layout .left-section .full-name-and-bio .ellipse {
+.layout .left-section .full-name-and-bio .profile-image {
   background-color: #9d9d9d;
   border-radius: 50%;
   height: 200px;
@@ -44,7 +44,7 @@
   line-height: 1;
 }
 
-.full-name-and-bio .text-wrapper {
+.full-name-and-bio .name {
   color: #000000;
   font-family: "SF Pro Display-Regular", Helvetica;
   font-size: 48px;
@@ -166,13 +166,13 @@
     margin-left: 0;
   }
 
-  .full-name-and-bio .ellipse {
+  .full-name-and-bio .profile-image {
     width: 155px;
     height: 155px;
     font-size: 72px;
   }
 
-  .full-name-and-bio .text-wrapper {
+  .full-name-and-bio .name {
     font-size: 36px;
   }
 
