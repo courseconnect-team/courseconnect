@@ -1,11 +1,15 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/firebase/auth/auth_context';
-import { Button } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import './style.css';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import DeleteUserButton from './DeleteUserButton';
 import { updateProfile } from 'firebase/auth';
+import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { QrCode2 } from '@mui/icons-material';
+import { set } from 'react-hook-form';
 
 interface ProfileProps {
   userRole: string;
@@ -34,33 +38,82 @@ const secondaryButtonStyle: React.CSSProperties = {
 
 export default function Profile(props: ProfileProps) {
   const { user } = useAuth();
-  // console.log('user', user);
+  const uid = user.uid as string;
+  const db = getFirestore();
 
-  const nameParts = user.displayName.split(' ');
-
-  // Extract first and last names
-  const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [gpa, setGpa] = useState('');
+  const [department, setDepartment] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [graduationDate, setGraduationDate] = useState('');
 
   const [updatedFirst, setUpdatedFirst] = useState('');
   const [updatedLast, setUpdatedLast] = useState('');
-
-  // need to add email
-  // add gpa
-  // add department
-  // add phone number
-  // add graduation semester and date
+  const [updatedEmail, setUpdatedEmail] = useState('');
+  const [updatedGpa, setUpdatedGpa] = useState('');
+  const [updatedDepartment, setUpdatedDepartment] = useState('');
+  const [updatedPhoneNumber, setUpdatedPhoneNumber] = useState('');
+  const [updatedGraduationDate, setUpdatedGraduationDate] = useState('');
 
   const [isEditing, setIsEditing] = useState(false);
   const [open, setOpen] = React.useState(false);
 
-  const handleSave = async (e: any) => {
-    e.preventDefault(); // Prevent the form from submitting in the traditional way
-    if (updatedFirst.trim() !== '' && updatedLast.trim() !== '') {
+  useEffect(() => {
+    const fetchUserData = async () => {
       try {
-        await updateProfile(user, {
-          displayName: `${updatedFirst} ${updatedLast}`,
-        });
+        const usersCollectionRef = collection(db, 'users_test');
+        const q = query(usersCollectionRef, where('userId', '==', uid));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const docSnap = querySnapshot.docs[0];
+          const data = docSnap.data();
+          setFirstName(data.firstname || '');
+          setLastName(data.lastname || '');
+          setEmail(data.email || '');
+          setGpa(data.gpa || '');
+          setDepartment(data.department || '');
+          setPhoneNumber(data.phonenumber || '');
+          setGraduationDate(data.graduationdate || '');
+        } else {
+          console.log('No such document!');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [db, uid]);
+
+  const handleSave = async (e: any) => {
+    e.preventDefault();
+    if (firstName.trim() !== '' && lastName.trim() !== '') {
+      try {
+        const usersCollectionRef = collection(db, 'users_test');
+        const q = query(usersCollectionRef, where('userId', '==', uid));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          const docRef = doc(db, 'users_test', querySnapshot.docs[0].id);
+          const updatedData: any = {};
+
+          if (updatedFirst.trim() !== '') updatedData.firstname = updatedFirst;
+          if (updatedLast.trim() !== '') updatedData.lastname = updatedLast;
+          if (updatedEmail.trim() !== '') updatedData.email = updatedEmail;
+          if (updatedGpa.trim() !== '') updatedData.gpa = updatedGpa;
+          if (updatedDepartment.trim() !== '') updatedData.department = updatedDepartment;
+          if (updatedPhoneNumber.trim() !== '') updatedData.phonenumber = updatedPhoneNumber;
+          if (updatedGraduationDate.trim() !== '') updatedData.graduationdate = updatedGraduationDate;
+
+        await updateDoc(docRef, updatedData);
+          console.log('Profile updated successfully');
+        }
+        else {
+          console.log('No such document!');
+        }
         setIsEditing(false);
         window.location.reload();
         alert('Profile updated successfully');
@@ -76,6 +129,11 @@ export default function Profile(props: ProfileProps) {
   const handleCancel = () => {
     setUpdatedFirst('');
     setUpdatedLast('');
+    setUpdatedEmail('');
+    setUpdatedGpa('');
+    setUpdatedDepartment('');
+    setUpdatedPhoneNumber('');
+    setUpdatedGraduationDate('');
     setIsEditing(false);
   };
 
@@ -87,10 +145,10 @@ export default function Profile(props: ProfileProps) {
         <div className="left-section">
           <div className="full-name-and-bio">
             <div className="profile-image">
-              {firstName[0].toUpperCase() + lastName[0].toUpperCase()}
+              {firstName[0]?.toUpperCase() + lastName[0]?.toUpperCase()}
             </div>
-            <div className="name">{user.displayName}</div>
-            <div className="email-address">{user.email}</div>
+            <div className="name">{firstName + " " + lastName}</div>
+            <div className="email-address">{email}</div>
             <DeleteUserButton open={open} setOpen={setOpen}/>
           </div>
         </div>
@@ -147,6 +205,85 @@ export default function Profile(props: ProfileProps) {
                     placeholder={lastName}
                     onChange={(e) => setUpdatedLast(e.target.value)}
                     value={updatedLast}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className='row'>
+              <div className="firstName">Email</div>
+              <div className="lastName">Phone Number</div>
+            </div>
+
+            <div className='row'>
+              <div className="firstname-border">
+                {!isEditing ? (
+                  <div className='firstName'>{email}</div>
+                ) : (
+                  <input
+                    className="firstname-input"
+                    type="text"
+                    placeholder={email}
+                    onChange={(e) => setUpdatedEmail(e.target.value)}
+                    value={updatedEmail}
+                  />
+                )}
+              </div>
+
+              <div className="lastname-border">
+                {!isEditing ? (
+                  <div className='lastName'>{phoneNumber}</div>
+                ) : (
+                  <input
+                    className="lastname-input"
+                    type="text"
+                    placeholder={phoneNumber}
+                    onChange={(e) => setUpdatedPhoneNumber(e.target.value)}
+                    value={updatedPhoneNumber}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className='row'>
+              <div className="firstName">GPA</div>
+              <div className="lastName">Department</div>
+            </div>
+
+            <div className='row'>
+              <div className="firstname-border">
+                {!isEditing ? (
+                  <div className='firstName'>{gpa}</div>
+                ) : (
+                  <TextField
+                    className='gpa-input'
+                    size='small'
+                    variant='outlined'
+                    fullWidth
+                    type="number"
+                    placeholder={gpa.toString()}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (value >= 0.0 && value <= 4.0) {
+                        setUpdatedGpa(e.target.value);
+                      }
+                    }}
+                    value={updatedGpa}
+                    inputProps={{ step: 0.1, min: 0.0, max: 4.0 }}
+                  />
+                )}
+              </div>
+
+              <div className="lastname-border">
+                {!isEditing ? (
+                  <div className='lastName'>{department}</div>
+                ) : (
+                  <input
+                    className="lastname-input"
+                    type="text"
+                    placeholder={department}
+                    onChange={(e) => setUpdatedDepartment(e.target.value)}
+                    value={updatedDepartment}
                   />
                 )}
               </div>

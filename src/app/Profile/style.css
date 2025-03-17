@@ -132,6 +132,12 @@ body {
   width: 50%
 }
 
+.gpa-input {
+  font-size: 18px;
+  height: 40px !important;
+  width: 80% !important;
+}
+
 /* Responsive design for smaller screens */
 @media (max-width: 1100px) {
   .layout {
