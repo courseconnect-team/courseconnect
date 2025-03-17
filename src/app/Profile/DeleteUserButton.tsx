@@ -117,7 +117,7 @@ const DeleteUserDialog: React.FC<CreateCourseDialogProps> = ({
       </Button>
 
       <Dialog
-        style={{ ...popUpStyle }}
+        style={popUpStyle}
         PaperProps={{
           style: { borderRadius: '16px' },
         }}
