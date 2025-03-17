@@ -11,6 +11,27 @@ interface ProfileProps {
   userRole: string;
 }
 
+const primaryButtonStyle: React.CSSProperties = {
+  borderRadius: '8px',
+  height: '40px',
+  width: '80px',
+  textTransform: 'none',
+  fontFamily: 'SF Pro Display-Bold , Helvetica',
+  backgroundColor: '#5736ac',
+  color: '#ffffff',
+};
+
+const secondaryButtonStyle: React.CSSProperties = {
+  borderRadius: '8px',
+  height: '40px',
+  width: '80px',
+  borderWidth: '2px',
+  textTransform: 'none',
+  fontFamily: 'SF Pro Display-Bold , Helvetica',
+  borderColor: '#808080',
+  color: '#808080',
+};
+
 export default function Profile(props: ProfileProps) {
   const { user } = useAuth();
   // console.log('user', user);
@@ -24,9 +45,9 @@ export default function Profile(props: ProfileProps) {
   const [updatedFirst, setUpdatedFirst] = useState('');
   const [updatedLast, setUpdatedLast] = useState('');
 
-  // need to add email 
-  // add gpa 
-  // add department 
+  // need to add email
+  // add gpa
+  // add department
   // add phone number
   // add graduation semester and date
 
@@ -40,7 +61,7 @@ export default function Profile(props: ProfileProps) {
         await updateProfile(user, {
           displayName: `${updatedFirst} ${updatedLast}`,
         });
-        setIsEditing(false); 
+        setIsEditing(false);
         window.location.reload();
         alert('Profile updated successfully');
       } catch (error) {
@@ -61,117 +82,73 @@ export default function Profile(props: ProfileProps) {
   return (
     <>
       <HeaderCard text="Profile" />
-      <div className="profile-container">
-        <div className="profile-left-section">
+
+      <div className="layout">
+        <div className="left-section">
           <div className="full-name-and-bio">
             <div className="ellipse">
-              <div className="initials">
-                {firstName[0].toUpperCase() + lastName[0].toUpperCase()}
-              </div>
+              {firstName[0].toUpperCase() + lastName[0].toUpperCase()}
             </div>
-
             <div className="text-wrapper">{user.displayName}</div>
-            <div className="div">{user.email}</div>
-            <div style={{ marginTop: '15px' }}>
-              <DeleteUserButton open={open} setOpen={setOpen} />
-            </div>
+            <div className="email-address">{user.email}</div>
+            <DeleteUserButton open={open} setOpen={setOpen}/>
           </div>
         </div>
-        <div className="rectangle1" />
 
-        <div className="buttonContainerProfile" >
-          <form onSubmit={handleSave}>
-            <div className="profileLineContainer">
-              <div className="info">BASIC INFO</div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                {!isEditing ? (
-                    <Button
-                      style={{
-                        borderRadius: '10px',
-                        height: '37px',
-                        width: '71px',
-                        textTransform: 'none',
-                        fontFamily: 'SF Pro Display-Bold , Helvetica',
-                        backgroundColor: '#5736ac',
-                        color: '#ffffff',
-                      }}
-                      variant="contained"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      Edit
+        <div className="right-section">
+          <form className="profile-container" onSubmit={handleSave}>
+            <div className='row'> 
+              <div className="title">Personal Information</div>
+                <div className='button-container'>
+                  {!isEditing ? (
+                    <Button variant="contained" style={primaryButtonStyle} onClick={() => setIsEditing(true)}>
+                        Edit
                     </Button>
-                  ) : (
+                    ) : (
                     <>
-                      <Button
-                        style={{
-                          borderRadius: '10px',
-                          height: '37px',
-                          width: '71px',
-                          textTransform: 'none',
-                          fontFamily: 'SF Pro Display-Bold , Helvetica',
-                          borderColor: '#5736ac',
-                          color: '#5736ac',
-                        }}
-                        variant="outlined"
-                        onClick={handleCancel}
-                      >
+                      <Button variant="outlined" style={secondaryButtonStyle} onClick={handleCancel}>
                         Cancel
-                      </Button>
-                      <Button
-                        style={{
-                          borderRadius: '10px',
-                          height: '37px',
-                          width: '71px',
-                          textTransform: 'none',
-                          fontFamily: 'SF Pro Display-Bold , Helvetica',
-                          backgroundColor: '#5736ac',
-                          color: '#ffffff',
-                        }}
-                        type="submit"
-                        variant="contained"
-                      >
+                        </Button>
+                        <Button type="submit" variant="contained" style={primaryButtonStyle} onClick={handleSave}>
                         Save
-                      </Button>
+                        </Button>
                     </>
-                  )}
+                    )}
+                </div>
               </div>
-            </div>
 
-
-            <div className="rectangle2" />
-            <div style={{ display: 'flex', marginTop: '41.57px' }}>
+            <div className='row'>
               <div className="firstName">First Name</div>
               <div className="lastName">Last Name</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'row' }}>
+
+            <div className='row'>
               <div className="firstname-border">
                 {!isEditing ? (
-                  <div style={{ paddingRight: '160px' }}>
-                    {firstName}
-                  </div>
-                ): (
+                  <div className='firstName'>{firstName}</div>
+                ) : (
                   <input
                     className="firstname-input"
                     type="text"
-                    placeholder="First Name"
-                    style={{ paddingLeft: '20px' }}
+                    placeholder={firstName}
                     onChange={(e) => setUpdatedFirst(e.target.value)}
                     value={updatedFirst}
                   />
                 )}
-                
               </div>
 
               <div className="lastname-border">
-                <input
-                  className="lastname-input"
-                  type="text"
-                  placeholder="Last Name"
-                  style={{ paddingLeft: '20px' }}
-                  value={updatedLast}
-                  onChange={(e) => setUpdatedLast(e.target.value)}
-                  disabled={!isEditing}
-                />
+                {!isEditing ? (
+                  <div className='lastName'>{lastName}</div>
+                ) : (
+                  <input
+                    className="lastname-input"
+                    type="text"
+                    placeholder={lastName}
+                    onChange={(e) => setUpdatedLast(e.target.value)}
+                    value={updatedLast}
+                  />
+                )}
               </div>
             </div>
           </form>
