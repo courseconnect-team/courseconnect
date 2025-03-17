@@ -59,8 +59,8 @@ const cancelButtonStyle: CSSProperties = {
   width: '120px',
   textTransform: 'none',
   fontFamily: 'SF Pro Display-Bold , Helvetica',
-  borderColor: '#5736ac',
-  color: '#5736ac',
+  borderColor: '#808080',
+  color: '#808080',
   borderWidth: '2px',
 };
 
@@ -131,11 +131,7 @@ const DeleteUserDialog: React.FC<CreateCourseDialogProps> = ({
             Are you sure you want to delete your profile?
           </DialogContent>
           <DialogActions style={dialogButtonContainerStyle}>
-            <Button
-              variant="outlined"
-              style={cancelButtonStyle}
-              onClick={handleClose}
-            >
+            <Button variant="outlined" style={cancelButtonStyle} onClick={handleClose}>
               Cancel
             </Button>
 
