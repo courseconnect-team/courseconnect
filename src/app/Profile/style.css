@@ -1,3 +1,19 @@
+/* Define CSS variables for colors and fonts */
+:root {
+  --primary-color: #5736ac;
+  --secondary-color: #808080;
+  --background-color: #ffffff;
+  --font-family: "SF Pro Display-Regular", Helvetica;
+  --font-color: #000000;
+  --font-color-secondary: #6c6c6c;
+}
+
+/* General styles */
+body {
+  font-family: var(--font-family);
+  color: var(--font-color);
+}
+
 .layout {
   display: flex;
   justify-content: space-evenly;
@@ -18,10 +34,9 @@
 .layout .right-section {
   width: 50vw;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
-  padding-left: 5vw;
-  padding-right: 5vw;
+  padding: 0 5vw;
 }
 
 .layout .left-section .full-name-and-bio {
@@ -39,14 +54,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--background-color);
   font-size: 96px;
   line-height: 1;
 }
 
 .full-name-and-bio .name {
-  color: #000000;
-  font-family: "SF Pro Display-Regular", Helvetica;
+  color: var(--font-color);
   font-size: 48px;
   font-weight: 400;
   line-height: 1;
@@ -55,13 +69,10 @@
 }
 
 .full-name-and-bio .email-address {
-  color: #6c6c6c;
-  font-family: "SF Pro Display-Regular", Helvetica;
+  color: var(--font-color-secondary);
   font-size: 24px;
   white-space: nowrap;
 }
-
-/* The vertical divider between sections */
 
 .profile-container {
   display: flex;
@@ -87,8 +98,7 @@
 }
 
 .profile-container .title {
-  color: #000000;
-  font-family: "SF Pro Display-Regular", Helvetica;
+  color: var(--font-color);
   font-size: 24px;
   font-weight: 400;
   line-height: 1;
@@ -97,8 +107,7 @@
 
 .firstName,
 .lastName {
-  color: #000000;
-  font-family: "SF Pro Display-Regular", Helvetica;
+  color: var(--font-color);
   font-size: 18px;
   font-weight: 400;
   height: 36px;
@@ -109,13 +118,13 @@
 
 .firstname-input,
 .lastname-input {
-  background-color: #ffffff;
-  font-family: "SF Pro Display-Regular", Helvetica;
+  background-color: var(--background-color);
   font-size: 18px;
   padding-left: 8px;
   border: 1px solid;
   height: 36px;
   border-radius: 8px;
+  width: 80%;
 }
 
 .firstname-border,
@@ -123,18 +132,6 @@
   width: 50%
 }
 
-@media (max-width: 1300px) {
-  .profileLineContainer{
-    display:flex;
-    justify-content: left;
-    gap:80px;
-  }
-  .rectangle2 {
-    background-color: #e5e5e5;
-    height: 2px;
-    width: 391px;
-  }
-}
 /* Responsive design for smaller screens */
 @media (max-width: 1100px) {
   .layout {
@@ -145,14 +142,12 @@
   .left-section,
   .right-section {
     width: 100%;
-    /* text-align: center; */
   }
 
   .profile-container {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    margin-top: 100px;
   }
 
   .initials {
@@ -163,7 +158,6 @@
   .full-name-and-bio {
     margin-top: 175px;
     width: 100%;
-    margin-left: 0;
   }
 
   .full-name-and-bio .profile-image {
@@ -172,27 +166,15 @@
     font-size: 72px;
   }
 
+  .title {
+    font-size: 18px;
+  }
+
   .full-name-and-bio .name {
     font-size: 36px;
   }
 
   .full-name-and-bio .email-address {
     font-size: 18px;
-  }
-
-  .firstname-input,
-  .lastname-input {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 10px;
-  }
-
-  .rectangle1 {
-    display: none; /* Remove the divider on smaller screens */
-  }
-
-  .formContainerProfile{
-    flex-grow: 2;
-    flex-shrink: 1;
   }
 }
