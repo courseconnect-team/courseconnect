@@ -1,125 +1,102 @@
-// components/HeaderCard/HeaderCard.tsx
-import React, { FC, ReactNode } from "react"; import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    CardActions,
-    Typography,
-    Grid,
-} from '@mui/material';
-import MoreInfoButton from "./MoreInfoButton";
-import LessInfoButton from "./LessInfoButton";
+import React, { useState } from 'react';
+import { Card, CardContent, Typography, Button, Box } from '@mui/material';
 
 interface ProjectCardProps {
-    project_title: string;
-    department: string;
-    faculty_mentor: string;
-    terms_available: string;
-    student_level: string;
-    project_description: string;
-    phd_student_mentor: string;
-    prerequisites: string;
-    credit: string;
-    stipend: string;
-    application_requirements: string;
-    application_deadline: string;
-    website: string;
-    children: ReactNode;
+  project_title: string;
+  department: string;
+  faculty_mentor: string;
+  terms_available: string;
+  student_level: string;
+  project_description: string;
+  phd_student_mentor?: string;
+  prerequisites?: string;
+  credit?: string;
+  stipend?: string;
+  application_requirements?: string;
+  application_deadline?: string;
+  website?: string;
+  onEdit?: () => void;
 }
 
-const ProjectCard: FC<ProjectCardProps> = ({
-    project_title,
-    department,
-    faculty_mentor,
-    terms_available,
-    student_level,
-    project_description,
-    phd_student_mentor,
-    prerequisites,
-    credit,
-    stipend,
-    application_requirements,
-    application_deadline,
-    website,
-    children
+const ProjectCard: React.FC<ProjectCardProps> = ({
+  project_title,
+  department,
+  faculty_mentor,
+  terms_available,
+  student_level,
+  project_description,
+  phd_student_mentor,
+  prerequisites,
+  credit,
+  stipend,
+  application_requirements,
+  application_deadline,
+  website,
+  onEdit,
 }) => {
-    const [expanded, setExpanded] = React.useState(false);
-    const handleToggleExpand = () => {
-        setExpanded(!expanded);
-    };
-    return (
-        <Card variant="outlined">
-            <CardContent>
-                {/* Title */}
-                <Typography variant="h6">
-                    <b>{project_title}</b>
-                </Typography>
+  const [expanded, setExpanded] = useState(false);
 
-                {/* Subtitle / Department */}
-                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                    {department}
-                </Typography>
-                <Box height="10px" />
+  return (
+    <Card
+      sx={{
+        p: 3,
+        borderRadius: '16px',
+        boxShadow: 3,
+        backgroundColor: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%', // Ensures all cards are equal height
+      }}
+    >
+      <CardContent sx={{ flexGrow: 1 }}>
+        {' '}
+        {/* Allows content to fill space */}
+        <Typography variant="h5" fontWeight="bold">
+          {project_title}
+        </Typography>
+        <Typography variant="subtitle2" color="text.secondary">
+          {department}
+        </Typography>
+        <Box mt={2}>
+          <Typography fontWeight="bold">Faculty Mentor:</Typography>
+          <Typography>{faculty_mentor}</Typography>
 
-                {/* Basic info */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Typography variant="body2">
-                        <strong>Faculty Mentor(s):</strong> {faculty_mentor}
-                    </Typography>
-                    <Typography variant="body2">
-                        <strong>Term(s) Available:</strong> {terms_available}
-                    </Typography>
-                    <Typography variant="body2">
-                        <strong>Student Level:</strong> {student_level}
-                    </Typography>
-                    <Box />
-                    <Typography variant="body2">
-                        {project_description}
-                    </Typography>
-                    <Box />
-                </Box>
-                <Box height="20px" />
-                {!expanded && (
-                    <MoreInfoButton onClick={handleToggleExpand} />
-                )}
+          <Typography fontWeight="bold">Terms Available:</Typography>
+          <Typography>{terms_available}</Typography>
 
-                {expanded && (
-                    <>
-                        <LessInfoButton onClick={handleToggleExpand} />
-                        <Box height="10px" />
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                            <Typography variant="body2">
-                                <strong>Ph.D Student Mentor(s):</strong> {phd_student_mentor}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Prerequisite(s):</strong> {prerequisites}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Credit</strong> {credit}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Stipend</strong> {stipend}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Application Requirements</strong> {application_requirements}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Application Deadline</strong> {application_deadline}
-                            </Typography>
-                            <Typography variant="body2">
-                                <strong>Website</strong> <a href={`${website}`}>{website}</a>
-                            </Typography>
-                            <Box />
-                        </Box>
-                    </>
-                )}
-                <Box height="20px" />
-                {children}
-            </CardContent>
-        </Card>
+          <Typography fontWeight="bold">Student Level:</Typography>
+          <Typography>{student_level}</Typography>
+        </Box>
+        <Box mt={2} sx={{ flexGrow: 1 }}>
+          {' '}
+          {/* Expands to fill space */}
+          <Typography fontWeight="bold">[Research Description]</Typography>
+          <Typography
+            sx={{
+              display: expanded ? 'block' : '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: expanded ? 'unset' : 3,
+              overflow: 'hidden',
+            }}
+          >
+            {project_description}
+          </Typography>
+        </Box>
+      </CardContent>
 
-    );
+      <Box display="flex" justifyContent="space-between" p={2}>
+        <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
+          {expanded ? 'Read Less' : 'Read More'}
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: '#5A41D8', color: '#FFFFFF' }}
+        >
+          Edit Application
+        </Button>
+      </Box>
+    </Card>
+  );
 };
 
 export default ProjectCard;
