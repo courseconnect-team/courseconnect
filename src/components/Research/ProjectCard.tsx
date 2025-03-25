@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
 
 interface ProjectCardProps {
+  userRole: string;
   project_title: string;
   department: string;
   faculty_mentor: string;
@@ -19,6 +20,7 @@ interface ProjectCardProps {
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
+  userRole,
   project_title,
   department,
   faculty_mentor,
@@ -83,17 +85,25 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </Typography>
         </Box>
       </CardContent>
-
       <Box display="flex" justifyContent="space-between" p={2}>
         <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
           {expanded ? 'Read Less' : 'Read More'}
         </Button>
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: '#5A41D8', color: '#FFFFFF' }}
-        >
-          Edit Application
-        </Button>
+        {userRole === 'student_applying' ? (
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: '#5A41D8', color: '#FFFFFF' }}
+          >
+            Apply
+          </Button>
+        ) : userRole === 'faculty' ? (
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: '#4CAF50', color: '#FFFFFF' }}
+          >
+            Edit Application
+          </Button>
+        ) : null}
       </Box>
     </Card>
   );
