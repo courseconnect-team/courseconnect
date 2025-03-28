@@ -62,8 +62,9 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${
+    current.getMonth() + 1
+  }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -347,22 +348,25 @@ export default function Application() {
           .firestore()
           .collection('semesters')
           .get()
-          .then((snapshot) => snapshot.docs.map((doc) => {
-            if (!doc.data().hidden) {
-              visibleSems.push(doc.data().semester);
-            }
-          }))
+          .then((snapshot) =>
+            snapshot.docs.map((doc) => {
+              if (!doc.data().hidden) {
+                visibleSems.push(doc.data().semester);
+              }
+            })
+          );
 
         await firebase
           .firestore()
           .collection('courses')
           .get()
-          .then((snapshot) => snapshot.docs.map((doc) => {
-            if (visibleSems.includes(doc.data().semester)) {
-              data.push(doc.id);
-            }
-          }
-          ));
+          .then((snapshot) =>
+            snapshot.docs.map((doc) => {
+              if (visibleSems.includes(doc.data().semester)) {
+                data.push(doc.id);
+              }
+            })
+          );
 
         setNames(data);
       } catch (err) {
