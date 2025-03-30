@@ -44,11 +44,14 @@ body {
   flex-direction: column;
   align-items: center;
   row-gap: 16px;
+  margin-top: -25%;
+  z-index: 1;
 }
 
 .layout .left-section .full-name-and-bio .profile-image {
   background-color: #9d9d9d;
   border-radius: 50%;
+  border:#ffffff 4px solid;     
   height: 200px;
   width: 200px;
   display: flex;
@@ -161,8 +164,8 @@ body {
     font-size: 70px;
   }
  
-  .full-name-and-bio {
-    margin-top: 175px;
+  .layout .left-section .full-name-and-bio {
+    margin-top: -10%;
     width: 100%;
   }
 
