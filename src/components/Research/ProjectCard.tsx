@@ -3,12 +3,14 @@ import { Card, CardContent, Typography, Button, Box } from '@mui/material';
 
 interface ProjectCardProps {
   userRole: string;
+  uid?: string;
   project_title: string;
   department: string;
   faculty_mentor: string;
   terms_available: string;
   student_level: string;
   project_description: string;
+  faculty_members?: string[];
   phd_student_mentor?: string;
   prerequisites?: string;
   credit?: string;
@@ -21,12 +23,14 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   userRole,
+  uid,
   project_title,
   department,
   faculty_mentor,
   terms_available,
   student_level,
   project_description,
+  faculty_members = [],
   phd_student_mentor,
   prerequisites,
   credit,
@@ -37,6 +41,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onEdit,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  console.log(faculty_members);
+  console.log(uid);
+  const isFacultyInvolved =
+    userRole === 'faculty' && faculty_members.includes(uid || '');
 
   return (
     <Card
@@ -96,10 +104,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           >
             Apply
           </Button>
-        ) : userRole === 'faculty' ? (
+        ) : isFacultyInvolved ? (
           <Button
             variant="contained"
             sx={{ backgroundColor: '#4CAF50', color: '#FFFFFF' }}
+            onClick={onEdit} // Optional edit handler
           >
             Edit Application
           </Button>
