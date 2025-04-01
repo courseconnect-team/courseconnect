@@ -19,6 +19,7 @@ interface ProjectCardProps {
   application_deadline?: string;
   website?: string;
   onEdit?: () => void;
+  onShowApplications?: () => void;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -39,10 +40,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   application_deadline,
   website,
   onEdit,
+  onShowApplications,
 }) => {
   const [expanded, setExpanded] = useState(false);
-  console.log(faculty_members);
-  console.log(uid);
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
 
@@ -105,13 +105,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             Apply
           </Button>
         ) : isFacultyInvolved ? (
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: '#4CAF50', color: '#FFFFFF' }}
-            onClick={onEdit} // Optional edit handler
-          >
-            Edit Application
-          </Button>
+          <Box display="flex" gap={1}>
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: '#4CAF50', color: '#FFFFFF' }}
+              onClick={onEdit} // Optional edit handler
+            >
+              Edit Application
+            </Button>
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: '#2196F3', color: '#FFFFFF' }}
+              onClick={onShowApplications} // Trigger the callback to show applications
+            >
+              Show Applications
+            </Button>
+          </Box>
         ) : null}
       </Box>
     </Card>
