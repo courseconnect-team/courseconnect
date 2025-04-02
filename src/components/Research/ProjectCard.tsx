@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import ModalApplicationForm from './ModalApplicationForm';
 
 interface ProjectCardProps {
   userRole: string;
@@ -46,87 +46,92 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const [expanded, setExpanded] = useState(false);
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
-  const router = useRouter();
-
+  const [openModal, setOpenModal] = useState(false);
   return (
-    <Card
-      sx={{
-        p: 3,
-        borderRadius: '16px',
-        boxShadow: 3,
-        backgroundColor: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%', // Ensures all cards are equal height
-      }}
-    >
-      <CardContent sx={{ flexGrow: 1 }}>
-        {' '}
-        {/* Allows content to fill space */}
-        <Typography variant="h5" fontWeight="bold">
-          {project_title}
-        </Typography>
-        <Typography variant="subtitle2" color="text.secondary">
-          {department}
-        </Typography>
-        <Box mt={2}>
-          <Typography fontWeight="bold">Faculty Mentor:</Typography>
-          <Typography>{faculty_mentor}</Typography>
-
-          <Typography fontWeight="bold">Terms Available:</Typography>
-          <Typography>{terms_available}</Typography>
-
-          <Typography fontWeight="bold">Student Level:</Typography>
-          <Typography>{student_level}</Typography>
-        </Box>
-        <Box mt={2} sx={{ flexGrow: 1 }}>
+    <>
+      <Card
+        sx={{
+          p: 3,
+          borderRadius: '16px',
+          boxShadow: 3,
+          backgroundColor: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%', // Ensures all cards are equal height
+        }}
+      >
+        <CardContent sx={{ flexGrow: 1 }}>
           {' '}
-          {/* Expands to fill space */}
-          <Typography fontWeight="bold">[Research Description]</Typography>
-          <Typography
-            sx={{
-              display: expanded ? 'block' : '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: expanded ? 'unset' : 3,
-              overflow: 'hidden',
-            }}
-          >
-            {project_description}
+          {/* Allows content to fill space */}
+          <Typography variant="h5" fontWeight="bold">
+            {project_title}
           </Typography>
-        </Box>
-      </CardContent>
-      <Box display="flex" justifyContent="space-between" p={2}>
-        <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'Read Less' : 'Read More'}
-        </Button>
-        {userRole === 'student_applying' ? (
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: '#5A41D8', color: '#FFFFFF' }}
-            onClick={() => router.push('/Research/ApplicationForm')}
-          >
-            Apply
-          </Button>
-        ) : isFacultyInvolved ? (
-          <Box display="flex" gap={1}>
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: '#4CAF50', color: '#FFFFFF' }}
-              onClick={onEdit} // Optional edit handler
-            >
-              Edit Application
-            </Button>
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: '#2196F3', color: '#FFFFFF' }}
-              onClick={onShowApplications} // Trigger the callback to show applications
-            >
-              Show Applications
-            </Button>
+          <Typography variant="subtitle2" color="text.secondary">
+            {department}
+          </Typography>
+          <Box mt={2}>
+            <Typography fontWeight="bold">Faculty Mentor:</Typography>
+            <Typography>{faculty_mentor}</Typography>
+
+            <Typography fontWeight="bold">Terms Available:</Typography>
+            <Typography>{terms_available}</Typography>
+
+            <Typography fontWeight="bold">Student Level:</Typography>
+            <Typography>{student_level}</Typography>
           </Box>
-        ) : null}
-      </Box>
-    </Card>
+          <Box mt={2} sx={{ flexGrow: 1 }}>
+            {' '}
+            {/* Expands to fill space */}
+            <Typography fontWeight="bold">[Research Description]</Typography>
+            <Typography
+              sx={{
+                display: expanded ? 'block' : '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: expanded ? 'unset' : 3,
+                overflow: 'hidden',
+              }}
+            >
+              {project_description}
+            </Typography>
+          </Box>
+        </CardContent>
+        <Box display="flex" justifyContent="space-between" p={2}>
+          <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
+            {expanded ? 'Read Less' : 'Read More'}
+          </Button>
+          {userRole === 'student_applying' ? (
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: '#5A41D8', color: '#FFFFFF' }}
+              onClick={() => setOpenModal(true)}
+            >
+              Apply
+            </Button>
+          ) : isFacultyInvolved ? (
+            <Box display="flex" gap={1}>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: '#4CAF50', color: '#FFFFFF' }}
+                onClick={onEdit} // Optional edit handler
+              >
+                Edit Application
+              </Button>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: '#2196F3', color: '#FFFFFF' }}
+                onClick={onShowApplications} // Trigger the callback to show applications
+              >
+                Show Applications
+              </Button>
+            </Box>
+          ) : null}
+        </Box>
+      </Card>
+      <ModalApplicationForm
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+      />
+    </>
   );
 };
 
