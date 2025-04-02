@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 interface ProjectCardProps {
   userRole: string;
@@ -45,6 +46,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const [expanded, setExpanded] = useState(false);
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
+  const router = useRouter();
 
   return (
     <Card
@@ -101,6 +103,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           <Button
             variant="contained"
             sx={{ backgroundColor: '#5A41D8', color: '#FFFFFF' }}
+            onClick={() => router.push('/Research/ApplicationForm')}
           >
             Apply
           </Button>
