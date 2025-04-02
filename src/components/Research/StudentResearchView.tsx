@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   TextField,
@@ -11,9 +11,11 @@ import {
   Grid,
 } from '@mui/material';
 import ProjectCard from '@/components/Research/ProjectCard';
+import ApplicationCard from '@/components/Research/ApplicationCard';
 
 interface StudentResearchViewProps {
   researchListings: any[];
+  researchApplications: any[];
   role: string;
   uid: string;
   department: string;
@@ -24,10 +26,13 @@ interface StudentResearchViewProps {
   setTermsAvailable: (value: string) => void;
   getResearchListings: () => void;
   setResearchListings: (listings: any[]) => void;
+  getApplications: () => void;
+  setResearchApplications: (Applications: any[]) => void;
 }
 
 const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   researchListings,
+  researchApplications,
   role,
   uid,
   department,
@@ -38,7 +43,11 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   setTermsAvailable,
   getResearchListings,
   setResearchListings,
+  getApplications,
+  setResearchApplications,
 }) => {
+  const [myApplications, showMyApplications] = useState(true);
+
   return (
     <>
       <Box sx={{ p: 3 }}>
@@ -130,42 +139,105 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               </Select>
             </FormControl>
           </Box>
-          <Grid container spacing={4} mt={3} mx="5%">
-            {researchListings.map((item, index) => (
-              <Grid item xs={12} sm={6} md={6} key={index}>
-                <ProjectCard
-                  userRole={role}
-                  project_title={item.project_title}
-                  department={item.department}
-                  faculty_mentor={item.faculty_mentor}
-                  terms_available={Object.keys(item.terms_available)
-                    .filter(
-                      (key) =>
-                        item.terms_available[
-                          key as keyof typeof item.terms_available
-                        ]
-                    )
-                    .join(', ')}
-                  student_level={Object.keys(item.student_level)
-                    .filter(
-                      (key) =>
-                        item.student_level[
-                          key as keyof typeof item.student_level
-                        ]
-                    )
-                    .join(', ')}
-                  project_description={item.project_description}
-                  phd_student_mentor={item.phd_student_mentor}
-                  prerequisites={item.prerequisites}
-                  credit={item.credit}
-                  stipend={item.stipend}
-                  application_requirements={item.application_requirements}
-                  application_deadline={item.application_deadline}
-                  website={item.website}
-                />
-              </Grid>
-            ))}
-          </Grid>
+
+          {/* Center: "Research Board View" Button */}
+          <Button
+            sx={{
+              backgroundColor: '#5A41D8', // Same purple as Edit Application
+              color: '#FFFFFF', // White text
+              textTransform: 'none', // Keep text normal case
+              borderRadius: '8px', // Rounded corners
+              boxShadow: '0px 0px 8px #E5F0DC', // Subtle greenish glow
+              fontWeight: 500,
+              padding: '10px 24px',
+              marginBottom: '16px', // Add vertical space below the button
+              '&:hover': {
+                backgroundColor: '#5A41D8', // Keep hover consistent
+                boxShadow: '0px 0px 8px #E5F0DC',
+              },
+            }}
+            onClick={() => showMyApplications(!myApplications)}
+          >
+            {myApplications ? 'Show My Applications' : 'Switch to Default View'}
+          </Button>
+
+          {/* Conditional rendering based on state */}
+          {myApplications ? (
+            <Grid container spacing={4} mt={3} mx="5%">
+              {researchListings.map((item, index) => (
+                <Grid item xs={12} sm={6} md={6} key={index}>
+                  <ProjectCard
+                    userRole={role}
+                    project_title={item.project_title}
+                    department={item.department}
+                    faculty_mentor={item.faculty_mentor}
+                    terms_available={Object.keys(item.terms_available)
+                      .filter(
+                        (key) =>
+                          item.terms_available[
+                            key as keyof typeof item.terms_available
+                          ]
+                      )
+                      .join(', ')}
+                    student_level={Object.keys(item.student_level)
+                      .filter(
+                        (key) =>
+                          item.student_level[
+                            key as keyof typeof item.student_level
+                          ]
+                      )
+                      .join(', ')}
+                    project_description={item.project_description}
+                    phd_student_mentor={item.phd_student_mentor}
+                    prerequisites={item.prerequisites}
+                    credit={item.credit}
+                    stipend={item.stipend}
+                    application_requirements={item.application_requirements}
+                    application_deadline={item.application_deadline}
+                    website={item.website}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Grid container spacing={4} mt={3} mx="5%">
+              {researchApplications.map((item, index) => (
+                <Grid item xs={12} sm={6} md={6} key={index}>
+                  <ApplicationCard
+                    userRole={role}
+                    project_title={`Application ID: ${item.appid}`} // Displaying appid as the title
+                    department={item.department || 'N/A'} // Fallback to 'N/A' if department is missing
+                    faculty_mentor={
+                      `${item.first_name} ${item.last_name}`.trim() || 'N/A'
+                    } // Combining first and last name
+                    terms_available={
+                      item.terms_available
+                        ? Object.keys(item.terms_available)
+                            .filter(
+                              (key) =>
+                                item.terms_available[
+                                  key as keyof typeof item.terms_available
+                                ]
+                            )
+                            .join(', ')
+                        : 'N/A' // Fallback if terms_available is undefined or null
+                    }
+                    student_level={item.degree || 'N/A'} // Mapping degree to student level
+                    project_description={
+                      item.qualifications || 'No description provided'
+                    } // Using qualifications as description
+                    phd_student_mentor="N/A" // Placeholder if no mentor info is available
+                    prerequisites="N/A" // Placeholder if no prerequisites info is available
+                    credit="N/A" // Placeholder if no credit info is available
+                    stipend="N/A" // Placeholder if no stipend info is available
+                    application_requirements="N/A" // Placeholder if no requirements info is available
+                    application_deadline={item.date_applied || 'N/A'} // Using date_applied as a deadline
+                    website="N/A" // Placeholder if no website info is available
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </Box>
       </Box>
     </>

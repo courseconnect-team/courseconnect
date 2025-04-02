@@ -65,30 +65,27 @@ interface ResearchListing {
   project_description: string;
 }
 
-interface ResearchListing {
-  id: string;
-  project_title: string;
-  department: string;
-  faculty_mentor: string;
-  phd_student_mentor: string;
+interface ResearchApplication {
+  appid: string;
+  app_status: string;
   terms_available: {
     spring: boolean;
     summer: boolean;
     fall: boolean;
   };
-  student_level: {
-    freshman: boolean;
-    sophomore: boolean;
-    junior: boolean;
-    senior: boolean;
-  };
-  prerequisites: string;
-  credit: string;
-  stipend: string;
-  application_requirements: string;
-  application_deadline: string;
-  website: string;
-  project_description: string;
+  date_applied: string;
+  degree: string;
+  department: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  gpa: string;
+  graduation_date: string;
+  phone_number: string;
+  qualifications: string;
+  resume: string;
+  uid: string;
+  weekly_hours: string;
 }
 
 const ResearchPage: React.FC<ResearchPageProps> = () => {
@@ -106,9 +103,13 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   const [researchListings, setResearchListings] = useState<ResearchListing[]>(
     []
   );
+  const [researchApplications, setResearchApplications] = useState<
+    ResearchApplication[]
+  >([]);
 
   useEffect(() => {
     getResearchListings();
+    getApplications();
   }, []);
 
   if (roleError) {
@@ -146,6 +147,35 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       ...doc.data(),
     }));
     setResearchListings(researchListings);
+  };
+
+  const getApplications = async () => {
+    let collectionRef: firebase.firestore.Query<firebase.firestore.DocumentData> =
+      firebase.firestore().collection('research-applications');
+    collectionRef = collectionRef.where('uid', '==', user.uid);
+    let snapshot = await collectionRef.get();
+
+    let researchApplications: ResearchApplication[] = snapshot.docs.map(
+      (doc: firebase.firestore.QueryDocumentSnapshot) => ({
+        appid: doc.id,
+        app_status: doc.data().app_status,
+        terms_available: doc.data().terms_available,
+        date_applied: doc.data().date_applied,
+        degree: doc.data().degree,
+        department: doc.data().department,
+        email: doc.data().email,
+        first_name: doc.data().first_name,
+        last_name: doc.data().last_name,
+        gpa: doc.data().gpa,
+        graduation_date: doc.data().graduation_date,
+        phone_number: doc.data().phone_number,
+        qualifications: doc.data().qualifications,
+        resume: doc.data().resume,
+        uid: doc.data().uid,
+        weekly_hours: doc.data().weekly_hours,
+      })
+    );
+    setResearchApplications(researchApplications);
   };
 
   const postNewResearchPosition = async (formData: any) => {
@@ -186,6 +216,7 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
               <HeaderCard text="Applications" />
               <StudentResearchView
                 researchListings={researchListings}
+                researchApplications={researchApplications}
                 role={role}
                 uid={user.uid}
                 department={department}
@@ -196,6 +227,8 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
                 setTermsAvailable={setTermsAvailable}
                 getResearchListings={getResearchListings}
                 setResearchListings={setResearchListings}
+                getApplications={getApplications}
+                setResearchApplications={setResearchApplications}
               />
             </>
           )}
