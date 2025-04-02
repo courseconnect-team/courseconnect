@@ -167,6 +167,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               {researchListings.map((item, index) => (
                 <Grid item xs={12} sm={6} md={6} key={index}>
                   <ProjectCard
+                    listingId={item.id}
                     userRole={role}
                     project_title={item.project_title}
                     department={item.department}

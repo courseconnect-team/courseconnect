@@ -18,11 +18,13 @@ import firebase from '@/firebase/firebase_config';
 interface ModalApplicationFormProps {
   open: boolean;
   onClose: () => void;
+  listingId: string;
 }
 
 const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
   open,
   onClose,
+  listingId,
 }) => {
   const auth = getAuth();
   const user = auth.currentUser;
@@ -57,18 +59,36 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
     try {
       const db = firebase.firestore();
 
-      // Save the application to Firestore
-      await db.collection('research-applications').add({
+      console.log('⏳ Trying to add application to research-applications...');
+      const applicationRef = await db.collection('research-applications').add({
         ...formData,
         uid: user.uid,
         app_status: 'Pending',
         date: new Date().toLocaleDateString(),
       });
+      console.log('✅ Application added');
 
-      setSubmitted(true); // show success snackbar
-      onClose(); // close the modal
+      const appId = applicationRef.id;
+
+      console.log('📎 Linking appId to research-listings...');
+      const listingRef = db.collection('research-listings').doc(listingId);
+      await listingRef.update({
+        applications: firebase.firestore.FieldValue.arrayUnion(appId),
+      });
+
+      console.log('✅ App linked to listing');
+      alert('Application submitted successfully!');
+      setSubmitted(true);
+      onClose();
     } catch (err) {
-      console.error('Submission failed:', err);
+      if (err instanceof Error) {
+        console.error('🔥 Submission failed:', err.message);
+        alert('Submission failed: ' + err.message);
+      } else {
+        console.error('🔥 Submission failed with unknown error:', err);
+        alert('Submission failed. Unknown error occurred.');
+      }
+
       setError('Submission failed. Please try again.');
     }
   };

@@ -21,6 +21,7 @@ interface ProjectCardProps {
   website?: string;
   onEdit?: () => void;
   onShowApplications?: () => void;
+  listingId: string;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -33,6 +34,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   student_level,
   project_description,
   faculty_members = [],
+  listingId,
   phd_student_mentor,
   prerequisites,
   credit,
@@ -130,6 +132,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       <ModalApplicationForm
         open={openModal}
         onClose={() => setOpenModal(false)}
+        listingId={listingId}
       />
     </>
   );
