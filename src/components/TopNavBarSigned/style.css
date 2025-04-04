@@ -7,7 +7,7 @@
 .top-nav-bar-signed .text-wrapper-3 {
   color: #ffffff;
   font-family: "SF Pro Display-Bold", Helvetica;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   left: 100px;
   letter-spacing: 0;
@@ -21,7 +21,7 @@
 .top-nav-bar-signed .text-wrapper-4 {
   color: #ffffff;
   font-family: "SF Pro Display-Bold", Helvetica;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   left: 0;
   letter-spacing: 0;
@@ -48,17 +48,17 @@
 .top-nav-bar-signed .overlap-group {
   background-color: #ffffff;
   border-radius: 10px;
-  height: 37px;
+  height: 36px;
   position: relative;
-  width: 115px;
+  width: 130px;
 }
 
 .top-nav-bar-signed .text-wrapper-5 {
   color: #000000;
   font-family: "SF Pro Display-Bold", Helvetica;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  left: 28px;
+  left: 38px;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
