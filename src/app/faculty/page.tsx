@@ -10,27 +10,29 @@ import FacultyDetails from '@/components/FacultyDetails/FacultyDetails';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import SmallClassCard from '@/components/SmallClassCard/SmallClassCard';
 import { FacultyStats } from '@/types/User';
-import { useFacultyStats } from '@/hooks/useFacultyStats';
+// import { useFacultyStats } from '@/hooks/useFacultyStats';
 import { LinearProgress } from '@mui/material';
 import { CourseType } from '@/types/User';
 import useFetchPastCourses from '@/hooks/usePastCourses';
+import { Toaster } from 'react-hot-toast';
+
 interface pageProps {
-  params: { id: string };
+  params: { name: string };
 }
 
 const FacultyStatistics: FC<pageProps> = ({ params }) => {
   const auth = getAuth();
   const user = auth.currentUser;
   const searchParams = useSearchParams();
-  const FacultyId = searchParams.get('id');
+  const FacultyId = searchParams.get('name');
   console.log(FacultyId);
   const db = firebase.firestore();
-  const [selectedYear, setSelectedYear] = useState<number>(1);
-  const {
-    data: facultyStats,
-    isLoading: statsLoading,
-    error: statsError,
-  } = useFacultyStats();
+  // const [selectedYear, setSelectedYear] = useState<number>(1);
+  // const {
+  //   data: facultyStats,
+  //   isLoading: statsLoading,
+  //   error: statsError,
+  // } = useFacultyStats();
   const [facultyData, setFacultyData] = useState<FacultyStats | null>(null);
 
   const {
@@ -39,20 +41,20 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
     error: roleError,
   } = useUserRole(user?.uid);
 
-  const getFacultyDetails = (FacultyId: string): FacultyStats | undefined => {
-    return FacultyId in facultyStats! ? facultyStats![FacultyId] : undefined;
-  };
-  const { pastCourses, loadingPast, error } = useFetchPastCourses(
-    selectedYear,
-    facultyData?.email
-  );
+  // const getFacultyDetails = (FacultyId: string): FacultyStats | undefined => {
+  //   return FacultyId in facultyStats! ? facultyStats![FacultyId] : undefined;
+  // };
+  // const { pastCourses, loadingPast, error } = useFetchPastCourses(
+  //   selectedYear,
+  //   facultyData?.email
+  // );
 
-  useEffect(() => {
-    if (FacultyId && facultyStats) {
-      const result = getFacultyDetails(FacultyId);
-      setFacultyData(result || null);
-    }
-  }, [FacultyId, facultyStats]);
+  // useEffect(() => {
+  //   if (FacultyId && facultyStats) {
+  //     const result = getFacultyDetails(FacultyId);
+  //     setFacultyData(result || null);
+  //   }
+  // }, [FacultyId, facultyStats]);
 
   if (roleError) {
     return <p>Error loading role</p>;
@@ -62,48 +64,48 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
     return <p>Please sign in.</p>;
   }
 
-  if (roleLoading || !role || role !== 'admin') {
-    return <LinearProgress />;
-  }
+  // if (roleLoading || !role || role !== 'admin') {
+  //   return <LinearProgress />;
+  // }
 
-  if (statsLoading) {
-    return <LinearProgress />;
-  }
+  // if (statsLoading) {
+  //   return <LinearProgress />;
+  // }
 
-  if (statsError) {
-    return <div>Error loading faculty statistics</div>;
-  }
+  // if (statsError) {
+  //   return <div>Error loading faculty statistics</div>;
+  // }
 
   // If facultyData is not found
-  if (!facultyData) {
-    return <p>Faculty member not found.</p>;
-  }
+  // if (!facultyData) {
+  //   return <p>Faculty member not found.</p>;
+  // }
 
-  const mapElement = (courses: CourseType[]) => {
-    return courses.map((val) => (
-      <div key={val.id}>
-        <SmallClassCard
-          pathname={`/course/${encodeURIComponent(val.id)}`}
-          courseName={val.code}
-          courseId={val.id}
-          className="class"
-          onGoing={undefined}
-        />
-      </div>
-    ));
-  };
+  // const mapElement = (courses: CourseType[]) => {
+  //   return courses.map((val) => (
+  //     <div key={val.id}>
+  //       <SmallClassCard
+  //         pathname={`/course/${encodeURIComponent(val.id)}`}
+  //         courseName={val.code}
+  //         courseId={val.id}
+  //         className="class"
+  //         onGoing={undefined}
+  //       />
+  //     </div>
+  //   ));
+  // };
   console.log(facultyData);
   return (
     <>
-      {facultyData && (
-        <>
-          <HeaderCard text="Faculty Statistics" />
-          <div
-            style={{
-              marginTop: '380px',
-            }}
-          >
-            <FacultyDetails
+      <Toaster />
+      <HeaderCard text="Faculty Statistics" />
+
+      <div
+        style={{
+          marginTop: '380px',
+        }}
+      >
+        {/* <FacultyDetails
               firstname={facultyData.firstname}
               lastname={facultyData.lastname}
               email={facultyData.email}
@@ -117,16 +119,12 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
               researchActivity={facultyData.researchActivity}
               labCourse={facultyData.labCourse}
               id={''}
-            >
-              {pastCourses.length !== 0 && (
-                <div className="class-cards-container1">
-                  {mapElement(pastCourses)}
-                </div>
-              )}
-            </FacultyDetails>
-          </div>
-        </>
-      )}
+            > */}
+        <FacultyDetails
+          instructor="Abdollahi Biron,Zoleikha"
+          research_level="Low"
+        />
+      </div>
     </>
   );
 };

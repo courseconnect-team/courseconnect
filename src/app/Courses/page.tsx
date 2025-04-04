@@ -97,6 +97,10 @@ export default function FacultyCourses() {
     setCourses(groupedCourses.get(semesterArray[selectedSemester]) || []);
   }, [selectedSemester, groupedCourses]);
 
+  window.addEventListener('beforeunload', function () {
+    localStorage.clear();
+  });
+
   return (
     <>
       <Toaster />
