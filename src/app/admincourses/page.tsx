@@ -153,7 +153,6 @@ export default function User() {
 
       for (const row of data) {
         console.log(row);
-
         const rawEmails = row['__EMPTY_26'] ?? 'undef';
         const emailArray =
           rawEmails === 'undef'

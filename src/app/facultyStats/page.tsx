@@ -65,9 +65,7 @@ export default function User() {
         await firebase
           .firestore()
           .collection('faculty')
-          .doc(
-            data[i]['__EMPTY_1']
-          )
+          .doc(data[i]['__EMPTY_1'])
           .set({
             instructor:
               data[i]['__EMPTY_1'] == undefined
@@ -78,7 +76,6 @@ export default function User() {
                 ? 'None'
                 : data[i]['__EMPTY_28'],
           });
-
       }
       setProcessing(false);
       toast.dismiss(toastId);
@@ -120,7 +117,7 @@ export default function User() {
           width: '100%',
         }}
       >
-        <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
+        <Box sx={{ mb: 2, width: '100%' }}>
           <input
             style={{ display: 'none' }}
             id="raised-button-file"
@@ -154,24 +151,93 @@ export default function User() {
           <br />
 
           <FacultyStats userRole={role as string} />
-          <Dialog style={{ borderImage: "linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1", boxShadow: "0px 2px 20px 4px #00000040", borderRadius: "20px", border: "2px solid" }} PaperProps={{
-            style: { borderRadius: 20 }
-          }} open={open} onClose={() => setOpen(false)} >
-            <DialogTitle style={{ fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "35px", fontWeight: "540" }}>Clear Data</DialogTitle>
+          <Dialog
+            style={{
+              borderImage:
+                'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+              boxShadow: '0px 2px 20px 4px #00000040',
+              borderRadius: '20px',
+              border: '2px solid',
+            }}
+            PaperProps={{
+              style: { borderRadius: 20 },
+            }}
+            open={open}
+            onClose={() => setOpen(false)}
+          >
+            <DialogTitle
+              style={{
+                fontFamily: 'SF Pro Display-Medium, Helvetica',
+                textAlign: 'center',
+                fontSize: '35px',
+                fontWeight: '540',
+              }}
+            >
+              Clear Data
+            </DialogTitle>
             <form onSubmit={handleSubmit}>
               <DialogContent>
-                <DialogContentText style={{ marginTop: "35px", fontFamily: "SF Pro Display-Medium, Helvetica", textAlign: "center", fontSize: "24px", color: "black" }}>
-                  Are you sure you want to clear all existing faculty statistics?
+                <DialogContentText
+                  style={{
+                    marginTop: '35px',
+                    fontFamily: 'SF Pro Display-Medium, Helvetica',
+                    textAlign: 'center',
+                    fontSize: '24px',
+                    color: 'black',
+                  }}
+                >
+                  Are you sure you want to clear all existing faculty
+                  statistics?
                 </DialogContentText>
               </DialogContent>
-              <DialogActions style={{ marginTop: "30px", marginBottom: "42px", display: "flex", justifyContent: "space-between", gap: "93px" }}>
-                <Button variant="outlined" style={{ fontSize: "17px", marginLeft: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", borderColor: '#5736ac', color: '#5736ac', borderWidth: "3px" }} onClick={() => setOpen(false)}>Cancel</Button>
+              <DialogActions
+                style={{
+                  marginTop: '30px',
+                  marginBottom: '42px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '93px',
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  style={{
+                    fontSize: '17px',
+                    marginLeft: '110px',
+                    borderRadius: '10px',
+                    height: '43px',
+                    width: '120px',
+                    textTransform: 'none',
+                    fontFamily: 'SF Pro Display-Bold , Helvetica',
+                    borderColor: '#5736ac',
+                    color: '#5736ac',
+                    borderWidth: '3px',
+                  }}
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </Button>
 
-                <Button variant="contained" style={{ fontSize: "17px", marginRight: "110px", borderRadius: "10px", height: '43px', width: '120px', textTransform: "none", fontFamily: "SF Pro Display-Bold , Helvetica", backgroundColor: '#5736ac', color: '#ffffff' }} type="submit">Delete</Button>
+                <Button
+                  variant="contained"
+                  style={{
+                    fontSize: '17px',
+                    marginRight: '110px',
+                    borderRadius: '10px',
+                    height: '43px',
+                    width: '120px',
+                    textTransform: 'none',
+                    fontFamily: 'SF Pro Display-Bold , Helvetica',
+                    backgroundColor: '#5736ac',
+                    color: '#ffffff',
+                  }}
+                  type="submit"
+                >
+                  Delete
+                </Button>
               </DialogActions>
             </form>
           </Dialog>
-
         </Box>
       </Box>
     </>
