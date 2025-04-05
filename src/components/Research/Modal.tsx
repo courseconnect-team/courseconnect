@@ -11,6 +11,7 @@ import {
 import firebase from '@/firebase/firebase_config';
 import { collection, addDoc } from 'firebase/firestore';
 import { Theme } from '@emotion/react';
+import {v4 as uuidv4} from 'uuid';
 
 /** Define an interface that matches your JSON keys (without using any values). */
 interface FormData {
@@ -74,11 +75,11 @@ const ResearchModal: React.FC<ResearchModal> = ({
   /** Submits the form and clears it, then closes the dialog. */
   async function handleSubmit() {
     // Do something with the form data, e.g., console.log or send to a server
-    console.log('Form submitted:', formData);
 
     // Reset form data only on submit
     const finalFormData = {
         ...formData,
+        id: uuidv4(),
         creator_id: uid, 
         faculty_members: [uid],
         applications: [],
