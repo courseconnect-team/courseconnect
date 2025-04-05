@@ -8,8 +8,6 @@ import { useAuth } from '@/firebase/auth/auth_context';
 import { Toaster, toast } from 'react-hot-toast';
 
 import { useState, useEffect } from 'react';
-import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
-import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import styles from './style.module.css';
 import 'firebase/firestore';
@@ -313,7 +311,7 @@ export default function User() {
             }}
           >
             <Box sx={{ minWidth: 120 }} />
-            <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
+            <Box sx={{ mb: 2, width: '100%' }}>
               <input
                 style={{ display: 'none' }}
                 id="raised-button-file"

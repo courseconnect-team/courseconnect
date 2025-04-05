@@ -126,7 +126,7 @@ export default function Status() {
             alignItems: 'center',
           }}
         >
-          <Box sx={{ mt: 50, mb: 2 }}>
+          <Box sx={{ mb: 2 }}>
             {courses &&
               adminDenied &&
               Object.entries(courses).map(([key, value]) => (

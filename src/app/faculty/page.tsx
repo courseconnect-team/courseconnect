@@ -100,12 +100,7 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
       <Toaster />
       <HeaderCard text="Faculty Statistics" />
 
-      <div
-        style={{
-          marginTop: '380px',
-        }}
-      >
-        {/* <FacultyDetails
+      {/* <FacultyDetails
               firstname={facultyData.firstname}
               lastname={facultyData.lastname}
               email={facultyData.email}
@@ -120,11 +115,10 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
               labCourse={facultyData.labCourse}
               id={''}
             > */}
-        <FacultyDetails
-          instructor="Abdollahi Biron,Zoleikha"
-          research_level="Low"
-        />
-      </div>
+      <FacultyDetails
+        instructor="Abdollahi Biron,Zoleikha"
+        research_level="Low"
+      />
     </>
   );
 };

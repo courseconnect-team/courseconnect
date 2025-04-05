@@ -15,7 +15,7 @@ export default function Application() {
           flexDirection: 'column',
           alignItems: 'center',
           textAlign: 'center',
-          marginTop: '280px',
+          marginTop: '250px',
           fontFamily: 'SF Pro Display-Bold',
         }}
       >

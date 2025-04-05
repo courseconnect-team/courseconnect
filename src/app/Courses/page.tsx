@@ -34,6 +34,7 @@ export default function FacultyCourses() {
       JSON.stringify(selectedSemesters)
     );
   }, [selectedSemesters]);
+
   const selectedSemesterValues = useMemo(() => {
     return selectedSemesters.map((option) => option.value);
   }, [selectedSemesters]);
@@ -97,9 +98,11 @@ export default function FacultyCourses() {
     setCourses(groupedCourses.get(semesterArray[selectedSemester]) || []);
   }, [selectedSemester, groupedCourses]);
 
-  window.addEventListener('beforeunload', function () {
-    localStorage.clear();
-  });
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('selectedSemesters');
+    };
+  }, []);
 
   return (
     <>

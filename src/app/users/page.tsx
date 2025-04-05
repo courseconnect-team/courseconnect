@@ -140,7 +140,7 @@ export default function User() {
           width: '100%',
         }}
       >
-        <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
+        <Box sx={{ mb: 2, width: '100%' }}>
           <Users userRole={role as string} />
         </Box>
       </Box>
