@@ -96,6 +96,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
               </Box>
 
               <ResearchModal
+                uid ={uid}
                 onSubmitSuccess={getResearchListings}
                 firebaseQuery={postNewResearchPosition}
                 buttonText="Create New Position"

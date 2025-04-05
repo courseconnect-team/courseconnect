@@ -37,6 +37,7 @@ interface ResearchModal {
   buttonStyle?: SxProps<Theme>;
   buttonText: string;
   firebaseQuery: (formData: any) => Promise<void>;
+  uid: string
 }
 const ResearchModal: React.FC<ResearchModal> = ({
   onSubmitSuccess,
@@ -44,6 +45,7 @@ const ResearchModal: React.FC<ResearchModal> = ({
   buttonStyle,
   buttonText,
   firebaseQuery,
+  uid
 }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>(currentFormData);
@@ -75,7 +77,12 @@ const ResearchModal: React.FC<ResearchModal> = ({
     console.log('Form submitted:', formData);
 
     // Reset form data only on submit
-    firebaseQuery(formData);
+    const finalFormData = {
+        ...formData,
+        creator_id: uid, 
+        faculty_members: [uid],
+    }
+    firebaseQuery(finalFormData);
     // Close the modal
     onSubmitSuccess();
     setFormData(currentFormData);
