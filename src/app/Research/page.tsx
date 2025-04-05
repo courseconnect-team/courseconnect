@@ -146,7 +146,6 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log('Fetched listings:', researchListings);
     setResearchListings(researchListings);
   };
 

@@ -81,6 +81,7 @@ const ResearchModal: React.FC<ResearchModal> = ({
         ...formData,
         creator_id: uid, 
         faculty_members: [uid],
+        applications: [],
     }
     firebaseQuery(finalFormData);
     // Close the modal
