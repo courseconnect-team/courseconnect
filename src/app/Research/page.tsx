@@ -80,7 +80,6 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       <HeaderCard text="Research Job Board" />
       <div
         style={{
-          marginTop: '380px',
           display: 'flex',
           justifyContent: 'center',
           flexWrap: 'wrap',

@@ -123,5 +123,6 @@
   }
   .container{
     flex-direction: column;
+    margin-top: 380px;
   }
 }

@@ -9,29 +9,15 @@ interface HeaderCardProps {
   text: string;
 }
 
-const HeaderCard: FC<HeaderCardProps> = ({ text }) => {
+const HeaderCard = ({ text }: HeaderCardProps) => {
   return (
-    <div className="header">
-      <div className="overlap-wrapper">
-        <div className="overlap">
-          <div className="overlap-2">
-            <div className="color-block-frame">
-              <div className="overlap-group-2">
-                <div className="color-block" />
-                <img
-                  className="GRADIENTS"
-                  alt="Gradients"
-                  src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                />
-                <div className="glass-card" />
-              </div>
-            </div>
-          </div>
-          <EceLogoPng className="ece-logo-png-2" />
-          <TopNavBarSigned className="top-nav-bar-signed-in" />
-          <div className="text-wrapper-10">{text}</div>
-        </div>
-      </div>
+    <div style={{ marginBottom: '1.5rem' }}>
+      <nav className="header">
+        <EceLogoPng className="ece-logo-png-2" />
+        <TopNavBarSigned className="top-nav-bar-signed-in" />
+
+        <div className="text-wrapper-10">{text}</div>
+      </nav>
       <div className="crumbs">
         <Breadcrumb />
       </div>

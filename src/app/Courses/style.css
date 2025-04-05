@@ -3,7 +3,6 @@
   font-family: 'SF Pro Display-Medium', Helvetica;
   color: #000;
   text-align: left;
-  margin-left: 20px;
   margin-top: 18px;
   margin-bottom: 26px;
 
@@ -29,7 +28,7 @@
   flex-direction: row;
   padding-left: 20px;
   padding-right: 20px;
-  margin-top: 555px;
+  margin-top: 175px;
   justify-content: space-around;
   width: calc(100% - 40px); 
   box-sizing: border-box;
@@ -38,7 +37,6 @@
 @media (max-width: 1200px) {
   .page-container {
     padding-left: 40px; /* Adjust padding */
-    margin-top: 150px; /* Adjust margin */
     gap: 10%; /* Decrease gap */
   }
 }
@@ -46,7 +44,6 @@
 @media (max-width: 900px) {
   .page-container {
     padding-left: 30px; /* Adjust padding */
-    margin-top: 125px; /* Adjust margin */
     gap: 7%; /* Further decrease gap */
   }
 }
@@ -54,7 +51,6 @@
 @media (max-width: 600px) {
   .page-container {
     padding-left: 20px; /* Adjust padding */
-    margin-top: 100px; /* Adjust margin */
     gap: 5%; /* Minimal gap */
   }
 }
@@ -72,7 +68,7 @@
 .full-name-and-bio-instance {
   left: 50%;
   position: absolute !important;
-  top: 250px !important;
+  top: 200px !important;
   transform: translateY(-50%);
   transform: translateX(-50%);
 }
