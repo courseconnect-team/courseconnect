@@ -122,42 +122,37 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
       {courseData && (
         <>
           <HeaderCard text="Courses" />
-          <div
-            style={{
-              marginTop: '400px',
-            }}
-          >
-            <CourseDetails
-              courseName={courseData.courseName}
-              semester={courseData.semester}
-              instructor={courseData.instructor}
-              email={courseData.email}
-              studentsEnrolled={courseData.studentsEnrolled}
-              maxStudents={courseData.maxStudents}
-              credits={courseData.credits}
-              courseCode={courseData.courseCode}
-              department={courseData.department}
-              TAs={courseData.TAs}
-              title={courseData.title}
-              schedule={[
-                {
-                  day: 'T',
-                  time: 'Periods 8-9 (3:00 PM - 4:55 PM)',
-                  location: 'CAR 0100',
-                },
-                {
-                  day: 'W',
-                  time: 'Periods 10-11 (5:10 PM - 7:05 PM)',
-                  location: 'CSE E312',
-                },
-                {
-                  day: 'R',
-                  time: 'Periods 9 (4:05 PM - 4:55 PM)',
-                  location: 'CAR 0100',
-                },
-              ]}
-            />
-          </div>
+
+          <CourseDetails
+            courseName={courseData.courseName}
+            semester={courseData.semester}
+            instructor={courseData.instructor}
+            email={courseData.email}
+            studentsEnrolled={courseData.studentsEnrolled}
+            maxStudents={courseData.maxStudents}
+            credits={courseData.credits}
+            courseCode={courseData.courseCode}
+            department={courseData.department}
+            TAs={courseData.TAs}
+            title={courseData.title}
+            schedule={[
+              {
+                day: 'T',
+                time: 'Periods 8-9 (3:00 PM - 4:55 PM)',
+                location: 'CAR 0100',
+              },
+              {
+                day: 'W',
+                time: 'Periods 10-11 (5:10 PM - 7:05 PM)',
+                location: 'CSE E312',
+              },
+              {
+                day: 'R',
+                time: 'Periods 9 (4:05 PM - 4:55 PM)',
+                location: 'CAR 0100',
+              },
+            ]}
+          />
         </>
       )}
     </>
