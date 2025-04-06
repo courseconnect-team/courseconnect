@@ -150,29 +150,42 @@ export default function User() {
         const sheetData = utils.sheet_to_json(workbook.Sheets[sheetName]);
         sheetData.forEach((row: any) => data.push(row));
       });
+      const course = new Set();
 
       for (const row of data) {
-        console.log(row);
-        const rawEmails = row['__EMPTY_26'] ?? 'undef';
-        const emailArray =
-          rawEmails === 'undef'
-            ? []
-            : rawEmails.split(';').map((email: string) => email.trim());
+        if (!course.has(`${row['Class Nbr']} ${row['Instructor']}`)) {
+          course.add(`${row['Class Nbr']} ${row['Instructor']}`);
 
-        await firebase
-          .firestore()
-          .collection('courses')
-          .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_22']}`)
-          .set({
-            professor_emails: emailArray,
-            professor_names: row['__EMPTY_25'] ?? 'undef',
-            code: row['__EMPTY_5'] ?? 'undef',
-            credits: row['__EMPTY_9'] ?? 'undef',
-            enrollment_cap: row['__EMPTY_24'] ?? 'undef',
-            enrolled: row['__EMPTY_26'] ?? 'undef',
-            title: row['__EMPTY_21'] ?? 'undef',
-            semester: semester,
-          });
+          const rawEmails = row['Instructor Emails'] ?? 'undef';
+          const emailArray =
+            rawEmails === 'undef'
+              ? []
+              : rawEmails.split(';').map((email: string) => email.trim());
+
+          await firebase
+            .firestore()
+            .collection('courses')
+            .doc(`${row['Course']} (${semester}) : ${row['Instructor']}`)
+            .set({
+              class_number: row['Class Nbr'] ?? 'undef',
+              professor_emails: emailArray,
+              professor_names: row['Instructor'] ?? 'undef',
+              code: row['Course'] ?? 'undef',
+              credits: row['Min - Max Cred'] ?? 'undef',
+              department: 'ECE',
+              enrollment_cap: row['Enr Cap'] ?? 'undef',
+              enrolled: row['Enrolled'] ?? 'undef',
+              title: row['Course Title'] ?? 'undef',
+              semester: semester,
+              meeting_times: [
+                {
+                  day: row['Day/s']?.replaceAll(' ', '') ?? 'undef',
+                  time: row['Time'] ?? 'undef',
+                  location: row['Facility'] ?? 'undef',
+                },
+              ],
+            });
+        }
       }
 
       setProcessing(false);
