@@ -152,19 +152,19 @@ export default function Application() {
     let f24 = false;
     let s25 = false;
     for (let i = 0; i < personName.length; i++) {
-      if (personName[i].includes('Fall 2024')) {
+      if (personName[i].includes('Summer 2025')) {
         f24 = true;
       }
-      if (personName[i].includes('Spring 2025')) {
+      if (personName[i].includes('Fall 2025')) {
         s25 = true;
       }
     }
 
     if (f24) {
-      semesterArray.push('Fall 2024');
+      semesterArray.push('Summer 2025');
     }
     if (s25) {
-      semesterArray.push('Spring 2025');
+      semesterArray.push('Fall 2025');
     }
 
     // get courses as array
