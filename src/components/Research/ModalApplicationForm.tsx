@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -45,6 +45,46 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user) return;
+      console.log('🔥 Fetching profile for UID:', user.uid);
+
+      try {
+        const db = firebase.firestore();
+        const snapshot = await db
+          .collection('users_test') // change users to users_test for profile database
+          .where('userId', '==', user.uid) // change uid to userId
+          .get();
+
+        if (!snapshot.empty) {
+          const profileData = snapshot.docs[0].data();
+          console.log('✅ Profile data:', profileData);
+          setFormData((prev) => ({
+            ...prev,
+            firstname: profileData.firstname || '',
+            lastname: profileData.lastname || '',
+            phone: profileData.phonenumber || '',
+            department: profileData.department || '',
+            degree: profileData.degree || '',
+            gpa: profileData.gpa || '',
+            graduationDate: profileData.graduationdate || '',
+            resume: profileData.resume || '',
+            qualifications: profileData.qualifications || '',
+            weeklyHours: profileData.weeklyHours || '',
+          }));
+        } else {
+          console.warn('⚠️ No matching profile found for user.uid');
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    if (open && user?.uid) {
+      fetchProfileData();
+    }
+  }, [open, user]);
 
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -71,7 +111,18 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
       const appId = applicationRef.id;
 
       console.log('📎 Linking appId to research-listings...');
-      const listingRef = db.collection('research-listings').doc(listingId);
+      const querySnapshot = await db
+        .collection('research-listings')
+        .where('id', '==', listingId)
+        .get();
+
+      if (querySnapshot.empty) {
+        throw new Error('No matching listing found!');
+      }
+
+      const listingDoc = querySnapshot.docs[0];
+      const listingRef = listingDoc.ref;
+
       await listingRef.update({
         applications: firebase.firestore.FieldValue.arrayUnion(appId),
       });
@@ -104,6 +155,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="firstname"
                 label="First Name"
                 fullWidth
+                value={formData.firstname}
                 onChange={handleChange}
               />
             </Grid>
@@ -112,6 +164,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="lastname"
                 label="Last Name"
                 fullWidth
+                value={formData.lastname}
                 onChange={handleChange}
               />
             </Grid>
@@ -129,6 +182,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="phone"
                 label="Phone Number"
                 fullWidth
+                value={formData.phone}
                 onChange={handleChange}
               />
             </Grid>
@@ -137,6 +191,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="department"
                 label="Department"
                 fullWidth
+                value={formData.department}
                 onChange={handleChange}
               />
             </Grid>
@@ -145,6 +200,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="degree"
                 label="Degree"
                 fullWidth
+                value={formData.degree}
                 onChange={handleChange}
               />
             </Grid>
@@ -153,6 +209,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="gpa"
                 label="GPA"
                 fullWidth
+                value={formData.gpa}
                 onChange={handleChange}
               />
             </Grid>
@@ -161,6 +218,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="graduationDate"
                 label="Graduation Date"
                 fullWidth
+                value={formData.graduationDate}
                 onChange={handleChange}
               />
             </Grid>
