@@ -13,25 +13,17 @@ import {
 import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
 import ThumbDownAltOutlinedIcon from "@mui/icons-material/ThumbDownAltOutlined";
 
-interface UserItem {
-    name: string;
-    email: string;
-}
 
 interface ApplicationTileProps {
-    item: UserItem;
-    status: "needs" | "approved" | "denied";
+    item: any;
+    status: "Pending" | "Approved" | "Denied";
+    changeStatus: (id: string, app_status: string) => Promise<void>;
 }
-
-function getInitials(name: string): string {
-    const parts = name.split(" ");
-    const initials = parts.map((part) => part.charAt(0).toUpperCase()).join("");
-    return initials;
-  }
 
 const ApplicationTile: React.FC<ApplicationTileProps> = ({
     item,
-    status
+    status,
+    changeStatus,
 }) => {
     return (
         <Paper
@@ -43,37 +35,37 @@ const ApplicationTile: React.FC<ApplicationTileProps> = ({
                 alignItems: "center",
                 mb: 1,
                 borderColor:
-                    status === "needs"
+                    status === "Pending"
                         ? "grey.300"
-                        : status === "approved"
+                        : status === "Approved"
                             ? "success.light"
                             : "error.light",
             }}
         >
-            <Avatar sx={{ mr: 2 }}>{getInitials(item.name)}</Avatar>
+            <Avatar sx={{ mr: 2 }}>{item?.firstname[0] || "" + item?.lastname[0] || ""}</Avatar>
             <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="subtitle1">{item.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
                     {item.email}
                 </Typography>
             </Box>
-            {status === "needs" && (
+            {status === "Pending" && (
                 <Stack direction="row" spacing={1}>
-                    <IconButton color="success">
+                    <IconButton color="success" onClick={() => changeStatus(item.id, "Approved")}>
                         <ThumbUpAltOutlinedIcon />
                     </IconButton>
                     <IconButton color="error">
-                        <ThumbDownAltOutlinedIcon />
+                        <ThumbDownAltOutlinedIcon onClick={() => changeStatus(item.id, "Denied")}/>
                     </IconButton>
                     <Button variant="outlined">Review</Button>
                 </Stack>
             )}
-            {status === "approved" && (
+            {status === "Approved" && (
                 <Typography variant="body1" color="success.main">
                     Approved
                 </Typography>
             )}
-            {status === "denied" && (
+            {status === "Denied" && (
                 <Typography variant="body1" color="error.main">
                     Denied
                 </Typography>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Tabs,
@@ -11,48 +11,46 @@ import {
   Stack,
 } from "@mui/material";
 import ApplicationTile from './ApplicationTile';
+import firebase from '@/firebase/firebase_config';
+import { collection, addDoc, updateDoc, doc, where, query, documentId, getDocs } from 'firebase/firestore';
 
-interface UserItem {
-  name: string;
-  email: string;
-}
 
 interface FacultyApplicantsViewProps {
   id: string;
-  name: string;
-  researchApplications: any[];
+  researchListing: any;
+  researchApplications: (researchListings: any) => Promise<any[]>;
   onBack: () => void;
 }
 
 const FacultyApplicantsView: React.FC<FacultyApplicantsViewProps> = ({
   id,
-  name,
+  researchListing,
   researchApplications,
   onBack,
 }) => {
   const [tabIndex, setTabIndex] = React.useState(0);
+  const [applications, setApplications] = React.useState<any[]>([]);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
   };
-  // Mock data for applicants (replace with actual data fetching logic)
-  const needsReviewData: UserItem[] = [
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-  ];
 
-  const approvedData: UserItem[] = [
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-  ];
+  useEffect(() => {
+    researchApplications(researchListing).then((data) => {
+      console.log("user effect", data)
+      setApplications(data);
+    })
+  }, [])
 
-  const deniedData: UserItem[] = [
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-    { name: "Firstname Lastname", email: "emailaddress@ufl.edu" },
-  ];
+  const changeStatus = async (id: string, app_status: string) => {
+    const db = firebase.firestore();
+    const docRef = doc(db, 'research-applications', id);
+    await updateDoc(docRef, { app_status });
+    researchApplications(researchListing).then((data) => {
+      console.log("user effect", data)
+      setApplications(data);
+    })
+  }
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -76,7 +74,7 @@ const FacultyApplicantsView: React.FC<FacultyApplicantsViewProps> = ({
         </Box>
 
         {/* Tabs for Needs Review, Approved, Denied */}
-        <Box sx={{justifyContent:"center", display: 'flex'}}>
+        <Box sx={{ justifyContent: "center", display: 'flex' }}>
           <Box sx={{ width: "50%" }}>
             <Tabs
               value={tabIndex}
@@ -109,13 +107,12 @@ const FacultyApplicantsView: React.FC<FacultyApplicantsViewProps> = ({
           Research
         </Typography>
 
-        {/* Render different content based on selected tab */}
         {tabIndex === 0 &&
-          needsReviewData.map((item) => <ApplicationTile item={item} status={"needs"} />)}
+          applications.filter(item => item.app_status === 'Pending').map((item) => <ApplicationTile changeStatus={changeStatus} item={item} status={"Pending"} />)}
         {tabIndex === 1 &&
-          approvedData.map((item) => <ApplicationTile item={item} status={"approved"} />)}
+          applications.filter(item => item.app_status === 'Approved').map((item) => <ApplicationTile changeStatus={changeStatus} item={item} status={"Approved"} />)}
         {tabIndex === 2 &&
-          deniedData.map((item) => <ApplicationTile item={item} status={"denied"} />)}
+          applications.filter(item => item.app_status === 'Denied').map((item) => <ApplicationTile changeStatus={changeStatus} item={item} status={"Denied"} />)}
       </Box>
     </Box>
   );

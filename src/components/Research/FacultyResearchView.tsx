@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button, Grid } from '@mui/material';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import ResearchModal from '@/components/Research/Modal';
 import ProjectCard from '@/components/Research/ProjectCard';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
+import { collection, addDoc, updateDoc, doc, where, query, documentId, getDocs } from 'firebase/firestore';
+import firebase from '@/firebase/firebase_config';
 
 interface FacultyResearchViewProps {
   researchListings: any[];
@@ -11,6 +13,27 @@ interface FacultyResearchViewProps {
   uid: string;
   getResearchListings: () => void;
   postNewResearchPosition: (formData: any) => Promise<void>;
+}
+
+const getResearchApplicationsListings = async(researchListing: any) => {
+  console.log("postings queried",researchListing)
+  const applicationsIds = researchListing.applications || [];
+  if (applicationsIds.length === 0) {
+    return [];
+  }
+  const db = firebase.firestore();
+  const q = query(collection(db, 'research-applications'), where(documentId(), 'in', applicationsIds));
+  try {
+    const querySnapshot = await getDocs(q);
+    const applicationsList = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    return applicationsList;
+  } catch (error) {
+    console.error("Error retrieving documents:", error);
+  }
+  return []
 }
 
 const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
@@ -48,12 +71,12 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
           >
             <FacultyApplicantsView
               id={selectedResearchId}
-              name={
+              researchListing={
                 researchListings.find(
                   (listing) => listing.id === selectedResearchId
-                )?.project_title || ''
+                )
               }
-              researchApplications={[]}
+              researchApplications={getResearchApplicationsListings}
               onBack={handleBackToListings}
             />
           </Box>
