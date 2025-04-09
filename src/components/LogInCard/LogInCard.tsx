@@ -185,7 +185,6 @@ export const LogInCard = ({ className }: { className: any }) => {
                 InputProps={{
                   disableUnderline: true,
                 }}
-                className="text-wrapper-3"
                 placeholder="Email"
                 margin="normal"
                 required
@@ -210,7 +209,6 @@ export const LogInCard = ({ className }: { className: any }) => {
                 InputProps={{
                   disableUnderline: true,
                 }}
-                className="text-wrapper-3"
                 placeholder="Password"
                 margin="normal"
                 required
