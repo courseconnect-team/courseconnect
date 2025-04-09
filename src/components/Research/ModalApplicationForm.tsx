@@ -53,8 +53,8 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
       try {
         const db = firebase.firestore();
         const snapshot = await db
-          .collection('users')
-          .where('uid', '==', user.uid)
+          .collection('users') // change users to users_test for profile database
+          .where('uid', '==', user.uid) // change uid to UserId
           .get();
 
         if (!snapshot.empty) {
