@@ -71,7 +71,18 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
       const appId = applicationRef.id;
 
       console.log('📎 Linking appId to research-listings...');
-      const listingRef = db.collection('research-listings').doc(listingId);
+      const querySnapshot = await db
+        .collection('research-listings')
+        .where('id', '==', listingId)
+        .get();
+
+      if (querySnapshot.empty) {
+        throw new Error('No matching listing found!');
+      }
+
+      const listingDoc = querySnapshot.docs[0];
+      const listingRef = listingDoc.ref;
+
       await listingRef.update({
         applications: firebase.firestore.FieldValue.arrayUnion(appId),
       });
