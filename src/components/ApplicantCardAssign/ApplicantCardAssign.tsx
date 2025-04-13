@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback } from 'react';
+import { FunctionComponent, useCallback, useState } from 'react';
 import './style.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -8,7 +8,17 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
-
+import {
+  AppBar,
+  Container,
+  Stack,
+  Paper,
+  Fade,
+  Box,
+  Toolbar,
+  Typography,
+} from '@mui/material';
+import FocusTrap from '@mui/material/Unstable_TrapFocus';
 import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
   id: string;
@@ -30,6 +40,8 @@ interface ApplicantCardProps {
   onExpandToggle: any;
   openReview: boolean;
   setOpenReviewDialog: (value: boolean) => void;
+  openRenew: boolean;
+  setOpenRenewDialog: (value: boolean) => void;
   currentStu: string;
   setCurrentStu: (value: string) => void;
   className: string;
@@ -54,19 +66,22 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
   onExpandToggle,
   openReview,
   setOpenReviewDialog,
+  openRenew,
+  setOpenRenewDialog,
   currentStu,
   setCurrentStu,
 
   className,
 }) => {
   const db = firebase.firestore();
+  const [viewMessage, setViewMessage] = useState(false);
   const handleMoveReview = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
       const statusRef = db.collection('applications').doc(currentStu);
       let doc = await getDoc(statusRef);
-      let coursesMap = doc.data().courses;
+      let coursesMap = doc.data()?.courses;
 
       coursesMap[className] = 'applied';
       await statusRef.update({ courses: coursesMap });
@@ -77,8 +92,10 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
     }
   };
 
-  const handleCloseReview = () => {
+  const handleCloseDialog = () => {
     setOpenReviewDialog(false);
+    setOpenRenewDialog(false);
+    setViewMessage(false);
   };
 
   const handleOpenReview = useCallback((event: any) => {
@@ -87,6 +104,277 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
     setOpenReviewDialog(true);
     setCurrentStu(id);
   }, []);
+
+  const handleViewMessage = () => {
+    setViewMessage(true);
+  };
+  const handleOpenRenew = useCallback((event: any) => {
+    event?.stopPropagation();
+
+    setOpenRenewDialog(true);
+    setCurrentStu(id);
+  }, []);
+
+  const renderRenewDialog = () =>
+    !viewMessage ? (
+      <Dialog
+        style={{
+          borderImage:
+            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+          boxShadow: '0px 2px 20px 4px #00000040',
+          borderRadius: '20px',
+          border: '2px solid',
+        }}
+        PaperProps={{
+          style: { borderRadius: 20 },
+        }}
+        open={openRenew}
+        onClose={handleCloseDialog}
+      >
+        <DialogTitle
+          style={{
+            fontFamily: 'SF Pro Display-Bold, Helvetica',
+            textAlign: 'center',
+            fontSize: '35px',
+            fontWeight: '540',
+            alignSelf: 'center',
+          }}
+        >
+          <div>Renew</div>
+          <div>
+            {firstname} {lastname}
+          </div>
+        </DialogTitle>
+        <form onSubmit={handleMoveReview}>
+          <DialogContent>
+            <DialogContentText
+              style={{
+                marginTop: '35px',
+                fontFamily: 'SF Pro Display-Bold, Helvetica',
+                textAlign: 'center',
+                fontSize: '24px',
+              }}
+            >
+              Are you sure you want to send a renewal to {firstname} {lastname}?
+            </DialogContentText>
+          </DialogContent>
+
+          <DialogActions
+            style={{
+              marginTop: '30px',
+              marginBottom: '42px',
+              display: 'flex',
+              justifyContent: 'center',
+              marginLeft: '10px',
+              marginRight: '10px',
+              gap: '20px',
+            }}
+          >
+            <Button
+              variant="outlined"
+              style={{
+                borderRadius: '10px',
+                height: '43px',
+                width: '120px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                borderColor: '#5736ac',
+                borderWidth: '4px',
+
+                color: '#5736ac',
+              }}
+              onClick={handleCloseDialog}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              style={{
+                borderRadius: '10px',
+                height: '43px',
+                width: '170px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                borderColor: '#5736ac',
+                borderWidth: '4px',
+                color: '#5736ac',
+              }}
+              onClick={handleViewMessage}
+            >
+              Review Message
+            </Button>
+            <Button
+              variant="contained"
+              style={{
+                borderRadius: '10px',
+                height: '43px',
+                width: '120px',
+                textTransform: 'none',
+                fontFamily: 'SF Pro Display-Bold , Helvetica',
+                backgroundColor: '#5736ac',
+                color: '#ffffff',
+              }}
+              type="submit"
+            >
+              Send
+            </Button>
+          </DialogActions>
+        </form>{' '}
+      </Dialog>
+    ) : (
+      <Dialog
+        style={{
+          borderImage:
+            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+          boxShadow: '0px 2px 20px 4px #00000040',
+          borderRadius: '20px',
+          border: '2px solid',
+        }}
+        PaperProps={{
+          style: { borderRadius: 20 },
+        }}
+        fullWidth
+        maxWidth="lg"
+        open={openRenew}
+        onClose={handleCloseDialog}
+      >
+        <Paper
+          role="dialog"
+          aria-modal="false"
+          elevation={3}
+          sx={{
+            m: 0,
+            p: 2,
+            borderWidth: 0,
+            borderTopWidth: 1,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'SF Pro Display-Bold, Helvetica',
+              fontSize: '30px',
+              fontWeight: '450',
+              marginLeft: '10px',
+            }}
+          >
+            <div>
+              Renew {firstname} {lastname}
+            </div>
+          </div>
+          <DialogContentText
+            style={{
+              fontFamily: 'SF Pro Display-Bold, Helvetica',
+              fontSize: '18px',
+              marginLeft: '10px',
+            }}
+          >
+            Are you sure you want to send a renewal to {firstname} {lastname}?
+          </DialogContentText>
+        </Paper>
+        <Container component="main" sx={{ pt: 4 }}>
+          <Typography sx={{ marginBottom: 2 }}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
+            dolor purus non enim praesent elementum facilisis leo vel. Risus at
+            ultrices mi tempus imperdiet.
+          </Typography>
+          <Typography sx={{ marginBottom: 2 }}>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
+            dolor purus non enim praesent elementum facilisis leo vel. Risus at
+            ultrices mi tempus imperdiet.ggLorem ipsum dolor sit amet,
+            consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+            labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent
+            elementum facilisis leo vel. Risus at ultrices mi tempus
+            imperdiet.ggLorem ipsum dolor sit amet, consectetur adipiscing elit,
+            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Rhoncus dolor purus non enim praesent elementum facilisis leo vel.
+            Risus at ultrices mi tempus imperdiet.ggLorem ipsum dolor sit amet,
+            consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+            labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent
+            elementum facilisis leo vel. Risus at ultrices mi tempus
+            imperdiet.gg
+          </Typography>
+        </Container>
+        <FocusTrap open disableAutoFocus disableEnforceFocus>
+          <Fade appear={false} in={true}>
+            <Paper
+              role="dialog"
+              aria-modal="false"
+              elevation={12}
+              sx={{
+                m: 0,
+                p: 2,
+                borderWidth: 0,
+                borderTopWidth: 1,
+              }}
+            >
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                sx={{ width: '100%' }}
+              >
+                <Box>
+                  <Button
+                    variant="outlined"
+                    style={{
+                      borderRadius: '10px',
+                      height: '43px',
+                      width: '120px',
+                      textTransform: 'none',
+                      fontFamily: 'SF Pro Display-Bold, Helvetica',
+                      borderColor: '#5736ac',
+                      borderWidth: '4px',
+                      color: '#5736ac',
+                    }}
+                    onClick={handleCloseDialog}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    variant="outlined"
+                    style={{
+                      borderRadius: '10px',
+                      height: '43px',
+                      width: '170px',
+                      textTransform: 'none',
+                      fontFamily: 'SF Pro Display-Bold, Helvetica',
+                      borderColor: '#5736ac',
+                      borderWidth: '4px',
+                      color: '#5736ac',
+                    }}
+                    onClick={() => {
+                      setViewMessage(false);
+                    }}
+                  >
+                    Hide Message
+                  </Button>
+                  <Button
+                    variant="contained"
+                    style={{
+                      borderRadius: '10px',
+                      height: '43px',
+                      width: '120px',
+                      textTransform: 'none',
+                      fontFamily: 'SF Pro Display-Bold, Helvetica',
+                      backgroundColor: '#5736ac',
+                      color: '#ffffff',
+                    }}
+                    type="submit"
+                  >
+                    Send
+                  </Button>
+                </Stack>
+              </Stack>
+            </Paper>
+          </Fade>
+        </FocusTrap>
+      </Dialog>
+    );
 
   const renderReviewDialog = () => (
     <Dialog
@@ -101,7 +389,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
         style: { borderRadius: 20 },
       }}
       open={openReview}
-      onClose={handleCloseReview}
+      onClose={handleCloseDialog}
     >
       <DialogTitle
         style={{
@@ -147,7 +435,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
               borderColor: '#5736ac',
               color: '#5736ac',
             }}
-            onClick={handleCloseReview}
+            onClick={handleCloseDialog}
           >
             Cancel
           </Button>
@@ -172,12 +460,13 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
     </Dialog>
   );
   const handleCardClick = () => {
-    // onExpandToggle();
+    onExpandToggle();
   };
 
   return (
     <>
       {renderReviewDialog()}
+      {renderRenewDialog()}
       <div className="applicantCardApprove1" onClick={handleCardClick}>
         {!expanded && (
           <>
@@ -193,9 +482,9 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
               </div>
             </div>
 
-            <div className="thumbsContainer1">
+            <div onClick={handleOpenRenew} className="thumbsContainer1">
               <div className="applicantStatus2">
-                <div className="approved2">Assigned</div>
+                <div className="approved2">Renew</div>
               </div>
             </div>
           </>
@@ -219,9 +508,9 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
                   {firstname} {lastname}
                 </div>
 
-                <div className="thumbsContainer1">
-                  <div className="applicantStatus3">
-                    <div className="approved1">Approved</div>
+                <div onClick={handleOpenRenew} className="thumbsContainer1">
+                  <div className="applicantStatus2">
+                    <div className="approved2">Renew</div>
                   </div>
                 </div>
                 <div style={{ position: 'absolute' }}>
@@ -328,7 +617,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
 
                 position: 'absolute',
                 right: '20px',
-                bottom: '662px',
+                bottom: '20px',
                 height: '43px',
                 width: '192px',
                 textTransform: 'none',

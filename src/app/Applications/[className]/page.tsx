@@ -71,6 +71,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
   const [openDenyDialog, setOpenDenyDialog] = useState(false);
   const [openReviewDialog, setOpenReviewDialog] = useState(false);
+  const [openRenewDialog, setOpenRenewDialog] = useState(false);
   const [currentStu, setCurrentStu] = useState('null');
   const [className, setClassName] = useState('none');
   const [loading, setLoading] = useState<boolean>(true);
@@ -248,114 +249,63 @@ const CoursePage: FC<pageProps> = ({ params }) => {
     }[]
   ) => {
     return data.map((ta) => {
+      const commonProps = {
+        id: ta.id,
+        number: ta.number,
+        position: ta.position,
+        semester: ta.semester,
+        availability: ta.availability,
+        department: ta.department,
+        degree: ta.degree,
+        collegestatus: ta.collegestatus,
+        qualifications: ta.qualifications,
+        expanded: expandedStates[ta.id] || false,
+        onExpandToggle: () => handleExpandToggle(ta.id),
+        uf_email: ta.uf_email,
+        firstname: ta.firstname,
+        lastname: ta.lastname,
+        resume: ta.resume,
+        plan: ta.plan,
+        gpa: ta.gpa,
+        currentStu: currentStu,
+        setCurrentStu: setCurrentStu,
+        className: className,
+      };
       return (
         <div key={ta.id} style={{ paddingBottom: '31px' }}>
           {selection === 'Review' && (
             <ApplicantCardApprovedeny
-              id={ta.id}
-              number={ta.number}
-              position={ta.position}
-              semester={ta.semester}
-              availability={ta.availability}
-              department={ta.department}
-              degree={ta.degree}
-              collegestatus={ta.collegestatus}
-              qualifications={ta.qualifications}
-              expanded={expandedStates[ta.id] || false}
-              onExpandToggle={() => handleExpandToggle(ta.id)}
-              uf_email={ta.uf_email}
-              firstname={ta.firstname}
-              lastname={ta.lastname}
-              resume={ta.resume}
-              plan={ta.plan}
-              gpa={ta.gpa}
+              {...commonProps}
               openApprove={openApproveDialog}
               openDeny={openDenyDialog}
               setOpenApproveDialog={setOpenApproveDialog}
               setOpenDenyDialog={setOpenDenyDialog}
-              currentStu={currentStu}
-              setCurrentStu={setCurrentStu}
-              className={className}
             />
           )}
 
           {selection === 'Approved' && (
             <ApplicantCardApprove
-              id={ta.id}
-              number={ta.number}
-              position={ta.position}
-              semester={ta.semester}
-              availability={ta.availability}
-              department={ta.department}
-              degree={ta.degree}
-              collegestatus={ta.collegestatus}
-              qualifications={ta.qualifications}
-              expanded={expandedStates[ta.id] || false}
-              onExpandToggle={() => handleExpandToggle(ta.id)}
-              uf_email={ta.uf_email}
-              firstname={ta.firstname}
-              lastname={ta.lastname}
-              resume={ta.resume}
-              plan={ta.plan}
-              gpa={ta.gpa}
+              {...commonProps}
               openReview={openReviewDialog}
               setOpenReviewDialog={setOpenReviewDialog}
-              currentStu={currentStu}
-              setCurrentStu={setCurrentStu}
-              className={className}
             />
           )}
+
           {selection === 'Assigned' && (
             <ApplicantCardAssign
-              id={ta.id}
-              number={ta.number}
-              position={ta.position}
-              semester={ta.semester}
-              availability={ta.availability}
-              department={ta.department}
-              degree={ta.degree}
-              collegestatus={ta.collegestatus}
-              qualifications={ta.qualifications}
-              expanded={expandedStates[ta.id] || false}
-              onExpandToggle={() => handleExpandToggle(ta.id)}
-              uf_email={ta.uf_email}
-              firstname={ta.firstname}
-              lastname={ta.lastname}
-              resume={ta.resume}
-              plan={ta.plan}
-              gpa={ta.gpa}
+              {...commonProps}
               openReview={openReviewDialog}
               setOpenReviewDialog={setOpenReviewDialog}
-              currentStu={currentStu}
-              setCurrentStu={setCurrentStu}
-              className={className}
+              openRenew={openRenewDialog}
+              setOpenRenewDialog={setOpenRenewDialog}
             />
           )}
 
           {selection === 'Denied' && (
             <ApplicantCardDeny
-              id={ta.id}
-              number={ta.number}
-              position={ta.position}
-              semester={ta.semester}
-              availability={ta.availability}
-              department={ta.department}
-              degree={ta.degree}
-              collegestatus={ta.collegestatus}
-              qualifications={ta.qualifications}
-              expanded={expandedStates[ta.id] || false}
-              onExpandToggle={() => handleExpandToggle(ta.id)}
-              uf_email={ta.uf_email}
-              firstname={ta.firstname}
-              lastname={ta.lastname}
-              resume={ta.resume}
-              plan={ta.plan}
-              gpa={ta.gpa}
+              {...commonProps}
               openReview={openReviewDialog}
               setOpenReviewDialog={setOpenReviewDialog}
-              currentStu={currentStu}
-              setCurrentStu={setCurrentStu}
-              className={className}
             />
           )}
         </div>
