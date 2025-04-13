@@ -17,6 +17,7 @@ import {
   sendFacultyNotificationEmail,
   sendUnapprovedUserNotificationEmail,
   sendFacultyAssignedNotificationEmail,
+  sendRenewTAEmail,
 } from './nodemailer';
 
 const admin = require('firebase-admin');
@@ -73,6 +74,13 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
       case 'unapprovedUser':
         sendUnapprovedUserNotificationEmail(data.user);
         break;
+      case 'renewTA':
+        sendRenewTAEmail(
+          data.userEmail,
+          data.position,
+          data.classCode,
+          data.semester
+        );
       default:
         res.status(400).json({ message: 'Invalid email type' });
         return;
