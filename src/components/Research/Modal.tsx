@@ -36,10 +36,11 @@ interface ResearchModal {
   onSubmitSuccess: () => void;
   currentFormData: FormData;
   buttonStyle?: SxProps<Theme>;
-  buttonText: string;
+  buttonText: React.ReactNode; // Changed from string to ReactNode
   firebaseQuery: (formData: any) => Promise<void>;
   uid: string
 }
+
 const ResearchModal: React.FC<ResearchModal> = ({
   onSubmitSuccess,
   currentFormData,

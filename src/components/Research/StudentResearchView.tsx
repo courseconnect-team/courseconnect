@@ -146,7 +146,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
             backgroundColor: '#5A41D8',
             color: '#FFFFFF',
             textTransform: 'none',
-            borderRadius: '8px',
+            borderRadius: '4px',
             boxShadow: '0px 0px 8px #E5F0DC',
             fontWeight: 500,
             marginLeft: { md: 'auto' }, // Push to right on md and larger screens
@@ -165,7 +165,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
       <Grid container spacing={3}>
         {myApplications
           ? researchListings.map((item, index) => (
-              <Grid item xs={12} md={6} lg={6} key={index}>
+              <Grid item xs={12} sm={12} md={6} lg={6} key={index}>
                 <ProjectCard
                   listingId={item.id}
                   userRole={role}
@@ -200,7 +200,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               </Grid>
             ))
           : researchApplications.map((item, index) => (
-              <Grid item xs={12} md={6} lg={6} key={index}>
+              <Grid item xs={12} sm={12} md={6} lg={6} key={index}>
                 <ApplicationCard
                   userRole={role}
                   project_title={`Application ID: ${item.appid}`}
