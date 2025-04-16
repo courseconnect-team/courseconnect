@@ -15,8 +15,8 @@ interface FacultyResearchViewProps {
   postNewResearchPosition: (formData: any) => Promise<void>;
 }
 
-const getResearchApplicationsListings = async(researchListing: any) => {
-  console.log("postings queried",researchListing)
+const getResearchApplicationsListings = async (researchListing: any) => {
+  console.log("postings queried", researchListing)
   const applicationsIds = researchListing.applications || [];
   if (applicationsIds.length === 0) {
     return [];
@@ -119,7 +119,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
               </Box>
 
               <ResearchModal
-                uid ={uid}
+                uid={uid}
                 onSubmitSuccess={getResearchListings}
                 firebaseQuery={postNewResearchPosition}
                 buttonText="Create New Position"
@@ -161,6 +161,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                     .map((item, index) => (
                       <Grid item xs={12} sm={6} md={6} key={index}>
                         <ProjectCard
+                          listingId={item.id}
                           userRole={role}
                           uid={uid}
                           project_title={item.project_title}
@@ -170,7 +171,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                             .filter(
                               (key) =>
                                 item.terms_available[
-                                  key as keyof typeof item.terms_available
+                                key as keyof typeof item.terms_available
                                 ]
                             )
                             .join(', ')}
@@ -178,7 +179,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                             .filter(
                               (key) =>
                                 item.student_level[
-                                  key as keyof typeof item.student_level
+                                key as keyof typeof item.student_level
                                 ]
                             )
                             .join(', ')}
@@ -205,6 +206,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                   {researchListings.map((item, index) => (
                     <Grid item xs={12} sm={6} md={6} key={index}>
                       <ProjectCard
+                        listingId={item.id}
                         userRole={role}
                         uid={uid}
                         project_title={item.project_title}
@@ -214,7 +216,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           .filter(
                             (key) =>
                               item.terms_available[
-                                key as keyof typeof item.terms_available
+                              key as keyof typeof item.terms_available
                               ]
                           )
                           .join(', ')}
@@ -222,7 +224,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           .filter(
                             (key) =>
                               item.student_level[
-                                key as keyof typeof item.student_level
+                              key as keyof typeof item.student_level
                               ]
                           )
                           .join(', ')}
