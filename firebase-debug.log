@@ -1,0 +1,434 @@
+[debug] [2025-04-16T18:39:06.382Z] ----------------------------------------------------------------------
+[debug] [2025-04-16T18:39:06.383Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy --only functions --debug
+[debug] [2025-04-16T18:39:06.384Z] CLI Version:   14.1.0
+[debug] [2025-04-16T18:39:06.384Z] Platform:      darwin
+[debug] [2025-04-16T18:39:06.384Z] Node Version:  v22.13.1
+[debug] [2025-04-16T18:39:06.384Z] Time:          Wed Apr 16 2025 14:39:06 GMT-0400 (Eastern Daylight Time)
+[debug] [2025-04-16T18:39:06.384Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-16T18:39:06.455Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-16T18:39:06.456Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2025-04-16T18:39:06.456Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-04-16T18:39:06.456Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:06.456Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:06.457Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2025-04-16T18:39:06.457Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:06.457Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-04-16T18:39:06.707Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2025-04-16T18:39:06.708Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-04-16T18:39:06.708Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:06.708Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:06.709Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-16T18:39:06.709Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-16T18:39:07.330Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-04-16T18:39:07.331Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] ✔  functions: Finished running predeploy script. 
+[debug] [2025-04-16T18:39:08.985Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:08.985Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:08.986Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b [none]
+[debug] [2025-04-16T18:39:09.105Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b 200
+[debug] [2025-04-16T18:39:09.105Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b {"projectNumber":"1095880459709","projectId":"courseconnect-c6a7b","lifecycleState":"ACTIVE","name":"courseconnect","labels":{"firebase":"enabled"},"createTime":"2023-05-26T18:15:07.259008Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[debug] [2025-04-16T18:39:09.106Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:09.106Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:09.106Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:09.106Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[debug] [2025-04-16T18:39:09.106Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:09.106Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-04-16T18:39:09.106Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:09.106Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:09.107Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-04-16T18:39:09.107Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:09.107Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-04-16T18:39:09.107Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:09.108Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [none]
+[debug] [2025-04-16T18:39:09.108Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:09.109Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [none]
+[debug] [2025-04-16T18:39:09.109Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:09.547Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com 200
+[debug] [2025-04-16T18:39:09.547Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [omitted]
+[info] ✔  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2025-04-16T18:39:09.551Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com 200
+[debug] [2025-04-16T18:39:09.551Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2025-04-16T18:39:09.555Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com 200
+[debug] [2025-04-16T18:39:09.556Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [omitted]
+[info] ✔  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2025-04-16T18:39:09.582Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com 200
+[debug] [2025-04-16T18:39:09.583Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [omitted]
+[info] ✔  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2025-04-16T18:39:09.583Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:09.583Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:09.583Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2025-04-16T18:39:10.093Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2025-04-16T18:39:10.093Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.firebasestorage.app"}
+[debug] [2025-04-16T18:39:10.094Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:10.094Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:10.094Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs [none]
+[debug] [2025-04-16T18:39:10.589Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs 200
+[debug] [2025-04-16T18:39:10.589Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs {}
+[debug] [2025-04-16T18:39:10.592Z] Validating nodejs source
+[warn] ⚠  functions: Runtime Node.js 18 will be deprecated on 2025-04-30 and will be decommissioned on 2025-10-31, after which you will not be able to deploy without upgrading. Consider upgrading now to avoid disruption. See https://cloud.google.com/functions/docs/runtime-support for full details on the lifecycle policy 
+[debug] [2025-04-16T18:39:10.985Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^11.8.0",
+    "firebase-functions": "^5.0.1",
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[debug] [2025-04-16T18:39:10.985Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2025-04-16T18:39:10.986Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-04-16T18:39:10.990Z] Found firebase-functions binary at '/Users/jeffreyma/courseconnect/node_modules/.bin/firebase-functions'
+[info] Serving at port 8928
+
+[error] (node:8448) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+[debug] [2025-04-16T18:39:11.146Z] Got response from /__/functions.yaml {"endpoints":{"processSignUpForm":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"processSignUpForm"},"processApplicationForm":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"processApplicationForm"},"processCreateCourseForm":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"processCreateCourseForm"},"deleteUserFromID":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"deleteUserFromID"},"sendEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"sendEmail"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled... 
+[debug] [2025-04-16T18:39:15.164Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:15.165Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:15.165Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/firebaseextensions.googleapis.com [none]
+[debug] [2025-04-16T18:39:15.165Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/firebaseextensions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:15.541Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/firebaseextensions.googleapis.com 200
+[debug] [2025-04-16T18:39:15.541Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/firebaseextensions.googleapis.com [omitted]
+[info] ✔  extensions: required API firebaseextensions.googleapis.com is enabled 
+[debug] [2025-04-16T18:39:15.542Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-16T18:39:15.542Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2025-04-16T18:39:15.542Z] [iam] checking project courseconnect-c6a7b for permissions ["firebase.projects.get","firebaseextensions.instances.list"]
+[debug] [2025-04-16T18:39:15.543Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:15.543Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:15.543Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2025-04-16T18:39:15.543Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:15.543Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-04-16T18:39:16.024Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2025-04-16T18:39:16.025Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-04-16T18:39:16.025Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:16.025Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:16.026Z] >>> [apiv2][query] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances pageSize=100&pageToken=
+[debug] [2025-04-16T18:39:16.596Z] <<< [apiv2][status] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances 200
+[debug] [2025-04-16T18:39:16.597Z] <<< [apiv2][body] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances {}
+[info] i  functions: preparing functions directory for uploading... 
+[info] i  functions: packaged /Users/jeffreyma/courseconnect/functions (75.31 KB) for uploading 
+[debug] [2025-04-16T18:39:16.637Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:16.637Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:16.637Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions [none]
+[debug] [2025-04-16T18:39:17.397Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions 200
+[debug] [2025-04-16T18:39:17.398Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions {"functions":[{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processCreateCourseForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processCreateCourseForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processCreateCourseForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:11:05.426Z","versionId":"42","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processCreateCourseForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/sendEmail","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"sendEmail","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:11:08.329Z","versionId":"25","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/sendEmail"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processSignUpForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processSignUpForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:10:58.521Z","versionId":"54","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processSignUpForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processApplicationForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processApplicationForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:11:04.342Z","versionId":"46","labels":{"firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448","deployment-tool":"cli-firebase"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processApplicationForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/deleteUserFromID","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/deleteUserFromID","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"deleteUserFromID","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:11:04.518Z","versionId":"40","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/deleteUserFromID"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}}]}
+[debug] [2025-04-16T18:39:17.400Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:17.400Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:17.400Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions filter=environment%3D%22GEN_2%22
+[debug] [2025-04-16T18:39:18.449Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions 200
+[debug] [2025-04-16T18:39:18.450Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions {}
+[info] i  functions: ensuring required API run.googleapis.com is enabled... 
+[debug] [2025-04-16T18:39:18.453Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:18.453Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: ensuring required API eventarc.googleapis.com is enabled... 
+[debug] [2025-04-16T18:39:18.453Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:18.454Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: ensuring required API pubsub.googleapis.com is enabled... 
+[debug] [2025-04-16T18:39:18.454Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:18.454Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: ensuring required API storage.googleapis.com is enabled... 
+[debug] [2025-04-16T18:39:18.454Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:18.454Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:18.454Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/run.googleapis.com [none]
+[debug] [2025-04-16T18:39:18.454Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/run.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:18.455Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/eventarc.googleapis.com [none]
+[debug] [2025-04-16T18:39:18.455Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/eventarc.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:18.458Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/pubsub.googleapis.com [none]
+[debug] [2025-04-16T18:39:18.458Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/pubsub.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:18.461Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/storage.googleapis.com [none]
+[debug] [2025-04-16T18:39:18.461Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/storage.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T18:39:19.041Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/run.googleapis.com 200
+[debug] [2025-04-16T18:39:19.041Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/run.googleapis.com [omitted]
+[info] ✔  functions: required API run.googleapis.com is enabled 
+[debug] [2025-04-16T18:39:19.044Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/eventarc.googleapis.com 200
+[debug] [2025-04-16T18:39:19.044Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/eventarc.googleapis.com [omitted]
+[info] ✔  functions: required API eventarc.googleapis.com is enabled 
+[debug] [2025-04-16T18:39:19.047Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/pubsub.googleapis.com 200
+[debug] [2025-04-16T18:39:19.047Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/pubsub.googleapis.com [omitted]
+[info] ✔  functions: required API pubsub.googleapis.com is enabled 
+[debug] [2025-04-16T18:39:19.059Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/storage.googleapis.com 200
+[debug] [2025-04-16T18:39:19.059Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/storage.googleapis.com [omitted]
+[info] ✔  functions: required API storage.googleapis.com is enabled 
+[info] i  functions: generating the service identity for pubsub.googleapis.com... 
+[debug] [2025-04-16T18:39:19.060Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:19.060Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: generating the service identity for eventarc.googleapis.com... 
+[debug] [2025-04-16T18:39:19.060Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:19.060Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:19.060Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/pubsub.googleapis.com:generateServiceIdentity [none]
+[debug] [2025-04-16T18:39:19.060Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/eventarc.googleapis.com:generateServiceIdentity [none]
+[debug] [2025-04-16T18:39:19.553Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/eventarc.googleapis.com:generateServiceIdentity 200
+[debug] [2025-04-16T18:39:19.553Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/eventarc.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-1095880459709@gcp-sa-eventarc.iam.gserviceaccount.com","uniqueId":"109337550557085178529"}}
+[debug] [2025-04-16T18:39:19.749Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/pubsub.googleapis.com:generateServiceIdentity 200
+[debug] [2025-04-16T18:39:19.749Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/pubsub.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-1095880459709@gcp-sa-pubsub.iam.gserviceaccount.com","uniqueId":"100090364831957219017"}}
+[debug] [2025-04-16T18:39:19.753Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:19.753Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:19.753Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b [none]
+[debug] [2025-04-16T18:39:19.860Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b 200
+[debug] [2025-04-16T18:39:19.861Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b {"projectNumber":"1095880459709","projectId":"courseconnect-c6a7b","lifecycleState":"ACTIVE","name":"courseconnect","labels":{"firebase":"enabled"},"createTime":"2023-05-26T18:15:07.259008Z"}
+[debug] [2025-04-16T18:39:19.863Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:19.863Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:19.863Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo [none]
+[debug] [2025-04-16T18:39:20.592Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo 200
+[debug] [2025-04-16T18:39:20.593Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo {"name":"projects/courseconnect-c6a7b/billingInfo","projectId":"courseconnect-c6a7b","billingAccountName":"billingAccounts/0119FF-CF2CE6-9CA7E4","billingEnabled":true}
+[debug] [2025-04-16T18:39:20.595Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:20.595Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T18:39:20.595Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/us-central1/functions:generateUploadUrl [none]
+[debug] [2025-04-16T18:39:21.783Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/us-central1/functions:generateUploadUrl 200
+[debug] [2025-04-16T18:39:21.784Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/us-central1/functions:generateUploadUrl {"uploadUrl":"https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/861aa8d4-2eed-475a-b247-57f5e2a61823.zip?GoogleAccessId=service-1095880459709@gcf-admin-robot.iam.gserviceaccount.com&Expires=1744830561&Signature=dj%2BVAKqz43BkYkjMZH7J6rLbJgpZn36rhs599C1Bvs6G7NiFQ6uryZxYT4mztgv%2BeNCgQ4nAVRtxUNoIYK7iEs2Dpp%2FH2V0XgNiKEzms9irAWJ6FBH0KYlfyX4A83tRpbvpJwwgXrajkrPB2917NYehZJSbMxRXWxNGYYn5z3s%2FqsiNOmmh3Xs8en5evOXrs9nfn3reTA45VDFA0mm3fZ9Lro3nr%2BfPdBfIjIoRps8p5R9IKQOs1whMdA9jjZ4JtbW7KkOmr%2FM8L9SsuE7R58keaHL5E3cgDvGu1dS0c41ESNf%2BDgqtv8eYMl8jcqI8UeKIf97Vcu9ORuxqgc9R26w%3D%3D","storageSource":{"bucket":"gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com","object":"861aa8d4-2eed-475a-b247-57f5e2a61823.zip"}}
+[debug] [2025-04-16T18:39:21.785Z] >>> [apiv2][query] PUT https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/861aa8d4-2eed-475a-b247-57f5e2a61823.zip GoogleAccessId=service-1095880459709%40gcf-admin-robot.iam.gserviceaccount.com&Expires=1744830561&Signature=dj%2BVAKqz43BkYkjMZH7J6rLbJgpZn36rhs599C1Bvs6G7NiFQ6uryZxYT4mztgv%2BeNCgQ4nAVRtxUNoIYK7iEs2Dpp%2FH2V0XgNiKEzms9irAWJ6FBH0KYlfyX4A83tRpbvpJwwgXrajkrPB2917NYehZJSbMxRXWxNGYYn5z3s%2FqsiNOmmh3Xs8en5evOXrs9nfn3reTA45VDFA0mm3fZ9Lro3nr%2BfPdBfIjIoRps8p5R9IKQOs1whMdA9jjZ4JtbW7KkOmr%2FM8L9SsuE7R58keaHL5E3cgDvGu1dS0c41ESNf%2BDgqtv8eYMl8jcqI8UeKIf97Vcu9ORuxqgc9R26w%3D%3D
+[debug] [2025-04-16T18:39:21.786Z] >>> [apiv2][body] PUT https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/861aa8d4-2eed-475a-b247-57f5e2a61823.zip [stream]
+[debug] [2025-04-16T18:39:22.431Z] <<< [apiv2][status] PUT https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/861aa8d4-2eed-475a-b247-57f5e2a61823.zip 200
+[debug] [2025-04-16T18:39:22.431Z] <<< [apiv2][body] PUT https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/861aa8d4-2eed-475a-b247-57f5e2a61823.zip [omitted]
+[info] ✔  functions: functions folder uploaded successfully 
+[error] 
+[error] Error: [processSignUpForm(us-central1)] Upgrading from 1st Gen to 2nd Gen is not yet supported. See https://firebase.google.com/docs/functions/2nd-gen-upgrade before migrating to 2nd Gen.
+[debug] [2025-04-16T19:05:18.499Z] ----------------------------------------------------------------------
+[debug] [2025-04-16T19:05:18.504Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy --only functions --debug
+[debug] [2025-04-16T19:05:18.504Z] CLI Version:   14.1.0
+[debug] [2025-04-16T19:05:18.505Z] Platform:      darwin
+[debug] [2025-04-16T19:05:18.505Z] Node Version:  v22.13.1
+[debug] [2025-04-16T19:05:18.505Z] Time:          Wed Apr 16 2025 15:05:18 GMT-0400 (Eastern Daylight Time)
+[debug] [2025-04-16T19:05:18.505Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-16T19:05:18.575Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-16T19:05:18.576Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2025-04-16T19:05:18.576Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-04-16T19:05:18.576Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:18.576Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:18.577Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2025-04-16T19:05:18.577Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:18.577Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-04-16T19:05:18.891Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2025-04-16T19:05:18.892Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-04-16T19:05:18.892Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:18.892Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:18.892Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-16T19:05:18.892Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-16T19:05:19.309Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-04-16T19:05:19.309Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] ✔  functions: Finished running predeploy script. 
+[debug] [2025-04-16T19:05:21.094Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.094Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.094Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b [none]
+[debug] [2025-04-16T19:05:21.258Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b 200
+[debug] [2025-04-16T19:05:21.259Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b {"projectNumber":"1095880459709","projectId":"courseconnect-c6a7b","lifecycleState":"ACTIVE","name":"courseconnect","labels":{"firebase":"enabled"},"createTime":"2023-05-26T18:15:07.259008Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[debug] [2025-04-16T19:05:21.260Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.260Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.260Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.260Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[debug] [2025-04-16T19:05:21.260Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.260Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-04-16T19:05:21.261Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.261Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.261Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-04-16T19:05:21.261Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:21.262Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-04-16T19:05:21.262Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:21.263Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [none]
+[debug] [2025-04-16T19:05:21.263Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:21.264Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [none]
+[debug] [2025-04-16T19:05:21.264Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:21.932Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com 200
+[debug] [2025-04-16T19:05:21.932Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2025-04-16T19:05:21.933Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com 200
+[debug] [2025-04-16T19:05:21.933Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudbuild.googleapis.com [omitted]
+[info] ✔  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2025-04-16T19:05:21.934Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com 200
+[debug] [2025-04-16T19:05:21.935Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/cloudfunctions.googleapis.com [omitted]
+[info] ✔  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2025-04-16T19:05:21.935Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com 200
+[debug] [2025-04-16T19:05:21.935Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/artifactregistry.googleapis.com [omitted]
+[info] ✔  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2025-04-16T19:05:21.936Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.936Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:21.936Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2025-04-16T19:05:22.478Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2025-04-16T19:05:22.478Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.firebasestorage.app"}
+[debug] [2025-04-16T19:05:22.478Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:22.479Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:22.479Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs [none]
+[debug] [2025-04-16T19:05:22.954Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs 200
+[debug] [2025-04-16T19:05:22.954Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs {}
+[debug] [2025-04-16T19:05:22.956Z] Validating nodejs source
+[warn] ⚠  functions: Runtime Node.js 18 will be deprecated on 2025-04-30 and will be decommissioned on 2025-10-31, after which you will not be able to deploy without upgrading. Consider upgrading now to avoid disruption. See https://cloud.google.com/functions/docs/runtime-support for full details on the lifecycle policy 
+[debug] [2025-04-16T19:05:23.472Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^11.8.0",
+    "firebase-functions": "^5.0.1",
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[debug] [2025-04-16T19:05:23.473Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2025-04-16T19:05:23.473Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-04-16T19:05:23.478Z] Found firebase-functions binary at '/Users/jeffreyma/courseconnect/node_modules/.bin/firebase-functions'
+[info] Serving at port 8684
+
+[error] (node:9159) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+[debug] [2025-04-16T19:05:23.778Z] Got response from /__/functions.yaml {"endpoints":{"processSignUpForm":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"processSignUpForm"},"processApplicationForm":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"processApplicationForm"},"processCreateCourseForm":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"processCreateCourseForm"},"deleteUserFromID":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"deleteUserFromID"},"sendEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"httpsTrigger":{},"entryPoint":"sendEmail"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled... 
+[debug] [2025-04-16T19:05:27.799Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:27.800Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:27.800Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/firebaseextensions.googleapis.com [none]
+[debug] [2025-04-16T19:05:27.800Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/firebaseextensions.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:28.186Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/firebaseextensions.googleapis.com 200
+[debug] [2025-04-16T19:05:28.187Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/firebaseextensions.googleapis.com [omitted]
+[info] ✔  extensions: required API firebaseextensions.googleapis.com is enabled 
+[debug] [2025-04-16T19:05:28.187Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-16T19:05:28.187Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2025-04-16T19:05:28.188Z] [iam] checking project courseconnect-c6a7b for permissions ["firebase.projects.get","firebaseextensions.instances.list"]
+[debug] [2025-04-16T19:05:28.188Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:28.188Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:28.188Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2025-04-16T19:05:28.188Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:28.188Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-04-16T19:05:28.387Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2025-04-16T19:05:28.387Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-04-16T19:05:28.388Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:28.388Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:28.389Z] >>> [apiv2][query] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances pageSize=100&pageToken=
+[debug] [2025-04-16T19:05:28.874Z] <<< [apiv2][status] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances 200
+[debug] [2025-04-16T19:05:28.875Z] <<< [apiv2][body] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances {}
+[info] i  functions: preparing functions directory for uploading... 
+[info] i  functions: packaged /Users/jeffreyma/courseconnect/functions (76.84 KB) for uploading 
+[debug] [2025-04-16T19:05:28.916Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:28.916Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:28.916Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions [none]
+[debug] [2025-04-16T19:05:29.637Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions 200
+[debug] [2025-04-16T19:05:29.637Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions {"functions":[{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processCreateCourseForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processCreateCourseForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processCreateCourseForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:11:05.426Z","versionId":"42","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processCreateCourseForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/sendEmail","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"sendEmail","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:11:08.329Z","versionId":"25","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/sendEmail"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processSignUpForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processSignUpForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:10:58.521Z","versionId":"54","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processSignUpForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processApplicationForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processApplicationForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:11:04.342Z","versionId":"46","labels":{"firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448","deployment-tool":"cli-firebase"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processApplicationForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/deleteUserFromID","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/deleteUserFromID","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"deleteUserFromID","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2024-08-18T17:11:04.518Z","versionId":"40","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"a3dc439b9ba844ff0420b31fea4ffb9ef6d09448"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/138e8218-7b8f-4e6f-a26d-2f7d8e12e89a.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.appspot.com\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/deleteUserFromID"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"81cbf4a2-2c9d-4c6f-ba84-4c162517c540","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/81cbf4a2-2c9d-4c6f-ba84-4c162517c540","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}}]}
+[debug] [2025-04-16T19:05:29.639Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:29.639Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:29.639Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions filter=environment%3D%22GEN_2%22
+[debug] [2025-04-16T19:05:30.104Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions 200
+[debug] [2025-04-16T19:05:30.105Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions {}
+[info] i  functions: ensuring required API run.googleapis.com is enabled... 
+[debug] [2025-04-16T19:05:30.108Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.108Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: ensuring required API eventarc.googleapis.com is enabled... 
+[debug] [2025-04-16T19:05:30.108Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.109Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: ensuring required API pubsub.googleapis.com is enabled... 
+[debug] [2025-04-16T19:05:30.109Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.109Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: ensuring required API storage.googleapis.com is enabled... 
+[debug] [2025-04-16T19:05:30.109Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.109Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.109Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/run.googleapis.com [none]
+[debug] [2025-04-16T19:05:30.109Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/run.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:30.110Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/eventarc.googleapis.com [none]
+[debug] [2025-04-16T19:05:30.110Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/eventarc.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:30.112Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/pubsub.googleapis.com [none]
+[debug] [2025-04-16T19:05:30.112Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/pubsub.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:30.114Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/storage.googleapis.com [none]
+[debug] [2025-04-16T19:05:30.115Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/storage.googleapis.com x-goog-quota-user=projects/courseconnect-c6a7b
+[debug] [2025-04-16T19:05:30.452Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/run.googleapis.com 200
+[debug] [2025-04-16T19:05:30.452Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/run.googleapis.com [omitted]
+[info] ✔  functions: required API run.googleapis.com is enabled 
+[debug] [2025-04-16T19:05:30.519Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/pubsub.googleapis.com 200
+[debug] [2025-04-16T19:05:30.519Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/pubsub.googleapis.com [omitted]
+[info] ✔  functions: required API pubsub.googleapis.com is enabled 
+[debug] [2025-04-16T19:05:30.520Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/storage.googleapis.com 200
+[debug] [2025-04-16T19:05:30.520Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/storage.googleapis.com [omitted]
+[info] ✔  functions: required API storage.googleapis.com is enabled 
+[debug] [2025-04-16T19:05:30.578Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/eventarc.googleapis.com 200
+[debug] [2025-04-16T19:05:30.579Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/courseconnect-c6a7b/services/eventarc.googleapis.com [omitted]
+[info] ✔  functions: required API eventarc.googleapis.com is enabled 
+[info] i  functions: generating the service identity for pubsub.googleapis.com... 
+[debug] [2025-04-16T19:05:30.580Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.580Z] Checked if tokens are valid: true, expires at: 1744831349639
+[info] i  functions: generating the service identity for eventarc.googleapis.com... 
+[debug] [2025-04-16T19:05:30.581Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.581Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.581Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/pubsub.googleapis.com:generateServiceIdentity [none]
+[debug] [2025-04-16T19:05:30.581Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/eventarc.googleapis.com:generateServiceIdentity [none]
+[debug] [2025-04-16T19:05:30.906Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/eventarc.googleapis.com:generateServiceIdentity 200
+[debug] [2025-04-16T19:05:30.907Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/eventarc.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-1095880459709@gcp-sa-eventarc.iam.gserviceaccount.com","uniqueId":"109337550557085178529"}}
+[debug] [2025-04-16T19:05:30.945Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/pubsub.googleapis.com:generateServiceIdentity 200
+[debug] [2025-04-16T19:05:30.946Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/1095880459709/services/pubsub.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-1095880459709@gcp-sa-pubsub.iam.gserviceaccount.com","uniqueId":"100090364831957219017"}}
+[debug] [2025-04-16T19:05:30.948Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.948Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:30.948Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b [none]
+[debug] [2025-04-16T19:05:31.137Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b 200
+[debug] [2025-04-16T19:05:31.137Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b {"projectNumber":"1095880459709","projectId":"courseconnect-c6a7b","lifecycleState":"ACTIVE","name":"courseconnect","labels":{"firebase":"enabled"},"createTime":"2023-05-26T18:15:07.259008Z"}
+[debug] [2025-04-16T19:05:31.139Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:31.139Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:31.139Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo [none]
+[debug] [2025-04-16T19:05:31.610Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo 200
+[debug] [2025-04-16T19:05:31.610Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo {"name":"projects/courseconnect-c6a7b/billingInfo","projectId":"courseconnect-c6a7b","billingAccountName":"billingAccounts/0119FF-CF2CE6-9CA7E4","billingEnabled":true}
+[debug] [2025-04-16T19:05:31.612Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:31.612Z] Checked if tokens are valid: true, expires at: 1744831349639
+[debug] [2025-04-16T19:05:31.612Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/us-central1/functions:generateUploadUrl [none]
+[debug] [2025-04-16T19:05:32.011Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/us-central1/functions:generateUploadUrl 200
+[debug] [2025-04-16T19:05:32.011Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/us-central1/functions:generateUploadUrl {"uploadUrl":"https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/2e033666-7349-406c-98a4-554625fd4b3e.zip?GoogleAccessId=service-1095880459709@gcf-admin-robot.iam.gserviceaccount.com&Expires=1744832131&Signature=YGo4wFk6m83e1S%2BPHVP0sYeTuewkjLy1QNEE%2BOuO64WLCjOY3c46EDMlUVaE4YjYyTipx%2BbmWfzlJDmSgSZmN409YRYeSSS6mhZQhXxPKUH9UG8bG34FnS2HiB3vj%2BL88f4eAussTRzQlzyziZXg8EcPTNlfvz8o2iGSsxT7Su09Qt2OpkhT5udFURe8PBAfWFVceIs3StrQYiGHGm8Z2bfJCtDfWdRB4dl1id9WeXbNqAdab%2B5N1jCPK%2FOGLel%2FjZu2snDzjPri5flatAZMDmdgtVxa2Sl7m7Y8JXwykWxtn3uIkd1SBV5f4W7XGTFCuPKyCFrTSP04MMjpScGSeg%3D%3D","storageSource":{"bucket":"gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com","object":"2e033666-7349-406c-98a4-554625fd4b3e.zip"}}
+[debug] [2025-04-16T19:05:32.013Z] >>> [apiv2][query] PUT https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/2e033666-7349-406c-98a4-554625fd4b3e.zip GoogleAccessId=service-1095880459709%40gcf-admin-robot.iam.gserviceaccount.com&Expires=1744832131&Signature=YGo4wFk6m83e1S%2BPHVP0sYeTuewkjLy1QNEE%2BOuO64WLCjOY3c46EDMlUVaE4YjYyTipx%2BbmWfzlJDmSgSZmN409YRYeSSS6mhZQhXxPKUH9UG8bG34FnS2HiB3vj%2BL88f4eAussTRzQlzyziZXg8EcPTNlfvz8o2iGSsxT7Su09Qt2OpkhT5udFURe8PBAfWFVceIs3StrQYiGHGm8Z2bfJCtDfWdRB4dl1id9WeXbNqAdab%2B5N1jCPK%2FOGLel%2FjZu2snDzjPri5flatAZMDmdgtVxa2Sl7m7Y8JXwykWxtn3uIkd1SBV5f4W7XGTFCuPKyCFrTSP04MMjpScGSeg%3D%3D
+[debug] [2025-04-16T19:05:32.013Z] >>> [apiv2][body] PUT https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/2e033666-7349-406c-98a4-554625fd4b3e.zip [stream]
+[debug] [2025-04-16T19:05:32.381Z] <<< [apiv2][status] PUT https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/2e033666-7349-406c-98a4-554625fd4b3e.zip 200
+[debug] [2025-04-16T19:05:32.382Z] <<< [apiv2][body] PUT https://storage.googleapis.com/gcf-v2-uploads-1095880459709.us-central1.cloudfunctions.appspot.com/2e033666-7349-406c-98a4-554625fd4b3e.zip [omitted]
+[info] ✔  functions: functions folder uploaded successfully 
+[error] 
+[error] Error: [processSignUpForm(us-central1)] Upgrading from 1st Gen to 2nd Gen is not yet supported. See https://firebase.google.com/docs/functions/2nd-gen-upgrade before migrating to 2nd Gen.

@@ -17,6 +17,61 @@ let transporter = nodemailer.createTransport({
   },
 });
 
+export function sendApplicantToFaculty(project_title) {
+  const mailOptions = {
+    from: email,
+    to: user.email,
+    subject: `Application Recieved for ${project_title}`,
+    text: `Hi ${user.name},\n\nWe have receieved a new application for ${posting.project_title}. \n\nBest regards,\nCourse Connect Team`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(
+        'Error occurred while sending applicant to faculty email:',
+        error
+      );
+    } else {
+      console.log('applicant to faculty sent:', info.response);
+    }
+  });
+}
+
+export function sendStatusUpdateToApplicant(project_title, status) {
+  var mailOptions
+
+  if (status == "Denied") {
+    mailOptions = {
+      from: email,
+      to: user.email,
+      subject: `Application Status Change for ${project_title}`,
+      text: `Dear ${user.name},\n\n
+Thank you for taking the time to apply for the ${project_title} role. We enjoyed learning about your skills and accomplishments.
+After careful consideration, we have decided to move forward with another candidate whose background more closely matches our current needs. We were impressed by your qualifications and will keep your application on file.
+In the meantime, we wish you every success in your job search and future endeavors.
+Thank you again for your interest. \n\nBest regards,\nCourse Connect Team`,
+    };
+  } else if (status == "Approved") {
+    mailOptions = {
+      from: email,
+      to: user.email,
+      subject: `Application Status Change for ${project_title}`,
+      text: `Dear ${user.name},\n\n Congratulations! We are delighted to let you know that we would like to offer you the position ${project_title}. We believe your experience will make you a great addition to our team. A member in the department will reach out regarding future steps.\n\nBest regards,\nCourse Connect Team`,
+    };
+  }
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(
+        'Error occurred while sending status update email',
+        error
+      );
+    } else {
+      console.log('Status update email sent:', info.response);
+    }
+  });
+}
+
 export function sendForgotPasswordEmail(user, resetLink) {
   const mailOptions = {
     from: email,

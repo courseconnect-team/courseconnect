@@ -18,6 +18,8 @@ import {
   sendUnapprovedUserNotificationEmail,
   sendFacultyAssignedNotificationEmail,
   sendRenewTAEmail,
+  sendApplicantToFaculty,
+  sendStatusUpdateToApplicant
 } from './nodemailer';
 
 const admin = require('firebase-admin');
@@ -35,6 +37,12 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
   } else {
     const { type, data } = req.body;
     switch (type) {
+      case 'sendApplicantToFaculty':
+        sendApplicantToFaculty(data.project_title)
+        break
+      case 'sendStatusUpdateToApplicant':
+        sendStatusUpdateToApplicant(data.project_title, data.status)
+        break
       case 'forgotPassword':
         sendForgotPasswordEmail(data.user, data.resetLink);
         break;
