@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import ThumbUpAltOutlinedIcon from "@mui/icons-material/ThumbUpAltOutlined";
 import ThumbDownAltOutlinedIcon from "@mui/icons-material/ThumbDownAltOutlined";
+import ReviewModal from './ReviewModal';
 
 
 interface ApplicationTileProps {
@@ -57,7 +58,7 @@ const ApplicationTile: React.FC<ApplicationTileProps> = ({
                     <IconButton color="error">
                         <ThumbDownAltOutlinedIcon onClick={() => changeStatus(item.id, "Denied")}/>
                     </IconButton>
-                    <Button variant="outlined">Review</Button>
+                    <ReviewModal item={item}/>
                 </Stack>
             )}
             {status === "Approved" && (

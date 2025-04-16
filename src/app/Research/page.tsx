@@ -190,18 +190,6 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
     }
   };
 
-  const patchResearchPosting = async (formData: any) => {
-    console.log('formData: ', formData);
-    const docRef = doc(firebase.firestore(), 'research-listings', formData.id);
-    try {
-      // This updates only the specified fields without overwriting the entire document.
-      await updateDoc(docRef, formData);
-      console.log('Document updated successfully!');
-    } catch (error) {
-      console.error('Error updating document: ', error);
-    }
-  };
-
   return (
     <>
       <Toaster />

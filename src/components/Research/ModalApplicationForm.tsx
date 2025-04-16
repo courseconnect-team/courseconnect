@@ -45,6 +45,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!user) return;
