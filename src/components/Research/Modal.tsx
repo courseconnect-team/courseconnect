@@ -12,6 +12,7 @@ import {
   Checkbox,
   InputLabel,
   FormControlLabel,
+  InputAdornment,
 } from '@mui/material';
 import firebase from '@/firebase/firebase_config';
 import { collection, addDoc } from 'firebase/firestore';
@@ -26,8 +27,8 @@ interface FormData {
   department: string;
   faculty_mentor: string;
   phd_student_mentor: string;
-  terms_available: string;
-  student_level: string;
+  terms_available: string[];
+  student_level: string[];
   prerequisites: string;
   credit: string;
   stipend: string;
@@ -189,57 +190,83 @@ const ResearchModal: React.FC<ResearchModal> = ({
             </Grid>
 
             {/* Terms Available */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
-                margin="dense"
+                select
                 label="Terms Available"
+                name="terms_available_display" // Change the name to avoid submitting this field
+                value={formData.terms_available.split(',')} // Convert the string to an array for the Select component
+                onChange={(e) => {
+                  const value = e.target.value as string[];
+                  setFormData((prev) => ({
+                    ...prev,
+                    terms_available: value.join(','), // Convert the array back to a comma-separated string
+                  }));
+                }}
+                SelectProps={{
+                  multiple: true, // Enable multiple selection
+                }}
+                fullWidth
+              >
+                {['Fall', 'Spring', 'Summer'].map((term) => (
+                  <MenuItem key={term} value={term}>
+                    {term}
+                  </MenuItem>
+                ))}
+              </TextField>
+              {/* Hidden input for Terms Available */}
+              <input
+                type="hidden"
                 name="terms_available"
                 value={formData.terms_available}
-                onChange={handleChange}
-                fullWidth
               />
             </Grid>
-
+            {/* Log Student Level */}
+            <Grid item xs={12}>
+              <Button
+                onClick={() =>
+                  console.log('Student Level:', formData.student_level)
+                }
+                sx={{
+                  textTransform: 'none',
+                  color: '#5A41D8',
+                  fontWeight: 500,
+                }}
+              >
+                Log Student Level
+              </Button>
+            </Grid>
             {/* Student Level */}
             <Grid item xs={12}>
               <TextField
                 select
                 label="Student Level"
-                name="student_level"
-                value={formData.student_level}
-                onChange={(e) =>
-                  setFormData({ ...formData, student_level: e.target.value })
-                }
-                fullWidth
-                SelectProps={{
-                  renderValue: (selected) => selected.split(',').join(', '),
+                name="student_level_display" // Change the name to avoid submitting this field
+                value={formData.student_level.split(',')} // Convert the string to an array for the Select component
+                onChange={(e) => {
+                  const value = e.target.value as string[];
+                  setFormData((prev) => ({
+                    ...prev,
+                    student_level: value.join(','), // Convert the array back to a comma-separated string
+                  }));
                 }}
+                SelectProps={{
+                  multiple: true, // Enable multiple selection
+                }}
+                fullWidth
               >
                 {['Freshman', 'Sophomore', 'Junior', 'Senior'].map((level) => (
-                  <MenuItem key={level} value={level.toLowerCase()}>
-                    <Checkbox
-                      checked={formData.student_level.includes(
-                        level.toLowerCase()
-                      )}
-                      onChange={(e) => {
-                        const { value, checked } = e.target;
-                        setFormData((prev) => ({
-                          ...prev,
-                          student_level: checked
-                            ? [...prev.student_level.split(','), value].join(
-                                ','
-                              )
-                            : prev.student_level
-                                .split(',')
-                                .filter((item) => item !== value)
-                                .join(','),
-                        }));
-                      }}
-                    />
+                  <MenuItem key={level} value={level}>
                     {level}
                   </MenuItem>
                 ))}
               </TextField>
+              {/* Hidden input for Student Level */}
+              <input
+                type="hidden"
+                name="student_level"
+                value={formData.student_level}
+              />
             </Grid>
 
             {/* Prerequisites */}
@@ -276,6 +303,11 @@ const ResearchModal: React.FC<ResearchModal> = ({
                 name="stipend"
                 value={formData.stipend}
                 onChange={handleChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ), // Add dollar sign
+                }}
                 fullWidth
               />
             </Grid>
