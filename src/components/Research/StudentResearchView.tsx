@@ -9,6 +9,7 @@ import {
   Button,
   Typography,
   Grid,
+  Container,
 } from '@mui/material';
 import ProjectCard from '@/components/Research/ProjectCard';
 import ApplicationCard from '@/components/Research/ApplicationCard';
@@ -49,199 +50,192 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   const [myApplications, showMyApplications] = useState(true);
 
   return (
-    <>
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Research
-        </Typography>
-        <Box
-          marginTop="380px"
-          justifyContent="space-between"
-          display="flex"
-          flexWrap="wrap"
+    <Container 
+      maxWidth="xl"
+      sx={{
+        marginTop: "380px",
+        paddingBottom: "80px",
+        px: { xs: '4%', sm: '6%', md: '8%' }  // Responsive horizontal padding
+      }}
+    >
+      
+      <Typography variant="h4" sx={{ mt: 2, mb: 3 }}>Research</Typography>
+      
+      {/* Filter Controls */}
+      <Box 
+        sx={{
+          display: 'flex',
+          flexDirection: 'row', // Always keep row direction
+          flexWrap: 'wrap', // Allow wrapping to next line
+          alignItems: 'center',
+          gap: 2,
+          mb: 4
+        }}
+      >
+        <TextField
+          label="Search Positions"
+          variant="outlined"
+          size="small"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              const searchText = (
+                e.target as HTMLInputElement
+              ).value.toLowerCase();
+              const filteredListings = researchListings.filter((item) =>
+                item.project_title.toLowerCase().includes(searchText)
+              );
+              setResearchListings(filteredListings);
+            }
+          }}
+          sx={{
+            minWidth: { xs: '100%', sm: '300px' }, // Full width on xs, min-width on sm+
+            flexGrow: { sm: 1 }, // Only grow on sm and above
+            mb: { xs: 1, sm: 0 } // Add bottom margin on xs only
+          }}
+        />
+        <Button
+          variant="outlined"
+          onClick={() => getResearchListings()}
+          sx={{ height: '40px' }}
         >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom="16px"
+          Clear
+        </Button>
+        
+        <FormControl size="small" sx={{ minWidth: '130px', flexShrink: 0 }}>
+          <InputLabel>Department</InputLabel>
+          <Select
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
           >
-            <TextField
-              label="Search Positions"
-              variant="outlined"
-              size="small"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const searchText = (
-                    e.target as HTMLInputElement
-                  ).value.toLowerCase();
-                  const filteredListings = researchListings.filter((item) =>
-                    item.project_title.toLowerCase().includes(searchText)
-                  );
-                  setResearchListings(filteredListings);
-                }
-              }}
-              sx={{
-                flex: 1,
-                marginLeft: '96px',
-                marginRight: '16px',
-                width: '600px',
-              }}
-            />
-            <Button
-              variant="outlined"
-              onClick={() => getResearchListings()}
-              sx={{ marginRight: '16px', height: '40px' }}
-            >
-              Clear
-            </Button>
-            <FormControl
-              size="small"
-              sx={{ minWidth: 150, marginRight: '16px' }}
-            >
-              <InputLabel>Department</InputLabel>
-              <Select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="Computer Science">Computer Science</MenuItem>
-                <MenuItem value="Biology">Biology</MenuItem>
-                <MenuItem value="Physics">Physics</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl
-              size="small"
-              sx={{ minWidth: 150, marginRight: '16px' }}
-            >
-              <InputLabel>Student Level</InputLabel>
-              <Select
-                value={studentLevel}
-                onChange={(e) => setStudentLevel(e.target.value)}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="freshman">Freshman</MenuItem>
-                <MenuItem value="sophomore">Sophomore</MenuItem>
-                <MenuItem value="junior">Junior</MenuItem>
-                <MenuItem value="senior">Senior</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Terms Available</InputLabel>
-              <Select
-                value={termsAvailable}
-                onChange={(e) => setTermsAvailable(e.target.value)}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="spring">Spring</MenuItem>
-                <MenuItem value="summer">Summer</MenuItem>
-                <MenuItem value="fall">Fall</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-
-          {/* Center: "Research Board View" Button */}
-          <Button
-            sx={{
-              backgroundColor: '#5A41D8', // Same purple as Edit Application
-              color: '#FFFFFF', // White text
-              textTransform: 'none', // Keep text normal case
-              borderRadius: '8px', // Rounded corners
-              boxShadow: '0px 0px 8px #E5F0DC', // Subtle greenish glow
-              fontWeight: 500,
-              padding: '10px 24px',
-              marginBottom: '16px', // Add vertical space below the button
-              '&:hover': {
-                backgroundColor: '#5A41D8', // Keep hover consistent
-                boxShadow: '0px 0px 8px #E5F0DC',
-              },
-            }}
-            onClick={() => showMyApplications(!myApplications)}
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="Computer Science">Computer Science</MenuItem>
+            <MenuItem value="Biology">Biology</MenuItem>
+            <MenuItem value="Physics">Physics</MenuItem>
+          </Select>
+        </FormControl>
+        
+        <FormControl size="small" sx={{ minWidth: '150px', flexShrink: 0 }}>
+          <InputLabel>Student Level</InputLabel>
+          <Select
+            value={studentLevel}
+            onChange={(e) => setStudentLevel(e.target.value)}
           >
-            {myApplications ? 'Show My Applications' : 'Switch to Default View'}
-          </Button>
-
-          {/* Conditional rendering based on state */}
-          {myApplications ? (
-            <Grid container spacing={4} mt={3} mx="5%">
-              {researchListings.map((item, index) => (
-                <Grid item xs={12} sm={6} md={6} key={index}>
-                  <ProjectCard
-                    listingId={item.id}
-                    userRole={role}
-                    project_title={item.project_title}
-                    department={item.department}
-                    faculty_mentor={item.faculty_mentor}
-                    terms_available={Object.keys(item.terms_available)
-                      .filter(
-                        (key) =>
-                          item.terms_available[
-                            key as keyof typeof item.terms_available
-                          ]
-                      )
-                      .join(', ')}
-                    student_level={Object.keys(item.student_level)
-                      .filter(
-                        (key) =>
-                          item.student_level[
-                            key as keyof typeof item.student_level
-                          ]
-                      )
-                      .join(', ')}
-                    project_description={item.project_description}
-                    phd_student_mentor={item.phd_student_mentor}
-                    prerequisites={item.prerequisites}
-                    credit={item.credit}
-                    stipend={item.stipend}
-                    application_requirements={item.application_requirements}
-                    application_deadline={item.application_deadline}
-                    website={item.website}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          ) : (
-            <Grid container spacing={4} mt={3} mx="5%">
-              {researchApplications.map((item, index) => (
-                <Grid item xs={12} sm={6} md={6} key={index}>
-                  <ApplicationCard
-                    userRole={role}
-                    project_title={`Application ID: ${item.appid}`} // Displaying appid as the title
-                    department={item.department || 'N/A'} // Fallback to 'N/A' if department is missing
-                    faculty_mentor={
-                      `${item.first_name} ${item.last_name}`.trim() || 'N/A'
-                    } // Combining first and last name
-                    terms_available={
-                      item.terms_available
-                        ? Object.keys(item.terms_available)
-                            .filter(
-                              (key) =>
-                                item.terms_available[
-                                  key as keyof typeof item.terms_available
-                                ]
-                            )
-                            .join(', ')
-                        : 'N/A' // Fallback if terms_available is undefined or null
-                    }
-                    student_level={item.degree || 'N/A'} // Mapping degree to student level
-                    project_description={
-                      item.qualifications || 'No description provided'
-                    } // Using qualifications as description
-                    phd_student_mentor="N/A" // Placeholder if no mentor info is available
-                    prerequisites="N/A" // Placeholder if no prerequisites info is available
-                    credit="N/A" // Placeholder if no credit info is available
-                    stipend="N/A" // Placeholder if no stipend info is available
-                    application_requirements="N/A" // Placeholder if no requirements info is available
-                    application_deadline={item.date_applied || 'N/A'} // Using date_applied as a deadline
-                    website="N/A" // Placeholder if no website info is available
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="freshman">Freshman</MenuItem>
+            <MenuItem value="sophomore">Sophomore</MenuItem>
+            <MenuItem value="junior">Junior</MenuItem>
+            <MenuItem value="senior">Senior</MenuItem>
+          </Select>
+        </FormControl>
+        
+        <FormControl size="small" sx={{ minWidth: '180px', flexShrink: 0 }}>
+          <InputLabel>Terms Available</InputLabel>
+          <Select
+            value={termsAvailable}
+            onChange={(e) => setTermsAvailable(e.target.value)}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="spring">Spring</MenuItem>
+            <MenuItem value="summer">Summer</MenuItem>
+            <MenuItem value="fall">Fall</MenuItem>
+          </Select>
+        </FormControl>
+        
+        <Button
+          sx={{
+            backgroundColor: '#5A41D8',
+            color: '#FFFFFF',
+            textTransform: 'none',
+            borderRadius: '8px',
+            boxShadow: '0px 0px 8px #E5F0DC',
+            fontWeight: 500,
+            marginLeft: { md: 'auto' }, // Push to right on md and larger screens
+            '&:hover': {
+              backgroundColor: '#5A41D8',
+              boxShadow: '0px 0px 8px #E5F0DC',
+            },
+          }}
+          onClick={() => showMyApplications(!myApplications)}
+        >
+          {myApplications ? 'Show My Applications' : 'Switch to Default View'}
+        </Button>
       </Box>
-    </>
+
+      {/* Cards Grid */}
+      <Grid container spacing={3}>
+        {myApplications
+          ? researchListings.map((item, index) => (
+              <Grid item xs={12} md={6} lg={6} key={index}>
+                <ProjectCard
+                  listingId={item.id}
+                  userRole={role}
+                  project_title={item.project_title}
+                  department={item.department}
+                  faculty_mentor={item.faculty_mentor}
+                  terms_available={Object.keys(item.terms_available)
+                    .filter(
+                      (key) =>
+                        item.terms_available[
+                          key as keyof typeof item.terms_available
+                        ]
+                    )
+                    .join(', ')}
+                  student_level={Object.keys(item.student_level)
+                    .filter(
+                      (key) =>
+                        item.student_level[
+                          key as keyof typeof item.student_level
+                        ]
+                    )
+                    .join(', ')}
+                  project_description={item.project_description}
+                  phd_student_mentor={item.phd_student_mentor}
+                  prerequisites={item.prerequisites}
+                  credit={item.credit}
+                  stipend={item.stipend}
+                  application_requirements={item.application_requirements}
+                  application_deadline={item.application_deadline}
+                  website={item.website}
+                />
+              </Grid>
+            ))
+          : researchApplications.map((item, index) => (
+              <Grid item xs={12} md={6} lg={6} key={index}>
+                <ApplicationCard
+                  userRole={role}
+                  project_title={`Application ID: ${item.appid}`}
+                  department={item.department || 'N/A'}
+                  faculty_mentor={
+                    `${item.first_name} ${item.last_name}`.trim() || 'N/A'
+                  }
+                  terms_available={
+                    item.terms_available
+                      ? Object.keys(item.terms_available)
+                          .filter(
+                            (key) =>
+                              item.terms_available[
+                                key as keyof typeof item.terms_available
+                              ]
+                          )
+                          .join(', ')
+                      : 'N/A'
+                  }
+                  student_level={item.degree || 'N/A'}
+                  project_description={
+                    item.qualifications || 'No description provided'
+                  }
+                  phd_student_mentor="N/A"
+                  prerequisites="N/A"
+                  credit="N/A"
+                  stipend="N/A"
+                  application_requirements="N/A"
+                  application_deadline={item.date_applied || 'N/A'}
+                  website="N/A"
+                />
+              </Grid>
+            ))}
+      </Grid>
+    </Container>
   );
 };
 
