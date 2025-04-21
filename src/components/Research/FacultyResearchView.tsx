@@ -4,7 +4,16 @@ import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import ResearchModal from '@/components/Research/Modal';
 import ProjectCard from '@/components/Research/ProjectCard';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
-import { collection, addDoc, updateDoc, doc, where, query, documentId, getDocs } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  where,
+  query,
+  documentId,
+  getDocs,
+} from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
 
 interface FacultyResearchViewProps {
@@ -16,25 +25,28 @@ interface FacultyResearchViewProps {
 }
 
 const getResearchApplicationsListings = async (researchListing: any) => {
-  console.log("postings queried", researchListing)
+  console.log('postings queried', researchListing);
   const applicationsIds = researchListing.applications || [];
   if (applicationsIds.length === 0) {
     return [];
   }
   const db = firebase.firestore();
-  const q = query(collection(db, 'research-applications'), where(documentId(), 'in', applicationsIds));
+  const q = query(
+    collection(db, 'research-applications'),
+    where(documentId(), 'in', applicationsIds)
+  );
   try {
     const querySnapshot = await getDocs(q);
-    const applicationsList = querySnapshot.docs.map(doc => ({
+    const applicationsList = querySnapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
     return applicationsList;
   } catch (error) {
-    console.error("Error retrieving documents:", error);
+    console.error('Error retrieving documents:', error);
   }
-  return []
-}
+  return [];
+};
 
 const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   researchListings,
@@ -71,11 +83,9 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
           >
             <FacultyApplicantsView
               id={selectedResearchId}
-              researchListing={
-                researchListings.find(
-                  (listing) => listing.id === selectedResearchId
-                )
-              }
+              researchListing={researchListings.find(
+                (listing) => listing.id === selectedResearchId
+              )}
               researchApplications={getResearchApplicationsListings}
               onBack={handleBackToListings}
             />
@@ -167,22 +177,8 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           project_title={item.project_title}
                           department={item.department}
                           faculty_mentor={item.faculty_mentor}
-                          terms_available={Object.keys(item.terms_available)
-                            .filter(
-                              (key) =>
-                                item.terms_available[
-                                key as keyof typeof item.terms_available
-                                ]
-                            )
-                            .join(', ')}
-                          student_level={Object.keys(item.student_level)
-                            .filter(
-                              (key) =>
-                                item.student_level[
-                                key as keyof typeof item.student_level
-                                ]
-                            )
-                            .join(', ')}
+                          terms_available={item.terms_available}
+                          student_level={item.student_level}
                           project_description={item.project_description}
                           faculty_members={item.faculty_members}
                           phd_student_mentor={item.phd_student_mentor}
@@ -212,22 +208,8 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                         project_title={item.project_title}
                         department={item.department}
                         faculty_mentor={item.faculty_mentor}
-                        terms_available={Object.keys(item.terms_available)
-                          .filter(
-                            (key) =>
-                              item.terms_available[
-                              key as keyof typeof item.terms_available
-                              ]
-                          )
-                          .join(', ')}
-                        student_level={Object.keys(item.student_level)
-                          .filter(
-                            (key) =>
-                              item.student_level[
-                              key as keyof typeof item.student_level
-                              ]
-                          )
-                          .join(', ')}
+                        terms_available={item.terms_available}
+                        student_level={item.student_level}
                         project_description={item.project_description}
                         faculty_members={item.faculty_members}
                         phd_student_mentor={item.phd_student_mentor}
