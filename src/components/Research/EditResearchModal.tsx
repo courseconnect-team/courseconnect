@@ -39,17 +39,6 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
     setFormData((prev: typeof formData) => ({ ...prev, [name]: value }));
   };
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData((prev: typeof formData) => ({
-      ...prev,
-      [name]: {
-        ...prev[name as keyof typeof formData],
-        [e.target.value]: checked,
-      },
-    }));
-  };
-
   const handleSubmit = async () => {
     try {
       const db = firebase.firestore();
@@ -189,34 +178,6 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
               onChange={handleChange}
               fullWidth
             />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Student Level"
-              name="student_level"
-              value={formData.student_level || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="subtitle1">Terms Available</Typography>
-            {['spring', 'summer', 'fall'].map((term) => (
-              <FormControlLabel
-                key={term}
-                control={
-                  <Checkbox
-                    value={term}
-                    checked={formData.terms_available?.[term] || false}
-                    onChange={handleCheckboxChange}
-                    name="terms_available"
-                  />
-                }
-                label={term.charAt(0).toUpperCase() + term.slice(1)}
-              />
-            ))}
           </Grid>
         </Grid>
       </DialogContent>

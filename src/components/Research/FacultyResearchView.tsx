@@ -180,22 +180,12 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           project_title={item.project_title}
                           department={item.department}
                           faculty_mentor={item.faculty_mentor}
-                          terms_available={Object.keys(item.terms_available)
-                            .filter(
-                              (key) =>
-                                item.terms_available[
-                                  key as keyof typeof item.terms_available
-                                ]
-                            )
+                          terms_available={Object.keys(
+                            item.terms_available || {}
+                          )
+                            .filter((term) => item.terms_available[term])
                             .join(', ')}
-                          student_level={Object.keys(item.student_level)
-                            .filter(
-                              (key) =>
-                                item.student_level[
-                                  key as keyof typeof item.student_level
-                                ]
-                            )
-                            .join(', ')}
+                          student_level={item.student_level}
                           project_description={item.project_description}
                           faculty_members={item.faculty_members}
                           phd_student_mentor={item.phd_student_mentor}
@@ -230,22 +220,8 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                         project_title={item.project_title}
                         department={item.department}
                         faculty_mentor={item.faculty_mentor}
-                        terms_available={Object.keys(item.terms_available)
-                          .filter(
-                            (key) =>
-                              item.terms_available[
-                                key as keyof typeof item.terms_available
-                              ]
-                          )
-                          .join(', ')}
-                        student_level={Object.keys(item.student_level)
-                          .filter(
-                            (key) =>
-                              item.student_level[
-                                key as keyof typeof item.student_level
-                              ]
-                          )
-                          .join(', ')}
+                        terms_available={item.terms_available}
+                        student_level={item.student_level}
                         project_description={item.project_description}
                         faculty_members={item.faculty_members}
                         phd_student_mentor={item.phd_student_mentor}

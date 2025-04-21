@@ -66,14 +66,13 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
           {department}
         </Typography>
         <Box mt={2}>
-          <Typography fontWeight="bold">Faculty Mentor:</Typography>
-          <Typography>{faculty_mentor}</Typography>
-
           <Typography fontWeight="bold">Terms Available:</Typography>
           <Typography>{terms_available}</Typography>
 
           <Typography fontWeight="bold">Student Level:</Typography>
           <Typography>{student_level}</Typography>
+          <Typography fontWeight="bold">Faculty Mentor:</Typography>
+          <Typography>{faculty_mentor}</Typography>
         </Box>
         <Box mt={2} sx={{ flexGrow: 1 }}>
           <Typography fontWeight="bold">[Research Description]</Typography>
