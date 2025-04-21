@@ -180,11 +180,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           project_title={item.project_title}
                           department={item.department}
                           faculty_mentor={item.faculty_mentor}
-                          terms_available={Object.keys(
-                            item.terms_available || {}
-                          )
-                            .filter((term) => item.terms_available[term])
-                            .join(', ')}
+                          terms_available={item.terms_available}
                           student_level={item.student_level}
                           project_description={item.project_description}
                           faculty_members={item.faculty_members}

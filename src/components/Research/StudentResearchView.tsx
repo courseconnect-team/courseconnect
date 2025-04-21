@@ -172,22 +172,8 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
                     project_title={item.project_title}
                     department={item.department}
                     faculty_mentor={item.faculty_mentor}
-                    terms_available={Object.keys(item.terms_available)
-                      .filter(
-                        (key) =>
-                          item.terms_available[
-                            key as keyof typeof item.terms_available
-                          ]
-                      )
-                      .join(', ')}
-                    student_level={Object.keys(item.student_level)
-                      .filter(
-                        (key) =>
-                          item.student_level[
-                            key as keyof typeof item.student_level
-                          ]
-                      )
-                      .join(', ')}
+                    terms_available={item.terms_available}
+                    student_level={item.student_level}
                     project_description={item.project_description}
                     phd_student_mentor={item.phd_student_mentor}
                     prerequisites={item.prerequisites}
@@ -211,18 +197,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
                     faculty_mentor={
                       `${item.first_name} ${item.last_name}`.trim() || 'N/A'
                     } // Combining first and last name
-                    terms_available={
-                      item.terms_available
-                        ? Object.keys(item.terms_available)
-                            .filter(
-                              (key) =>
-                                item.terms_available[
-                                  key as keyof typeof item.terms_available
-                                ]
-                            )
-                            .join(', ')
-                        : 'N/A' // Fallback if terms_available is undefined or null
-                    }
+                    terms_available={item.terms_available}
                     student_level={item.degree || 'N/A'} // Mapping degree to student level
                     project_description={
                       item.qualifications || 'No description provided'
