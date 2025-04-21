@@ -1,10 +1,22 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/firebase/auth/auth_context';
-import { Button, Grid, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { 
+  Button, 
+  Grid, 
+  TextField, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem,
+  CircularProgress, 
+  Box,
+  Typography 
+} from '@mui/material';
 import './style.css';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import DeleteUserButton from './DeleteUserButton';
+import GetUserRole from '@/firebase/util/GetUserRole';
 import { updateProfile } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -62,23 +74,26 @@ const textFieldStyles = (isEditable: boolean) => ({
 
 export default function Profile(props: ProfileProps) {
   const { user } = useAuth();
-  const uid = user.uid as string;
+  const [role, loading, error] = GetUserRole(user?.uid);
+  const uid = user?.uid as string;
   const db = getFirestore();
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [gpa, setGpa] = useState('');
   const [department, setDepartment] = useState('');
+
+  const [gpa, setGpa] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [graduationDate, setGraduationDate] = useState('');
   const [degree, setDegree] = useState('');
 
   const [updatedFirst, setUpdatedFirst] = useState('');
   const [updatedLast, setUpdatedLast] = useState('');
-  const [updatedEmail, setUpdatedEmail] = useState('');
-  const [updatedGpa, setUpdatedGpa] = useState('');
   const [updatedDepartment, setUpdatedDepartment] = useState('');
+  const [updatedGpa, setUpdatedGpa] = useState('');
   const [updatedPhoneNumber, setUpdatedPhoneNumber] = useState('');
   const [updatedGraduationDate, setUpdatedGraduationDate] = useState('');
   const [updatedDegree, setUpdatedDegree] = useState('');
@@ -88,9 +103,11 @@ export default function Profile(props: ProfileProps) {
 
   useEffect(() => {
     const fetchUserData = async () => {
+      setIsLoading(true);
+
       try {
-        const usersCollectionRef = collection(db, 'users_test');
-        const q = query(usersCollectionRef, where('userId', '==', uid));
+        const usersCollectionRef = collection(db, 'users');
+        const q = query(usersCollectionRef, where('uid', '==', uid));
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
@@ -103,49 +120,81 @@ export default function Profile(props: ProfileProps) {
           setDepartment(data.department || '');
           setPhoneNumber(data.phonenumber || '');
           setGraduationDate(data.graduationdate || '');
+          setDegree(data.degree || '');
         } else {
           console.log('No such document!');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchUserData();
+    if (uid) {
+      fetchUserData();
+    }
   }, [db, uid]);
 
   const handleSave = async (e: any) => {
     e.preventDefault();
     if (firstName.trim() !== '' && lastName.trim() !== '') {
       try {
-        const usersCollectionRef = collection(db, 'users_test');
-        const q = query(usersCollectionRef, where('userId', '==', uid));
+        const usersCollectionRef = collection(db, 'users');
+        const q = query(usersCollectionRef, where('uid', '==', uid));
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-          const docRef = doc(db, 'users_test', querySnapshot.docs[0].id);
+          const docRef = doc(db, 'users', querySnapshot.docs[0].id);
+          const docSnap = querySnapshot.docs[0];
+          const currentData = docSnap.data();
           const updatedData: any = {};
 
+          // Always include these fields for all users
           if (updatedFirst.trim() !== '') updatedData.firstname = updatedFirst;
           if (updatedLast.trim() !== '') updatedData.lastname = updatedLast;
-          if (updatedEmail.trim() !== '') updatedData.email = updatedEmail;
-          if (updatedGpa.trim() !== '') updatedData.gpa = updatedGpa;
-          if (updatedDepartment.trim() !== '')
-            updatedData.department = updatedDepartment;
-          if (updatedPhoneNumber.trim() !== '')
-            updatedData.phonenumber = updatedPhoneNumber;
-          if (updatedGraduationDate.trim() !== '')
-            updatedData.graduationdate = updatedGraduationDate;
-          if (updatedDegree.trim() !== '') updatedData.degree = updatedDegree;
+          if (updatedDepartment.trim() !== '') updatedData.department = updatedDepartment;
+          
+          // Only include student fields if user is not faculty
+          if (showStudentFields) {
+            // For GPA field
+            if (updatedGpa.trim() !== '') {
+              updatedData.gpa = updatedGpa;
+            }
+            
+            // For phone number field
+            if (updatedPhoneNumber.trim() !== '') {
+              updatedData.phonenumber = updatedPhoneNumber;
+            }
+            
+            // For graduation date field
+            if (updatedGraduationDate.trim() !== '') {
+              updatedData.graduationdate = updatedGraduationDate;
+            }
+            
+            // For degree field
+            if (updatedDegree.trim() !== '') {
+              updatedData.degree = updatedDegree;
+            }
+          }
 
-          await updateDoc(docRef, updatedData);
-          console.log('Profile updated successfully');
+          // Only update if there are changes
+          if (Object.keys(updatedData).length > 0) {
+            await updateDoc(docRef, updatedData);
+            console.log('Profile updated successfully');
+            alert('Profile updated successfully');
+            setIsEditing(false);
+            window.location.reload();
+          } else {
+            console.log('No changes to update');
+            alert('No changes detected');
+            setIsEditing(false);
+          }
         } else {
-          console.log('No such document!');
+          // This will only happen if the user ID doesn't exist in the collection
+          console.log('No document found for this user ID');
+          alert('Profile not found. Please contact support.');
         }
-        setIsEditing(false);
-        window.location.reload();
-        alert('Profile updated successfully');
       } catch (error) {
         console.error('Error updating profile: ', error);
         alert('Failed to update profile');
@@ -158,7 +207,6 @@ export default function Profile(props: ProfileProps) {
   const handleCancel = () => {
     setUpdatedFirst('');
     setUpdatedLast('');
-    setUpdatedEmail('');
     setUpdatedGpa('');
     setUpdatedDepartment('');
     setUpdatedPhoneNumber('');
@@ -166,6 +214,74 @@ export default function Profile(props: ProfileProps) {
     setUpdatedDegree('');
     setIsEditing(false);
   };
+
+  if (loading || isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          width: '100%',
+          backgroundColor: '#f5f5f5',
+        }}
+      >
+        <CircularProgress size={60} thickness={4} sx={{ color: '#5736ac' }} />
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            mt: 3, 
+            fontFamily: 'SF Pro Display-Bold, Helvetica',
+            color: '#5736ac' 
+          }}
+        >
+          Loading your profile...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          width: '100%',
+          backgroundColor: '#f5f5f5',
+          padding: 3,
+        }}
+      >
+        <Typography 
+          variant="h6" 
+          color="error" 
+          sx={{ textAlign: 'center' }}
+        >
+          There was an error loading your profile. Please try again later.
+        </Typography>
+        <Button 
+          variant="contained" 
+          onClick={() => window.location.reload()}
+          sx={{ 
+            mt: 2,
+            backgroundColor: '#5736ac',
+            '&:hover': {
+              backgroundColor: '#4a2d91',
+            }
+          }}
+        >
+          Refresh Page
+        </Button>
+      </Box>
+    );
+  }
+
+  const showStudentFields = role !== 'faculty';
 
   return (
     <>
@@ -247,34 +363,24 @@ export default function Profile(props: ProfileProps) {
                   sx={textFieldStyles(isEditing)}
                 />
               </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  fullWidth
-                  name="email"
-                  label="Email (not editable)"
-                  type="email"
-                  variant="outlined"
-                  value={email}
-                  disabled
-                  
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  name="phone"
-                  label="Phone Number"
-                  variant="outlined"
-                  type="tel"
-                  fullWidth
-                  placeholder={phoneNumber}
-                  value={updatedPhoneNumber}
-                  inputProps={{ readOnly: !isEditing }}
-                  InputLabelProps={{ shrink: true }}
-                  onChange={(e) => setUpdatedPhoneNumber(e.target.value)}
-                  sx={textFieldStyles(isEditing)}
-                />
-              </Grid>
-              <Grid item xs={6}>
+              {showStudentFields && (
+                <Grid item xs={6}>
+                  <TextField
+                    name="phone"
+                    label="Phone Number"
+                    variant="outlined"
+                    type="tel"
+                    fullWidth
+                    placeholder={phoneNumber}
+                    value={updatedPhoneNumber}
+                    inputProps={{ readOnly: !isEditing }}
+                    InputLabelProps={{ shrink: true }}
+                    onChange={(e) => setUpdatedPhoneNumber(e.target.value)}
+                    sx={textFieldStyles(isEditing)}
+                  />
+                </Grid>
+              )}
+              <Grid item xs={showStudentFields ? 6 : 12}>
                 <TextField
                   name="department"
                   label="Department"
@@ -287,68 +393,70 @@ export default function Profile(props: ProfileProps) {
                   sx={textFieldStyles(isEditing)}
                 />
               </Grid>
-              <Grid item xs={6}>
-                  <Select
-                    name="degree"
-                    fullWidth
-                    label="Degree"
-                    variant="outlined"
-                    placeholder={degree}
-                    value={updatedDegree}
-                    onChange={(e) => setUpdatedDegree(e.target.value)}
-                    displayEmpty
-                    inputProps={{ readOnly: !isEditing, shrink: true }}
-                    sx={{
-                      ...textFieldStyles(isEditing),
-                    }}
-                  >
-                    <MenuItem value="" disabled sx={{ color: '#888' }}>
-                      Select Degree
-                    </MenuItem>
-                    <MenuItem value="BS">BS</MenuItem>
-                    <MenuItem value="BS/MS">BS/MS</MenuItem>
-                    <MenuItem value="MS">MS</MenuItem>
-                    <MenuItem value="PhD">PhD</MenuItem>
-                  </Select>
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  name="gpa"
-                  label="GPA"
-                  variant="outlined"
-                  fullWidth
-                  type="number"
-                  placeholder={gpa.toString()}
-                  value={updatedGpa}
-                  InputLabelProps={{ shrink: true }}
-                  inputProps={{
-                    step: 0.1,
-                    min: 0.0,
-                    max: 4.0,
-                    readOnly: !isEditing,
-                  }}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    if (value >= 0.0 && value <= 4.0) {
-                      setUpdatedGpa(e.target.value);
-                    }
-                  }}
-                  sx={textFieldStyles(isEditing)}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  name="graduationDate"
-                  label="Graduation Date"
-                  fullWidth
-                  placeholder={graduationDate}
-                  value={updatedGraduationDate}
-                  inputProps={{ readOnly: !isEditing }}
-                  InputLabelProps={{ shrink: true }}
-                  onChange={(e) => setUpdatedGraduationDate(e.target.value)}
-                  sx={textFieldStyles(isEditing)}
-                />
-              </Grid>
+              {showStudentFields && (
+                <>
+                  <Grid item xs={6}>
+                    <FormControl fullWidth variant="outlined">
+                      <InputLabel shrink={true}>Degree</InputLabel>
+                      <Select
+                        name="degree"
+                        value={updatedDegree}
+                        onChange={(e) => setUpdatedDegree(e.target.value)}
+                        displayEmpty
+                        disabled={!isEditing}
+                        label="Degree"
+                        sx={textFieldStyles(isEditing)}
+                      >
+                        <MenuItem value="" disabled>
+                          <em>Select Degree</em>
+                        </MenuItem>
+                        <MenuItem value="BS">BS</MenuItem>
+                        <MenuItem value="BS/MS">BS/MS</MenuItem>
+                        <MenuItem value="MS">MS</MenuItem>
+                        <MenuItem value="PhD">PhD</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      name="gpa"
+                      label="GPA"
+                      variant="outlined"
+                      fullWidth
+                      type="number"
+                      placeholder={gpa.toString()}
+                      value={updatedGpa}
+                      InputLabelProps={{ shrink: true }}
+                      inputProps={{
+                        step: 0.1,
+                        min: 0.0,
+                        max: 4.0,
+                        readOnly: !isEditing,
+                      }}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        if (value >= 0.0 && value <= 4.0) {
+                          setUpdatedGpa(e.target.value);
+                        }
+                      }}
+                      sx={textFieldStyles(isEditing)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      name="graduationDate"
+                      label="Graduation Date"
+                      fullWidth
+                      placeholder={graduationDate}
+                      value={updatedGraduationDate}
+                      inputProps={{ readOnly: !isEditing }}
+                      InputLabelProps={{ shrink: true }}
+                      onChange={(e) => setUpdatedGraduationDate(e.target.value)}
+                      sx={textFieldStyles(isEditing)}
+                    />
+                  </Grid>
+                </>
+              )}
             </Grid>
           </form>
         </div>
