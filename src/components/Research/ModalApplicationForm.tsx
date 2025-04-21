@@ -70,9 +70,9 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
             degree: profileData.degree || '',
             gpa: profileData.gpa || '',
             graduationDate: profileData.graduationdate || '',
-            resume: profileData.resume || '',
-            qualifications: profileData.qualifications || '',
-            weeklyHours: profileData.weeklyHours || '',
+            resume: '',
+            qualifications: '',
+            weeklyHours: '',
           }));
         } else {
           console.warn('⚠️ No matching profile found for user.uid');
@@ -116,6 +116,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
         .collection('research-listings')
         .where('id', '==', listingId)
         .get();
+      console.log(listingId);
 
       if (querySnapshot.empty) {
         throw new Error('No matching listing found!');
