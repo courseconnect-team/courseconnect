@@ -54,8 +54,8 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
       try {
         const db = firebase.firestore();
         const snapshot = await db
-          .collection('users_test') // change users to users_test for profile database
-          .where('userId', '==', user.uid) // change uid to userId
+          .collection('users') // change users to users_test for profile database
+          .where('uid', '==', user.uid) // change uid to userId
           .get();
 
         if (!snapshot.empty) {
@@ -99,6 +99,39 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
 
     try {
       const db = firebase.firestore();
+
+      // First, update the user profile with any changed form data
+      console.log('⏳ Updating user profile if values changed...');
+      const userRef = db.collection('users').where('uid', '==', user.uid);
+      const userSnapshot = await userRef.get();
+      
+      if (!userSnapshot.empty) {
+        const userDocRef = userSnapshot.docs[0].ref;
+        const userData = userSnapshot.docs[0].data();
+        
+        // Check if any profile data has been updated
+        const updatedProfileData = {
+          firstname: formData.firstname !== userData.firstname ? formData.firstname : userData.firstname,
+          lastname: formData.lastname !== userData.lastname ? formData.lastname : userData.lastname,
+          phonenumber: formData.phone !== userData.phonenumber ? formData.phone : userData.phonenumber,
+          department: formData.department !== userData.department ? formData.department : userData.department,
+          degree: formData.degree !== userData.degree ? formData.degree : userData.degree,
+          gpa: formData.gpa !== userData.gpa ? formData.gpa : userData.gpa,
+          graduationdate: formData.graduationDate !== userData.graduationdate ? formData.graduationDate : userData.graduationdate
+        };
+        
+        // Only update fields that have changed
+        const fieldsToUpdate = Object.entries(updatedProfileData)
+          .filter(([key, value]) => userData[key] !== value)
+          .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+        
+        if (Object.keys(fieldsToUpdate).length > 0) {
+          await userDocRef.update(fieldsToUpdate);
+          console.log('User profile updated with new values');
+        } else {
+          console.log('No profile updates needed');
+        }
+      }
 
       console.log('⏳ Trying to add application to research-applications...');
       const applicationRef = await db.collection('research-applications').add({
