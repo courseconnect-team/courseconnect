@@ -57,8 +57,6 @@ const ResearchModal: React.FC<ResearchModal> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>(currentFormData);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageUploading, setImageUploading] = useState(false);
 
   /** Opens the dialog (modal). */
   const handleOpen = () => {
@@ -81,47 +79,14 @@ const ResearchModal: React.FC<ResearchModal> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /** Handles image file selection. */
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setImageFile(event.target.files[0]);
-    }
-  };
-
-  /** Uploads the image to Firebase Storage and returns the download URL. */
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return null;
-
-    const storage = getStorage();
-    const storageRef = ref(
-      storage,
-      `research-images/${uuidv4()}-${imageFile.name}`
-    );
-    setImageUploading(true);
-
-    try {
-      await uploadBytes(storageRef, imageFile);
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      return null;
-    } finally {
-      setImageUploading(false);
-    }
-  };
-
   /** Submits the form and clears it, then closes the dialog. */
   const handleSubmit = async () => {
-    const imageUrl = await uploadImage();
-
     const finalFormData = {
       ...formData,
       id: uuidv4(),
       creator_id: uid,
       faculty_members: [uid],
       applications: [],
-      image_url: imageUrl || '', // Add the image URL to the form data
     };
 
     firebaseQuery(finalFormData);
@@ -190,82 +155,25 @@ const ResearchModal: React.FC<ResearchModal> = ({
             </Grid>
 
             {/* Terms Available */}
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
               <TextField
-                select
+                margin="dense"
                 label="Terms Available"
-                name="terms_available_display" // Change the name to avoid submitting this field
-                value={formData.terms_available.split(',')} // Convert the string to an array for the Select component
-                onChange={(e) => {
-                  const value = e.target.value as string[];
-                  setFormData((prev) => ({
-                    ...prev,
-                    terms_available: value.join(','), // Convert the array back to a comma-separated string
-                  }));
-                }}
-                SelectProps={{
-                  multiple: true, // Enable multiple selection
-                }}
-                fullWidth
-              >
-                {['Fall', 'Spring', 'Summer'].map((term) => (
-                  <MenuItem key={term} value={term}>
-                    {term}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {/* Hidden input for Terms Available */}
-              <input
-                type="hidden"
                 name="terms_available"
                 value={formData.terms_available}
+                onChange={handleChange}
+                fullWidth
               />
             </Grid>
-            {/* Log Student Level */}
-            <Grid item xs={12}>
-              <Button
-                onClick={() =>
-                  console.log('Student Level:', formData.student_level)
-                }
-                sx={{
-                  textTransform: 'none',
-                  color: '#5A41D8',
-                  fontWeight: 500,
-                }}
-              >
-                Log Student Level
-              </Button>
-            </Grid>
             {/* Student Level */}
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
               <TextField
-                select
+                margin="dense"
                 label="Student Level"
-                name="student_level_display" // Change the name to avoid submitting this field
-                value={formData.student_level.split(',')} // Convert the string to an array for the Select component
-                onChange={(e) => {
-                  const value = e.target.value as string[];
-                  setFormData((prev) => ({
-                    ...prev,
-                    student_level: value.join(','), // Convert the array back to a comma-separated string
-                  }));
-                }}
-                SelectProps={{
-                  multiple: true, // Enable multiple selection
-                }}
-                fullWidth
-              >
-                {['Freshman', 'Sophomore', 'Junior', 'Senior'].map((level) => (
-                  <MenuItem key={level} value={level}>
-                    {level}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {/* Hidden input for Student Level */}
-              <input
-                type="hidden"
                 name="student_level"
                 value={formData.student_level}
+                onChange={handleChange}
+                fullWidth
               />
             </Grid>
 
@@ -380,36 +288,6 @@ const ResearchModal: React.FC<ResearchModal> = ({
                 rows={4}
               />
             </Grid>
-
-            {/* Image Upload Field */}
-            <Grid item xs={12}>
-              <Button
-                component="label"
-                sx={{
-                  backgroundColor: '#5A41D8',
-                  color: '#FFFFFF',
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  boxShadow: '0px 0px 8px #E5F0DC',
-                  fontWeight: 500,
-                  padding: '10px 24px',
-                  marginTop: '16px',
-                  '&:hover': {
-                    backgroundColor: '#5A41D8',
-                    boxShadow: '0px 0px 8px #E5F0DC',
-                  },
-                }}
-              >
-                Upload Image
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  hidden
-                />
-              </Button>
-              {imageUploading && <p>Uploading image...</p>}
-            </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
@@ -426,7 +304,6 @@ const ResearchModal: React.FC<ResearchModal> = ({
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={imageUploading}
             sx={{
               backgroundColor: '#5A41D8',
               color: '#FFFFFF',
