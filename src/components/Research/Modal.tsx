@@ -27,8 +27,8 @@ interface FormData {
   department: string;
   faculty_mentor: string;
   phd_student_mentor: string;
-  terms_available: string[];
-  student_level: string[];
+  terms_available: string;
+  student_level: string;
   prerequisites: string;
   credit: string;
   stipend: string;

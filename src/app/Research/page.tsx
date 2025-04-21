@@ -114,17 +114,13 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       collectionRef = collectionRef.where('department', '==', department);
     }
     if (studentLevel) {
-      collectionRef = collectionRef.where(
-        'student_level.' + studentLevel,
-        '==',
-        true
-      );
+      collectionRef = collectionRef.where('student_level', '==', studentLevel);
     }
     if (termsAvailable) {
       collectionRef = collectionRef.where(
-        'terms_available.' + termsAvailable,
+        'terms_available',
         '==',
-        true
+        termsAvailable
       );
     }
     let snapshot = await collectionRef.get();
