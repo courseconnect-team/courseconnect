@@ -4,8 +4,18 @@ import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import ResearchModal from '@/components/Research/Modal';
 import ProjectCard from '@/components/Research/ProjectCard';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
-import { collection, addDoc, updateDoc, doc, where, query, documentId, getDocs } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  where,
+  query,
+  documentId,
+  getDocs,
+} from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
+import EditResearchModal from './EditResearchModal';
 
 interface FacultyResearchViewProps {
   researchListings: any[];
@@ -16,25 +26,28 @@ interface FacultyResearchViewProps {
 }
 
 const getResearchApplicationsListings = async (researchListing: any) => {
-  console.log("postings queried", researchListing)
+  console.log('postings queried', researchListing);
   const applicationsIds = researchListing.applications || [];
   if (applicationsIds.length === 0) {
     return [];
   }
   const db = firebase.firestore();
-  const q = query(collection(db, 'research-applications'), where(documentId(), 'in', applicationsIds));
+  const q = query(
+    collection(db, 'research-applications'),
+    where(documentId(), 'in', applicationsIds)
+  );
   try {
     const querySnapshot = await getDocs(q);
-    const applicationsList = querySnapshot.docs.map(doc => ({
+    const applicationsList = querySnapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
     return applicationsList;
   } catch (error) {
-    console.error("Error retrieving documents:", error);
+    console.error('Error retrieving documents:', error);
   }
-  return []
-}
+  return [];
+};
 
 const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   researchListings,
@@ -44,6 +57,8 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   postNewResearchPosition,
 }) => {
   const [studentView, showStudentView] = useState(true);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingForm, setEditingForm] = useState<any | null>(null);
 
   const [selectedResearchId, setSelectedResearchId] = useState<string | null>(
     null
@@ -71,11 +86,9 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
           >
             <FacultyApplicantsView
               id={selectedResearchId}
-              researchListing={
-                researchListings.find(
-                  (listing) => listing.id === selectedResearchId
-                )
-              }
+              researchListing={researchListings.find(
+                (listing) => listing.id === selectedResearchId
+              )}
               researchApplications={getResearchApplicationsListings}
               onBack={handleBackToListings}
             />
@@ -171,7 +184,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                             .filter(
                               (key) =>
                                 item.terms_available[
-                                key as keyof typeof item.terms_available
+                                  key as keyof typeof item.terms_available
                                 ]
                             )
                             .join(', ')}
@@ -179,7 +192,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                             .filter(
                               (key) =>
                                 item.student_level[
-                                key as keyof typeof item.student_level
+                                  key as keyof typeof item.student_level
                                 ]
                             )
                             .join(', ')}
@@ -196,6 +209,11 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           website={item.website}
                           onShowApplications={() => {
                             setSelectedResearchId(item.id);
+                          }}
+                          onEdit={() => {
+                            console.log('Opening edit modal');
+                            setEditingForm(item);
+                            setEditModalOpen(true);
                           }}
                         />
                       </Grid>
@@ -216,7 +234,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           .filter(
                             (key) =>
                               item.terms_available[
-                              key as keyof typeof item.terms_available
+                                key as keyof typeof item.terms_available
                               ]
                           )
                           .join(', ')}
@@ -224,7 +242,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           .filter(
                             (key) =>
                               item.student_level[
-                              key as keyof typeof item.student_level
+                                key as keyof typeof item.student_level
                               ]
                           )
                           .join(', ')}
@@ -240,6 +258,11 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                         onShowApplications={() => {
                           setSelectedResearchId(item.id);
                         }}
+                        onEdit={() => {
+                          console.log('Opening edit modal');
+                          setEditingForm(item);
+                          setEditModalOpen(true);
+                        }}
                       />
                     </Grid>
                   ))}
@@ -249,6 +272,14 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
           </>
         )}
       </Box>
+      {editingForm && (
+        <EditResearchModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          listingData={editingForm}
+          onSubmitSuccess={getResearchListings}
+        />
+      )}
     </>
   );
 };
