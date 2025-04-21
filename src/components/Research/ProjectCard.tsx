@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
 import ModalApplicationForm from './ModalApplicationForm';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  where,
+  query,
+  documentId,
+  getDocs,
+} from 'firebase/firestore';
+import firebase from '@/firebase/firebase_config';
 
 interface ProjectCardProps {
   userRole: string;
@@ -19,6 +30,7 @@ interface ProjectCardProps {
   application_requirements?: string;
   application_deadline?: string;
   website?: string;
+  applications?: any[];
   onEdit?: () => void;
   onShowApplications?: () => void;
   listingId: string;
@@ -42,6 +54,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   application_requirements,
   application_deadline,
   website,
+  applications = [],
   onEdit,
   onShowApplications,
 }) => {
@@ -49,6 +62,39 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
   const [openModal, setOpenModal] = useState(false);
+
+  const handleModalOpen = async() => {
+    // get applications ids from research listings
+    // query application id (those are doc ids) from research-applications
+    // check if project card uid is same as application uid
+    // dont open modal and return alert
+
+    const db = firebase.firestore();
+    const q = query(
+      collection(db, 'research-applications'),
+      where(documentId(), 'in', applications)
+    );
+    try {
+      const querySnapshot = await getDocs(q);
+      const applicationsList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log('Applications List:', applicationsList);
+      for (const application of applicationsList) {
+        console.log("current uid: ", uid);
+        console.log("current application uid: ", application?.uid);
+        if (application?.uid === uid) {
+          alert('You have already applied to this project.');
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error retrieving documents:', error);
+    }
+
+    setOpenModal(true);
+  }
   return (
     <>
       <Card
@@ -105,7 +151,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Button
               variant="contained"
               sx={{ backgroundColor: '#5A41D8', color: '#FFFFFF' }}
-              onClick={() => setOpenModal(true)}
+              onClick={() => handleModalOpen()}
             >
               Apply
             </Button>
