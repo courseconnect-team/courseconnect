@@ -148,6 +148,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
             textTransform: 'none',
             borderRadius: '4px',
             boxShadow: '0px 0px 8px #E5F0DC',
+            height: '40px',
             fontWeight: 500,
             marginLeft: { md: 'auto' }, // Push to right on md and larger screens
             '&:hover': {
