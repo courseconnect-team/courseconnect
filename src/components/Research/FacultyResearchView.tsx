@@ -132,7 +132,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                   id: '',
                   project_title: '',
                   department: '',
-                  faculty_mentor: '',
+                  faculty_mentor: {},
                   phd_student_mentor: '',
                   terms_available: '',
                   student_level: '',
