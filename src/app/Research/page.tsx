@@ -124,7 +124,6 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       );
     }
     let snapshot = await collectionRef.get();
-    // Execute the query.
     let researchListings: ResearchListing[] = await Promise.all(snapshot.docs.map(async (doc: any) => {
       const detailsSnap = await getDocs(collection(doc.ref, 'applications'));
       const apps = detailsSnap.docs.map(d => ({

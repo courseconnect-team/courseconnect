@@ -62,7 +62,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
             <FacultyApplicantsView
               id={selectedResearchId}
               researchListing={researchListings.find(
-                (listing) => listing.id === selectedResearchId
+                (listing) => listing.docID === selectedResearchId
               )}
               onBack={handleBackToListings}
             />
@@ -168,7 +168,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           application_deadline={item.application_deadline}
                           website={item.website}
                           onShowApplications={() => {
-                            setSelectedResearchId(item.id);
+                            setSelectedResearchId(item.docID);
                           }}
                           onEdit={() => {
                             console.log('Opening edit modal');
@@ -202,7 +202,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                         application_deadline={item.application_deadline}
                         website={item.website}
                         onShowApplications={() => {
-                          setSelectedResearchId(item.id);
+                          setSelectedResearchId(item.docID);
                         }}
                         onEdit={() => {
                           console.log('Opening edit modal');

@@ -83,7 +83,6 @@ const ResearchModal: React.FC<ResearchModal> = ({
   const handleSubmit = async () => {
     const finalFormData = {
       ...formData,
-      id: uuidv4(),
       creator_id: uid,
       faculty_members: [uid],
     };
