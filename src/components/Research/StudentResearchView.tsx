@@ -270,19 +270,22 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
           </Grid>
         ) : (
           <Grid container spacing={4}>
-            {researchApplications.map((item, index) => (
+            {researchApplications.map((item, index) => {
+              return(
               <Grid item xs={12} md={12} lg={6} key={index}>
                 <ApplicationCard
+                  app_status = {item.app_status}
                   userRole={role}
-                  project_title={`Application ID: ${item.appid}`}
+                  project_title={`${item.project_title}`}
                   department={item.department || 'N/A'}
+                  date_applied={item.date_applied}
                   faculty_mentor={
                     `${item.first_name} ${item.last_name}`.trim() || 'N/A'
                   }
                   terms_available={item.terms_available}
                   student_level={item.degree || 'N/A'}
                   project_description={
-                    item.qualifications || 'No description provided'
+                    item.project_description || 'No description provided'
                   }
                   phd_student_mentor="N/A"
                   prerequisites="N/A"
@@ -293,7 +296,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
                   website="N/A"
                 />
               </Grid>
-            ))}
+            )})}
           </Grid>
         )}
       </Box>

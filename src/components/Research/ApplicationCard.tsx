@@ -7,6 +7,7 @@ interface ApplicationCardProps {
   project_title: string;
   department: string;
   faculty_mentor: string;
+  date_applied: string;
   terms_available: string;
   student_level: string;
   project_description: string;
@@ -18,6 +19,7 @@ interface ApplicationCardProps {
   application_requirements?: string;
   application_deadline?: string;
   website?: string;
+  app_status: string
   onEdit?: () => void;
   onShowApplications?: () => void;
 }
@@ -27,11 +29,13 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
   uid,
   project_title,
   department,
+  date_applied,
   faculty_mentor,
   terms_available,
   student_level,
   project_description,
   faculty_members = [],
+  app_status,
   phd_student_mentor,
   prerequisites,
   credit,
@@ -66,13 +70,14 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
           {department}
         </Typography>
         <Box mt={2}>
-          <Typography fontWeight="bold">Terms Available:</Typography>
-          <Typography>{terms_available}</Typography>
-
-          <Typography fontWeight="bold">Student Level:</Typography>
-          <Typography>{student_level}</Typography>
-          <Typography fontWeight="bold">Faculty Mentor:</Typography>
-          <Typography>{faculty_mentor}</Typography>
+        <Typography fontWeight="bold">Status</Typography>
+        <Typography variant="subtitle2" color="text.secondary">
+          {app_status}
+        </Typography>
+        <Typography fontWeight="bold">Date applied</Typography>
+        <Typography variant="subtitle2" color="text.secondary">
+          {date_applied}
+        </Typography>
         </Box>
         <Box mt={2} sx={{ flexGrow: 1 }}>
           <Typography fontWeight="bold">[Research Description]</Typography>

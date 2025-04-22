@@ -52,8 +52,8 @@ interface ResearchListing {
   id: string;
   project_title: string;
   department: string;
-  faculty_mentor: string;
-  phd_student_mentor: string;
+  faculty_mentor: {};
+  phd_student_mentor: string | {};
   terms_available: string;
   student_level: string;
   prerequisites: string;
@@ -82,6 +82,9 @@ interface ResearchApplication {
   resume: string;
   uid: string;
   weekly_hours: string;
+  project_title: string;
+  faculty_mentor: {}
+  project_description: string;
 }
 
 const ResearchPage: React.FC<ResearchPageProps> = () => {
@@ -151,30 +154,54 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   };
 
   const getApplications = async () => {
-    const appsQ = query(
-      collectionGroup(firebase.firestore(), 'applications'),
-      where('uid', '==', user.uid)
-    );
-    const snapshot = await getDocs(appsQ);
+    const snapshot = await firebase.firestore()
+      .collectionGroup('applications')
+      .where('uid', '==', user.uid)
+      .get();
+    const results = await Promise.all(
+      snapshot.docs.map(async appDoc => {
+        const appData = appDoc.data();
 
-    let researchApplications: ResearchApplication[] = snapshot.docs.map(
+        // navigate back up to the parent document
+        var listingRef = appDoc.ref.parent.parent;
+        let listingData: any = {};
+        if (listingRef) {
+          const listingSnap = await listingRef.get();        // valid in compat
+          if (listingSnap.exists) {
+            listingData = listingSnap.data();
+          }
+        }
+
+        return {
+          appId: appDoc.id,
+          ...appData,
+          listingId: listingRef?.id ?? null,
+          listingData
+        };
+      })
+    );
+
+    let researchApplications: ResearchApplication[] = results.map(
       (doc: any) => ({
-        appid: doc.id,
-        app_status: doc.data().app_status,
-        terms_available: doc.data().terms_available,
-        date_applied: doc.data().date_applied,
-        degree: doc.data().degree,
-        department: doc.data().department,
-        email: doc.data().email,
-        first_name: doc.data().first_name,
-        last_name: doc.data().last_name,
-        gpa: doc.data().gpa,
-        graduation_date: doc.data().graduation_date,
-        phone_number: doc.data().phone_number,
-        qualifications: doc.data().qualifications,
-        resume: doc.data().resume,
-        uid: doc.data().uid,
-        weekly_hours: doc.data().weekly_hours,
+        appid: doc.appId,
+        app_status: doc.app_status,
+        terms_available: doc.listingData.terms_available,
+        date_applied: doc.date,
+        degree: doc.degree,
+        department: doc.department,
+        email: doc.email,
+        first_name: doc.firstname,
+        last_name: doc.lastname,
+        gpa: doc.gpa,
+        graduation_date: doc.graduation_date,
+        phone_number: doc.phone_number,
+        qualifications: doc.qualifications,
+        resume: doc.resume,
+        uid: doc.uid,
+        weekly_hours: doc.weekly_hours,
+        faculty_mentor: doc.listingData.faculty_mentor,
+        project_title: doc.listingData.project_title,
+        project_description: doc.listingData.project_description,
       })
     );
     setResearchApplications(researchApplications);
@@ -205,21 +232,21 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
             <>
               <HeaderCard text="Applications" />
               <StudentResearchView
-                  researchListings={researchListings}
-                  researchApplications={researchApplications}
-                  role={role}
-                  uid={user.uid}
-                  department={department}
-                  setDepartment={setDepartment}
-                  studentLevel={studentLevel}
-                  setStudentLevel={setStudentLevel}
-                  getResearchListings={getResearchListings}
-                  setResearchListings={setResearchListings}
-                  getApplications={getApplications}
-                  termsAvailable={termsAvailable}
-                  setTermsAvailable={setTermsAvailable}
-                  setResearchApplications={setResearchApplications}
-                 />
+                researchListings={researchListings}
+                researchApplications={researchApplications}
+                role={role}
+                uid={user.uid}
+                department={department}
+                setDepartment={setDepartment}
+                studentLevel={studentLevel}
+                setStudentLevel={setStudentLevel}
+                getResearchListings={getResearchListings}
+                setResearchListings={setResearchListings}
+                getApplications={getApplications}
+                termsAvailable={termsAvailable}
+                setTermsAvailable={setTermsAvailable}
+                setResearchApplications={setResearchApplications}
+              />
             </>
           )}
           {role === 'faculty' && (
