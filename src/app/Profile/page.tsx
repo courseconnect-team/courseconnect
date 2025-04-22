@@ -1,17 +1,17 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/firebase/auth/auth_context';
-import { 
-  Button, 
-  Grid, 
-  TextField, 
-  FormControl, 
-  InputLabel, 
-  Select, 
+import {
+  Button,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
   MenuItem,
-  CircularProgress, 
+  CircularProgress,
   Box,
-  Typography 
+  Typography,
 } from '@mui/material';
 import './style.css';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
@@ -22,6 +22,7 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { QrCode2 } from '@mui/icons-material';
 import { set } from 'react-hook-form';
+import { placeholderCSS } from 'react-select/dist/declarations/src/components/Placeholder';
 
 interface ProfileProps {
   userRole: string;
@@ -51,10 +52,10 @@ const secondaryButtonStyle: React.CSSProperties = {
 const textFieldStyles = (isEditable: boolean) => ({
   '& .MuiOutlinedInput-root': {
     '& fieldset': {
-      borderColor: isEditable ? "black" : '#cecece',
+      borderColor: isEditable ? 'black' : '#cecece',
     },
     '&:hover fieldset': {
-      borderColor: isEditable ? "black" : '#cecece',
+      borderColor: isEditable ? 'black' : '#cecece',
     },
     '&.Mui-focused fieldset': {
       borderColor: isEditable ? undefined : '#cecece',
@@ -153,25 +154,26 @@ export default function Profile(props: ProfileProps) {
           // Always include these fields for all users
           if (updatedFirst.trim() !== '') updatedData.firstname = updatedFirst;
           if (updatedLast.trim() !== '') updatedData.lastname = updatedLast;
-          if (updatedDepartment.trim() !== '') updatedData.department = updatedDepartment;
-          
+          if (updatedDepartment.trim() !== '')
+            updatedData.department = updatedDepartment;
+
           // Only include student fields if user is not faculty
           if (showStudentFields) {
             // For GPA field
             if (updatedGpa.trim() !== '') {
               updatedData.gpa = updatedGpa;
             }
-            
+
             // For phone number field
             if (updatedPhoneNumber.trim() !== '') {
               updatedData.phonenumber = updatedPhoneNumber;
             }
-            
+
             // For graduation date field
             if (updatedGraduationDate.trim() !== '') {
               updatedData.graduationdate = updatedGraduationDate;
             }
-            
+
             // For degree field
             if (updatedDegree.trim() !== '') {
               updatedData.degree = updatedDegree;
@@ -229,12 +231,12 @@ export default function Profile(props: ProfileProps) {
         }}
       >
         <CircularProgress size={60} thickness={4} sx={{ color: '#5736ac' }} />
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            mt: 3, 
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 3,
             fontFamily: 'SF Pro Display-Bold, Helvetica',
-            color: '#5736ac' 
+            color: '#5736ac',
           }}
         >
           Loading your profile...
@@ -257,22 +259,18 @@ export default function Profile(props: ProfileProps) {
           padding: 3,
         }}
       >
-        <Typography 
-          variant="h6" 
-          color="error" 
-          sx={{ textAlign: 'center' }}
-        >
+        <Typography variant="h6" color="error" sx={{ textAlign: 'center' }}>
           There was an error loading your profile. Please try again later.
         </Typography>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           onClick={() => window.location.reload()}
-          sx={{ 
+          sx={{
             mt: 2,
             backgroundColor: '#5736ac',
             '&:hover': {
               backgroundColor: '#4a2d91',
-            }
+            },
           }}
         >
           Refresh Page
@@ -396,20 +394,32 @@ export default function Profile(props: ProfileProps) {
               {showStudentFields && (
                 <>
                   <Grid item xs={6}>
-                    <FormControl fullWidth variant="outlined">
-                      <InputLabel shrink={true}>Degree</InputLabel>
+                    <FormControl fullWidth sx={textFieldStyles(isEditing)}>
+                      <InputLabel id="degree-label" shrink={true}>
+                        Degree
+                      </InputLabel>
                       <Select
-                        name="degree"
-                        value={updatedDegree}
-                        onChange={(e) => setUpdatedDegree(e.target.value)}
-                        displayEmpty
-                        disabled={!isEditing}
+                        labelId="degree-label"
                         label="Degree"
-                        sx={textFieldStyles(isEditing)}
+                        name="degree"
+                        value={isEditing ? updatedDegree : degree}
+                        onChange={
+                          isEditing
+                            ? (e) => setUpdatedDegree(e.target.value)
+                            : undefined
+                        }
+                        disabled={!isEditing}
+                        inputProps={{ displayEmpty: true }}
                       >
-                        <MenuItem value="" disabled>
-                          <em>Select Degree</em>
-                        </MenuItem>
+                        {isEditing ? (
+                          <MenuItem value="">
+                            <em>Select degree</em>
+                          </MenuItem>
+                        ) : (
+                          <MenuItem value={degree}>
+                            <em>{degree}</em>
+                          </MenuItem>
+                        )}
                         <MenuItem value="BS">BS</MenuItem>
                         <MenuItem value="BS/MS">BS/MS</MenuItem>
                         <MenuItem value="MS">MS</MenuItem>
@@ -417,6 +427,7 @@ export default function Profile(props: ProfileProps) {
                       </Select>
                     </FormControl>
                   </Grid>
+
                   <Grid item xs={6}>
                     <TextField
                       name="gpa"
