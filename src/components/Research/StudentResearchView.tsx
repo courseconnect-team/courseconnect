@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -9,6 +9,7 @@ import {
   Button,
   Typography,
   Grid,
+  Container,
 } from '@mui/material';
 import ProjectCard from '@/components/Research/ProjectCard';
 import ApplicationCard from '@/components/Research/ApplicationCard';
@@ -37,194 +38,266 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   uid,
   department,
   setDepartment,
-  studentLevel,
   setStudentLevel,
-  termsAvailable,
   setTermsAvailable,
   getResearchListings,
   setResearchListings,
   getApplications,
-  setResearchApplications,
 }) => {
   const [myApplications, showMyApplications] = useState(true);
+  const [originalListings, setOriginalListings] = useState<any[]>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (researchListings.length > 0 && originalListings.length === 0) {
+      setOriginalListings([...researchListings]);
+    }
+  }, [researchListings, originalListings.length]);
 
   useEffect(() => {
     getApplications();
-  });
+  }, []);
+
+  const handleSearch = (searchText: string) => {
+    if (!searchText && department === "") {
+      setResearchListings([...originalListings]);
+      return;
+    }
+
+    const listingsToFilter = originalListings.length > 0 ? 
+      [...originalListings] : 
+      [...researchListings];
+
+    let filteredListings = listingsToFilter;
+    
+    // Text search
+    if (searchText) {
+      filteredListings = filteredListings.filter(item => {
+        const searchLower = searchText.toLowerCase();
+        
+        const titleMatch = item.project_title && 
+          typeof item.project_title === 'string' && 
+          item.project_title.toLowerCase().includes(searchLower);
+          
+        const descriptionMatch = item.project_description && 
+          typeof item.project_description === 'string' && 
+          item.project_description.toLowerCase().includes(searchLower);
+          
+        const mentorMatch = item.faculty_mentor && 
+          typeof item.faculty_mentor === 'string' && 
+          item.faculty_mentor.toLowerCase().includes(searchLower);
+          
+        return titleMatch || descriptionMatch || mentorMatch;
+      });
+      console.log("Filtered Listings: ", filteredListings);
+    }
+
+    // Department filter with special handling for CISE
+    if (department) {
+      filteredListings = filteredListings.filter(item => {
+        if (department === "Computer and Information Science and Engineering") {
+          return (
+            item.department === "Computer and Information Science and Engineering" ||
+            item.department === "Computer and Information Sciences and Engineering" ||
+            (item.department && item.department.toLowerCase().includes("computer") && 
+             item.department.toLowerCase().includes("information") && 
+             item.department.toLowerCase().includes("engineering"))
+          );
+        }
+        return item.department === department;
+      });
+      console.log("Filtered Listings by Department: ", filteredListings);
+    }
+
+    setResearchListings(filteredListings);
+  };
+
+  const handleClearFilters = () => {
+    setDepartment("");
+    setStudentLevel("");
+    setTermsAvailable("");
+
+    if (searchInputRef.current) {
+      searchInputRef.current.value = "";
+    }
+
+    if (originalListings.length > 0) {
+      setResearchListings([...originalListings]);
+    } else {
+      getResearchListings();
+    }
+  };
+
+  const handleDepartmentChange = (value: string) => {
+    setDepartment(value);
+    const searchText = searchInputRef.current?.value || "";
+    handleSearch(searchText);
+  };
 
   return (
-    <>
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
+    <Container 
+      sx={{ 
+        mt: "380px",
+        mb: 8,
+        maxWidth: {
+          xs: '100%',
+          sm: '95%',
+          md: '90%', 
+          lg: '85%',
+          xl: '80%',
+        },
+        mx: 'auto',
+      }}
+    >
+      <Box 
+        display="flex" 
+        justifyContent="space-between" 
+        alignItems="center" 
+        mb={4}
+      >
+        <Typography variant="h4">
           Research
         </Typography>
-        <Box
-          marginTop="380px"
-          justifyContent="space-between"
-          display="flex"
-          flexWrap="wrap"
+        
+        <Button
+          sx={{
+            backgroundColor: '#5A41D8',
+            color: '#FFFFFF',
+            textTransform: 'none',
+            borderRadius: '8px',
+            boxShadow: '0px 0px 8px #E5F0DC',
+            fontWeight: 500,
+            padding: '10px 24px',
+            '&:hover': {
+              backgroundColor: '#4A35B8',
+              boxShadow: '0px 0px 12px #E5F0DC',
+            },
+          }}
+          onClick={() => showMyApplications(!myApplications)}
         >
+          {myApplications ? 'Show My Applications' : 'Switch to Default View'}
+        </Button>
+      </Box>
+      
+      <Box sx={{ mb: 4 }}>
+        {/* Only show search controls when viewing research listings (not applications) */}
+        {myApplications ? (
           <Box
             display="flex"
             justifyContent="space-between"
             alignItems="center"
-            marginBottom="16px"
+            gap={2}
+            mb={3}
           >
             <TextField
               label="Search Positions"
               variant="outlined"
               size="small"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const searchText = (
-                    e.target as HTMLInputElement
-                  ).value.toLowerCase();
-                  const filteredListings = researchListings.filter((item) =>
-                    item.project_title.toLowerCase().includes(searchText)
-                  );
-                  setResearchListings(filteredListings);
+              inputRef={searchInputRef}
+              onChange={(e) => {
+                if (e.target.value === '') {
+                  handleSearch('');
                 }
               }}
-              sx={{
-                flex: 1,
-                marginLeft: '96px',
-                marginRight: '16px',
-                width: '600px',
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const searchText = (e.target as HTMLInputElement).value;
+                  handleSearch(searchText);
+                }
               }}
+              sx={{ flex: 1 }}
             />
+            
             <Button
               variant="outlined"
-              onClick={() => getResearchListings()}
-              sx={{ marginRight: '16px', height: '40px' }}
+              onClick={handleClearFilters}
+              sx={{ 
+                height: '40px',
+                minWidth: '80px',
+                borderColor: '#5A41D8',
+                color: '#5A41D8',
+                '&:hover': {
+                  borderColor: '#4A35B8',
+                  backgroundColor: 'rgba(90, 65, 216, 0.04)',
+                },
+              }}
             >
               Clear
             </Button>
-            <FormControl
-              size="small"
-              sx={{ minWidth: 150, marginRight: '16px' }}
-            >
+            
+            <FormControl size="small" sx={{ minWidth: 150 }}>
               <InputLabel>Department</InputLabel>
               <Select
                 value={department}
-                onChange={(e) => setDepartment(e.target.value)}
+                onChange={(e) => handleDepartmentChange(e.target.value as string)}
               >
                 <MenuItem value="">All</MenuItem>
-                <MenuItem value="Computer Science">Computer Science</MenuItem>
-                <MenuItem value="Biology">Biology</MenuItem>
-                <MenuItem value="Physics">Physics</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl
-              size="small"
-              sx={{ minWidth: 150, marginRight: '16px' }}
-            >
-              <InputLabel>Student Level</InputLabel>
-              <Select
-                value={studentLevel}
-                onChange={(e) => setStudentLevel(e.target.value)}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="freshman">Freshman</MenuItem>
-                <MenuItem value="sophomore">Sophomore</MenuItem>
-                <MenuItem value="junior">Junior</MenuItem>
-                <MenuItem value="senior">Senior</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Terms Available</InputLabel>
-              <Select
-                value={termsAvailable}
-                onChange={(e) => setTermsAvailable(e.target.value)}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="spring">Spring</MenuItem>
-                <MenuItem value="summer">Summer</MenuItem>
-                <MenuItem value="fall">Fall</MenuItem>
+                <MenuItem value={"Computer and Information Science and Engineering"}>CISE</MenuItem>
+                <MenuItem value="Electrical and Computer Engineering">ECE</MenuItem>
+                <MenuItem value="Engineering Education">Education</MenuItem>
               </Select>
             </FormControl>
           </Box>
+        ) : null}
 
-          {/* Center: "Research Board View" Button */}
-          <Button
-            sx={{
-              backgroundColor: '#5A41D8', // Same purple as Edit Application
-              color: '#FFFFFF', // White text
-              textTransform: 'none', // Keep text normal case
-              borderRadius: '8px', // Rounded corners
-              boxShadow: '0px 0px 8px #E5F0DC', // Subtle greenish glow
-              fontWeight: 500,
-              padding: '10px 24px',
-              marginBottom: '16px', // Add vertical space below the button
-              '&:hover': {
-                backgroundColor: '#5A41D8', // Keep hover consistent
-                boxShadow: '0px 0px 8px #E5F0DC',
-              },
-            }}
-            onClick={() => showMyApplications(!myApplications)}
-          >
-            {myApplications ? 'Show My Applications' : 'Switch to Default View'}
-          </Button>
-
-          {/* Conditional rendering based on state */}
-          {myApplications ? (
-            <Grid container spacing={4} mt={3} mx="5%">
-              {researchListings.map((item, index) => {
-                return (
-                  <Grid item xs={12} sm={6} md={6} key={index}>
-                    <ProjectCard
-                      uid={uid}
-                      applications={item.applications}
-                      listingId={item.docID}
-                      userRole={role}
-                      project_title={item.project_title}
-                      department={item.department}
-                      faculty_mentor={item.faculty_mentor}
-                      terms_available={item.terms_available}
-                      student_level={item.student_level}
-                      project_description={item.project_description}
-                      phd_student_mentor={item.phd_student_mentor}
-                      prerequisites={item.prerequisites}
-                      credit={item.credit}
-                      stipend={item.stipend}
-                      application_requirements={item.application_requirements}
-                      application_deadline={item.application_deadline}
-                      website={item.website}
-                    />
-                  </Grid>
-                );
-              })}
-            </Grid>
-          ) : (
-            <Grid container spacing={4} mt={3} mx="5%">
-              {researchApplications.map((item, index) => (
-                <Grid item xs={12} sm={6} md={6} key={index}>
-                  <ApplicationCard
-                    userRole={role}
-                    project_title={`Application ID: ${item.appid}`} // Displaying appid as the title
-                    department={item.department || 'N/A'} // Fallback to 'N/A' if department is missing
-                    faculty_mentor={
-                      `${item.first_name} ${item.last_name}`.trim() || 'N/A'
-                    } // Combining first and last name
-                    terms_available={item.terms_available}
-                    student_level={item.degree || 'N/A'} // Mapping degree to student level
-                    project_description={
-                      item.qualifications || 'No description provided'
-                    } // Using qualifications as description
-                    phd_student_mentor="N/A" // Placeholder if no mentor info is available
-                    prerequisites="N/A" // Placeholder if no prerequisites info is available
-                    credit="N/A" // Placeholder if no credit info is available
-                    stipend="N/A" // Placeholder if no stipend info is available
-                    application_requirements="N/A" // Placeholder if no requirements info is available
-                    application_deadline={item.date_applied || 'N/A'} // Using date_applied as a deadline
-                    website="N/A" // Placeholder if no website info is available
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        </Box>
+        {/* Content Display remains the same */}
+        {myApplications ? (
+          <Grid container spacing={4}>
+            {researchListings.map((item, index) => (
+              <Grid item xs={12} md={12} lg={6} key={index}>
+                <ProjectCard
+                  uid={uid}
+                  applications={item.applications}
+                  listingId={item.docID}
+                  userRole={role}
+                  project_title={item.project_title}
+                  department={item.department}
+                  faculty_mentor={item.faculty_mentor}
+                  terms_available={item.terms_available}
+                  student_level={item.student_level}
+                  project_description={item.project_description}
+                  phd_student_mentor={item.phd_student_mentor}
+                  prerequisites={item.prerequisites}
+                  credit={item.credit}
+                  stipend={item.stipend}
+                  application_requirements={item.application_requirements}
+                  application_deadline={item.application_deadline}
+                  website={item.website}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <Grid container spacing={4}>
+            {researchApplications.map((item, index) => (
+              <Grid item xs={12} md={12} lg={6} key={index}>
+                <ApplicationCard
+                  userRole={role}
+                  project_title={`Application ID: ${item.appid}`}
+                  department={item.department || 'N/A'}
+                  faculty_mentor={
+                    `${item.first_name} ${item.last_name}`.trim() || 'N/A'
+                  }
+                  terms_available={item.terms_available}
+                  student_level={item.degree || 'N/A'}
+                  project_description={
+                    item.qualifications || 'No description provided'
+                  }
+                  phd_student_mentor="N/A"
+                  prerequisites="N/A"
+                  credit="N/A"
+                  stipend="N/A"
+                  application_requirements="N/A"
+                  application_deadline={item.date_applied || 'N/A'}
+                  website="N/A"
+                />
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
-    </>
+    </Container>
   );
 };
 

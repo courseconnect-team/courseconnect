@@ -125,13 +125,13 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
     if (studentLevel) {
       collectionRef = collectionRef.where('student_level', '==', studentLevel);
     }
-    if (termsAvailable) {
-      collectionRef = collectionRef.where(
-        'terms_available',
-        '==',
-        termsAvailable
-      );
-    }
+    // if (termsAvailable) {
+    //   collectionRef = collectionRef.where(
+    //     'terms_available',
+    //     '==',
+    //     termsAvailable
+    //   );
+    // }
     let snapshot = await collectionRef.get();
     let researchListings: ResearchListing[] = await Promise.all(
       snapshot.docs.map(async (doc: any) => {
@@ -191,7 +191,6 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       console.error('Error adding document: ', e);
     }
   };
-  console.log('User role:', role);
   return (
     <>
       <Toaster />
@@ -206,21 +205,21 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
             <>
               <HeaderCard text="Applications" />
               <StudentResearchView
-                researchListings={researchListings}
-                researchApplications={researchApplications}
-                role={role}
-                uid={user.uid}
-                department={department}
-                setDepartment={setDepartment}
-                studentLevel={studentLevel}
-                setStudentLevel={setStudentLevel}
-                termsAvailable={termsAvailable}
-                setTermsAvailable={setTermsAvailable}
-                getResearchListings={getResearchListings}
-                setResearchListings={setResearchListings}
-                getApplications={getApplications}
-                setResearchApplications={setResearchApplications}
-              />
+                  researchListings={researchListings}
+                  researchApplications={researchApplications}
+                  role={role}
+                  uid={user.uid}
+                  department={department}
+                  setDepartment={setDepartment}
+                  studentLevel={studentLevel}
+                  setStudentLevel={setStudentLevel}
+                  getResearchListings={getResearchListings}
+                  setResearchListings={setResearchListings}
+                  getApplications={getApplications}
+                  termsAvailable={termsAvailable}
+                  setTermsAvailable={setTermsAvailable}
+                  setResearchApplications={setResearchApplications}
+                 />
             </>
           )}
           {role === 'faculty' && (
