@@ -58,25 +58,35 @@ const FacultyApplicantsView: React.FC<FacultyApplicantsViewProps> = ({
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Button onClick={onBack} variant="outlined" sx={{ mb: 2 }}>
-        Back to Research Listings
-      </Button>
       <Box sx={{ width: '100%', p: 4 }}>
-        {/* Top header area */}
+        {/* Top header area with button now aligned */}
         <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'baseline',
-            mb: 2,
+            alignItems: 'center', // Changed from 'baseline' to 'center' for better vertical alignment
+            mb: 3, // Increased bottom margin for more space
+            width: '100%',
           }}
         >
           <Typography variant="h5">
-            Modeling Dialogue for Supporting Learning
+            {researchListing.project_title}
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Fall 2023
-          </Typography>
+
+          <Button
+            onClick={onBack}
+            variant="outlined"
+            sx={{
+              borderColor: '#5A41D8',
+              color: '#5A41D8',
+              '&:hover': {
+                borderColor: '#4A35B8',
+                backgroundColor: 'rgba(90, 65, 216, 0.04)',
+              },
+            }}
+          >
+            Back to Research Listings
+          </Button>
         </Box>
 
         {/* Tabs for Needs Review, Approved, Denied */}
@@ -85,19 +95,15 @@ const FacultyApplicantsView: React.FC<FacultyApplicantsViewProps> = ({
             <Tabs
               value={tabIndex}
               onChange={handleChange}
-              // Spread the tabs evenly
               variant="fullWidth"
-              // Hide the default selection indicator bar
               TabIndicatorProps={{ style: { display: 'none' } }}
               sx={{
-                // Outer container styles
-                border: '1px solid #555', // Change to desired border color
-                borderRadius: '9999px', // Large border-radius for "pill" shape
-                minHeight: 'auto', // Allow more control over tab height
-                // Selected tab styles
+                border: '1px solid #555',
+                borderRadius: '9999px',
+                minHeight: 'auto',
                 '& .Mui-selected': {
-                  backgroundColor: '#673AB7', // Purple fill for selected tab
-                  color: '#fff', // White text for selected tab
+                  backgroundColor: '#673AB7',
+                  color: '#fff',
                 },
               }}
             >
@@ -109,10 +115,11 @@ const FacultyApplicantsView: React.FC<FacultyApplicantsViewProps> = ({
         </Box>
 
         {/* Section title */}
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Research
+        <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+          Applications
         </Typography>
 
+        {/* Application tiles based on tabs */}
         {tabIndex === 0 &&
           applications
             .filter((item) => item.app_status === 'Pending')

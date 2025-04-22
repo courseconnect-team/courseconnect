@@ -276,7 +276,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
                 <ApplicationCard
                   app_status = {item.app_status}
                   userRole={role}
-                  project_title={`${item.project_title}`}
+                  project_title={item.project_title}
                   department={item.department || 'N/A'}
                   date_applied={item.date_applied}
                   faculty_mentor={

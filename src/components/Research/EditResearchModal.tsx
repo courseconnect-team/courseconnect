@@ -9,8 +9,6 @@ import {
   TextField,
   Button,
   Grid,
-  Checkbox,
-  FormControlLabel,
   Typography,
 } from '@mui/material';
 import firebase from '@/firebase/firebase_config';
@@ -29,6 +27,8 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
   onSubmitSuccess,
 }) => {
   const [formData, setFormData] = useState({ ...listingData });
+  const [facultyEmail, setFacultyEmail] = useState('');
+  const [facultyName, setFacultyName] = useState('');
 
   useEffect(() => {
     setFormData({ ...listingData });
@@ -37,6 +37,30 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev: typeof formData) => ({ ...prev, [name]: value }));
+  };
+
+  /** Adds a faculty mentor to the map. */
+  const handleAddFacultyMentor = () => {
+    if (facultyEmail && facultyName) {
+      setFormData((prev) => ({
+        ...prev,
+        faculty_mentor: {
+          ...prev.faculty_mentor,
+          [facultyEmail]: facultyName,
+        },
+      }));
+      setFacultyEmail('');
+      setFacultyName('');
+    }
+  };
+
+  /** Removes a faculty mentor from the map. */
+  const handleRemoveFacultyMentor = (email: string) => {
+    setFormData((prev) => {
+      const updatedMentors = { ...prev.faculty_mentor };
+      delete updatedMentors[email];
+      return { ...prev, faculty_mentor: updatedMentors };
+    });
   };
 
   const handleSubmit = async () => {
@@ -66,9 +90,14 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Edit Research Listing</DialogTitle>
-      <DialogContent>
+      <DialogContent
+        sx={{
+          maxHeight: '70vh', // Adjust the height as needed
+          overflowY: 'auto', // Enables scrolling
+        }}
+      >
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ marginTop: 2 }}>
             <TextField
               label="Project Title"
               name="project_title"
@@ -88,14 +117,62 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
             />
           </Grid>
 
-          <Grid item xs={6}>
+          {/* Faculty Mentor */}
+          <Grid item xs={12}>
+            <Typography variant="subtitle1">Faculty Mentors</Typography>
             <TextField
-              label="Faculty Mentor"
-              name="faculty_mentor"
-              value={formData.faculty_mentor || ''}
-              onChange={handleChange}
+              label="Faculty Mentor Email"
+              value={facultyEmail}
+              onChange={(e) => setFacultyEmail(e.target.value)}
               fullWidth
+              margin="dense"
             />
+            <TextField
+              label="Faculty Mentor Name"
+              value={facultyName}
+              onChange={(e) => setFacultyName(e.target.value)}
+              fullWidth
+              margin="dense"
+            />
+            <Button
+              onClick={handleAddFacultyMentor}
+              sx={{
+                textTransform: 'none',
+                color: '#5A41D8',
+                fontWeight: 500,
+                marginTop: '8px',
+              }}
+            >
+              Add Faculty Mentor
+            </Button>
+            <Grid container spacing={1} sx={{ marginTop: '8px' }}>
+              {formData.faculty_mentor &&
+                Object.entries(formData.faculty_mentor).map(([email, name]) => (
+                  <Grid item xs={12} key={email}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span>
+                        {name} ({email})
+                      </span>
+                      <Button
+                        onClick={() => handleRemoveFacultyMentor(email)}
+                        sx={{
+                          textTransform: 'none',
+                          color: '#D32F2F',
+                          fontWeight: 500,
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </Grid>
+                ))}
+            </Grid>
           </Grid>
 
           <Grid item xs={6}>

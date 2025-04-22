@@ -20,12 +20,12 @@ import { Theme } from '@emotion/react';
 import { v4 as uuidv4 } from 'uuid';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-/** Define an interface that matches your JSON keys (without using any values). */
+/** Define an interface that matches your JSON keys (updated for faculty_mentor). */
 interface FormData {
   id: string;
   project_title: string;
   department: string;
-  faculty_mentor: string;
+  faculty_mentor: { [email: string]: string }; // Updated to use curly braces for the map
   phd_student_mentor: string;
   terms_available: string;
   student_level: string;
@@ -58,6 +58,8 @@ const ResearchModal: React.FC<ResearchModal> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>(currentFormData);
+  const [facultyEmail, setFacultyEmail] = useState('');
+  const [facultyName, setFacultyName] = useState('');
 
   /** Opens the dialog (modal). */
   const handleOpen = () => {
@@ -80,14 +82,39 @@ const ResearchModal: React.FC<ResearchModal> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /** Adds a faculty mentor to the map. */
+  const handleAddFacultyMentor = () => {
+    if (facultyEmail && facultyName) {
+      setFormData((prev) => ({
+        ...prev,
+        faculty_mentor: {
+          ...prev.faculty_mentor,
+          [facultyEmail]: facultyName,
+        },
+      }));
+      setFacultyEmail('');
+      setFacultyName('');
+    }
+  };
+
+  /** Removes a faculty mentor from the map. */
+  const handleRemoveFacultyMentor = (email: string) => {
+    setFormData((prev) => {
+      const updatedMentors = { ...prev.faculty_mentor };
+      delete updatedMentors[email];
+      return { ...prev, faculty_mentor: updatedMentors };
+    });
+  };
+
   /** Submits the form and clears it, then closes the dialog. */
   const handleSubmit = async () => {
     const finalFormData = {
       ...formData,
+      faculty_mentor: formData.faculty_mentor,
       creator_id: uid,
       faculty_members: [uid],
     };
-
+    console.log('Final Form Data:', finalFormData);
     firebaseQuery(finalFormData);
     onSubmitSuccess();
     setFormData(currentFormData);
@@ -130,15 +157,61 @@ const ResearchModal: React.FC<ResearchModal> = ({
             </Grid>
 
             {/* Faculty Mentor */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <TextField
                 margin="dense"
-                label="Faculty Mentor"
-                name="faculty_mentor"
-                value={formData.faculty_mentor}
-                onChange={handleChange}
+                label="Faculty Mentor Email"
+                value={facultyEmail}
+                onChange={(e) => setFacultyEmail(e.target.value)}
                 fullWidth
               />
+              <TextField
+                margin="dense"
+                label="Faculty Mentor Name"
+                value={facultyName}
+                onChange={(e) => setFacultyName(e.target.value)}
+                fullWidth
+              />
+              <Button
+                onClick={handleAddFacultyMentor}
+                sx={{
+                  textTransform: 'none',
+                  color: '#5A41D8',
+                  fontWeight: 500,
+                  marginTop: '8px',
+                }}
+              >
+                Add Faculty Mentor
+              </Button>
+              <Grid container spacing={1} sx={{ marginTop: '8px' }}>
+                {Object.entries(formData.faculty_mentor).map(
+                  ([email, name]) => (
+                    <Grid item xs={12} key={email}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <span>
+                          {name} ({email})
+                        </span>
+                        <Button
+                          onClick={() => handleRemoveFacultyMentor(email)}
+                          sx={{
+                            textTransform: 'none',
+                            color: '#D32F2F',
+                            fontWeight: 500,
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </Grid>
+                  )
+                )}
+              </Grid>
             </Grid>
 
             {/* PhD Student Mentor */}
