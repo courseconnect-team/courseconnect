@@ -120,7 +120,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Typography fontWeight="bold">Student Level:</Typography>
             <Typography>{student_level}</Typography>
           </Box>
-          <Box mt={2} sx={{ flexGrow: 1 }}>
+          <Box sx={{ flexGrow: 1 }}>
             {' '}
             {/* Expands to fill space */}
             <Typography fontWeight="bold">[Research Description]</Typography>

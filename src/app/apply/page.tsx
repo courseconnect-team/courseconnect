@@ -60,10 +60,53 @@ export default function Application() {
   const { user } = useAuth();
   const userId = user.uid;
 
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
+  const [email, setEmail] = useState('');
+  const [phonenumber, setPhonenumber] = useState('');
+  const [gpa, setGpa] = useState('');
+  const [department, setDepartment] = useState('');
+
+  React.useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!user) return;
+
+      try {
+        const db = firebase.firestore();
+        const snapshot = await db
+          .collection('users_test') // Adjust collection name if needed
+          .where('userId', '==', user.uid) // Ensure the field matches your Firestore schema
+          .get();
+
+        if (!snapshot.empty) {
+          const profileData = snapshot.docs[0].data();
+          console.log('✅ Profile data:', profileData);
+
+          // Set individual state variables with profile data
+          setFirstname(profileData.firstname || '');
+          setLastname(profileData.lastname || '');
+          setEmail(profileData.email || '');
+          setPhonenumber(profileData.phonenumber || '');
+          setGpa(profileData.gpa || '');
+          setDepartment(profileData.department || '');
+        } else {
+          console.warn('⚠️ No matching profile found for user.uid');
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      }
+    };
+
+    if (user?.uid) {
+      fetchProfileData();
+    }
+  }, [user]);
+
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${
+    current.getMonth() + 1
+  }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -176,15 +219,14 @@ export default function Application() {
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
-      firstname: formData.get('firstName') as string || '',
-      lastname: formData.get('lastName') as string || '',
-      email: formData.get('email') as string || '',
-      ufid: formData.get('ufid') as string || '',
-      phonenumber: formData.get('phone-number') as string || '',
-      gpa: formData.get('gpa-select') as string,
-      department: formData.get('department-select') as string || '',
-      degree: formData.get('degrees-radio-group') as string || '',
-      semesterstatus: formData.get('semstatus-radio-group') as string || '',
+      firstname: (firstname as string) || '',
+      lastname: (lastname as string) || '',
+      email: (email as string) || '',
+      phonenumber: (phonenumber as string) || '',
+      gpa: gpa as string,
+      department: (department as string) || '',
+      degree: (formData.get('degrees-radio-group') as string) || '',
+      semesterstatus: (formData.get('semstatus-radio-group') as string) || '',
       additionalprompt: additionalPromptValue,
       nationality: nationality as string,
       englishproficiency: 'NA',
@@ -199,6 +241,8 @@ export default function Application() {
       resume_link: formData.get('resumeLink') as string,
     };
 
+    console.log('Application Data:', applicationData);
+
     if (!applicationData.email.includes('ufl')) {
       toast.error('Please enter a valid ufl email!');
       setLoading(false);
@@ -211,40 +255,8 @@ export default function Application() {
       toast.error('Please enter a valid last name!');
       setLoading(false);
       return;
-    } else if (applicationData.ufid == '') {
-      toast.error('Please enter a valid ufid!');
-      setLoading(false);
-      return;
     } else if (applicationData.phonenumber === '') {
       toast.error('Please enter a valid phone number!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.degree === null ||
-      applicationData.degree === ''
-    ) {
-      toast.error('Please select a degree!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.department === null ||
-      applicationData.department === ''
-    ) {
-      toast.error('Please select a department!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.semesterstatus === null ||
-      applicationData.semesterstatus === ''
-    ) {
-      toast.error('Please select a semester status!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.resume_link === null ||
-      applicationData.resume_link === ''
-    ) {
-      toast.error('Please provide a resume link!');
       setLoading(false);
       return;
     } else if (
@@ -256,10 +268,6 @@ export default function Application() {
       return;
     } else if (applicationData.available_hours.length == 0) {
       toast.error('Please enter your available hours!');
-      setLoading(false);
-      return;
-    } else if (applicationData.available_semesters.length == 0) {
-      toast.error('Please enter your available semesters!');
       setLoading(false);
       return;
     } else if (coursesArray.length == 0) {
@@ -347,22 +355,25 @@ export default function Application() {
           .firestore()
           .collection('semesters')
           .get()
-          .then((snapshot) => snapshot.docs.map((doc) => {
-            if (!doc.data().hidden) {
-              visibleSems.push(doc.data().semester);
-            }
-          }))
+          .then((snapshot) =>
+            snapshot.docs.map((doc) => {
+              if (!doc.data().hidden) {
+                visibleSems.push(doc.data().semester);
+              }
+            })
+          );
 
         await firebase
           .firestore()
           .collection('courses')
           .get()
-          .then((snapshot) => snapshot.docs.map((doc) => {
-            if (visibleSems.includes(doc.data().semester)) {
-              data.push(doc.id);
-            }
-          }
-          ));
+          .then((snapshot) =>
+            snapshot.docs.map((doc) => {
+              if (visibleSems.includes(doc.data().semester)) {
+                data.push(doc.id);
+              }
+            })
+          );
 
         setNames(data);
       } catch (err) {
@@ -400,6 +411,84 @@ export default function Application() {
               component="h2"
               variant="h6"
               sx={{ marginTop: 45 }}
+            >
+              Personal Information
+            </Typography>
+            <br />
+            <Grid container spacing={2} sx={{ marginTop: 0 }}>
+              <Grid item xs={6}>
+                <TextField
+                  label="First Name"
+                  value={firstname}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  variant="filled"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Last Name"
+                  value={lastname}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  variant="filled"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Email"
+                  value={email}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  variant="filled"
+                />
+              </Grid>
+
+              <Grid item xs={6}>
+                <TextField
+                  label="Phone Number"
+                  value={phonenumber}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  variant="filled"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="GPA"
+                  value={gpa}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  variant="filled"
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  label="Department"
+                  value={department}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  variant="filled"
+                />
+              </Grid>
+            </Grid>
+            <Typography
+              align="center"
+              component="h2"
+              variant="h6"
+              sx={{ marginTop: 5 }}
             >
               Position Information
             </Typography>
@@ -463,13 +552,6 @@ export default function Application() {
                     ))}
                   </Select>
                 </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>
-                  Please provide your most recently calculated cumulative UF
-                  GPA.
-                </Typography>
-                <GPA_Select />
               </Grid>
               <Grid item xs={12}>
                 <Typography sx={{ paddingBottom: 2 }}>
