@@ -86,12 +86,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   }, [expanded, project_description]);
 
   const handleModalOpen = async () => {
-    for (const application of applications) {
-      if (application?.uid === uid) {
-        alert('You have already applied to this project.');
-        return;
-      }
-    }
+    // for (const application of applications) {
+    //   if (application?.uid === uid) {
+    //     alert('You have already applied to this project.');
+    //     return;
+    //   }
+    // }
 
     setOpenModal(true);
   };
