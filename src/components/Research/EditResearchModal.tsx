@@ -90,9 +90,14 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Edit Research Listing</DialogTitle>
-      <DialogContent>
+      <DialogContent
+        sx={{
+          maxHeight: '70vh', // Adjust the height as needed
+          overflowY: 'auto', // Enables scrolling
+        }}
+      >
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ marginTop: 2 }}>
             <TextField
               label="Project Title"
               name="project_title"
