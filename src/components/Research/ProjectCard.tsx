@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
 import ModalApplicationForm from './ModalApplicationForm';
 import {
@@ -59,9 +59,31 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onShowApplications,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [needsExpansion, setNeedsExpansion] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement>(null);
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
   const [openModal, setOpenModal] = useState(false);
+
+  useEffect(() => {
+    const checkTextOverflow = () => {
+      const element = descriptionRef.current;
+      if (!element) return;
+
+      if (expanded) {
+        setNeedsExpansion(true);
+        return;
+      }
+
+      const isOverflowing = element.scrollHeight > element.clientHeight;
+      setNeedsExpansion(isOverflowing);
+    };
+
+    checkTextOverflow();
+
+    window.addEventListener('resize', checkTextOverflow);
+    return () => window.removeEventListener('resize', checkTextOverflow);
+  }, [expanded, project_description]);
 
   const handleModalOpen = async () => {
     for (const application of applications) {
@@ -73,6 +95,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
     setOpenModal(true);
   };
+
   return (
     <>
       <Card
@@ -83,12 +106,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           backgroundColor: '#fff',
           display: 'flex',
           flexDirection: 'column',
-          height: '100%', // Ensures all cards are equal height
+          height: '100%',
         }}
       >
         <CardContent sx={{ flexGrow: 1 }}>
-          {' '}
-          {/* Allows content to fill space */}
           <Typography variant="h5" fontWeight="bold">
             {project_title}
           </Typography>
@@ -106,7 +127,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Typography>{student_level}</Typography>
           </Box>
           <Box sx={{ flexGrow: 1 }}>
-            {' '}
             <Typography fontWeight="bold">PhD Student Mentors</Typography>
             <Typography>
               {typeof phd_student_mentor === 'string'
@@ -126,27 +146,28 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Typography fontWeight="bold">Application Deadline</Typography>
             <Typography>{application_deadline}</Typography>
             <Typography fontWeight="bold">Website</Typography>
-            {website && 
-              !["n/a", "na", "none", "no", ""].includes(website.toLowerCase().trim()) ? (
+            {website &&
+            !['n/a', 'na', 'none', 'no', ''].includes(website.toLowerCase().trim()) ? (
               <Typography>
-                <a 
+                <a
                   href={website.startsWith('http') ? website : `https://${website}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ 
-                    color: '#5A41D8', 
+                  style={{
+                    color: '#5A41D8',
                     textDecoration: 'underline',
-                    wordBreak: 'break-word'
+                    wordBreak: 'break-word',
                   }}
                 >
                   {website}
                 </a>
               </Typography>
             ) : (
-              <Typography>{website || "None provided"}</Typography>
+              <Typography>{website || 'None provided'}</Typography>
             )}
             <Typography fontWeight="bold">Research Description</Typography>
             <Typography
+              ref={descriptionRef}
               sx={{
                 display: expanded ? 'block' : '-webkit-box',
                 WebkitBoxOrient: 'vertical',
@@ -159,9 +180,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </Box>
         </CardContent>
         <Box display="flex" justifyContent="space-between" p={2}>
-          <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
-            {expanded ? 'Read Less' : 'Read More'}
-          </Button>
+          {needsExpansion ? (
+            <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
+              {expanded ? 'Read Less' : 'Read More'}
+            </Button>
+          ) : (
+            <div></div>
+          )}
           {userRole === 'student_applying' || userRole === 'student_applied' ? (
             <Button
               variant="contained"
@@ -175,14 +200,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
               <Button
                 variant="contained"
                 sx={{ backgroundColor: '#4CAF50', color: '#FFFFFF' }}
-                onClick={onEdit} // Optional edit handler
+                onClick={onEdit}
               >
                 Edit Application
               </Button>
               <Button
                 variant="contained"
                 sx={{ backgroundColor: '#2196F3', color: '#FFFFFF' }}
-                onClick={onShowApplications} // Trigger the callback to show applications
+                onClick={onShowApplications}
               >
                 Show Applications
               </Button>
