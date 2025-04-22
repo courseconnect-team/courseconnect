@@ -274,7 +274,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               <Grid item xs={12} md={12} lg={6} key={index}>
                 <ApplicationCard
                   userRole={role}
-                  project_title={`Application ID: ${item.appid}`}
+                  project_title={item.project_title || 'N/A'}
                   department={item.department || 'N/A'}
                   faculty_mentor={
                     `${item.first_name} ${item.last_name}`.trim() || 'N/A'

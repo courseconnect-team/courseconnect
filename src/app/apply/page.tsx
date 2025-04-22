@@ -74,8 +74,8 @@ export default function Application() {
       try {
         const db = firebase.firestore();
         const snapshot = await db
-          .collection('users_test') // Adjust collection name if needed
-          .where('userId', '==', user.uid) // Ensure the field matches your Firestore schema
+          .collection('users') // Adjust collection name if needed
+          .where('uid', '==', user.uid) // Ensure the field matches your Firestore schema
           .get();
 
         if (!snapshot.empty) {

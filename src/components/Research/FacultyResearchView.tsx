@@ -40,6 +40,14 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
     null
   );
 
+  // Get my positions by filtering
+  const myPositions = researchListings.filter((item) =>
+    item.faculty_members?.includes(uid)
+  );
+
+  // Check if there are no positions when in my positions view
+  const hasNoPositions = studentView && myPositions.length === 0;
+
   // Callback to go back to the research listings view
   const handleBackToListings = () => {
     setSelectedResearchId(null);
@@ -111,9 +119,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                   }}
                   onClick={() => showStudentView(!studentView)}
                 >
-                  {studentView
-                    ? 'View all Positions'
-                    : 'View my Positions'}
+                  {studentView ? 'View all Positions' : 'View my Positions'}
                 </Button>
               </Box>
 
@@ -154,78 +160,98 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
               />
             </Box>
 
-            {/* Grid container with consistent width - no additional margins */}
-            {studentView ? (
-              <Grid container spacing={4}>
-                {researchListings
-                  .filter((item) => item.faculty_members?.includes(uid))
-                  .map((item, index) => (
-                    <Grid item xs={12} md={12} lg={6} key={index}>
-                      <ProjectCard
-                        listingId={item.docID}
-                        userRole={role}
-                        uid={uid}
-                        project_title={item.project_title}
-                        department={item.department}
-                        faculty_mentor={item.faculty_mentor}
-                        terms_available={item.terms_available}
-                        student_level={item.student_level}
-                        project_description={item.project_description}
-                        faculty_members={item.faculty_members}
-                        phd_student_mentor={item.phd_student_mentor}
-                        prerequisites={item.prerequisites}
-                        credit={item.credit}
-                        stipend={item.stipend}
-                        application_requirements={
-                          item.application_requirements
-                        }
-                        application_deadline={item.application_deadline}
-                        website={item.website}
-                        onShowApplications={() => {
-                          setSelectedResearchId(item.docID);
-                        }}
-                        onEdit={() => {
-                          console.log('Opening edit modal');
-                          setEditingForm(item);
-                          setEditModalOpen(true);
-                        }}
-                      />
-                    </Grid>
-                  ))}
-              </Grid>
+            {hasNoPositions ? (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  py: 10,
+                  px: 3,
+                  backgroundColor: '#f9f9f9',
+                  borderRadius: 2,
+                }}
+              >
+                <Typography variant="h5" sx={{ mb: 2, color: '#555' }}>
+                  No research positions found
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 4, maxWidth: 600 }}>
+                  You haven't created any research positions yet. Get started by
+                  creating your first position using the "Create New Position"
+                  button above.
+                </Typography>
+              </Box>
             ) : (
               <Grid container spacing={4}>
-                {researchListings.map((item, index) => (
-                  <Grid item xs={12} md={12} lg={6} key={index}>
-                    <ProjectCard
-                      listingId={item.id || item.docID}
-                      userRole={role}
-                      uid={uid}
-                      project_title={item.project_title}
-                      department={item.department}
-                      faculty_mentor={item.faculty_mentor}
-                      terms_available={item.terms_available}
-                      student_level={item.student_level}
-                      project_description={item.project_description}
-                      faculty_members={item.faculty_members}
-                      phd_student_mentor={item.phd_student_mentor}
-                      prerequisites={item.prerequisites}
-                      credit={item.credit}
-                      stipend={item.stipend}
-                      application_requirements={item.application_requirements}
-                      application_deadline={item.application_deadline}
-                      website={item.website}
-                      onShowApplications={() => {
-                        setSelectedResearchId(item.docID);
-                      }}
-                      onEdit={() => {
-                        console.log('Opening edit modal');
-                        setEditingForm(item);
-                        setEditModalOpen(true);
-                      }}
-                    />
-                  </Grid>
-                ))}
+                {studentView
+                  ? myPositions.map((item, index) => (
+                      <Grid item xs={12} md={12} lg={6} key={index}>
+                        <ProjectCard
+                          listingId={item.docID}
+                          userRole={role}
+                          uid={uid}
+                          project_title={item.project_title}
+                          department={item.department}
+                          faculty_mentor={item.faculty_mentor}
+                          terms_available={item.terms_available}
+                          student_level={item.student_level}
+                          project_description={item.project_description}
+                          faculty_members={item.faculty_members}
+                          phd_student_mentor={item.phd_student_mentor}
+                          prerequisites={item.prerequisites}
+                          credit={item.credit}
+                          stipend={item.stipend}
+                          application_requirements={
+                            item.application_requirements
+                          }
+                          application_deadline={item.application_deadline}
+                          website={item.website}
+                          onShowApplications={() => {
+                            setSelectedResearchId(item.docID);
+                          }}
+                          onEdit={() => {
+                            console.log('Opening edit modal');
+                            setEditingForm(item);
+                            setEditModalOpen(true);
+                          }}
+                        />
+                      </Grid>
+                    ))
+                  : researchListings.map((item, index) => (
+                      <Grid item xs={12} md={12} lg={6} key={index}>
+                        <ProjectCard
+                          listingId={item.id || item.docID}
+                          userRole={role}
+                          uid={uid}
+                          project_title={item.project_title}
+                          department={item.department}
+                          faculty_mentor={item.faculty_mentor}
+                          terms_available={item.terms_available}
+                          student_level={item.student_level}
+                          project_description={item.project_description}
+                          faculty_members={item.faculty_members}
+                          phd_student_mentor={item.phd_student_mentor}
+                          prerequisites={item.prerequisites}
+                          credit={item.credit}
+                          stipend={item.stipend}
+                          application_requirements={
+                            item.application_requirements
+                          }
+                          application_deadline={item.application_deadline}
+                          website={item.website}
+                          onShowApplications={() => {
+                            setSelectedResearchId(item.docID);
+                          }}
+                          onEdit={() => {
+                            console.log('Opening edit modal');
+                            setEditingForm(item);
+                            setEditModalOpen(true);
+                          }}
+                        />
+                      </Grid>
+                    ))}
               </Grid>
             )}
           </>
