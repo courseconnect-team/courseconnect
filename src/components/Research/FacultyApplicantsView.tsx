@@ -72,10 +72,7 @@ const FacultyApplicantsView: React.FC<FacultyApplicantsViewProps> = ({
           }}
         >
           <Typography variant="h5">
-            Modeling Dialogue for Supporting Learning
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Fall 2023
+            {researchListing.project_title}
           </Typography>
         </Box>
 
