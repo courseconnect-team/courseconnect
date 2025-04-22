@@ -1,24 +1,36 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
 import ModalApplicationForm from './ModalApplicationForm';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  where,
+  query,
+  documentId,
+  getDocs,
+} from 'firebase/firestore';
+import firebase from '@/firebase/firebase_config';
 
 interface ProjectCardProps {
   userRole: string;
   uid?: string;
   project_title: string;
   department: string;
-  faculty_mentor: string;
+  faculty_mentor: {};
   terms_available: string;
   student_level: string;
   project_description: string;
   faculty_members?: string[];
-  phd_student_mentor?: string;
+  phd_student_mentor?: {} | string;
   prerequisites?: string;
   credit?: string;
   stipend?: string;
   application_requirements?: string;
   application_deadline?: string;
   website?: string;
+  applications?: any[];
   onEdit?: () => void;
   onShowApplications?: () => void;
   listingId: string;
@@ -42,6 +54,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   application_requirements,
   application_deadline,
   website,
+  applications = [],
   onEdit,
   onShowApplications,
 }) => {
@@ -49,6 +62,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
   const [openModal, setOpenModal] = useState(false);
+
+  const handleModalOpen = async () => {
+    for (const application of applications) {
+      if (application?.uid === uid) {
+        alert('You have already applied to this project.');
+        return;
+      }
+    }
+
+    setOpenModal(true);
+  };
   return (
     <>
       <Card
@@ -73,7 +97,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </Typography>
           <Box mt={2}>
             <Typography fontWeight="bold">Faculty Mentor:</Typography>
-            <Typography>{faculty_mentor}</Typography>
+            <Typography>{Object.values(faculty_mentor).join(', ')}</Typography>
 
             <Typography fontWeight="bold">Terms Available:</Typography>
             <Typography>{terms_available}</Typography>
@@ -81,10 +105,29 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Typography fontWeight="bold">Student Level:</Typography>
             <Typography>{student_level}</Typography>
           </Box>
-          <Box mt={2} sx={{ flexGrow: 1 }}>
+          <Box sx={{ flexGrow: 1 }}>
             {' '}
-            {/* Expands to fill space */}
-            <Typography fontWeight="bold">[Research Description]</Typography>
+            <Typography fontWeight="bold">PhD Student Mentors</Typography>
+            <Typography>
+              {typeof phd_student_mentor === 'string'
+                ? phd_student_mentor
+                : Object.entries(phd_student_mentor ?? {})
+                    .map(([k, v]) => (k === 'info' ? v : `${v}, ${k}`))
+                    .join(' ')}
+            </Typography>
+            <Typography fontWeight="bold">Prerequisites</Typography>
+            <Typography>{prerequisites}</Typography>
+            <Typography fontWeight="bold">Credit</Typography>
+            <Typography>{credit}</Typography>
+            <Typography fontWeight="bold">Stipend</Typography>
+            <Typography>{stipend}</Typography>
+            <Typography fontWeight="bold">Application Requirements</Typography>
+            <Typography>{application_requirements}</Typography>
+            <Typography fontWeight="bold">Application Deadline</Typography>
+            <Typography>{application_deadline}</Typography>
+            <Typography fontWeight="bold">Website</Typography>
+            <Typography>{website}</Typography>
+            <Typography fontWeight="bold">Research Description</Typography>
             <Typography
               sx={{
                 display: expanded ? 'block' : '-webkit-box',
@@ -101,11 +144,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
             {expanded ? 'Read Less' : 'Read More'}
           </Button>
-          {userRole === 'student_applying' ? (
+          {userRole === 'student_applying' || userRole === 'student_applied' ? (
             <Button
               variant="contained"
               sx={{ backgroundColor: '#5A41D8', color: '#FFFFFF' }}
-              onClick={() => setOpenModal(true)}
+              onClick={() => handleModalOpen()}
             >
               Apply
             </Button>

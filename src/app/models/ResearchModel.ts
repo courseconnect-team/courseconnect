@@ -4,17 +4,8 @@ export interface ResearchListing {
   department: string;
   faculty_mentor: string;
   phd_student_mentor: string;
-  terms_available: {
-    spring: boolean;
-    summer: boolean;
-    fall: boolean;
-  };
-  student_level: {
-    freshman: boolean;
-    sophomore: boolean;
-    junior: boolean;
-    senior: boolean;
-  };
+  terms_available: string;
+  student_level: string;
   prerequisites: string;
   credit: string;
   stipend: string;
@@ -22,4 +13,5 @@ export interface ResearchListing {
   application_deadline: string;
   website: string;
   project_description: string;
+  faculty_members?: string[];
 }

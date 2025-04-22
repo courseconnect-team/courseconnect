@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
-import { Box, Typography, Button, Grid, Container } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import React, { useEffect, useState } from 'react';
+import { Box, Typography, Button, Grid } from '@mui/material';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import ResearchModal from '@/components/Research/Modal';
 import ProjectCard from '@/components/Research/ProjectCard';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
 import {
   collection,
+  addDoc,
+  updateDoc,
+  doc,
   where,
   query,
   documentId,
   getDocs,
 } from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
+import EditResearchModal from './EditResearchModal';
 
 interface FacultyResearchViewProps {
   researchListings: any[];
@@ -23,29 +25,6 @@ interface FacultyResearchViewProps {
   postNewResearchPosition: (formData: any) => Promise<void>;
 }
 
-const getResearchApplicationsListings = async (researchListing: any) => {
-  const applicationsIds = researchListing.applications || [];
-  if (applicationsIds.length === 0) {
-    return [];
-  }
-  const db = firebase.firestore();
-  const q = query(
-    collection(db, 'research-applications'),
-    where(documentId(), 'in', applicationsIds)
-  );
-  try {
-    const querySnapshot = await getDocs(q);
-    const applicationsList = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    return applicationsList;
-  } catch (error) {
-    console.error('Error retrieving documents:', error);
-  }
-  return [];
-};
-
 const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   researchListings,
   role,
@@ -54,89 +33,83 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   postNewResearchPosition,
 }) => {
   const [studentView, showStudentView] = useState(true);
-  const [selectedResearchId, setSelectedResearchId] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingForm, setEditingForm] = useState<any | null>(null);
 
+  const [selectedResearchId, setSelectedResearchId] = useState<string | null>(
+    null
+  );
+
+  // Callback to go back to the research listings view
   const handleBackToListings = () => {
     setSelectedResearchId(null);
   };
-
   return (
     <>
       <HeaderCard text="Applications" />
-      <Container 
-        maxWidth="xl"
-        sx={{
-          marginTop: '380px',
-          paddingBottom: '80px',
-          px: { xs: '4%', sm: '6%', md: '8%' }
-        }}
-      >
-        {/* Top section with Research title and Toggle button on the same line */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 3,
-            flexWrap: 'wrap',
-            gap: 2
-          }}
-        >
-          <Typography variant="h4" sx={{ my: 0 }}>Research</Typography>
-          
-          <Button
-            variant="outlined"
-            onClick={() => showStudentView(!studentView)}
-            sx={{ 
-              height: '40px',
-              width: '220px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1
-            }}
-          >
-            <VisibilityIcon fontSize="small" />
-            {studentView ? 'View All Postings' : 'View My Postings'}
-          </Button>
-        </Box>
-        
+      <Box sx={{ p: 3 }}>
+        {/* Top-level heading */}
+        <Typography variant="h4" gutterBottom>
+          Research
+        </Typography>
         {selectedResearchId ? (
-          <FacultyApplicantsView
-            id={selectedResearchId}
-            researchListing={researchListings.find(
-              (listing) => listing.id === selectedResearchId
-            )}
-            researchApplications={getResearchApplicationsListings}
-            onBack={handleBackToListings}
-          />
+          <Box
+            marginTop="380px"
+            justifyContent="space-between"
+            display="flex"
+            flexWrap="wrap"
+          >
+            <FacultyApplicantsView
+              id={selectedResearchId}
+              researchListing={researchListings.find(
+                (listing) => listing.docID === selectedResearchId
+              )}
+              onBack={handleBackToListings}
+            />
+          </Box>
         ) : (
           <>
-            {/* Second row with "All Postings"/"My Postings" text and Create button */}
-            <Box 
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 4,
-                flexWrap: 'wrap',
-                gap: 2
-              }}
+            {/* Container for "My Positions" and the button */}
+            <Box
+              marginTop="380px"
+              justifyContent="space-between"
+              display="flex"
+              flexWrap="wrap"
             >
-              <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                {studentView ? 'My Postings' : 'All Postings'}
-              </Typography>
-              
+              <Box>
+                {/* Left side: "My Positions" and link/label */}
+                <Typography variant="h6" gutterBottom>
+                  My Positions:
+                </Typography>
+                {/* Center: "Research Board View" Button */}
+                <Button
+                  sx={{
+                    backgroundColor: '#5A41D8', // Same purple as Edit Application
+                    color: '#FFFFFF', // White text
+                    textTransform: 'none', // Keep text normal case
+                    borderRadius: '8px', // Rounded corners
+                    boxShadow: '0px 0px 8px #E5F0DC', // Subtle greenish glow
+                    fontWeight: 500,
+                    padding: '10px 24px',
+                    marginBottom: '16px', // Add vertical space below the button
+                    '&:hover': {
+                      backgroundColor: '#5A41D8', // Keep hover consistent
+                      boxShadow: '0px 0px 8px #E5F0DC',
+                    },
+                  }}
+                  onClick={() => showStudentView(!studentView)}
+                >
+                  {studentView
+                    ? 'Switch to Student View'
+                    : 'Switch to Default View'}
+                </Button>
+              </Box>
+
               <ResearchModal
                 uid={uid}
                 onSubmitSuccess={getResearchListings}
                 firebaseQuery={postNewResearchPosition}
-                buttonText={
-                  <>
-                    Create New Position 
-                    <AddIcon sx={{ ml: 1, fontSize: '20px' }} />
-                  </>
-                }
+                buttonText="Create New Position"
                 currentFormData={{
                   id: '',
                   project_title: '',
@@ -154,54 +127,71 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                   project_description: '',
                 }}
                 buttonStyle={{
-                  height: '40px',
-                  minWidth: '200px',
-                  backgroundColor: '#5A41D8',
-                  color: '#FFFFFF',
-                  textTransform: 'none',
-                  borderRadius: '4px',
-                  boxShadow: '0px 0px 8px #E5F0DC',
+                  backgroundColor: '#5A41D8', // Same purple as Edit Application
+                  color: '#FFFFFF', // White text
+                  textTransform: 'none', // Keep text normal case
+                  borderRadius: '8px', // Rounded corners
+                  boxShadow: '0px 0px 8px #E5F0DC', // Subtle greenish glow
                   fontWeight: 500,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  padding: '10px 24px',
                   '&:hover': {
-                    backgroundColor: '#5A41D8',
+                    backgroundColor: '#5A41D8', // Keep hover consistent
                     boxShadow: '0px 0px 8px #E5F0DC',
                   },
                 }}
               />
-            </Box>
-
-            {/* Cards Grid */}
-            <Grid container spacing={3}>
+              {/* Conditional rendering based on state */}
               {studentView ? (
-                researchListings
-                  .filter((item) => item.faculty_members?.includes(uid))
-                  .map((item, index) => (
-                    <Grid item xs={12} sm={12} md={6} lg={6} key={index}>
+                <Grid container spacing={4} mt={3} mx="5%">
+                  {researchListings
+                    .filter((item) => item.faculty_members?.includes(uid))
+                    .map((item, index) => (
+                      <Grid item xs={12} sm={6} md={6} key={index}>
+                        <ProjectCard
+                          listingId={item.docID}
+                          userRole={role}
+                          uid={uid}
+                          project_title={item.project_title}
+                          department={item.department}
+                          faculty_mentor={item.faculty_mentor}
+                          terms_available={item.terms_available}
+                          student_level={item.student_level}
+                          project_description={item.project_description}
+                          faculty_members={item.faculty_members}
+                          phd_student_mentor={item.phd_student_mentor}
+                          prerequisites={item.prerequisites}
+                          credit={item.credit}
+                          stipend={item.stipend}
+                          application_requirements={
+                            item.application_requirements
+                          }
+                          application_deadline={item.application_deadline}
+                          website={item.website}
+                          onShowApplications={() => {
+                            setSelectedResearchId(item.docID);
+                          }}
+                          onEdit={() => {
+                            console.log('Opening edit modal');
+                            setEditingForm(item);
+                            setEditModalOpen(true);
+                          }}
+                        />
+                      </Grid>
+                    ))}
+                </Grid>
+              ) : (
+                <Grid container spacing={4} mt={3} mx="5%">
+                  {researchListings.map((item, index) => (
+                    <Grid item xs={12} sm={6} md={6} key={index}>
                       <ProjectCard
+                        listingId={item.id}
                         userRole={role}
                         uid={uid}
                         project_title={item.project_title}
                         department={item.department}
                         faculty_mentor={item.faculty_mentor}
-                        terms_available={Object.keys(item.terms_available)
-                          .filter(
-                            (key) =>
-                              item.terms_available[
-                                key as keyof typeof item.terms_available
-                              ]
-                          )
-                          .join(', ')}
-                        student_level={Object.keys(item.student_level)
-                          .filter(
-                            (key) =>
-                              item.student_level[
-                                key as keyof typeof item.student_level
-                              ]
-                          )
-                          .join(', ')}
+                        terms_available={item.terms_available}
+                        student_level={item.student_level}
                         project_description={item.project_description}
                         faculty_members={item.faculty_members}
                         phd_student_mentor={item.phd_student_mentor}
@@ -212,58 +202,30 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                         application_deadline={item.application_deadline}
                         website={item.website}
                         onShowApplications={() => {
-                          setSelectedResearchId(item.id);
+                          setSelectedResearchId(item.docID);
                         }}
-                        listingId={item.id}
+                        onEdit={() => {
+                          console.log('Opening edit modal');
+                          setEditingForm(item);
+                          setEditModalOpen(true);
+                        }}
                       />
                     </Grid>
-                  ))
-              ) : (
-                researchListings.map((item, index) => (
-                  <Grid item xs={12} sm={12} md={6} lg={6} key={index}>
-                    <ProjectCard
-                      userRole={role}
-                      uid={uid}
-                      project_title={item.project_title}
-                      department={item.department}
-                      faculty_mentor={item.faculty_mentor}
-                      terms_available={Object.keys(item.terms_available)
-                        .filter(
-                          (key) =>
-                            item.terms_available[
-                              key as keyof typeof item.terms_available
-                            ]
-                        )
-                        .join(', ')}
-                      student_level={Object.keys(item.student_level)
-                        .filter(
-                          (key) =>
-                            item.student_level[
-                              key as keyof typeof item.student_level
-                            ]
-                        )
-                        .join(', ')}
-                      project_description={item.project_description}
-                      faculty_members={item.faculty_members}
-                      phd_student_mentor={item.phd_student_mentor}
-                      prerequisites={item.prerequisites}
-                      credit={item.credit}
-                      stipend={item.stipend}
-                      application_requirements={item.application_requirements}
-                      application_deadline={item.application_deadline}
-                      website={item.website}
-                      onShowApplications={() => {
-                        setSelectedResearchId(item.id);
-                      }}
-                      listingId={item.id}
-                    />
-                  </Grid>
-                ))
+                  ))}
+                </Grid>
               )}
-            </Grid>
+            </Box>
           </>
         )}
-      </Container>
+      </Box>
+      {editingForm && (
+        <EditResearchModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          listingData={editingForm}
+          onSubmitSuccess={getResearchListings}
+        />
+      )}
     </>
   );
 };

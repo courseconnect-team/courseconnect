@@ -14,6 +14,17 @@ import {
 } from '@mui/material';
 import { getAuth } from 'firebase/auth';
 import firebase from '@/firebase/firebase_config';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  where,
+  query,
+  documentId,
+  getDocs,
+} from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ModalApplicationFormProps {
   open: boolean;
@@ -45,6 +56,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!user) return;
@@ -53,8 +65,8 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
       try {
         const db = firebase.firestore();
         const snapshot = await db
-          .collection('users_test') // change users to users_test for profile database
-          .where('userId', '==', user.uid) // change uid to userId
+          .collection('users') // change users to users_test for profile database
+          .where('uid', '==', user.uid) // change uid to userId
           .get();
 
         if (!snapshot.empty) {
@@ -69,9 +81,9 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
             degree: profileData.degree || '',
             gpa: profileData.gpa || '',
             graduationDate: profileData.graduationdate || '',
-            resume: profileData.resume || '',
-            qualifications: profileData.qualifications || '',
-            weeklyHours: profileData.weeklyHours || '',
+            resume: '',
+            qualifications: '',
+            weeklyHours: '',
           }));
         } else {
           console.warn('⚠️ No matching profile found for user.uid');
@@ -99,35 +111,66 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
     try {
       const db = firebase.firestore();
 
-      console.log('⏳ Trying to add application to research-applications...');
-      const applicationRef = await db.collection('research-applications').add({
-        ...formData,
+      // First, update the user profile with any changed form data
+      console.log('⏳ Updating user profile if values changed...');
+      const userRef = db.collection('users').where('uid', '==', user.uid);
+      const userSnapshot = await userRef.get();
+
+      if (!userSnapshot.empty) {
+        const userDocRef = userSnapshot.docs[0].ref;
+        const userData = userSnapshot.docs[0].data();
+
+        // Check if any profile data has been updated
+        const updatedProfileData = {
+          firstname:
+            formData.firstname !== userData.firstname
+              ? formData.firstname
+              : userData.firstname,
+          lastname:
+            formData.lastname !== userData.lastname
+              ? formData.lastname
+              : userData.lastname,
+          phonenumber:
+            formData.phone !== userData.phonenumber
+              ? formData.phone
+              : userData.phonenumber,
+          department:
+            formData.department !== userData.department
+              ? formData.department
+              : userData.department,
+          degree:
+            formData.degree !== userData.degree
+              ? formData.degree
+              : userData.degree,
+          gpa: formData.gpa !== userData.gpa ? formData.gpa : userData.gpa,
+          graduationdate:
+            formData.graduationDate !== userData.graduationdate
+              ? formData.graduationDate
+              : userData.graduationdate,
+        };
+
+        // Only update fields that have changed
+        const fieldsToUpdate = Object.entries(updatedProfileData)
+          .filter(([key, value]) => userData[key] !== value)
+          .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+        if (Object.keys(fieldsToUpdate).length > 0) {
+          await userDocRef.update(fieldsToUpdate);
+          console.log('User profile updated with new values');
+        } else {
+          console.log('No profile updates needed');
+        }
+      }
+
+      const parentDocRef = doc(db, 'research-listings', listingId);
+      const noteColRef = collection(parentDocRef, 'applications');
+      const finalFormData = {
         uid: user.uid,
         app_status: 'Pending',
         date: new Date().toLocaleDateString(),
-      });
-      console.log('✅ Application added');
-
-      const appId = applicationRef.id;
-
-      console.log('📎 Linking appId to research-listings...');
-      const querySnapshot = await db
-        .collection('research-listings')
-        .where('id', '==', listingId)
-        .get();
-
-      if (querySnapshot.empty) {
-        throw new Error('No matching listing found!');
-      }
-
-      const listingDoc = querySnapshot.docs[0];
-      const listingRef = listingDoc.ref;
-
-      await listingRef.update({
-        applications: firebase.firestore.FieldValue.arrayUnion(appId),
-      });
-
-      console.log('✅ App linked to listing');
+        ...formData,
+      };
+      await addDoc(noteColRef, finalFormData);
       alert('Application submitted successfully!');
       setSubmitted(true);
       onClose();

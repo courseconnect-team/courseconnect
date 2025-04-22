@@ -4,7 +4,16 @@ import { Toaster } from 'react-hot-toast';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
-import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  getDocs,
+  collectionGroup,
+  query,
+  where,
+} from 'firebase/firestore';
 import { testData } from './testdata';
 import {
   Box,
@@ -45,17 +54,8 @@ interface ResearchListing {
   department: string;
   faculty_mentor: string;
   phd_student_mentor: string;
-  terms_available: {
-    spring: boolean;
-    summer: boolean;
-    fall: boolean;
-  };
-  student_level: {
-    freshman: boolean;
-    sophomore: boolean;
-    junior: boolean;
-    senior: boolean;
-  };
+  terms_available: string;
+  student_level: string;
   prerequisites: string;
   credit: string;
   stipend: string;
@@ -68,11 +68,7 @@ interface ResearchListing {
 interface ResearchApplication {
   appid: string;
   app_status: string;
-  terms_available: {
-    spring: boolean;
-    summer: boolean;
-    fall: boolean;
-  };
+  terms_available: string;
   date_applied: string;
   degree: string;
   department: string;
@@ -110,7 +106,7 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   useEffect(() => {
     getResearchListings();
     getApplications();
-  }, []);
+  });
 
   if (roleError) {
     return <p>Error loading role</p>;
@@ -127,36 +123,42 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       collectionRef = collectionRef.where('department', '==', department);
     }
     if (studentLevel) {
-      collectionRef = collectionRef.where(
-        'student_level.' + studentLevel,
-        '==',
-        true
-      );
+      collectionRef = collectionRef.where('student_level', '==', studentLevel);
     }
     if (termsAvailable) {
       collectionRef = collectionRef.where(
-        'terms_available.' + termsAvailable,
+        'terms_available',
         '==',
-        true
+        termsAvailable
       );
     }
     let snapshot = await collectionRef.get();
-    // Execute the query.
-    let researchListings: ResearchListing[] = snapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    let researchListings: ResearchListing[] = await Promise.all(
+      snapshot.docs.map(async (doc: any) => {
+        const detailsSnap = await getDocs(collection(doc.ref, 'applications'));
+        const apps = detailsSnap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
+        return {
+          docID: doc.id,
+          applications: apps,
+          ...doc.data(),
+        };
+      })
+    );
     setResearchListings(researchListings);
   };
 
   const getApplications = async () => {
-    let collectionRef: firebase.firestore.Query<firebase.firestore.DocumentData> =
-      firebase.firestore().collection('research-applications');
-    collectionRef = collectionRef.where('uid', '==', user.uid);
-    let snapshot = await collectionRef.get();
+    const appsQ = query(
+      collectionGroup(firebase.firestore(), 'applications'),
+      where('uid', '==', user.uid)
+    );
+    const snapshot = await getDocs(appsQ);
 
     let researchApplications: ResearchApplication[] = snapshot.docs.map(
-      (doc: firebase.firestore.QueryDocumentSnapshot) => ({
+      (doc: any) => ({
         appid: doc.id,
         app_status: doc.data().app_status,
         terms_available: doc.data().terms_available,
@@ -189,29 +191,18 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       console.error('Error adding document: ', e);
     }
   };
-
-  const patchResearchPosting = async (formData: any) => {
-    console.log('formData: ', formData);
-    const docRef = doc(firebase.firestore(), 'research-listings', formData.id);
-    try {
-      // This updates only the specified fields without overwriting the entire document.
-      await updateDoc(docRef, formData);
-      console.log('Document updated successfully!');
-    } catch (error) {
-      console.error('Error updating document: ', error);
-    }
-  };
-
+  console.log('User role:', role);
   return (
     <>
       <Toaster />
+
       {roleLoading ? (
         <>
           <h1>loading</h1>
         </>
       ) : (
         <>
-          {role === 'student_applying' && (
+          {(role === 'student_applying' || role === 'student_applied') && (
             <>
               <HeaderCard text="Applications" />
               <StudentResearchView
