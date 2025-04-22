@@ -63,28 +63,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     userRole === 'faculty' && faculty_members.includes(uid || '');
   const [openModal, setOpenModal] = useState(false);
 
-  const handleModalOpen = async() => {
-
-    // const db = firebase.firestore();
-    // const q = query(
-    //   collection(db, 'research-applications'),
-    //   where(documentId(), 'in', applications)
-    // );
-    // try {
-    //   const querySnapshot = await getDocs(q);
-    //   const applicationsList = querySnapshot.docs.map((doc) => ({
-    //     id: doc.id,
-    //     ...doc.data(),
-    //   }));
-    //   for (const application of applicationsList) {
-    //     if (application?.uid === uid) {
-    //       alert('You have already applied to this project.');
-    //       return;
-    //     }
-    //   }
-    // } catch (error) {
-    //   console.error('Error retrieving documents:', error);
-    // }
+  const handleModalOpen = async () => {
+    for (const application of applications) {
+      if (application?.uid === uid) {
+        alert('You have already applied to this project.');
+        return;
+      }
+    }
 
     setOpenModal(true);
   }

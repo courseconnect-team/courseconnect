@@ -153,7 +153,6 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
         ...formData
       }
       await addDoc(noteColRef, finalFormData);
-      console.log("passed my ocde")
       alert('Application submitted successfully!');
       setSubmitted(true);
       onClose();
