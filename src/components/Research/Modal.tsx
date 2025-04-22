@@ -86,7 +86,6 @@ const ResearchModal: React.FC<ResearchModal> = ({
       id: uuidv4(),
       creator_id: uid,
       faculty_members: [uid],
-      applications: [],
     };
 
     firebaseQuery(finalFormData);

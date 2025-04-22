@@ -164,12 +164,14 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
           {/* Conditional rendering based on state */}
           {myApplications ? (
             <Grid container spacing={4} mt={3} mx="5%">
-              {researchListings.map((item, index) => (
+              {
+              researchListings.map((item, index) => {
+                return (
                 <Grid item xs={12} sm={6} md={6} key={index}>
                   <ProjectCard
                     uid={uid}
                     applications={item.applications}
-                    listingId={item.id}
+                    listingId={item.docID}
                     userRole={role}
                     project_title={item.project_title}
                     department={item.department}
@@ -200,7 +202,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
                     website={item.website}
                   />
                 </Grid>
-              ))}
+              )})}
             </Grid>
           ) : (
             <Grid container spacing={4} mt={3} mx="5%">

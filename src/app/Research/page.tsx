@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
-import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, getDocs } from 'firebase/firestore';
 import { testData } from './testdata';
 import {
   Box,
@@ -142,10 +142,18 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
     }
     let snapshot = await collectionRef.get();
     // Execute the query.
-    let researchListings: ResearchListing[] = snapshot.docs.map((doc: any) => ({
-      id: doc.id,
+    let researchListings: ResearchListing[] = await Promise.all(snapshot.docs.map(async (doc: any) => {
+      const detailsSnap = await getDocs(collection(doc.ref, 'applications'));
+      const apps = detailsSnap.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      }));
+      return (
+      {
+      docID: doc.id,
+      applications: apps,
       ...doc.data(),
-    }));
+    })}));
     setResearchListings(researchListings);
   };
 

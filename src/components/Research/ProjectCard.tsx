@@ -64,34 +64,27 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const [openModal, setOpenModal] = useState(false);
 
   const handleModalOpen = async() => {
-    // get applications ids from research listings
-    // query application id (those are doc ids) from research-applications
-    // check if project card uid is same as application uid
-    // dont open modal and return alert
 
-    const db = firebase.firestore();
-    const q = query(
-      collection(db, 'research-applications'),
-      where(documentId(), 'in', applications)
-    );
-    try {
-      const querySnapshot = await getDocs(q);
-      const applicationsList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      console.log('Applications List:', applicationsList);
-      for (const application of applicationsList) {
-        console.log("current uid: ", uid);
-        console.log("current application uid: ", application?.uid);
-        if (application?.uid === uid) {
-          alert('You have already applied to this project.');
-          return;
-        }
-      }
-    } catch (error) {
-      console.error('Error retrieving documents:', error);
-    }
+    // const db = firebase.firestore();
+    // const q = query(
+    //   collection(db, 'research-applications'),
+    //   where(documentId(), 'in', applications)
+    // );
+    // try {
+    //   const querySnapshot = await getDocs(q);
+    //   const applicationsList = querySnapshot.docs.map((doc) => ({
+    //     id: doc.id,
+    //     ...doc.data(),
+    //   }));
+    //   for (const application of applicationsList) {
+    //     if (application?.uid === uid) {
+    //       alert('You have already applied to this project.');
+    //       return;
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error('Error retrieving documents:', error);
+    // }
 
     setOpenModal(true);
   }

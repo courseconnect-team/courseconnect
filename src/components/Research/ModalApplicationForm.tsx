@@ -14,6 +14,17 @@ import {
 } from '@mui/material';
 import { getAuth } from 'firebase/auth';
 import firebase from '@/firebase/firebase_config';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  where,
+  query,
+  documentId,
+  getDocs,
+} from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ModalApplicationFormProps {
   open: boolean;
@@ -99,36 +110,17 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
 
     try {
       const db = firebase.firestore();
-
-      console.log('⏳ Trying to add application to research-applications...');
-      const applicationRef = await db.collection('research-applications').add({
-        ...formData,
+      console.log("listing id: ",listingId)
+      const parentDocRef = doc(db, 'research-listings', listingId);
+      const noteColRef = collection(parentDocRef, "applications");
+      const finalFormData = {
         uid: user.uid,
         app_status: 'Pending',
         date: new Date().toLocaleDateString(),
-      });
-      console.log('✅ Application added');
-
-      const appId = applicationRef.id;
-
-      console.log('📎 Linking appId to research-listings...');
-      const querySnapshot = await db
-        .collection('research-listings')
-        .where('id', '==', listingId)
-        .get();
-
-      if (querySnapshot.empty) {
-        throw new Error('No matching listing found!');
+        ...formData
       }
-
-      const listingDoc = querySnapshot.docs[0];
-      const listingRef = listingDoc.ref;
-
-      await listingRef.update({
-        applications: firebase.firestore.FieldValue.arrayUnion(appId),
-      });
-
-      console.log('✅ App linked to listing');
+      await addDoc(noteColRef, finalFormData);
+      console.log("passed my ocde")
       alert('Application submitted successfully!');
       setSubmitted(true);
       onClose();

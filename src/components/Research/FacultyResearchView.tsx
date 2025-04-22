@@ -25,30 +25,6 @@ interface FacultyResearchViewProps {
   postNewResearchPosition: (formData: any) => Promise<void>;
 }
 
-const getResearchApplicationsListings = async (researchListing: any) => {
-  console.log('postings queried', researchListing);
-  const applicationsIds = researchListing.applications || [];
-  if (applicationsIds.length === 0) {
-    return [];
-  }
-  const db = firebase.firestore();
-  const q = query(
-    collection(db, 'research-applications'),
-    where(documentId(), 'in', applicationsIds)
-  );
-  try {
-    const querySnapshot = await getDocs(q);
-    const applicationsList = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    return applicationsList;
-  } catch (error) {
-    console.error('Error retrieving documents:', error);
-  }
-  return [];
-};
-
 const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   researchListings,
   role,
@@ -68,7 +44,6 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   const handleBackToListings = () => {
     setSelectedResearchId(null);
   };
-
   return (
     <>
       <HeaderCard text="Applications" />
@@ -89,7 +64,6 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
               researchListing={researchListings.find(
                 (listing) => listing.id === selectedResearchId
               )}
-              researchApplications={getResearchApplicationsListings}
               onBack={handleBackToListings}
             />
           </Box>
@@ -174,7 +148,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                     .map((item, index) => (
                       <Grid item xs={12} sm={6} md={6} key={index}>
                         <ProjectCard
-                          listingId={item.id}
+                          listingId={item.docID}
                           userRole={role}
                           uid={uid}
                           project_title={item.project_title}

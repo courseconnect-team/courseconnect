@@ -18,38 +18,35 @@ import { collection, addDoc, updateDoc, doc, where, query, documentId, getDocs }
 interface FacultyApplicantsViewProps {
   id: string;
   researchListing: any;
-  researchApplications: (researchListings: any) => Promise<any[]>;
   onBack: () => void;
 }
 
 const FacultyApplicantsView: React.FC<FacultyApplicantsViewProps> = ({
   id,
   researchListing,
-  researchApplications,
   onBack,
 }) => {
   const [tabIndex, setTabIndex] = React.useState(0);
-  const [applications, setApplications] = React.useState<any[]>([]);
+  const [applications, setApplications] = React.useState<any[]>(researchListing.applications);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
   };
 
-  useEffect(() => {
-    researchApplications(researchListing).then((data) => {
-      console.log("user effect", data)
-      setApplications(data);
-    })
-  }, [])
-
   const changeStatus = async (id: string, app_status: string) => {
     const db = firebase.firestore();
-    const docRef = doc(db, 'research-applications', id);
-    await updateDoc(docRef, { app_status });
-    researchApplications(researchListing).then((data) => {
-      console.log("user effect", data)
-      setApplications(data);
-    })
+    const docRef = doc(db, 'research-listings', researchListing.docID);
+    const colRef = collection(docRef, "applications")
+    const docAppRef = doc(colRef, id)
+    await updateDoc(docAppRef, { app_status });
+    for (var i = 0;i < researchListing.applications.length; i++) {
+      setApplications(old =>
+        old.map(app =>
+          app.id === id
+            ? { ...app, app_status }  
+            : app                     
+        ))
+    }
   }
 
   return (
