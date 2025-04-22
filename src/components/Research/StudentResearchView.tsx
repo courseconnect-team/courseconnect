@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   TextField,
@@ -47,6 +47,10 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   setResearchApplications,
 }) => {
   const [myApplications, showMyApplications] = useState(true);
+
+  useEffect(() => {
+    getApplications()
+  },[myApplications])
 
   return (
     <>

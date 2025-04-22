@@ -18,12 +18,12 @@ interface ProjectCardProps {
   uid?: string;
   project_title: string;
   department: string;
-  faculty_mentor: string;
+  faculty_mentor: {};
   terms_available: string;
   student_level: string;
   project_description: string;
   faculty_members?: string[];
-  phd_student_mentor?: string;
+  phd_student_mentor?: {} | string;
   prerequisites?: string;
   credit?: string;
   stipend?: string;
@@ -97,7 +97,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </Typography>
           <Box mt={2}>
             <Typography fontWeight="bold">Faculty Mentor:</Typography>
-            <Typography>{faculty_mentor}</Typography>
+            <Typography>{Object.values(faculty_mentor).join(", ")}
+            </Typography>
 
             <Typography fontWeight="bold">Terms Available:</Typography>
             <Typography>{terms_available}</Typography>
@@ -107,8 +108,21 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           </Box>
           <Box sx={{ flexGrow: 1 }}>
             {' '}
-            {/* Expands to fill space */}
-            <Typography fontWeight="bold">[Research Description]</Typography>
+            <Typography fontWeight="bold">PhD Student Mentors</Typography>
+            <Typography>{typeof phd_student_mentor === 'string' ? phd_student_mentor : (Object.entries(phd_student_mentor ?? {}).map(([k, v]) => (k === "info" ? v : `${v}, ${k}`)).join(" "))}</Typography>
+            <Typography fontWeight="bold">Prerequisites</Typography>
+            <Typography>{prerequisites}</Typography>
+            <Typography fontWeight="bold">Credit</Typography>
+            <Typography>{credit}</Typography>       
+            <Typography fontWeight="bold">Stipend</Typography>
+            <Typography>{stipend}</Typography>
+            <Typography fontWeight="bold">Application Requirements</Typography>
+            <Typography>{application_requirements}</Typography>
+            <Typography fontWeight="bold">Application Deadline</Typography>
+            <Typography>{application_deadline}</Typography>
+            <Typography fontWeight="bold">Website</Typography>
+            <Typography>{website}</Typography>
+            <Typography fontWeight="bold">Research Description</Typography>
             <Typography
               sx={{
                 display: expanded ? 'block' : '-webkit-box',
