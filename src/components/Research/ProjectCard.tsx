@@ -126,7 +126,25 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Typography fontWeight="bold">Application Deadline</Typography>
             <Typography>{application_deadline}</Typography>
             <Typography fontWeight="bold">Website</Typography>
-            <Typography>{website}</Typography>
+            {website && 
+              !["n/a", "na", "none", "no", ""].includes(website.toLowerCase().trim()) ? (
+              <Typography>
+                <a 
+                  href={website.startsWith('http') ? website : `https://${website}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ 
+                    color: '#5A41D8', 
+                    textDecoration: 'underline',
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  {website}
+                </a>
+              </Typography>
+            ) : (
+              <Typography>{website || "None provided"}</Typography>
+            )}
             <Typography fontWeight="bold">Research Description</Typography>
             <Typography
               sx={{
