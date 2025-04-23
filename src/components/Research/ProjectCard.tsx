@@ -33,6 +33,7 @@ interface ProjectCardProps {
   applications?: any[];
   onEdit?: () => void;
   onShowApplications?: () => void;
+  onDelete?: () => void;
   listingId: string;
 }
 
@@ -57,6 +58,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   applications = [],
   onEdit,
   onShowApplications,
+  onDelete,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [needsExpansion, setNeedsExpansion] = useState(false);
@@ -147,10 +149,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Typography>{application_deadline}</Typography>
             <Typography fontWeight="bold">Website</Typography>
             {website &&
-            !['n/a', 'na', 'none', 'no', ''].includes(website.toLowerCase().trim()) ? (
+            !['n/a', 'na', 'none', 'no', ''].includes(
+              website.toLowerCase().trim()
+            ) ? (
               <Typography>
                 <a
-                  href={website.startsWith('http') ? website : `https://${website}`}
+                  href={
+                    website.startsWith('http') ? website : `https://${website}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -210,6 +216,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 onClick={onShowApplications}
               >
                 Show Applications
+              </Button>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: '#F44336', color: '#FFFFFF' }}
+                onClick={onDelete}
+              >
+                Delete Application
               </Button>
             </Box>
           ) : null}
