@@ -245,7 +245,20 @@ const ReviewModal: React.FC<FormData> = ({
                   <Typography variant="subtitle2">
                     {getFieldLabel(key)}
                   </Typography>
-                  <Typography>{formatFieldValue(key, item[key])}</Typography>
+                  {key === 'resume' ? (
+                    <Typography>
+                      <a
+                        href={item[key]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#5A41D8' }}
+                      >
+                        View Resume
+                      </a>
+                    </Typography>
+                  ) : (
+                    <Typography>{formatFieldValue(key, item[key])}</Typography>
+                  )}
                 </Grid>
               ) : null
             )}
