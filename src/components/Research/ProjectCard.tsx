@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, Typography, Button, Box } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+  Grid,
+} from '@mui/material';
 import ModalApplicationForm from './ModalApplicationForm';
 import {
   collection,
@@ -110,47 +117,73 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         }}
       >
         <CardContent sx={{ flexGrow: 1 }}>
-          <Typography variant="h5" fontWeight="bold">
+          <Typography variant="h5" fontWeight="bold" gutterBottom>
             {project_title}
           </Typography>
-          <Typography variant="subtitle2" color="text.secondary">
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
             {department}
           </Typography>
-          <Box mt={2}>
-            <Typography fontWeight="bold">Faculty Mentor:</Typography>
-            <Typography>{Object.values(faculty_mentor).join(', ')}</Typography>
 
-            <Typography fontWeight="bold">Terms Available:</Typography>
-            <Typography>{terms_available}</Typography>
-
-            <Typography fontWeight="bold">Student Level:</Typography>
-            <Typography>{student_level}</Typography>
-          </Box>
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography fontWeight="bold">PhD Student Mentors</Typography>
+          <Box mt={3}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              Mentor Information
+            </Typography>
             <Typography>
+              <strong>Faculty Mentor:</strong>{' '}
+              {Object.values(faculty_mentor).join(', ')}
+            </Typography>
+            <Typography>
+              <strong>PhD Student Mentor:</strong>{' '}
               {typeof phd_student_mentor === 'string'
                 ? phd_student_mentor
                 : Object.entries(phd_student_mentor ?? {})
                     .map(([k, v]) => (k === 'info' ? v : `${v}, ${k}`))
                     .join(' ')}
             </Typography>
-            <Typography fontWeight="bold">Prerequisites</Typography>
-            <Typography>{prerequisites}</Typography>
-            <Typography fontWeight="bold">Credit</Typography>
-            <Typography>{credit}</Typography>
-            <Typography fontWeight="bold">Stipend</Typography>
-            <Typography>{stipend}</Typography>
-            <Typography fontWeight="bold">Application Requirements</Typography>
-            <Typography>{application_requirements}</Typography>
-            <Typography fontWeight="bold">Application Deadline</Typography>
-            <Typography>{application_deadline}</Typography>
-            <Typography fontWeight="bold">Website</Typography>
-            {website &&
-            !['n/a', 'na', 'none', 'no', ''].includes(website.toLowerCase().trim()) ? (
-              <Typography>
+          </Box>
+
+          <Box mt={3}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              Academic Information
+            </Typography>
+            <Typography>
+              <strong>Student Level:</strong> {student_level}
+            </Typography>
+            <Typography>
+              <strong>Terms Available:</strong> {terms_available}
+            </Typography>
+            <Typography>
+              <strong>Prerequisites:</strong> {prerequisites}
+            </Typography>
+            <Typography>
+              <strong>Credit:</strong> {credit}
+            </Typography>
+            <Typography>
+              <strong>Stipend:</strong> {stipend}
+            </Typography>
+          </Box>
+
+          <Box mt={3}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              Application Details
+            </Typography>
+            <Typography>
+              <strong>Application Requirements:</strong>{' '}
+              {application_requirements}
+            </Typography>
+            <Typography>
+              <strong>Application Deadline:</strong> {application_deadline}
+            </Typography>
+            <Typography>
+              <strong>Website:</strong>{' '}
+              {website &&
+              !['n/a', 'na', 'none', 'no', ''].includes(
+                website.toLowerCase().trim()
+              ) ? (
                 <a
-                  href={website.startsWith('http') ? website : `https://${website}`}
+                  href={
+                    website.startsWith('http') ? website : `https://${website}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -161,11 +194,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 >
                   {website}
                 </a>
-              </Typography>
-            ) : (
-              <Typography>{website || 'None provided'}</Typography>
-            )}
-            <Typography fontWeight="bold">Research Description</Typography>
+              ) : (
+                'None provided'
+              )}
+            </Typography>
+          </Box>
+
+          <Box mt={3}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              Research Description
+            </Typography>
             <Typography
               ref={descriptionRef}
               sx={{
@@ -179,6 +217,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             </Typography>
           </Box>
         </CardContent>
+
         <Box display="flex" justifyContent="space-between" p={2}>
           {needsExpansion ? (
             <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
