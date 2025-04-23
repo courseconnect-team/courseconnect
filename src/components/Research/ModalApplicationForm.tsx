@@ -107,6 +107,32 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
       setError('You must be signed in to apply.');
       return;
     }
+    const requiredFields = [
+      'firstname',
+      'lastname',
+      'phone',
+      'department',
+      'degree',
+      'gpa',
+      'graduationDate',
+      'resume',
+      'qualifications',
+      'weeklyHours',
+    ];
+
+    const missingField = requiredFields.find(
+      (field) => !formData[field as keyof typeof formData]
+    );
+    if (missingField) {
+      setError(`Please fill out the ${missingField} field.`);
+      return;
+    }
+
+    const urlRegex = /^https?:\/\/[\w.-]+\.[a-z]{2,}.*$/i;
+    if (!urlRegex.test(formData.resume)) {
+      setError('Please enter a valid URL for the resume.');
+      return;
+    }
 
     try {
       const db = firebase.firestore();
@@ -198,6 +224,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="firstname"
                 label="First Name"
                 fullWidth
+                required
                 value={formData.firstname}
                 onChange={handleChange}
               />
@@ -207,6 +234,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="lastname"
                 label="Last Name"
                 fullWidth
+                required
                 value={formData.lastname}
                 onChange={handleChange}
               />
@@ -216,6 +244,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="email"
                 label="Email"
                 fullWidth
+                required
                 value={formData.email}
                 disabled
               />
@@ -225,6 +254,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="phone"
                 label="Phone Number"
                 fullWidth
+                required
                 value={formData.phone}
                 onChange={handleChange}
               />
@@ -234,6 +264,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="department"
                 label="Department"
                 fullWidth
+                required
                 value={formData.department}
                 onChange={handleChange}
               />
@@ -243,6 +274,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="degree"
                 label="Degree"
                 fullWidth
+                required
                 value={formData.degree}
                 onChange={handleChange}
               />
@@ -252,6 +284,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="gpa"
                 label="GPA"
                 fullWidth
+                required
                 value={formData.gpa}
                 onChange={handleChange}
               />
@@ -261,6 +294,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="graduationDate"
                 label="Graduation Date"
                 fullWidth
+                required
                 value={formData.graduationDate}
                 onChange={handleChange}
               />
@@ -270,6 +304,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="resume"
                 label="Resume URL"
                 fullWidth
+                required
                 onChange={handleChange}
               />
             </Grid>
@@ -278,6 +313,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="qualifications"
                 label="Qualifications"
                 fullWidth
+                required
                 onChange={handleChange}
               />
             </Grid>
@@ -286,6 +322,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
                 name="weeklyHours"
                 label="Weekly Hours"
                 fullWidth
+                required
                 onChange={handleChange}
               />
             </Grid>

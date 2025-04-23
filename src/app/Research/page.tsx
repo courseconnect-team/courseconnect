@@ -83,7 +83,7 @@ interface ResearchApplication {
   uid: string;
   weekly_hours: string;
   project_title: string;
-  faculty_mentor: {}
+  faculty_mentor: {};
   project_description: string;
 }
 
@@ -109,7 +109,7 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   useEffect(() => {
     getResearchListings();
     getApplications();
-  });
+  }, []);
 
   if (roleError) {
     return <p>Error loading role</p>;
@@ -154,19 +154,20 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   };
 
   const getApplications = async () => {
-    const snapshot = await firebase.firestore()
+    const snapshot = await firebase
+      .firestore()
       .collectionGroup('applications')
       .where('uid', '==', user.uid)
       .get();
     const results = await Promise.all(
-      snapshot.docs.map(async appDoc => {
+      snapshot.docs.map(async (appDoc) => {
         const appData = appDoc.data();
 
         // navigate back up to the parent document
         var listingRef = appDoc.ref.parent.parent;
         let listingData: any = {};
         if (listingRef) {
-          const listingSnap = await listingRef.get();        // valid in compat
+          const listingSnap = await listingRef.get(); // valid in compat
           if (listingSnap.exists) {
             listingData = listingSnap.data();
           }
@@ -176,7 +177,7 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
           appId: appDoc.id,
           ...appData,
           listingId: listingRef?.id ?? null,
-          listingData
+          listingData,
         };
       })
     );
