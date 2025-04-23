@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
 
 interface ApplicationCardProps {
@@ -47,8 +47,30 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
   onShowApplications,
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [needsExpansion, setNeedsExpansion] = useState(false);
+  const descriptionRef = useRef<HTMLDivElement>(null);
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
+
+  useEffect(() => {
+    const checkTextOverflow = () => {
+      const element = descriptionRef.current;
+      if (!element) return;
+
+      if (expanded) {
+        setNeedsExpansion(true);
+        return;
+      }
+
+      const isOverflowing = element.scrollHeight > element.clientHeight;
+      setNeedsExpansion(isOverflowing);
+    };
+
+    checkTextOverflow();
+
+    window.addEventListener('resize', checkTextOverflow);
+    return () => window.removeEventListener('resize', checkTextOverflow);
+  }, [expanded, project_description]);
 
   return (
     <Card
@@ -128,6 +150,7 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
         <Box mt={2} sx={{ flexGrow: 1 }}>
           <Typography fontWeight="bold">Research Description</Typography>
           <Typography
+            ref={descriptionRef}
             sx={{
               display: expanded ? 'block' : '-webkit-box',
               WebkitBoxOrient: 'vertical',
@@ -140,9 +163,13 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
         </Box>
       </CardContent>
       <Box display="flex" justifyContent="space-between" p={2}>
-        <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
-          {expanded ? 'Read Less' : 'Read More'}
-        </Button>
+        {needsExpansion ? (
+          <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
+            {expanded ? 'Read Less' : 'Read More'}
+          </Button>
+        ) : (
+          <div></div>
+        )}
         {isFacultyInvolved && (
           <Box display="flex" gap={1}>
             <Button
