@@ -323,22 +323,22 @@ const ResearchModal: React.FC<ResearchModal> = ({
                 name="application_deadline"
                 type="date"
                 value={
-                  formData.application_deadline === 'rolling'
+                  formData.application_deadline === 'Rolling'
                     ? ''
                     : formData.application_deadline
                 }
                 onChange={handleChange}
                 fullWidth
-                disabled={formData.application_deadline === 'rolling'}
+                disabled={formData.application_deadline === 'Rolling'}
               />
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={formData.application_deadline === 'rolling'}
+                    checked={formData.application_deadline === 'Rolling'}
                     onChange={(e) => {
                       setFormData((prev) => ({
                         ...prev,
-                        application_deadline: e.target.checked ? 'rolling' : '',
+                        application_deadline: e.target.checked ? 'Rolling' : '',
                       }));
                     }}
                   />
