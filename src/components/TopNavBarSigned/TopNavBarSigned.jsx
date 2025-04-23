@@ -24,12 +24,8 @@ export const TopNavBarSigned = ({ className }) => {
         <div className="text-wrapper-3">About</div>
       </Link>
 
-      <Link href="/Research">
-        <div className="text-wrapper-4">Research</div>
-      </Link>
-
       <Link href="/dashboard">
-        <div className="text-wrapper-2">Home</div>
+        <div className="text-wrapper-4">Home</div>
       </Link>
 
       <button className="logout-button" onClick={() => setOpen(true)}>

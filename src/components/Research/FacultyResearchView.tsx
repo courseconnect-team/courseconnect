@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, Grid, Container } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import ResearchModal from '@/components/Research/Modal';
 import ProjectCard from '@/components/Research/ProjectCard';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  where,
-  query,
-  documentId,
-  getDocs,
-} from 'firebase/firestore';
+import { deleteDoc, doc } from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
 import EditResearchModal from './EditResearchModal';
 
@@ -35,10 +37,41 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   const [studentView, showStudentView] = useState(true);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingForm, setEditingForm] = useState<any | null>(null);
-
   const [selectedResearchId, setSelectedResearchId] = useState<string | null>(
     null
   );
+
+  // State for delete confirmation modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteDocID, setDeleteDocID] = useState<string | null>(null);
+
+  // Open delete confirmation modal
+  const handleOpenDeleteModal = (docID: string) => {
+    setDeleteDocID(docID);
+    setDeleteModalOpen(true);
+  };
+
+  // Close delete confirmation modal
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setDeleteDocID(null);
+  };
+
+  // Handle delete action
+  const handleDelete = async () => {
+    if (!deleteDocID) return;
+    try {
+      const db = firebase.firestore();
+      const docRef = doc(db, 'research-listings', deleteDocID); // Reference to the document
+      await deleteDoc(docRef); // Delete the document
+      console.log(`Listing with ID ${deleteDocID} deleted successfully.`);
+      getResearchListings(); // Refresh the listings
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+    } finally {
+      handleCloseDeleteModal(); // Close the modal
+    }
+  };
 
   // Get my positions by filtering
   const myPositions = researchListings.filter((item) =>
@@ -178,9 +211,9 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                   No research positions found
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 4, maxWidth: 600 }}>
-                  You haven't created any research positions yet. Get started by
-                  creating your first position using the "Create New Position"
-                  button above.
+                  You haven&apos;t created any research positions yet. Get
+                  started by creating your first position using the &quot;Create
+                  New Position&quot; button above.
                 </Typography>
               </Box>
             ) : (
@@ -216,6 +249,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                             setEditingForm(item);
                             setEditModalOpen(true);
                           }}
+                          onDelete={() => handleOpenDeleteModal(item.docID)} // Open confirmation modal
                         />
                       </Grid>
                     ))
@@ -249,6 +283,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                             setEditingForm(item);
                             setEditModalOpen(true);
                           }}
+                          onDelete={() => handleOpenDeleteModal(item.docID)} // Open confirmation modal
                         />
                       </Grid>
                     ))}
@@ -257,6 +292,51 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
           </>
         )}
       </Container>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog
+        open={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        aria-labelledby="delete-confirmation-title"
+        aria-describedby="delete-confirmation-description"
+      >
+        <DialogTitle id="delete-confirmation-title">
+          Confirm Deletion
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-confirmation-description">
+            Are you sure you want to delete this research listing? This action
+            cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseDeleteModal}
+            sx={{
+              color: '#5A41D8',
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: 'rgba(90, 65, 216, 0.04)',
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            sx={{
+              backgroundColor: '#5A41D8',
+              color: '#FFFFFF',
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: '#4A35B8',
+              },
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {editingForm && (
         <EditResearchModal

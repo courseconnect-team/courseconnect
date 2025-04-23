@@ -40,6 +40,7 @@ interface ProjectCardProps {
   applications?: any[];
   onEdit?: () => void;
   onShowApplications?: () => void;
+  onDelete?: () => void;
   listingId: string;
 }
 
@@ -64,6 +65,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   applications = [],
   onEdit,
   onShowApplications,
+  onDelete,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [needsExpansion, setNeedsExpansion] = useState(false);
@@ -249,6 +251,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 onClick={onShowApplications}
               >
                 Show Applications
+              </Button>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: '#F44336', color: '#FFFFFF' }}
+                onClick={onDelete}
+              >
+                Delete Application
               </Button>
             </Box>
           ) : null}
