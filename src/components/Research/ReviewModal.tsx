@@ -26,8 +26,8 @@ const HIDDEN_FIELDS = ['id', 'uid', 'docID', 'appid', '_id', 'app_id', 'key'];
 
 // Fields that should be displayed first and in a specific order
 const PRIORITY_FIELDS = [
-  'first_name',
-  'last_name',
+  'firstname',
+  'lastname',
   'email',
   'phone',
   'department',
@@ -52,8 +52,8 @@ const MULTILINE_FIELDS = [
 
 // Human-readable field labels
 const FIELD_LABELS: Record<string, string> = {
-  first_name: 'First Name',
-  last_name: 'Last Name',
+  firstname: 'First Name',
+  lastname: 'Last Name',
   qualifications: 'Qualifications',
   project_title: 'Project Title',
   terms_available: 'Terms Available',
@@ -197,7 +197,7 @@ const ReviewModal: React.FC<FormData> = ({
           </Typography>
           <Divider sx={{ mb: 2 }} />
           <Grid container spacing={2}>
-            {['first_name', 'last_name', 'email', 'phone'].map((key) =>
+            {['firstname', 'lastname', 'email', 'phone'].map((key) =>
               item[key] ? (
                 <Grid item xs={6} key={key}>
                   <Typography variant="subtitle2">
