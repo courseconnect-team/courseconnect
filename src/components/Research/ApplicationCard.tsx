@@ -6,7 +6,7 @@ interface ApplicationCardProps {
   uid?: string;
   project_title: string;
   department: string;
-  faculty_mentor: string;
+  faculty_mentor: { name: string; email: string };
   date_applied: string;
   terms_available: string;
   student_level: string;
@@ -70,13 +70,59 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
           {department}
         </Typography>
         <Box mt={2}>
-          <Typography fontWeight="bold">Status</Typography>
-          <Typography variant="subtitle2" color="text.secondary">
+          <Typography fontWeight="bold" display="inline">
+            Status:
+          </Typography>{' '}
+          <Typography
+            variant="subtitle1"
+            color={
+              app_status === 'Pending'
+                ? 'warning.main'
+                : app_status === 'Denied'
+                ? 'error.main'
+                : 'success.main'
+            }
+            display="inline"
+          >
             {app_status}
           </Typography>
-          <Typography fontWeight="bold">Date applied</Typography>
-          <Typography variant="subtitle2" color="text.secondary">
+          <br />
+          <Typography fontWeight="bold" display="inline">
+            Date Applied:
+          </Typography>{' '}
+          <Typography
+            variant="subtitle1"
+            color="text.secondary"
+            display="inline"
+          >
             {date_applied}
+          </Typography>
+        </Box>
+        <Box mt={2}>
+          <Typography fontWeight="bold" display="inline">
+            Faculty Mentor:
+          </Typography>{' '}
+          <Typography
+            variant="subtitle1"
+            color="text.secondary"
+            display="inline"
+          >
+            {Object.entries(faculty_mentor ?? {})
+              .map(([key, value]) => `${value}`)
+              .join(', ')}
+          </Typography>
+          <br />
+          <Typography fontWeight="bold" display="inline">
+            Faculty Email:
+          </Typography>{' '}
+          <Typography
+            variant="subtitle1"
+            color="text.secondary"
+            display="inline"
+          >
+            {Object.entries(faculty_mentor ?? {})
+              .map(([key, value]) => `${key}`)
+              .join(', ')}
           </Typography>
         </Box>
         <Box mt={2} sx={{ flexGrow: 1 }}>

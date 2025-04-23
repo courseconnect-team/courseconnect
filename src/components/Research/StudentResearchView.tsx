@@ -59,66 +59,73 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   }, []);
 
   const handleSearch = (searchText: string) => {
-    if (!searchText && department === "") {
+    if (!searchText && department === '') {
       setResearchListings([...originalListings]);
       return;
     }
 
-    const listingsToFilter = originalListings.length > 0 ? 
-      [...originalListings] : 
-      [...researchListings];
+    const listingsToFilter =
+      originalListings.length > 0
+        ? [...originalListings]
+        : [...researchListings];
 
     let filteredListings = listingsToFilter;
-    
+
     // Text search
     if (searchText) {
-      filteredListings = filteredListings.filter(item => {
+      filteredListings = filteredListings.filter((item) => {
         const searchLower = searchText.toLowerCase();
-        
-        const titleMatch = item.project_title && 
-          typeof item.project_title === 'string' && 
+
+        const titleMatch =
+          item.project_title &&
+          typeof item.project_title === 'string' &&
           item.project_title.toLowerCase().includes(searchLower);
-          
-        const descriptionMatch = item.project_description && 
-          typeof item.project_description === 'string' && 
+
+        const descriptionMatch =
+          item.project_description &&
+          typeof item.project_description === 'string' &&
           item.project_description.toLowerCase().includes(searchLower);
-          
-        const mentorMatch = item.faculty_mentor && 
-          typeof item.faculty_mentor === 'string' && 
+
+        const mentorMatch =
+          item.faculty_mentor &&
+          typeof item.faculty_mentor === 'string' &&
           item.faculty_mentor.toLowerCase().includes(searchLower);
-          
+
         return titleMatch || descriptionMatch || mentorMatch;
       });
-      console.log("Filtered Listings: ", filteredListings);
+      console.log('Filtered Listings: ', filteredListings);
     }
 
     // Department filter with special handling for CISE
     if (department) {
-      filteredListings = filteredListings.filter(item => {
-        if (department === "Computer and Information Science and Engineering") {
+      filteredListings = filteredListings.filter((item) => {
+        if (department === 'Computer and Information Science and Engineering') {
           return (
-            item.department === "Computer and Information Science and Engineering" ||
-            item.department === "Computer and Information Sciences and Engineering" ||
-            (item.department && item.department.toLowerCase().includes("computer") && 
-             item.department.toLowerCase().includes("information") && 
-             item.department.toLowerCase().includes("engineering"))
+            item.department ===
+              'Computer and Information Science and Engineering' ||
+            item.department ===
+              'Computer and Information Sciences and Engineering' ||
+            (item.department &&
+              item.department.toLowerCase().includes('computer') &&
+              item.department.toLowerCase().includes('information') &&
+              item.department.toLowerCase().includes('engineering'))
           );
         }
         return item.department === department;
       });
-      console.log("Filtered Listings by Department: ", filteredListings);
+      console.log('Filtered Listings by Department: ', filteredListings);
     }
 
     setResearchListings(filteredListings);
   };
 
   const handleClearFilters = () => {
-    setDepartment("");
-    setStudentLevel("");
-    setTermsAvailable("");
+    setDepartment('');
+    setStudentLevel('');
+    setTermsAvailable('');
 
     if (searchInputRef.current) {
-      searchInputRef.current.value = "";
+      searchInputRef.current.value = '';
     }
 
     if (originalListings.length > 0) {
@@ -130,35 +137,33 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
 
   const handleDepartmentChange = (value: string) => {
     setDepartment(value);
-    const searchText = searchInputRef.current?.value || "";
+    const searchText = searchInputRef.current?.value || '';
     handleSearch(searchText);
   };
 
   return (
-    <Container 
-      sx={{ 
-        mt: "380px",
+    <Container
+      sx={{
+        mt: '380px',
         mb: 8,
         maxWidth: {
           xs: '100%',
           sm: '95%',
-          md: '90%', 
+          md: '90%',
           lg: '85%',
           xl: '80%',
         },
         mx: 'auto',
       }}
     >
-      <Box 
-        display="flex" 
-        justifyContent="space-between" 
-        alignItems="center" 
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
         mb={4}
       >
-        <Typography variant="h4">
-          Research
-        </Typography>
-        
+        <Typography variant="h4">Research</Typography>
+
         <Button
           sx={{
             backgroundColor: '#5A41D8',
@@ -178,7 +183,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
           {myApplications ? 'Show My Applications' : 'Switch to Default View'}
         </Button>
       </Box>
-      
+
       <Box sx={{ mb: 4 }}>
         {/* Only show search controls when viewing research listings (not applications) */}
         {myApplications ? (
@@ -208,11 +213,11 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               }}
               sx={{ flex: 1 }}
             />
-            
+
             <Button
               variant="outlined"
               onClick={handleClearFilters}
-              sx={{ 
+              sx={{
                 height: '40px',
                 minWidth: '80px',
                 borderColor: '#5A41D8',
@@ -225,16 +230,24 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
             >
               Clear
             </Button>
-            
+
             <FormControl size="small" sx={{ minWidth: 150 }}>
               <InputLabel>Department</InputLabel>
               <Select
                 value={department}
-                onChange={(e) => handleDepartmentChange(e.target.value as string)}
+                onChange={(e) =>
+                  handleDepartmentChange(e.target.value as string)
+                }
               >
                 <MenuItem value="">All</MenuItem>
-                <MenuItem value={"Computer and Information Science and Engineering"}>CISE</MenuItem>
-                <MenuItem value="Electrical and Computer Engineering">ECE</MenuItem>
+                <MenuItem
+                  value={'Computer and Information Science and Engineering'}
+                >
+                  CISE
+                </MenuItem>
+                <MenuItem value="Electrical and Computer Engineering">
+                  ECE
+                </MenuItem>
                 <MenuItem value="Engineering Education">Education</MenuItem>
               </Select>
             </FormControl>
@@ -271,32 +284,31 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
         ) : (
           <Grid container spacing={4}>
             {researchApplications.map((item, index) => {
-              return(
-              <Grid item xs={12} md={12} lg={6} key={index}>
-                <ApplicationCard
-                  app_status = {item.app_status}
-                  userRole={role}
-                  project_title={item.project_title}
-                  department={item.department || 'N/A'}
-                  date_applied={item.date_applied}
-                  faculty_mentor={
-                    `${item.first_name} ${item.last_name}`.trim() || 'N/A'
-                  }
-                  terms_available={item.terms_available}
-                  student_level={item.degree || 'N/A'}
-                  project_description={
-                    item.project_description || 'No description provided'
-                  }
-                  phd_student_mentor="N/A"
-                  prerequisites="N/A"
-                  credit="N/A"
-                  stipend="N/A"
-                  application_requirements="N/A"
-                  application_deadline={item.date_applied || 'N/A'}
-                  website="N/A"
-                />
-              </Grid>
-            )})}
+              return (
+                <Grid item xs={12} md={12} lg={6} key={index}>
+                  <ApplicationCard
+                    app_status={item.app_status}
+                    userRole={role}
+                    project_title={item.project_title}
+                    department={item.department || 'N/A'}
+                    date_applied={item.date_applied}
+                    faculty_mentor={item.faculty_mentor}
+                    terms_available={item.terms_available}
+                    student_level={item.degree || 'N/A'}
+                    project_description={
+                      item.project_description || 'No description provided'
+                    }
+                    phd_student_mentor="N/A"
+                    prerequisites="N/A"
+                    credit="N/A"
+                    stipend="N/A"
+                    application_requirements="N/A"
+                    application_deadline={item.date_applied || 'N/A'}
+                    website="N/A"
+                  />
+                </Grid>
+              );
+            })}
           </Grid>
         )}
       </Box>
