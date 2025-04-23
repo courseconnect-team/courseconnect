@@ -19,7 +19,7 @@ interface ApplicationCardProps {
   application_requirements?: string;
   application_deadline?: string;
   website?: string;
-  app_status: string
+  app_status: string;
   onEdit?: () => void;
   onShowApplications?: () => void;
 }
@@ -70,17 +70,17 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
           {department}
         </Typography>
         <Box mt={2}>
-        <Typography fontWeight="bold">Status</Typography>
-        <Typography variant="subtitle2" color="text.secondary">
-          {app_status}
-        </Typography>
-        <Typography fontWeight="bold">Date applied</Typography>
-        <Typography variant="subtitle2" color="text.secondary">
-          {date_applied}
-        </Typography>
+          <Typography fontWeight="bold">Status</Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            {app_status}
+          </Typography>
+          <Typography fontWeight="bold">Date applied</Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            {date_applied}
+          </Typography>
         </Box>
         <Box mt={2} sx={{ flexGrow: 1 }}>
-          <Typography fontWeight="bold">[Research Description]</Typography>
+          <Typography fontWeight="bold">Research Description</Typography>
           <Typography
             sx={{
               display: expanded ? 'block' : '-webkit-box',
