@@ -99,20 +99,20 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
     // Department filter with special handling for CISE
     if (department) {
       filteredListings = filteredListings.filter((item) => {
-        if (department === 'Computer and Information Science and Engineering') {
+        const normalized = item.department?.toLowerCase().trim();
+
+        if (
+          department === 'Computer and Information Sciences and Engineering'
+        ) {
           return (
-            item.department ===
-              'Computer and Information Science and Engineering' ||
-            item.department ===
-              'Computer and Information Sciences and Engineering' ||
-            (item.department &&
-              item.department.toLowerCase().includes('computer') &&
-              item.department.toLowerCase().includes('information') &&
-              item.department.toLowerCase().includes('engineering'))
+            normalized === 'computer and information science and engineering' ||
+            normalized === 'computer and information sciences and engineering'
           );
         }
-        return item.department === department;
+
+        return normalized === department.toLowerCase();
       });
+
       console.log('Filtered Listings by Department: ', filteredListings);
     }
 
@@ -243,10 +243,10 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
                 <MenuItem
                   value={'Computer and Information Science and Engineering'}
                 >
-                  CISE
+                  ECE
                 </MenuItem>
                 <MenuItem value="Electrical and Computer Engineering">
-                  ECE
+                  CISE
                 </MenuItem>
                 <MenuItem value="Engineering Education">Education</MenuItem>
               </Select>
