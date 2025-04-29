@@ -139,7 +139,6 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
           }),
         }
       );
-      console.log(uf_email);
       if (response.ok) {
         toast.success('Email sent successfully');
         handleCloseDialog();
