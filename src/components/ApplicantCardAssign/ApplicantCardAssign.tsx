@@ -96,7 +96,6 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
 
       coursesMap[className] = 'applied';
       await statusRef.update({ courses: coursesMap });
-      console.log('Application moved successfully');
       window.location.reload();
     } catch (error) {
       console.error('Error approving application:', error);
