@@ -159,21 +159,18 @@ export function sendFacultyAssignedNotificationEmail(
   });
 }
 
-export function sendRenewTAEmail(userEmail, position, classCode, semester) {
+export function sendRenewTAEmail(userEmail, message, subject) {
   const mailOptions = {
     from: email,
     to: userEmail,
-    subject: 'New Student Application',
-    text: `Dear Professor,\n\nA student has been assigned for the ${position} role in your ${semester} ${classCode} class. Please login to your account to view more information regarding the new assignment.\n\nBest regards,\nCourse Connect Team`,
+    subject: subject,
+    text: message,
   };
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.error(
-        'Error occurred while sending faculty notification email:',
-        error
-      );
+      console.error('Error occurred while sending TA renewal email:', error);
     } else {
-      console.log('Faculty notification email sent:', info.response);
+      console.log('TA renewal email sent:', info.response);
     }
   });
 }

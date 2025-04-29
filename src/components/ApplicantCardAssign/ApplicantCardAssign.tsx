@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useState } from 'react';
+import { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import './style.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -8,6 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
+import { Toaster, toast } from 'react-hot-toast';
 import {
   AppBar,
   Container,
@@ -15,7 +16,7 @@ import {
   Paper,
   Fade,
   Box,
-  Toolbar,
+  TextField,
   Typography,
 } from '@mui/material';
 import FocusTrap from '@mui/material/Unstable_TrapFocus';
@@ -75,6 +76,16 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
 }) => {
   const db = firebase.firestore();
   const [viewMessage, setViewMessage] = useState(false);
+  const [subject, setSubject] = useState(
+    () => localStorage.getItem('renewalSubject') || ''
+  );
+  const [content, setContent] = useState(
+    () => localStorage.getItem('renewalContent') || ''
+  );
+  const [errors, setErrors] = useState({
+    subject: false,
+    content: false,
+  });
   const handleMoveReview = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -92,12 +103,84 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
     }
   };
 
+  useEffect(() => {
+    setErrors({
+      subject: subject.trim() === '',
+      content: content.trim() === '',
+    });
+  }, [subject, content]);
+
+  const handleSendRenwalEmail = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    if (errors.subject || errors.content) {
+      if (errors.subject) toast.error('Please enter a valid email subject!');
+      if (errors.content)
+        toast.error('Please enter a valid email content section!');
+      return;
+    }
+    try {
+      const response = await fetch(
+        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'renewTA',
+            data: {
+              userEmail: uf_email,
+              message: content,
+              subject: subject,
+            },
+          }),
+        }
+      );
+      console.log(uf_email);
+      if (response.ok) {
+        toast.success('Email sent successfully');
+        handleCloseDialog();
+      } else {
+        let err;
+        try {
+          const json = await response.json();
+          err = JSON.stringify(json);
+        } catch {
+          // fallback to plain text
+          err = await response.text();
+        }
+        console.error('Cloud Function returned 400:', err);
+        throw new Error('Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+    handleCloseDialog();
+    toast.success('Email sent successfully');
+  };
+
   const handleCloseDialog = () => {
     setOpenReviewDialog(false);
     setOpenRenewDialog(false);
     setViewMessage(false);
   };
 
+  useEffect(() => {
+    if (openRenew) {
+      const draftSubj = localStorage.getItem('renewalSubject') ?? '';
+      const draftCont = localStorage.getItem('renewalContent') ?? '';
+      setSubject(draftSubj);
+      setContent(draftCont);
+    }
+  }, [openRenew]);
+
+  const handleRenewalSave = () => {
+    handleSave();
+    setViewMessage(false);
+  };
   const handleOpenReview = useCallback((event: any) => {
     event?.stopPropagation();
 
@@ -115,6 +198,10 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
     setCurrentStu(id);
   }, []);
 
+  const handleSave = () => {
+    localStorage.setItem('renewalSubject', subject);
+    localStorage.setItem('renewalContent', content);
+  };
   const renderRenewDialog = () =>
     !viewMessage ? (
       <Dialog
@@ -145,7 +232,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
             {firstname} {lastname}
           </div>
         </DialogTitle>
-        <form onSubmit={handleMoveReview}>
+        <form onSubmit={handleSendRenwalEmail}>
           <DialogContent>
             <DialogContentText
               style={{
@@ -234,7 +321,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
           style: { borderRadius: 20 },
         }}
         fullWidth
-        maxWidth="lg"
+        maxWidth="xl"
         open={openRenew}
         onClose={handleCloseDialog}
       >
@@ -271,31 +358,38 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
             Are you sure you want to send a renewal to {firstname} {lastname}?
           </DialogContentText>
         </Paper>
-        <Container component="main" sx={{ pt: 4 }}>
-          <Typography sx={{ marginBottom: 2 }}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
-            dolor purus non enim praesent elementum facilisis leo vel. Risus at
-            ultrices mi tempus imperdiet.
-          </Typography>
-          <Typography sx={{ marginBottom: 2 }}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
-            dolor purus non enim praesent elementum facilisis leo vel. Risus at
-            ultrices mi tempus imperdiet.ggLorem ipsum dolor sit amet,
-            consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-            labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent
-            elementum facilisis leo vel. Risus at ultrices mi tempus
-            imperdiet.ggLorem ipsum dolor sit amet, consectetur adipiscing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Rhoncus dolor purus non enim praesent elementum facilisis leo vel.
-            Risus at ultrices mi tempus imperdiet.ggLorem ipsum dolor sit amet,
-            consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-            labore et dolore magna aliqua. Rhoncus dolor purus non enim praesent
-            elementum facilisis leo vel. Risus at ultrices mi tempus
-            imperdiet.gg
-          </Typography>
-        </Container>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <TextField
+            sx={{
+              // hides the placeholder text as soon as the input is focused:
+              '& input:focus::placeholder': {
+                opacity: 0,
+                transition: 'opacity 0.2s',
+              },
+            }}
+            placeholder="Subject"
+            onChange={(e) => setSubject(e.target.value)}
+            value={subject}
+            error={errors.subject}
+            helperText={errors.subject ? 'Subject cannot be empty' : ''}
+          />
+          <TextField
+            onChange={(e) => setContent(e.target.value)}
+            sx={{
+              '& textarea:focus::placeholder': {
+                opacity: 0,
+                transition: 'opacity 0.2s',
+              },
+            }}
+            error={errors.content}
+            helperText={errors.content ? 'Content cannot be empty' : ''}
+            multiline
+            rows={10}
+            id="standard-basic"
+            placeholder="Content"
+            value={content}
+          />
+        </div>
         <FocusTrap open disableAutoFocus disableEnforceFocus>
           <Fade appear={false} in={true}>
             <Paper
@@ -309,67 +403,67 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
                 borderTopWidth: 1,
               }}
             >
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ width: '100%' }}
-              >
-                <Box>
-                  <Button
-                    variant="outlined"
-                    style={{
-                      borderRadius: '10px',
-                      height: '43px',
-                      width: '120px',
-                      textTransform: 'none',
-                      fontFamily: 'SF Pro Display-Bold, Helvetica',
-                      borderColor: '#5736ac',
-                      borderWidth: '4px',
-                      color: '#5736ac',
-                    }}
-                    onClick={handleCloseDialog}
-                  >
-                    Cancel
-                  </Button>
-                </Box>
+              <form onSubmit={handleSendRenwalEmail}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ width: '100%' }}
+                >
+                  <Box>
+                    <Button
+                      variant="outlined"
+                      style={{
+                        borderRadius: '10px',
+                        height: '43px',
+                        width: '120px',
+                        textTransform: 'none',
+                        fontFamily: 'SF Pro Display-Bold, Helvetica',
+                        borderColor: '#5736ac',
+                        borderWidth: '4px',
+                        color: '#5736ac',
+                      }}
+                      onClick={handleCloseDialog}
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
 
-                <Stack direction="row" spacing={2}>
-                  <Button
-                    variant="outlined"
-                    style={{
-                      borderRadius: '10px',
-                      height: '43px',
-                      width: '170px',
-                      textTransform: 'none',
-                      fontFamily: 'SF Pro Display-Bold, Helvetica',
-                      borderColor: '#5736ac',
-                      borderWidth: '4px',
-                      color: '#5736ac',
-                    }}
-                    onClick={() => {
-                      setViewMessage(false);
-                    }}
-                  >
-                    Hide Message
-                  </Button>
-                  <Button
-                    variant="contained"
-                    style={{
-                      borderRadius: '10px',
-                      height: '43px',
-                      width: '120px',
-                      textTransform: 'none',
-                      fontFamily: 'SF Pro Display-Bold, Helvetica',
-                      backgroundColor: '#5736ac',
-                      color: '#ffffff',
-                    }}
-                    type="submit"
-                  >
-                    Send
-                  </Button>
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      variant="outlined"
+                      style={{
+                        borderRadius: '10px',
+                        height: '43px',
+                        width: '170px',
+                        textTransform: 'none',
+                        fontFamily: 'SF Pro Display-Bold, Helvetica',
+                        borderColor: '#5736ac',
+                        borderWidth: '4px',
+                        color: '#5736ac',
+                      }}
+                      onClick={handleRenewalSave}
+                    >
+                      Save Message
+                    </Button>
+                    <Button
+                      variant="contained"
+                      style={{
+                        borderRadius: '10px',
+                        height: '43px',
+                        width: '120px',
+                        textTransform: 'none',
+                        fontFamily: 'SF Pro Display-Bold, Helvetica',
+                        backgroundColor: '#5736ac',
+                        color: '#ffffff',
+                      }}
+                      type="submit"
+                    >
+                      Send
+                    </Button>
+                  </Stack>
                 </Stack>
-              </Stack>
+              </form>
             </Paper>
           </Fade>
         </FocusTrap>

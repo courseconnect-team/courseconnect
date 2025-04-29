@@ -75,12 +75,7 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
         sendUnapprovedUserNotificationEmail(data.user);
         break;
       case 'renewTA':
-        sendRenewTAEmail(
-          data.userEmail,
-          data.position,
-          data.classCode,
-          data.semester
-        );
+        sendRenewTAEmail(data.userEmail, data.message, data.subject);
       default:
         res.status(400).json({ message: 'Invalid email type' });
         return;

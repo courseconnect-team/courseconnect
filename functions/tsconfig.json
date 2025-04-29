@@ -1,15 +1,29 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "outDir": "lib",
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2017"
+    "target": "ES2020",                        
+    "module": "CommonJS",                      
+    "lib": ["ES2020"],                         
+    "rootDir": "src",                          
+    "outDir": "lib",                           
+    "strict": true,                            
+    "esModuleInterop": true,                   
+    "forceConsistentCasingInFileNames": true,  
+
+    // ← don’t type‑check anything in node_modules
+    "skipLibCheck": true,                     
+    // ← only look here for ambient types
+    "typeRoots": ["./node_modules/@types"],   
+    // ← only pull in Node’s built‑ins
+    "types": ["node"]                         
   },
-  "compileOnSave": true,
-  "include": [
-    "src"
-, "sendEmail/nodemailer.ts", "../src/app/api/email.js"  ]
+
+  // only compile your function source
+  "include": ["src/**/*.ts"],
+
+  // never compile your lib output, node_modules, or any ../ files
+  "exclude": [
+    "node_modules",
+    "lib",
+    "../node_modules"
+  ]
 }
