@@ -153,10 +153,53 @@ export default function User() {
       const course = new Set();
 
       for (const row of data) {
-        if (!course.has(`${row['Class Nbr']} ${row['Instructor']}`)) {
-          course.add(`${row['Class Nbr']} ${row['Instructor']}`);
+        console.log(row);
+        const mappedRow: any = {}
+        mappedRow["Session Code"] = row["2258 -- Fall 2025"];
+        mappedRow["Session Begin Date"] = row["__EMPTY"];
+        mappedRow["Session End Date"] = row["__EMPTY_1"];
+        mappedRow["Drop/Add End Date"] = row["__EMPTY_2"];
+        mappedRow["Grading End Date"] = row["__EMPTY_3"];
+        mappedRow["Acad Org"] = row["__EMPTY_4"];
+        mappedRow["Course"] = row["__EMPTY_5"];
+        mappedRow["Gord Rule"] = row["__EMPTY_6"];
+        mappedRow["Gen ED"] = row["__EMPTY_7"];
+        mappedRow["Hons List"] = row["__EMPTY_8"];
+        mappedRow["Sect"] = row["__EMPTY_9"];
+        mappedRow["Class Nbr"] = row["__EMPTY_10"];
+        mappedRow["Assoc Class"] = row["__EMPTY_11"];
+        mappedRow["Min - Max Cred"] = row["__EMPTY_12"];
+        mappedRow["Day/s"] = row["__EMPTY_13"];
+        mappedRow["Time"] = row["__EMPTY_14"];
+        mappedRow["Meeting Pattern"] = row["__EMPTY_15"];
+        mappedRow["Facility"] = row["__EMPTY_16"];
+        mappedRow["Join"] = row["__EMPTY_17"];
+        mappedRow["Site"] = row["__EMPTY_18"];
+        mappedRow["County"] = row["__EMPTY_19"];
+        mappedRow["Spec"] = row["__EMPTY_20"];
+        mappedRow["Book"] = row["__EMPTY_21"];
+        mappedRow["SOC"] = row["__EMPTY_22"];
+        mappedRow["Exam"] = row["__EMPTY_23"];
+        mappedRow["Course Title"] = row["__EMPTY_24"];
+        mappedRow["Instructor"] = row["__EMPTY_25"];
+        mappedRow["Instructor Emails"] = row["__EMPTY_26"];
+        mappedRow["Enr Cap"] = row["__EMPTY_27"];
+        mappedRow["Room Cap"] = row["__EMPTY_28"];
+        mappedRow["Enrolled"] = row["__EMPTY_29"];
+        mappedRow["Current as of 06/18/2025"] = row["__EMPTY_30"];
+        mappedRow["Multi Meet Cap"] = row["__EMPTY_31"];
+        mappedRow["Wait List Cap"] = row["__EMPTY_32"];
+        mappedRow["Wait List Total"] = row["__EMPTY_33"];
+        mappedRow["Sched Codes"] = row["__EMPTY_34"];
+        mappedRow["Class Status"] = row["__EMPTY_35"];
+        mappedRow["DL Fee Per Credit"] = row["__EMPTY_36"];
+        mappedRow["Chartfield"] = row["__EMPTY_37"];
+        mappedRow["DL Fee Status"] = row["__EMPTY_38"];
 
-          const rawEmails = row['Instructor Emails'] ?? 'undef';
+        if (!course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)) {
+          course.add(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`);
+
+          const rawEmails = mappedRow['Instructor Emails'] ?? 'undef';
           const emailArray =
             rawEmails === 'undef'
               ? []
@@ -165,23 +208,23 @@ export default function User() {
           await firebase
             .firestore()
             .collection('courses')
-            .doc(`${row['Course']} (${semester}) : ${row['Instructor']}`)
+            .doc(`${mappedRow['Course']} (${semester}) : ${mappedRow['Instructor']}`)
             .set({
-              class_number: row['Class Nbr'] ?? 'undef',
+              class_number: mappedRow['Class Nbr'] ?? 'undef',
               professor_emails: emailArray,
-              professor_names: row['Instructor'] ?? 'undef',
-              code: row['Course'] ?? 'undef',
-              credits: row['Min - Max Cred'] ?? 'undef',
+              professor_names: mappedRow['Instructor'] ?? 'undef',
+              code: mappedRow['Course'] ?? 'undef',
+              credits: mappedRow['Min - Max Cred'] ?? 'undef',
               department: 'ECE',
-              enrollment_cap: row['Enr Cap'] ?? 'undef',
-              enrolled: row['Enrolled'] ?? 'undef',
-              title: row['Course Title'] ?? 'undef',
+              enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
+              enrolled: mappedRow['Enrolled'] ?? 'undef',
+              title: mappedRow['Course Title'] ?? 'undef',
               semester: semester,
               meeting_times: [
                 {
-                  day: row['Day/s']?.replaceAll(' ', '') ?? 'undef',
-                  time: row['Time'] ?? 'undef',
-                  location: row['Facility'] ?? 'undef',
+                  day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
+                  time: mappedRow['Time'] ?? 'undef',
+                  location: mappedRow['Facility'] ?? 'undef',
                 },
               ],
             });
