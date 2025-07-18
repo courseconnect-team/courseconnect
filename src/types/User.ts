@@ -25,3 +25,12 @@ export type SelectSemester = {
   value: string;
   label: string;
 };
+export type Role =
+  | 'Student'
+  | 'admin'
+  | 'faculty'
+  | 'unapproved'
+  | 'student_applying'
+  | 'student_applied'
+  | 'student_accepted'
+  | 'student_denied';

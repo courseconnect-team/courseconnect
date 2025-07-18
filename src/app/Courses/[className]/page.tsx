@@ -22,8 +22,8 @@ interface TA {
 
 interface Schedule {
   day: string;
-  time: string;
   location: string;
+  time: string;
 }
 
 interface CourseDetails {
@@ -39,6 +39,7 @@ interface CourseDetails {
   credits: number;
   semester: string;
   title: string;
+  meetingTimes: Schedule[];
 }
 
 const StatisticsPage: FC<pageProps> = ({ params }) => {
@@ -78,6 +79,7 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
           credits: data?.credits || 0,
           semester: data?.semester || 'N/A',
           title: data?.title || 'N/A',
+          meetingTimes: data?.meeting_times || 'N/A',
         };
       } else {
         throw new Error('No matching documents found');
@@ -135,23 +137,7 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
             department={courseData.department}
             TAs={courseData.TAs}
             title={courseData.title}
-            schedule={[
-              {
-                day: 'T',
-                time: 'Periods 8-9 (3:00 PM - 4:55 PM)',
-                location: 'CAR 0100',
-              },
-              {
-                day: 'W',
-                time: 'Periods 10-11 (5:10 PM - 7:05 PM)',
-                location: 'CSE E312',
-              },
-              {
-                day: 'R',
-                time: 'Periods 9 (4:05 PM - 4:55 PM)',
-                location: 'CAR 0100',
-              },
-            ]}
+            schedule={courseData.meetingTimes}
           />
         </>
       )}
