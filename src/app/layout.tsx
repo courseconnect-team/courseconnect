@@ -6,6 +6,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import darkTheme from './theme/darkTheme';
 import lightTheme from './theme/lightTheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import '@/styles/tailwind.css';
 
 const queryClient = new QueryClient();
 

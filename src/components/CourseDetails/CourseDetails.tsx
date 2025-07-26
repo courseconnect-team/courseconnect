@@ -265,33 +265,40 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
             <Typography variant="h5" gutterBottom>
               Time and Location:
             </Typography>
-            {schedule.map((item, index) => (
-              <Box
-                key={index}
-                className="schedule-item"
-                display="flex"
-                flexDirection="column" // Stacks items vertically
-                alignItems="flex-start" // Aligns items to the left
-                mb={2} // Adds margin bottom for spacing between schedule items
-              >
-                <Typography variant="h6">
-                  {item.day} | {item.time}
-                </Typography>
-                <Box display="flex" alignItems="center">
-                  <LocationOnIcon fontSize="small" />
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      ml: 1,
-                      fontWeight: 'bold',
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    {item.location}
+            {Array.isArray(schedule) ? (
+              schedule.map((item, index) => (
+                <Box
+                  key={index}
+                  className="schedule-item"
+                  display="flex"
+                  flexDirection="column" // Stacks items vertically
+                  alignItems="flex-start" // Aligns items to the left
+                  mb={2} // Adds margin bottom for spacing between schedule items
+                >
+                  <Typography variant="h6">
+                    {item.day} | {item.time}
                   </Typography>
+                  <Box display="flex" alignItems="center">
+                    <LocationOnIcon fontSize="small" />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        ml: 1,
+                        fontWeight: 'bold',
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      {item.location}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              ))
+            ) : (
+              <Typography variant="h5" gutterBottom>
+                None Listed{' '}
+              </Typography>
+            )}
+            {}
           </Grid>
         </Grid>
       </Box>
