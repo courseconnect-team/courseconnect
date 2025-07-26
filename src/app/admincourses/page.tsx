@@ -358,80 +358,85 @@ export default function User() {
           <CssBaseline />
           <Box
             sx={{
-              marginTop: 0,
+              mt: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               width: '100%',
             }}
           >
-            <Box sx={{ minWidth: 120 }} />
-            <Box sx={{ mb: 2, width: '100%' }}>
+            <Box
+              sx={{
+                mb: 2,
+                width: '100%',
+                display: 'flex',
+                flexWrap: 'nowrap',        // prevent wrapping
+                alignItems: 'center',      // vertical align
+                justifyContent: 'center',
+                gap: 5,                    // consistent spacing
+              }}
+            >
               <input
-                style={{ display: 'none' }}
                 id="raised-button-file"
-                multiple
                 type="file"
+                multiple
                 onChange={readExcelFile}
-                onClick={(event) => (event.currentTarget.value = '')}
+                onClick={(e) => (e.currentTarget.value = '')}
+                style={{ display: 'none' }}
               />
               <label htmlFor="raised-button-file">
                 <Button
-                  sx={{ ml: 40, mt: 1.5 }}
-                  style={{ textTransform: 'none' }}
-                  variant="contained"
                   component="span"
+                  variant="contained"
                   startIcon={<FileUploadOutlined />}
+                  sx={{ textTransform: 'none' }}
                 >
                   Upload Semester Data
                 </Button>
               </label>
+
               <Button
-                sx={{ ml: 10, mt: 1.5 }}
-                onClick={handleDeleteSem}
-                style={{ textTransform: 'none' }}
                 variant="contained"
-                component="span"
+                onClick={handleDeleteSem}
                 startIcon={<DeleteOutline />}
+                sx={{ textTransform: 'none' }}
               >
                 Clear Semester Data
               </Button>
+
               <Button
-                sx={{ ml: 10, mt: 1.5 }}
-                onClick={handleSemesterHiddenToggle}
-                style={{ textTransform: 'none' }}
                 variant="contained"
-                component="span"
+                onClick={handleSemesterHiddenToggle}
                 startIcon={semesterHidden ? <Visibility /> : <VisibilityOff />}
+                sx={{ textTransform: 'none' }}
               >
                 {semesterHidden ? 'Unhide' : 'Hide'} Semester Data
               </Button>
-              <FormControl sx={{ ml: 40, mb: 5, minWidth: 140 }}>
-                <InputLabel id="demo-simple-select-label">Semester</InputLabel>
+
+              <FormControl sx={{ minWidth: 140 }}>
+                <InputLabel id="semester-select-label">Semester</InputLabel>
                 <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
+                  labelId="semester-select-label"
+                  id="semester-select"
                   value={semester}
                   label="Semester"
                   onChange={handleChange}
                 >
-                  {menu.map((i) => (
-                    <MenuItem key={i} value={i}>
-                      {i}
+                  {menu.map((sem) => (
+                    <MenuItem key={sem} value={sem}>
+                      {sem}
                     </MenuItem>
                   ))}
-                  <MenuItem value={'New Semester'}>
-                    Create New Semester
-                  </MenuItem>
+                  <MenuItem value="New Semester">Create New Semester</MenuItem>
                 </Select>
               </FormControl>
-              <br />
-              <Courses
-                userRole={role as string}
-                semester={semester}
-                processing={processing}
-              />
             </Box>
+
+            <Courses
+              userRole={role as string}
+              semester={semester}
+              processing={processing}
+            />
           </Box>
         </div>
       </div>

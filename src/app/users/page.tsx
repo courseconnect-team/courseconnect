@@ -82,11 +82,11 @@ export default function User() {
           .collection('courses')
           .doc(
             data[i]['__EMPTY_5'] +
-              ' (' +
-              semester +
-              ') ' +
-              ': ' +
-              data[i]['__EMPTY_22']
+            ' (' +
+            semester +
+            ') ' +
+            ': ' +
+            data[i]['__EMPTY_22']
           )
           .set({
             professor_emails:
@@ -128,7 +128,7 @@ export default function User() {
   return (
     <>
       <Toaster />
-      <HeaderCard text="users" />
+      <HeaderCard text="Users" />
 
       <CssBaseline />
       <Box
