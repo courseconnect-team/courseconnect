@@ -29,7 +29,7 @@ export default function DashboardSections({
     case 'faculty':
     case 'admin':
       return (
-        <div>
+        <div className="flex flex-wrap gap-6">
           {navItems.map(({ label, to, icon: Icon }: NavbarItem) => (
             <DashboardCard key={to} icon={Icon} label={label} to={to} />
           ))}

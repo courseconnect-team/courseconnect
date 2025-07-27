@@ -11,7 +11,17 @@ export default function TopNav({}) {
   const [user, role, loading, error] = useUserInfo();
   const onProfile = () => {};
   const onNotifications = () => {};
-
+  const display = (v: unknown, fallback = 'Not listed'): string => {
+    if (v == null) return fallback; // null/undefined
+    if (typeof v === 'string') {
+      const t = v.trim();
+      return t.length ? t : fallback; // empty string
+    }
+    if (typeof v === 'number') {
+      return Number.isFinite(v) ? String(v) : fallback; // NaN / Infinity
+    }
+    return String(v);
+  };
   return (
     <AppBar
       position="fixed"
@@ -35,23 +45,16 @@ export default function TopNav({}) {
           </IconButton>
 
           {/* User avatar + meta */}
-          <button onClick={onProfile} className="flex items-center gap-2">
+          <Link href="/Profile" className="flex items-center gap-2">
             {/* Circle avatar placeholder (letter) */}
-            <div className="w-9 h-9 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-opacity-20 flex items-center justify-center">
               <AccountCircleTwoToneIcon className="text-white" />
             </div>
             <div className="text-left text-white leading-tight hidden sm:block">
-              <p className="text-sm">{user.displayName}</p>
-              <p className="text-[10px] -mt-0.5 opacity-80">
-                {' '}
-                {['Student', 'student_applied', 'student_applying'].includes(
-                  role
-                )
-                  ? 'Student'
-                  : role}
-              </p>
+              <p className="text-sm">{display(user.displayName)}</p>
+              <p className="text-[10px] -mt-0.5 opacity-80"> {display(role)}</p>
             </div>
-          </button>
+          </Link>
         </div>
       </Toolbar>
     </AppBar>
