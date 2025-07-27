@@ -294,7 +294,7 @@ const CourseDetails: React.FC<CourseDetailsProps> = ({
                 </Box>
               ))
             ) : (
-              <Typography variant="h5" gutterBottom>
+              <Typography variant="h6" gutterBottom>
                 None Listed{' '}
               </Typography>
             )}

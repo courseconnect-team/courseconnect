@@ -43,12 +43,20 @@ export default function SideNav({ navItems }: SideNavProps) {
               href={to}
               className={`
               group relative flex flex-col items-center text-5xl px-2 py-1 duration-200
-              ${isActive ? 'bg-white text-[#6C37D8]' : 'text-white '}
+              ${isActive ? 'bg-white text-primary' : 'text-white '}
                 hover:border-r-4 "rounded-sm border-black]
             `}
             >
-              <Icon fontSize="inherit" className="!text-[#FFFFFF] " />
-              <span className="!text-[#FFFFFF] text-[12px] mt-1 tracking-wide text-center">
+              <Icon
+                fontSize="inherit"
+                className={`  
+              ${isActive ? 'bg-white text-primary' : 'text-white '}`}
+              />
+              <span
+                className={`text-[12px] mt-1 tracking-wide text-center   ${
+                  isActive ? 'bg-white text-primary' : 'text-white '
+                }`}
+              >
                 {label}
               </span>
             </Link>
