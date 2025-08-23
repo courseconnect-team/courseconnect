@@ -3,8 +3,8 @@
 import { FC } from 'react';
 import PageLayout from '@/newcomponents/PageLayout/PageLayout';
 import { StatusTable } from '@/newcomponents/StatusTable/StatusTable';
-import { useUserInfo } from '@/hooks/useGetUserInfo';
-import { useFetchAssignments } from '@/hooks/useFetchApplications';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
+import { useFetchAssignments } from '@/hooks/Applications/useFetchStudentApplications';
 import { getNavItems } from '@/hooks/useGetItems';
 
 const StatusPage: FC = () => {
@@ -14,6 +14,8 @@ const StatusPage: FC = () => {
     assignments,
     courses,
     adminDenied,
+    position,
+    dateApplied,
     loading: assignmentsLoading,
     error: assignmentsError,
   } = useFetchAssignments(user?.uid); // ok to pass undefined
@@ -30,6 +32,8 @@ const StatusPage: FC = () => {
         assignments={assignments}
         courses={courses}
         adminDenied={adminDenied}
+        position={position}
+        dateApplied={dateApplied}
       />
     </PageLayout>
   );

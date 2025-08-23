@@ -30,7 +30,6 @@ const generateSemesters = (): SelectSemester[] => {
   return semesters;
 };
 
-// Define props for your component
 interface SemesterSelectionProps {
   selectedSemesters: SelectSemester[];
   setSelectedSemesters: (semesters: SelectSemester[]) => void;
@@ -55,7 +54,7 @@ const SemesterSelection: React.FC<SemesterSelectionProps> = ({
     }),
     control: (provided: any) => ({
       ...provided,
-      borderRadius: '16px', // Rounded border
+      borderRadius: '', // Rounded border
     }),
   };
 

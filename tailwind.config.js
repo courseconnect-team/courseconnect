@@ -77,7 +77,9 @@ module.exports = {
         caption: ['12px', { letterSpacing: '0.048px', fontWeight: '400' }],
         overline: ['10px', { letterSpacing: '0.15px', fontWeight: '400' }],
       },
-
+      fontFamily: {
+        sans: ['SF Pro Display', 'Helvetica', 'sans-serif'],
+      },
       /*  ── Shadow tokens ─────────────────────────────────────────── */
       boxShadow: {
         xs: '0 1px 2px 0 oklch(20.99% 0.034 263.44 / 0.05)',

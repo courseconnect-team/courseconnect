@@ -20,7 +20,13 @@ import handleSignIn from '@/firebase/auth/auth_signin_password';
 import styles from './style.module.css';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { toast } from 'react-hot-toast';
-export const SignUpCard = ({ className }: { className: any }) => {
+export const SignUpCard = ({
+  className,
+  setSignup,
+}: {
+  className: any;
+  setSignup: (val: boolean) => void;
+}) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
@@ -29,7 +35,9 @@ export const SignUpCard = ({ className }: { className: any }) => {
   const [role, setRole] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
   const [email, setEmail] = useState('');
-  const [label, setLabel] = useState('Department');
+  const [label, setLabel] = useState('ECE');
+  const [roleLabel, setRoleLabel] = useState('Student');
+
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
     ref
@@ -206,23 +214,18 @@ export const SignUpCard = ({ className }: { className: any }) => {
       </Snackbar>
       <div className={className}>
         <div className={styles.overlap}>
-          <div className={styles.welcometocourse}>
-            <span className={styles.textwrapper}>Welcome to </span>
-            <span className={styles.span}>Course Connect</span>
-          </div>
-          <div className={styles.div}>Sign up</div>
+          <div className={styles.div}>Sign Up</div>
           <div className={styles.firstnameinput}>
-            <div className={styles.textwrapper2}>Name</div>
+            <div className={styles.textwrapper2}>First Name</div>
             <div className={styles.overlapgroupwrapper}>
               <div className={styles.overlapgroup}>
                 <TextField
-                  variant="standard"
+                  variant="outlined"
                   InputProps={{
                     disableUnderline: true,
                   }}
                   className={styles.textwrapper3}
-                  placeholder="First Name"
-                  margin="none"
+                  placeholder="Albert"
                   required
                   fullWidth
                   size="small"
@@ -239,29 +242,27 @@ export const SignUpCard = ({ className }: { className: any }) => {
           </div>
           <div className={styles.roleinput}>
             <div className={styles.textwrapper4}>Role</div>
-            <FormControl>
-              <RadioGroup
-                row
-                aria-labelledby="demo-row-radio-buttons-group-label"
-                name="row-radio-buttons-group"
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setRole(event.target.value);
+            <div className={styles.overlapgroup2}>
+              <TextField
+                sx={{
+                  borderRadius: '30px',
                 }}
                 value={role}
-                style={{ marginTop: '30px' }}
+                placeholder="Set Role"
+                InputLabelProps={{ shrink: false }}
+                label={roleLabel}
+                size="small"
+                select
+                onChange={(event) => {
+                  setRole(event.target.value);
+                  setRoleLabel('');
+                }}
+                className={styles.textwrapper9}
               >
-                <FormControlLabel
-                  value="student_applying"
-                  control={<Radio />}
-                  label="Student"
-                />
-                <FormControlLabel
-                  value="unapproved"
-                  control={<Radio />}
-                  label="Faculty"
-                />
-              </RadioGroup>
-            </FormControl>
+                <MenuItem value={'student_applying'}>Student</MenuItem>
+                <MenuItem value={'unapproved'}>Faculty</MenuItem>
+              </TextField>
+            </div>
           </div>
 
           <div className={styles.departmentinput}>
@@ -270,8 +271,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
               <div className={styles.overlapgroup2}>
                 <TextField
                   sx={{
-                    boxShadow: 'none',
-                    '.MuiOutlinedInput-notchedOutline': { border: 0 },
+                    borderRadius: '30px',
                   }}
                   value={department}
                   placeholder="First Name"
@@ -282,6 +282,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
                     setDepartment(event.target.value);
                     setLabel('');
                   }}
+                  size="small"
                   className={styles.textwrapper9}
                 >
                   <MenuItem value={'ECE'}>ECE</MenuItem>
@@ -303,13 +304,12 @@ export const SignUpCard = ({ className }: { className: any }) => {
             <div className={styles.overlapgroupwrapper}>
               <div className={styles.overlapgroup}>
                 <TextField
-                  variant="standard"
+                  variant="outlined"
                   InputProps={{
                     disableUnderline: true,
                   }}
                   className={styles.textwrapper3}
-                  placeholder="Last Name"
-                  margin="none"
+                  placeholder="Gator"
                   required
                   fullWidth
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -317,6 +317,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   }}
                   id="full-width"
                   name="first-name"
+                  size="small"
                   autoComplete="given-name"
                   autoFocus
                 />
@@ -329,13 +330,12 @@ export const SignUpCard = ({ className }: { className: any }) => {
             <div className={styles.divwrapper}>
               <div className={styles.overlapgroup3}>
                 <TextField
-                  variant="standard"
+                  variant="outlined"
                   InputProps={{
                     disableUnderline: true,
                   }}
-                  className={styles.textwrapper3}
-                  placeholder="Email"
-                  margin="none"
+                  className={styles.textwrapperlongbox}
+                  placeholder="email@ufl.edu"
                   required
                   fullWidth
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -343,6 +343,7 @@ export const SignUpCard = ({ className }: { className: any }) => {
                   }}
                   id="email"
                   name="email"
+                  size="small"
                   autoComplete="email"
                   autoFocus
                 />
@@ -355,13 +356,12 @@ export const SignUpCard = ({ className }: { className: any }) => {
             <div className={styles.divwrapper}>
               <div className={styles.overlapgroup3}>
                 <TextField
-                  variant="standard"
+                  variant="outlined"
                   InputProps={{
                     disableUnderline: true,
                   }}
-                  className={styles.textwrapper15}
-                  placeholder="Password"
-                  margin="none"
+                  className={styles.textwrapperlongbox}
+                  placeholder="1234567890"
                   required
                   size="small"
                   fullWidth={true}
@@ -378,13 +378,12 @@ export const SignUpCard = ({ className }: { className: any }) => {
             <div className={styles.confirmpassword}>
               <div className={styles.overlapgroup3}>
                 <TextField
-                  variant="standard"
+                  variant="outlined"
                   InputProps={{
                     disableUnderline: true,
                   }}
-                  className={styles.textwrapper15}
-                  placeholder="Confirm"
-                  margin="none"
+                  className={styles.textwrapperlongbox}
+                  placeholder="1234567890"
                   required
                   size="small"
                   fullWidth={true}
@@ -404,7 +403,16 @@ export const SignUpCard = ({ className }: { className: any }) => {
             please make sure to sign up using the same email that you use for
             Onbase/Course Registration.
           </div>
-
+          <div className={styles.signintext}>
+            <span className="text-gray-300">Already have an account? </span>
+            <br></br>
+            <button
+              className="cursor-pointer underline hover:no-underline"
+              onClick={() => setSignup(false)}
+            >
+              {'Log In'}
+            </button>
+          </div>
           <div className={styles.signinbutton}>
             <br />
             <button

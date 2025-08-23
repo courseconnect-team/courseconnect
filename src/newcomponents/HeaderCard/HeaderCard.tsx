@@ -3,7 +3,7 @@
 import React from 'react';
 import SideNav from '@/newcomponents/SideNavBar/SideNavBar';
 import TopNav from '@/newcomponents/TopBar/TopBar';
-import { useUserInfo } from '@/hooks/useGetUserInfo';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { getNavItems } from '@/hooks/useGetItems';
 
 interface HeaderCardProps {

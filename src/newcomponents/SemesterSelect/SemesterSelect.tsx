@@ -4,13 +4,13 @@ import MenuItem from '@mui/material/MenuItem';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import type { SemesterName } from '@/hooks/useSemesterOptions';
 
-const ITEM_HEIGHT = 48;
+const ITEM_HEIGHT = 40;
 const ITEM_PADDING_TOP = 8;
 
 const MenuProps = {
   PaperProps: {
     style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      maxHeight: ITEM_HEIGHT * 4.0 + ITEM_PADDING_TOP,
       width: 250,
       border: '1px solid #000000',
       borderRadius: 20,
@@ -19,8 +19,8 @@ const MenuProps = {
 };
 
 interface SemesterSelectProps {
-  semester: SemesterName; // controlled value
-  onChange: React.Dispatch<React.SetStateAction<SemesterName>>; // setter from parent
+  semester?: SemesterName; // controlled value
+  onChange: React.Dispatch<React.SetStateAction<SemesterName | undefined>>; // setter from parent
   names: SemesterName[]; // options
 }
 
@@ -34,33 +34,47 @@ const SemesterSelect: React.FC<SemesterSelectProps> = ({
   };
 
   return (
-    <FormControl sx={{ width: 250 }}>
+    <FormControl sx={{ width: 275 }}>
       <Select
-        value={semester}
+        value={semester ?? ''} // MUI wants string, so use empty string when undefined
         onChange={handleChange}
         MenuProps={MenuProps}
-        inputProps={{ 'aria-label': 'Semester select' }}
-        sx={{
-          borderRadius: '8px',
+        displayEmpty
+        renderValue={(selected) => {
+          if (!selected) {
+            return (
+              <em className="text-button">
+                <span
+                  style={{
+                    fontWeight: '600',
+                    backgroundColor: '#d9d9d9',
+                    padding: '8px',
+                    borderRadius: '5px',
+                  }}
+                >
+                  Semesters
+                </span>
+              </em>
+            );
+          }
+          return (
+            <em className="text-button">
+              <span
+                style={{
+                  fontWeight: '600',
+                  backgroundColor: '#d9d9d9',
+                  padding: '8px',
+                  borderRadius: '5px',
+                }}
+              >
+                Semesters
+              </span>
+              <span style={{ marginLeft: '10px', letterSpacing: '-0.75px' }}>
+                {selected}
+              </span>
+            </em>
+          );
         }}
-        renderValue={(selected) => (
-          <em className="text-button">
-            <span
-              style={{
-                fontWeight: '600',
-                backgroundColor: '#d9d9d9',
-                padding: '8px',
-                borderRadius: '5px',
-              }}
-            >
-              Semester
-            </span>
-
-            <span style={{ marginLeft: '10px', letterSpacing: '-0.75px' }}>
-              {selected}
-            </span>
-          </em>
-        )}
       >
         {names.map((name) => (
           <MenuItem

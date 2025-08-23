@@ -181,16 +181,16 @@ export default function ProfileSection({
             {editing ? (
               <div className="mt-2 flex gap-3">
                 <input
-                  className="h-10 w-48 border border-gray-900 px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="h-10 w-48 border rounded-sm border-#D3D3D3 px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
                   type="text"
-                  placeholder="First name"
+                  placeholder="First Name"
                   value={updatedFirst}
                   onChange={(e) => setUpdatedFirst(e.target.value)}
                 />
                 <input
-                  className="h-10 w-56 border border-gray-900 px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="h-10 w-48 border rounded-sm border-#D3D3D3 px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
                   type="text"
-                  placeholder="Last name"
+                  placeholder="Last Name"
                   value={updatedLast}
                   onChange={(e) => setUpdatedLast(e.target.value)}
                 />

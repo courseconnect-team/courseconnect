@@ -7,3 +7,4 @@ export const useUserInfo = () => {
 
   return [user, role, loading, error];
 };
+

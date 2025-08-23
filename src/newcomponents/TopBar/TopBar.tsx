@@ -1,4 +1,4 @@
-import { useUserInfo } from '@/hooks/useGetUserInfo';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { AppBar } from '@mui/material';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -7,9 +7,11 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import Link from 'next/link';
+import { Role, roleMapping } from '@/types/User';
+
 export default function TopNav({}) {
   const [user, role, loading, error] = useUserInfo();
-  const onProfile = () => {};
+  
   const onNotifications = () => {};
   const display = (v: unknown, fallback = 'Not listed'): string => {
     if (v == null) return fallback; // null/undefined
@@ -52,7 +54,7 @@ export default function TopNav({}) {
             </div>
             <div className="text-left text-white leading-tight hidden sm:block">
               <p className="text-sm">{display(user.displayName)}</p>
-              <p className="text-[10px] -mt-0.5 opacity-80"> {display(role)}</p>
+              <p className="text-[10px] -mt-0.5 opacity-80"> {display(roleMapping[role as Role])}</p>
             </div>
           </Link>
         </div>

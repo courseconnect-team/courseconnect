@@ -13,12 +13,12 @@ import { useState } from 'react';
 import './style.css';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { TextField } from '@mui/material';
-
+import Link from 'next/link';
 import FormControl from '@mui/material/FormControl';
 import { toast } from 'react-hot-toast';
 
 import 'firebase/firestore';
-export const LogInCard = ({ className }: { className: any }) => {
+export const LogInCard = ({ className, setSignup }: { className: any, setSignup:(val:boolean) => void  }) => {
   var res;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -171,22 +171,17 @@ export const LogInCard = ({ className }: { className: any }) => {
         </form>
       </Dialog>
       <form>
-        <div className="welcome-to-course">
-          <span className="text-wrapper">Welcome to </span>
-          <span className="span">Course Connect</span>
-        </div>
-        <div className="div">Sign in</div>
+        <div className="div">Log In</div>
         <div className="email-address-input">
-          <div className="text-wrapper-2">Enter email address</div>
+          <div className="text-wrapper-2">Email</div>
           <div className="overlap-group-wrapper">
             <div className="overlap-group">
               <TextField
-                variant="standard"
+                variant="outlined"
                 InputProps={{
                   disableUnderline: true,
                 }}
-                placeholder="Email"
-                margin="normal"
+                placeholder="email@ufl.edu"
                 required
                 fullWidth
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -201,16 +196,15 @@ export const LogInCard = ({ className }: { className: any }) => {
           </div>
         </div>
         <div className="password-input">
-          <div className="text-wrapper-2">Enter password</div>
+          <div className="text-wrapper-2">Password</div>
           <div className="overlap-group-wrapper">
             <div className="overlap-group">
               <TextField
-                variant="standard"
+                variant="outlined"
                 InputProps={{
                   disableUnderline: true,
                 }}
-                placeholder="Password"
-                margin="normal"
+                placeholder="1234567890"
                 required
                 fullWidth
                 name="password"
@@ -224,13 +218,24 @@ export const LogInCard = ({ className }: { className: any }) => {
             </div>
           </div>
         </div>
-        <div className="text-wrapper-4" onClick={(e) => setOpen(true)}>
-          Forgot Password
-        </div>
+        
         <div className="sign-in-button">
           <button onClick={(e) => handleSubmit(e)} className="overlap">
-            <div className="text-wrapper-5">Sign In</div>
+            <div className="text-wrapper-5">Log In</div>
           </button>
+        </div>
+        <div className="password-forgot-text">
+        <div className="cursor-pointer underline hover:no-underline" onClick={(e) => setOpen(true)}>
+          Forgot Password?
+        </div>
+      </div>
+
+        <div className="sign-up-text">
+            <span className="text-gray-300">Don't have an account? </span>
+            <br/>
+            <button className="cursor-pointer underline hover:no-underline" onClick={() => setSignup(true)}>
+              {'Sign Up'}
+            </button>
         </div>
       </form>
     </div>

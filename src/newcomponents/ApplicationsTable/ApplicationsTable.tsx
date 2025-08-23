@@ -101,7 +101,7 @@ export const StatusTable: React.FC<StatusTableProps> = ({
             {['Application', 'Position', 'Submitted', 'Status'].map((h) => (
               <th
                 key={h}
-                className="px-4 py-3 !bg-primary-light text-on-background"
+                className="px-4 py-3 !bg-primary-variant text-on-primary"
               >
                 {h}
               </th>

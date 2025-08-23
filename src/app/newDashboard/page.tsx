@@ -3,7 +3,7 @@
 import SideNav from '@/newcomponents/SideNavBar/SideNavBar';
 import TopNav from '@/newcomponents/TopBar/TopBar';
 import { getNavItems } from '@/hooks/useGetItems';
-import { useUserInfo } from '@/hooks/useGetUserInfo';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import DashboardSections from './DashboardSections';
 import PageLayout from '@/newcomponents/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';

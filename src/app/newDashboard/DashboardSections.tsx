@@ -1,7 +1,6 @@
 /* components/DashboardSections.tsx */
-import { StudentSections } from './sections/StudentSections';
-import { StaffSections } from './sections/StaffSections';
-import { useUserInfo } from '@/hooks/useGetUserInfo';
+
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { Role } from '@/types/User';
 import { DashboardCard } from '@/newcomponents/DashboardCard/DashboardCard';
 import { NavbarItem } from '@/types/navigation';

@@ -3,7 +3,7 @@
 import PageLayout from '@/newcomponents/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';
 import { getNavItems } from '@/hooks/useGetItems';
-import { useUserInfo } from '@/hooks/useGetUserInfo';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import ProfileSection from './profileSections';
 interface pageProps {}
 

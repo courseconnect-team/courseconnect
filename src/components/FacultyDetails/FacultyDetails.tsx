@@ -17,7 +17,7 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import CourseUnitInfo from '../CourseUnitInfo/CourseUnit';
 import { FacultyStats } from '@/types/User';
-import useFetchTempPastCourses from '@/hooks/useFetchTempPastCourses';
+import useFetchTempPastCourses from '@/hooks/old/useFetchTempPastCourses';
 import { Timeline } from '../Timeline/Timeline';
 import SmallClassCard from '../SmallClassCard/SmallClassCard';
 

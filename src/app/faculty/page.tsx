@@ -13,7 +13,7 @@ import { FacultyStats } from '@/types/User';
 // import { useFacultyStats } from '@/hooks/useFacultyStats';
 import { LinearProgress } from '@mui/material';
 import { CourseType } from '@/types/User';
-import useFetchPastCourses from '@/hooks/usePastCourses';
+import useFetchPastCourses from '@/hooks/old/usePastCourses';
 import { Toaster } from 'react-hot-toast';
 
 interface pageProps {
