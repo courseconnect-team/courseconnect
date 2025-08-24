@@ -34,3 +34,14 @@ export type Role =
   | 'student_applied'
   | 'student_accepted'
   | 'student_denied';
+  
+export const roleMapping: Record<Role, string> = {
+  Student: "Student",
+  admin: "Admin",
+  faculty: "Faculty",
+  unapproved: "Unapproved",
+  student_applying: "Student",
+  student_applied: "Student",
+  student_accepted: "Student (Accepted)",
+  student_denied: "Student (Denied)",
+};

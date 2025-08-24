@@ -4,6 +4,8 @@ import { signOut } from 'firebase/auth';
 const auth = firebase.auth();
 
 function handleSignOut() {
+  localStorage.removeItem("selectedSemesters");
+
   signOut(auth)
     .then(() => {
       // Sign-out successful.

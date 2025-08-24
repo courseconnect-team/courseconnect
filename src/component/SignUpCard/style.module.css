@@ -1,0 +1,448 @@
+.box {
+  height: 800px;
+  width: 539px;
+}
+
+.box .overlap {
+  background-color: #ffffff;
+  border-radius: 40px;
+  box-shadow: 0px 4px 35px #00000014;
+  height: 800px;
+  position: relative;
+  width: 539px;
+}
+
+.box .textwrapper {
+  color: #000000;
+}
+
+.box .span {
+  color: #562eba;
+  font-family: "SF Pro Display-Bold", Helvetica;
+  font-weight: 700;
+}
+
+.box .div {
+  color: #000000;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 55px;
+  font-weight: 500;
+  left: 25px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 35px;
+  white-space: nowrap;
+  width: 179px;
+  gap:5px;
+}
+
+.box .firstnameinput {
+  height: 89px;
+  left: 25px;
+  position: absolute;
+  top: 130px;
+  width: 240px;
+}
+.box .signintext {
+  height: 54px;
+  left: 25px;
+  position: absolute;
+  top: 745px;
+  width: 453px;
+  display: flex;
+  gap:3px;
+  justify-content: center; 
+  align-items: center;   
+}
+.box .textwrapper2 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 90px;
+}
+
+.box .overlapgroupwrapper {
+  position: absolute;
+  top: 33px;
+  width: 240px;
+}
+
+.box .overlapgroup {
+  background-color: #ffffff;
+  border-radius: 20px;
+  position: relative;
+  width: 240px;
+}
+
+.box .textwrapper3 {
+  color: #6d6d6d;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  white-space: nowrap;
+  width: 230px;
+}
+
+
+.box .textwrapperlongbox {
+  color: #6d6d6d;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 18px;
+  white-space: nowrap;
+  width: 490px;
+}
+
+.box .circle {
+  height: 22px;
+  left: 5px;
+  position: absolute;
+  top: 29px;
+  width: 22px;
+}
+
+.box .img {
+  height: 22px;
+  left: 113px;
+  position: absolute;
+  top: 29px;
+  width: 22px;
+}
+
+.box .textwrapper5 {
+  color: #6d6d6d;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  left: 37px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 30px;
+  white-space: nowrap;
+  width: 50px;
+}
+
+.box .textwrapper6 {
+  color: #6d6d6d;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  left: 143px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 30px;
+  white-space: nowrap;
+  width: 46px;
+}
+
+.box .departmentinput {
+  height: 89px;
+  left: 25px;
+  position: absolute;
+  top: 485px;
+  width: 193px;
+}
+.box .roleinput {
+  left: 280px;
+  position: absolute;
+  top: 485px;
+  width: 193px;
+}
+.box .departmentdropdown {
+  height: 89px;
+  position: relative;
+  width: 197px;
+}
+
+.box .textwrapper7 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 99px;
+}
+
+.box .overlapgroup2 {
+  background-color: #ffffff;
+  border-radius: 9px;
+  left: 0;
+  position: absolute;
+  top: 33px;
+  width: 193px;
+}
+
+.box .textwrapper8 {
+  color: #6d6d6d;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  left: 24px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 18px;
+  white-space: nowrap;
+  width: 75px;
+}
+
+.box .arrowdropdown {
+  height: 23px;
+  left: 161px;
+  position: absolute;
+  top: 16px;
+  width: 24px;
+}
+
+.box .lastnameinput {
+  height: 89px;
+  left: 280px;
+  position: absolute;
+  top: 130px;
+  width: 195px;
+}
+
+.box .UFIDinput {
+  height: 89px;
+  left: 302px;
+  position: absolute;
+  top: 536px;
+  width: 195px;
+}
+
+.box .textwrapper9 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 230px;
+}
+.box .textwrapper4 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 42px;
+}
+
+.box .textwrapper10 {
+  color: #6d6d6d;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  left: 24px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 18px;
+  white-space: nowrap;
+  width: 150px;
+}
+
+.box .emailaddressinput {
+  height: 89px;
+  left: 25px;
+  position: absolute;
+  top: 220px;
+  width: 453px;
+}
+
+.box .textwrapper11 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 147px;
+}
+
+.box .divwrapper {
+  left: 0;
+  position: absolute;
+  top: 15px;
+  width: 453px;
+}
+
+.box .overlapgroup3 {
+  background-color: #ffffff;
+  border-radius: 9px;
+  position: relative;
+  width: 451px;
+}
+
+.box .textwrapper12 {
+  color: #6d6d6d;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  left: 24px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 18px;
+  white-space: nowrap;
+  width: 88px;
+}
+
+.box .passwordinput {
+  height: 187px;
+  left: 25px;
+  position: absolute;
+  top: 310px;
+  width: 455px;
+}
+
+.box .textwrapper13 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  width: 117px;
+}
+
+.box .textwrapper14 {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 18px;
+  font-weight: 400;
+  left: 0;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 90px;
+  white-space: nowrap;
+  width: 138px;
+}
+
+.box .textwrapper15 {
+  color: #6d6d6d;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 18px;
+  white-space: nowrap;
+  width: 188px;
+}
+
+.box .confirmpassword {
+  left: 0;
+  position: absolute;
+  top: 100px;
+  width: 453px;
+}
+
+.box .signinbutton {
+  all: unset;
+  box-sizing: border-box;
+  height: 53px;
+  left: 25px;
+  position: absolute;
+  top: 630px;
+  width: 490px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box .overlap2 {
+  background-color: #6739B7;
+  border-radius: 10px;
+  box-shadow: 0px 4px 19px #7793414c;
+  height: 45px;
+  position: relative;
+  width: 490px;
+}
+.box .overlap2:hover{
+  cursor: pointer; 
+}
+
+
+.box .textwrapper16 {
+  color: #ffffff;
+  font-family: "SF Pro Display-Medium", Helvetica;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: normal;  
+  white-space: nowrap;
+  width: 100%;
+  text-align: center;
+}
+.box .facultytext{
+  position:absolute;
+  top: 700px;
+  font-family: SF Pro Display;
+  font-size: 12px;
+  color: #4D4D4D;
+  word-wrap: break-word;
+  font-weight: 300;
+  margin-left: 45px;
+  margin-right: 45px;
+
+}
+
+
+@media (max-width: 570px) {
+  .box .facultytext{
+    max-width: 60%;
+  }
+  .box .signinbutton{
+    width: 350px;
+    top: 780px;
+    left: 50px;
+  }
+  
+.box .lastnameinput {
+  left: 240px;
+  
+}
+
+}

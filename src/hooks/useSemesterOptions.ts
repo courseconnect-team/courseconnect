@@ -2,14 +2,25 @@ import { useMemo, useState } from 'react';
 
 export type SemesterName = `${'Spring' | 'Summer' | 'Fall'} ${number}`;
 
-const getCurrentSemester = (): SemesterName => {
+export const getCurrentSemester = (): SemesterName => {
   const now = new Date();
   const year = now.getFullYear();
-  const month = now.getMonth(); // 0 = Jan
-
-  const term = month < 5 ? 'Spring' : month < 8 ? 'Summer' : 'Fall';
+  const month = now.getMonth() + 1; // 0 = Jan
+  const day = now.getDate()
+  
+  const term =(month < 5 && day < 6) ? 'Spring' : (month < 8 && day < 13) ? 'Summer' : 'Fall';
   return `${term} ${year}` as SemesterName;
 };
+
+export function generateSemesters(startYear = 2023): SemesterName[] {
+  const currentYear = new Date().getFullYear();
+  const out: string[] = [];
+  for (let y = startYear; y <= currentYear; y++) {
+    out.push(`Spring ${y}`, `Summer ${y}`, `Fall ${y}`);
+  }
+  // Most recent first, if you prefer:
+  return out.reverse() as SemesterName[];
+}
 
 const generateSemesterNames = (
   start: SemesterName,

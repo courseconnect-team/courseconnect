@@ -6,14 +6,14 @@ import { useUserRole } from '@/firebase/util/GetUserRole';
 import { useSearchParams } from 'next/navigation';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import FacultyDetails from '@/components/FacultyDetails/FacultyDetails';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
-import SmallClassCard from '@/components/SmallClassCard/SmallClassCard';
+import FacultyDetails from '@/component/FacultyDetails/FacultyDetails';
+import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import SmallClassCard from '@/component/SmallClassCard/SmallClassCard';
 import { FacultyStats } from '@/types/User';
 // import { useFacultyStats } from '@/hooks/useFacultyStats';
 import { LinearProgress } from '@mui/material';
 import { CourseType } from '@/types/User';
-import useFetchPastCourses from '@/hooks/usePastCourses';
+import useFetchPastCourses from '@/hooks/old/usePastCourses';
 import { Toaster } from 'react-hot-toast';
 
 interface pageProps {

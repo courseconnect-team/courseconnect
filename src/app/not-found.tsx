@@ -1,10 +1,10 @@
 'use client';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import HeaderCard from '@/component/HeaderCard/HeaderCard';
 import Link from 'next/link';
 import { Toaster } from 'react-hot-toast';
 import { redirect } from 'next/navigation';
 import { useEffect } from 'react';
-import SmallHeader from '@/components/SmallHeader/SmallHeader';
+import SmallHeader from '@/component/SmallHeader/SmallHeader';
 
 export default function NotFound() {
   useEffect(() => {
