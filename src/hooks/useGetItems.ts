@@ -42,10 +42,10 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
         { label: 'Users', to: '/users', icon: PersonOutlineOutlinedIcon },
         {
           label: 'Applications',
-          to: '/applications',
+          to: '/admin-applications',
           icon: DescriptionOutlinedIcon,
         },
-        { label: 'Courses', to: '/courses', icon: BookOutlinedIcon },
+        { label: 'Courses', to: '/admincourses', icon: BookOutlinedIcon },
         {
           label: 'Scheduling',
           to: '/scheduling',

@@ -5,7 +5,7 @@ import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import PageLayout from '@/newcomponents/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';
 import CourseSections from './courseSections';
-import Application from '../Apply/inacessible';
+import Application from '../../oldPages/Apply/inacessible';
 
 interface pageProps {}
 const CoursesPage: FC<pageProps> = () => {

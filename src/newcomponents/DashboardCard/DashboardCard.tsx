@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Skeleton from '@mui/material/Skeleton';
 import type { NavbarItem } from '@/types/navigation';
-import Dashboard from '@/app/dashboard/page';
+import Dashboard from '@/oldPages/dashboard/page';
 
 type SkeletonProps = { width?: number | string; height?: number | string };
 
@@ -55,5 +55,7 @@ DashboardCard.Skeleton = ({ width = 360, height = 80 }: SkeletonProps) => (
     </div>
   </div>
 );
+
+
 /** Optional named export if you prefer importing it directly */
 export const DashboardCardSkeleton = DashboardCard.Skeleton;
