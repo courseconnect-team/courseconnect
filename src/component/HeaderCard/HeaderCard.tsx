@@ -1,7 +1,7 @@
 // components/HeaderCard/HeaderCard.tsx
 import React, { FC } from 'react';
-import { EceLogoPng } from '@/componentsd/EceLogoPng/EceLogoPng';
-import { TopNavBarSigned } from '@/componentsd/TopNavBarSigned/TopNavBarSigned';
+import { EceLogoPng } from '@/component/EceLogoPng/EceLogoPng';
+import { TopNavBarSigned } from '@/component/TopNavBarSigned/TopNavBarSigned';
 import './style.css';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
 

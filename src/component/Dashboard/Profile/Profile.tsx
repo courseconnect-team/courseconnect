@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Container from '@mui/material/Container';
-import UnderDevelopment from '@/componentsd/UnderDevelopment';
+import UnderDevelopment from '@/component/UnderDevelopment';
 import DeleteUserButton from './DeleteUserButton';
 
 interface ProfileProps {

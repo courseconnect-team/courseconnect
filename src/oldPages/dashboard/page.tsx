@@ -2,18 +2,18 @@
 import React from 'react';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import BottomMenu from '@/componentsd/BottomMenu/BottomMenu';
+import BottomMenu from '@/component/BottomMenu/BottomMenu';
 
 // dashboard components
-import DashboardWelcome from '@/componentsd/Dashboard/Welcome/Welcome';
-import Profile from '@/componentsd/Dashboard/Profile/Profile';
-import Users from '@/componentsd/Dashboard/Users/Users';
-import Courses from '@/componentsd/Dashboard/Courses/Courses';
-import Applications from '@/componentsd/Dashboard/Applications/Applications';
-import Application from '@/componentsd/Dashboard/Applications/Application';
-import ShowApplicationStatus from '@/componentsd/Dashboard/Applications/AppStatus';
+import DashboardWelcome from '@/component/Dashboard/Welcome/Welcome';
+import Profile from '@/component/Dashboard/Profile/Profile';
+import Users from '@/component/Dashboard/Users/Users';
+import Courses from '@/component/Dashboard/Courses/Courses';
+import Applications from '@/component/Dashboard/Applications/Applications';
+import Application from '@/component/Dashboard/Applications/Application';
+import ShowApplicationStatus from '@/component/Dashboard/Applications/AppStatus';
 import { Toaster } from 'react-hot-toast';
-import { TopNavBarSigned } from '@/componentsd/TopNavBarSigned/TopNavBarSigned';
+import { TopNavBarSigned } from '@/component/TopNavBarSigned/TopNavBarSigned';
 
 // user information reference: https://firebase.google.com/docs/auth/web/manage-users
 

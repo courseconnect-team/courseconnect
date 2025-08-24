@@ -53,7 +53,7 @@ import {
 } from '@mui/material';
 import { purple } from '@mui/material/colors';
 
-import UnderDevelopment from '@/componentsd/UnderDevelopment';
+import UnderDevelopment from '@/component/UnderDevelopment';
 import AppView from './AppView';
 import { ThumbDownOffAlt, ThumbUpOffAlt } from '@mui/icons-material';
 

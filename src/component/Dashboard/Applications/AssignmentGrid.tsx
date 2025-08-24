@@ -40,7 +40,7 @@ import {
   LinearProgress,
   TextField,
 } from '@mui/material';
-import UnderDevelopment from '@/componentsd/UnderDevelopment';
+import UnderDevelopment from '@/component/UnderDevelopment';
 import AssignView from './AssignView';
 import AssignViewOnly from './AssignViewOnly';
 

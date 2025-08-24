@@ -1,4 +1,4 @@
-import { EceLogoPng } from '@/componentsd/EceLogoPng/EceLogoPng';
+import { EceLogoPng } from '@/component/EceLogoPng/EceLogoPng';
 import styles from './style.module.css';
 import AuthSwitcher from './AuthSwitcher';
 export const metadata = {

@@ -1,6 +1,6 @@
 'use client';
-import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
-import SmallHeader from '@/componentsd/SmallHeader/SmallHeader';
+import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import SmallHeader from '@/component/SmallHeader/SmallHeader';
 import { Toaster } from 'react-hot-toast';
 import Link from 'next/link';
 

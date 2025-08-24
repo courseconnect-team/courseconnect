@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
-import { EceLogoPng } from '@/componentsd/EceLogoPng/EceLogoPng';
+import { EceLogoPng } from '@/component/EceLogoPng/EceLogoPng';
 import Link from 'next/link';
 import { Role, roleMapping } from '@/types/User';
 

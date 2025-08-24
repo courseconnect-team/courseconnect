@@ -1,10 +1,10 @@
 import { Toaster } from 'react-hot-toast';
-import { EceLogoPng } from '@/componentsd/EceLogoPng/EceLogoPng';
+import { EceLogoPng } from '@/component/EceLogoPng/EceLogoPng';
 import { DashboardCard } from '@/components/DashboardCard/DashboardCard';
 import { Bio } from '@/components/Bio/Bio';
-import { TopNavBarSigned } from '@/componentsd/TopNavBarSigned/TopNavBarSigned';
+import { TopNavBarSigned } from '@/component/TopNavBarSigned/TopNavBarSigned';
 import styles from './style.module.css';
-import { VerifyEmailCard } from '@/componentsd/VerifyEmailCard/VerifyEmailCard';
+import { VerifyEmailCard } from '@/component/VerifyEmailCard/VerifyEmailCard';
 import Link from 'next/link';
 
 interface DashboardProps {

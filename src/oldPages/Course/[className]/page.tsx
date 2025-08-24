@@ -1,11 +1,11 @@
 'use client';
 
 import { FC, useEffect, useState } from 'react';
-import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
+import HeaderCard from '@/component/HeaderCard/HeaderCard';
 import './style.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import CourseDetails from '@/componentsd/CourseDetails/CourseDetails';
+import CourseDetails from '@/component/CourseDetails/CourseDetails';
 import { getAuth } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
 import { useSearchParams } from 'next/navigation';

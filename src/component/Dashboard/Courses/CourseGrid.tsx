@@ -37,7 +37,7 @@ import {
   DialogTitle,
   LinearProgress,
 } from '@mui/material';
-import UnderDevelopment from '@/componentsd/UnderDevelopment';
+import UnderDevelopment from '@/component/UnderDevelopment';
 
 import { alpha, styled } from '@mui/material/styles';
 interface Course {

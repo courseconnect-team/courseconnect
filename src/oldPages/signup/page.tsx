@@ -1,10 +1,10 @@
 import toast, { Toaster } from 'react-hot-toast';
-import { EceLogoPng } from '@/componentsd/EceLogoPng/EceLogoPng';
+import { EceLogoPng } from '@/component/EceLogoPng/EceLogoPng';
 
-import { TopNavBar } from '@/components/TopNavBar/TopNavBar';
+import { TopNavBar } from '@/component/TopNavBar/TopNavBar';
 import './style.css';
 import Link from 'next/link';
-import { SignUpCard } from '@/componentsd/SignUpCard/SignUpCard';
+import { SignUpCard } from '@/component/SignUpCard/SignUpCard';
 export default function SignUpPage() {
   return (
     <>

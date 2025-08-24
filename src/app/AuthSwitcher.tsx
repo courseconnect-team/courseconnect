@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { LogInCard } from '@/componentsd/LogInCard/LogInCard';
-import { SignUpCard } from '@/componentsd/SignUpCard/SignUpCard';
+import { LogInCard } from '@/component/LogInCard/LogInCard';
+import { SignUpCard } from '@/component/SignUpCard/SignUpCard';
 
 export default function AuthSwitcher() {
   const [signup, setSignup] = useState(false);

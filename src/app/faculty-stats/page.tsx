@@ -15,8 +15,8 @@ import GetUserRole from '@/firebase/util/GetUserRole';
 import 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
 import { read, utils, writeFile, readFile } from 'xlsx';
-import FacultyStats from '@/componentsd/Dashboard/Users/FacultyStats';
-import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
+import FacultyStats from '@/component/Dashboard/Users/FacultyStats';
+import HeaderCard from '@/component/HeaderCard/HeaderCard';
 
 export default function User() {
   const { user } = useAuth();
