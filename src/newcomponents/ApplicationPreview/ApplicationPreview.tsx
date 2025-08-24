@@ -2,8 +2,8 @@ import React from 'react';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 import { ApplicationData } from '@/types/query';
 import {
-  denyApplication,
   approveApplication,
+  denyApplication,
 } from '@/app/applications/[className]/ApplicationFunctions';
 
 import { ApplicationStatus } from '@/types/query';
