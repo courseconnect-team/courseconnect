@@ -4,7 +4,7 @@ import { ApplicationData } from '@/types/query';
 import {
   approveApplication,
   denyApplication,
-} from '@/app/applications/[className]/ApplicationFunctions';
+} from '@/app/applications/ApplicationFunctions';
 
 import { ApplicationStatus } from '@/types/query';
 type Props = {

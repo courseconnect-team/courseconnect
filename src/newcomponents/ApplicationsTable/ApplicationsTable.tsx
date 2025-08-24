@@ -6,7 +6,7 @@ import { AppRow } from '@/types/query';
 import {
   denyApplication,
   approveApplication,
-} from '@/app/applications/[className]/ApplicationFunctions';
+} from '@/app/applications/ApplicationFunctions';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 type AdminStatus = 'approved' | 'pending' | 'denied';
 
