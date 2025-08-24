@@ -24,6 +24,6 @@
       
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/ClassCard/ClassCard.jsx", "functions/sendEmail/nodemailer.ts", "src/components/LinearProgress/LinearProgress.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/componentsd/ClassCard/ClassCard.jsx", "functions/sendEmail/nodemailer.ts", "src/componentsd/LinearProgress/LinearProgress.jsx"],
   "exclude": ["node_modules"]
 }

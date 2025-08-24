@@ -1,11 +1,11 @@
 /* components/DashboardSections.tsx */
 import { Role } from '@/types/User';
 import { useState } from 'react';
-import { DashboardCard } from '@/newcomponents/DashboardCard/DashboardCard';
+import { DashboardCard } from '@/components/DashboardCard/DashboardCard';
 import { NavbarItem } from '@/types/navigation';
-import SemesterSelect from '@/newcomponents/SemesterSelect/SemesterSelect';
+import SemesterSelect from '@/components/SemesterSelect/SemesterSelect';
 import { useSemesterData } from '@/hooks/Courses/useSemesterData';
-import { CoursesGrid } from '@/newcomponents/CoursesGrid/CoursesGrid';
+import { CoursesGrid } from '@/components/CoursesGrid/CoursesGrid';
 import { type SemesterName } from '@/hooks/useSemesterOptions';
 export default function ApplicationSections({
   role,
@@ -16,9 +16,8 @@ export default function ApplicationSections({
   navItems: NavbarItem[];
   uemail: string;
 }) {
-
   const [semester, setSemester] = useState<SemesterName | undefined>();
-  const semesterArray = semester ?  [semester] : undefined;
+  const semesterArray = semester ? [semester] : undefined;
   const {
     currentSemester,
     options,
@@ -29,7 +28,6 @@ export default function ApplicationSections({
     showSkeletons,
     skeletonCount,
   } = useSemesterData(role, uemail, semesterArray);
-
 
   switch (role) {
     case 'Student':
@@ -72,7 +70,7 @@ export default function ApplicationSections({
               error={error}
               showSkeletons={showSkeletons}
               skeletonCount={skeletonCount}
-              path={"applications"}
+              path={'applications'}
               semester={semesterArray}
             />
           </div>

@@ -2,7 +2,7 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import PersonRemoveOutlinedIcon from '@mui/icons-material/PersonRemoveOutlined';
-import ConfirmDialog from '@/newcomponents/ConfirmDialog/ConfirmDialog';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog';
 import { HandleDeleteUser } from '@/firebase/auth/auth_delete_prompt';
 
 interface DeleteUserDialogProps {

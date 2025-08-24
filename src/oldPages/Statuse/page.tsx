@@ -3,7 +3,7 @@ import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 
 import Box from '@mui/material/Box';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
 import Container from '@mui/material/Container';
 
 import { useAuth } from '@/firebase/auth/auth_context';

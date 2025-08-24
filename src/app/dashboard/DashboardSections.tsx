@@ -2,7 +2,7 @@
 
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { Role } from '@/types/User';
-import { DashboardCard } from '@/newcomponents/DashboardCard/DashboardCard';
+import { DashboardCard } from '@/components/DashboardCard/DashboardCard';
 import { NavbarItem } from '@/types/navigation';
 export default function DashboardSections({
   role,

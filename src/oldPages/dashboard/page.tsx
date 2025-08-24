@@ -2,18 +2,18 @@
 import React from 'react';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import BottomMenu from '@/components/BottomMenu/BottomMenu';
+import BottomMenu from '@/componentsd/BottomMenu/BottomMenu';
 
 // dashboard components
-import DashboardWelcome from '@/components/Dashboard/Welcome/Welcome';
-import Profile from '@/components/Dashboard/Profile/Profile';
-import Users from '@/components/Dashboard/Users/Users';
-import Courses from '@/components/Dashboard/Courses/Courses';
-import Applications from '@/components/Dashboard/Applications/Applications';
-import Application from '@/components/Dashboard/Applications/Application';
-import ShowApplicationStatus from '@/components/Dashboard/Applications/AppStatus';
+import DashboardWelcome from '@/componentsd/Dashboard/Welcome/Welcome';
+import Profile from '@/componentsd/Dashboard/Profile/Profile';
+import Users from '@/componentsd/Dashboard/Users/Users';
+import Courses from '@/componentsd/Dashboard/Courses/Courses';
+import Applications from '@/componentsd/Dashboard/Applications/Applications';
+import Application from '@/componentsd/Dashboard/Applications/Application';
+import ShowApplicationStatus from '@/componentsd/Dashboard/Applications/AppStatus';
 import { Toaster } from 'react-hot-toast';
-import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
+import { TopNavBarSigned } from '@/componentsd/TopNavBarSigned/TopNavBarSigned';
 
 // user information reference: https://firebase.google.com/docs/auth/web/manage-users
 
@@ -29,7 +29,11 @@ export default function Dashboard() {
   return (
     <>
       <Toaster />
-      <DashboardWelcome user={user} userRole={role as string} emailVerified={user.emailVerified} />
+      <DashboardWelcome
+        user={user}
+        userRole={role as string}
+        emailVerified={user.emailVerified}
+      />
     </>
   );
 }

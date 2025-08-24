@@ -6,8 +6,8 @@ import { Toaster, toast } from 'react-hot-toast';
 import GetUserRole from '@/firebase/util/GetUserRole';
 
 import 'firebase/firestore';
-import Applications from '@/components/Dashboard/Applications/Applications';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import Applications from '@/componentsd/Dashboard/Applications/Applications';
+import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
 
 export default function AdminApplications() {
   let { user } = useAuth();

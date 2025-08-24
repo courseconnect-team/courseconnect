@@ -2,16 +2,16 @@
 import './style.css';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Toaster } from 'react-hot-toast';
-import SmallClassCard from '@/components/SmallClassCard/SmallClassCard';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import SmallClassCard from '@/componentsd/SmallClassCard/SmallClassCard';
+import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { Bio } from '@/components/Bio/Bio';
-import { SemesterTimeline } from '@/components/SemesterTimeline/SemesterTimeline';
+import { SemesterTimeline } from '@/componentsd/SemesterTimeline/SemesterTimeline';
 import useFetchPastCourses from '@/hooks/old/usePastCourses';
 import { CourseType } from '@/types/User';
-import SemesterSelection from '@/components/SemesterSelection/SemesterSelection';
+import SemesterSelection from '@/componentsd/SemesterSelection/SemesterSelection';
 import { SelectSemester } from '@/types/User';
 
 export default function FacultyCourses() {

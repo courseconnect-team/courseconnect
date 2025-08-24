@@ -1,13 +1,13 @@
 'use client';
 
 import { Toaster } from 'react-hot-toast';
-import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
+import { EceLogoPng } from '@/componentsd/EceLogoPng/EceLogoPng';
 import { TopNavBar } from '@/components/TopNavBar/TopNavBar';
 import styles from './style.module.css';
 import { Card } from '@/components/Card/Card';
 
 import { useAuth } from '@/firebase/auth/auth_context';
-import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
+import { TopNavBarSigned } from '@/componentsd/TopNavBarSigned/TopNavBarSigned';
 export default function About() {
   const { user } = useAuth();
   return (

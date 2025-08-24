@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { LogInCard } from '@/components/LogInCard/LogInCard';
-import { SignUpCard } from '@/components/SignUpCard/SignUpCard';
+import { LogInCard } from '@/componentsd/LogInCard/LogInCard';
+import { SignUpCard } from '@/componentsd/SignUpCard/SignUpCard';
 
 export default function AuthSwitcher() {
   const [signup, setSignup] = useState(false);
@@ -12,9 +12,9 @@ export default function AuthSwitcher() {
     <>
       <Toaster />
       {signup ? (
-        <SignUpCard className="" setSignup={setSignup}/>
+        <SignUpCard className="" setSignup={setSignup} />
       ) : (
-        <LogInCard className="" setSignup={setSignup}/>
+        <LogInCard className="" setSignup={setSignup} />
       )}
     </>
   );

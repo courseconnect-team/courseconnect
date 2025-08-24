@@ -1,6 +1,6 @@
 'use client';
 import { FC, useMemo } from 'react';
-import PageLayout from '@/newcomponents/PageLayout/PageLayout';
+import PageLayout from '@/components/PageLayout/PageLayout';
 import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import {
@@ -12,7 +12,7 @@ import {
 import { useCourseApplications } from '@/hooks/Applications/useFetchApplications';
 import { LinearProgress } from '@mui/material';
 import { AppRow, ApplicationStatus } from '@/types/query';
-import { CourseApplicationsTable } from '@/newcomponents/ApplicationsTable/ApplicationsTable';
+import { CourseApplicationsTable } from '@/components/ApplicationsTable/ApplicationsTable';
 import { ApplicationModal } from './ApplicationsModal';
 import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicationById';
 const ApplicationsPage: FC = () => {

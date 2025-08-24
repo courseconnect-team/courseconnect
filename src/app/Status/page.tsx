@@ -1,8 +1,8 @@
 'use client';
 
 import { FC } from 'react';
-import PageLayout from '@/newcomponents/PageLayout/PageLayout';
-import { StatusTable } from '@/newcomponents/StatusTable/StatusTable';
+import PageLayout from '@/components/PageLayout/PageLayout';
+import { StatusTable } from '@/components/StatusTable/StatusTable';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { useFetchAssignments } from '@/hooks/Applications/useFetchStudentApplications';
 import { getNavItems } from '@/hooks/useGetItems';

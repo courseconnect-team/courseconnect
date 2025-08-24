@@ -7,7 +7,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
-import { ApplicationPreview } from '@/newcomponents/ApplicationPreview/ApplicationPreview';
+import { ApplicationPreview } from '@/components/ApplicationPreview/ApplicationPreview';
 import { ApplicationData, ApplicationStatus } from '@/types/query';
 import Box from '@mui/material/Box';
 

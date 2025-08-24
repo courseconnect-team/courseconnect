@@ -1,12 +1,12 @@
 'use client';
 
 import { FC } from 'react';
-import CourseDetails from '@/newcomponents/CourseDetails/CourseDetails';
+import CourseDetails from '@/components/CourseDetails/CourseDetails';
 import { useParams, useSearchParams } from 'next/navigation';
 import { LinearProgress } from '@mui/material';
 import { useCourseDetails } from '@/hooks/Courses/useFetchCourse';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
-import PageLayout from '@/newcomponents/PageLayout/PageLayout';
+import PageLayout from '@/components/PageLayout/PageLayout';
 import { getNavItems } from '@/hooks/useGetItems';
 
 const StatisticsPage: FC = () => {
@@ -39,7 +39,7 @@ const StatisticsPage: FC = () => {
     );
 
   return (
-    <PageLayout mainTitle={""} navItems={getNavItems(role)}>
+    <PageLayout mainTitle={''} navItems={getNavItems(role)}>
       <CourseDetails {...course} schedule={course.meetingTimes} />
     </PageLayout>
   );

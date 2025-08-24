@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import SemesterSelect from './semesterselect';
 import ClassCard from '@/components/ClassCard/ClassCard';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';

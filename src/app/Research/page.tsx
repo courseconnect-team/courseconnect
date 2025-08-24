@@ -1,10 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
-import { JobCard } from '@/components/JobCard/JobCard';
+import { JobCard } from '@/componentsd/JobCard/JobCard';
 interface ResearchPageProps {
   user: {
     uid: string;

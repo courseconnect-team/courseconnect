@@ -2,11 +2,11 @@
 
 import { getNavItems, getApplications } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
-import PageLayout from '@/newcomponents/PageLayout/PageLayout';
-import { FC, useEffect, useState } from 'react';
+import PageLayout from '@/components/PageLayout/PageLayout';
+import { FC } from 'react';
 import ApplicationSections from './applicationSections';
 
-ApplicationSections
+ApplicationSections;
 interface pageProps {}
 const ApplicationPage: FC<pageProps> = () => {
   const [user, role, loading, error] = useUserInfo();
@@ -17,7 +17,11 @@ const ApplicationPage: FC<pageProps> = () => {
 
   return (
     <PageLayout mainTitle="Applications" navItems={getNavItems(role)}>
-      <ApplicationSections role={role} uemail={uemail} navItems={getApplications(role)} />
+      <ApplicationSections
+        role={role}
+        uemail={uemail}
+        navItems={getApplications(role)}
+      />
     </PageLayout>
   );
 };

@@ -18,7 +18,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Courses from '@/components/Dashboard/AdminCourses/Courses';
+import Courses from '@/componentsd/Dashboard/AdminCourses/Courses';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -31,7 +31,7 @@ import {
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
 
 export default function User() {
   const { user } = useAuth();

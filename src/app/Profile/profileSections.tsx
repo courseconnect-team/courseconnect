@@ -5,7 +5,7 @@ import { Role } from '@/types/User';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Button from '@mui/material/Button';
 import { updateProfile } from 'firebase/auth';
-import ConfirmDialog from '@/newcomponents/ConfirmDialog/ConfirmDialog';
+import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog';
 import { HandleDeleteUser } from '@/firebase/auth/auth_delete_prompt';
 
 /* ---------- helpers ---------- */

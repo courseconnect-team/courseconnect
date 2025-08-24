@@ -1,11 +1,11 @@
 /* components/DashboardSections.tsx */
 import { useSemesterData } from '@/hooks/Courses/useSemesterData';
-import SemesterSelect from '@/newcomponents/SemesterSelect/SemesterSelect';
-import { CoursesGrid } from '@/newcomponents/CoursesGrid/CoursesGrid';
+import SemesterSelect from '@/components/SemesterSelect/SemesterSelect';
+import { CoursesGrid } from '@/components/CoursesGrid/CoursesGrid';
 import type { Role } from '@/types/User';
 import type { NavbarItem } from '@/types/navigation';
-import { DashboardCard } from '@/newcomponents/DashboardCard/DashboardCard';
-import SemesterMultiSelect from '@/newcomponents/SemesterMultiSelect/SemesterMultiSelect';
+import { DashboardCard } from '@/components/DashboardCard/DashboardCard';
+import SemesterMultiSelect from '@/components/SemesterMultiSelect/SemesterMultiSelect';
 import { getCurrentSemester, SemesterName } from '@/hooks/useSemesterOptions';
 import { useState } from 'react';
 import { useMemo, useEffect } from 'react';
@@ -50,7 +50,6 @@ export default function CourseSections({
     showSkeletons: showCurrentSkeletons,
     skeletonCount: currentSkeletonCount,
   } = useSemesterData(role, uemail, currentSemArray);
-
 
   return (
     <>

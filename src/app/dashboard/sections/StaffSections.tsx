@@ -1,5 +1,5 @@
 /* components/sections/StaffSections.tsx */
-import { DashboardCard } from '@/newcomponents/DashboardCard/DashboardCard';
+import { DashboardCard } from '@/components/DashboardCard/DashboardCard';
 import { useFetchStatus } from '@/hooks/useFetchStatus';
 
 type Props = { userId: string };

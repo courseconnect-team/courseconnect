@@ -1,11 +1,11 @@
 'use client';
 
-import SideNav from '@/newcomponents/SideNavBar/SideNavBar';
-import TopNav from '@/newcomponents/TopBar/TopBar';
+import SideNav from '@/components/SideNavBar/SideNavBar';
+import TopNav from '@/components/TopBar/TopBar';
 import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import DashboardSections from './DashboardSections';
-import PageLayout from '@/newcomponents/PageLayout/PageLayout';
+import PageLayout from '@/components/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';
 interface pageProps {}
 const NewDashboard: FC<pageProps> = () => {

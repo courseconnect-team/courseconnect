@@ -2,7 +2,7 @@
 
 import { getNavItems, getCourses } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
-import PageLayout from '@/newcomponents/PageLayout/PageLayout';
+import PageLayout from '@/components/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';
 import CourseSections from './courseSections';
 import Application from '../../oldPages/Apply/inacessible';
@@ -15,10 +15,10 @@ const CoursesPage: FC<pageProps> = () => {
   // ② handle loading / error
   if (loading) return <div>Loading…</div>;
   if (error) return <div>Error loading user info</div>;
-  if(role !== "faculty" && role !== "admin") return <div> Inaccessible </div>;
+  if (role !== 'faculty' && role !== 'admin') return <div> Inaccessible </div>;
   return (
     <PageLayout mainTitle="Courses" navItems={getNavItems(role)}>
-      <CourseSections role={role} uemail ={uemail} navItems={getCourses(role)} />
+      <CourseSections role={role} uemail={uemail} navItems={getCourses(role)} />
     </PageLayout>
   );
 };

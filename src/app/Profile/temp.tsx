@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Button } from '@mui/material';
 import './style.css';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import HeaderCard from '@/componentsd/HeaderCard/HeaderCard';
 import DeleteUserButton from './DeleteUserButton';
 import { updateProfile } from 'firebase/auth';
 

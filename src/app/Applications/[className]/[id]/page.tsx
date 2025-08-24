@@ -1,5 +1,5 @@
-import { ApplicationPreview } from '@/newcomponents/ApplicationPreview/ApplicationPreview';
-import PageLayout from '@/newcomponents/PageLayout/PageLayout';
+import { ApplicationPreview } from '@/components/ApplicationPreview/ApplicationPreview';
+import PageLayout from '@/components/PageLayout/PageLayout';
 export default function ApplicationPage({
   params: { id },
 }: {
