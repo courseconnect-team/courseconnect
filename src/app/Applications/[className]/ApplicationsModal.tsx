@@ -11,6 +11,15 @@ import { ApplicationPreview } from '@/newcomponents/ApplicationPreview/Applicati
 import { ApplicationData } from '@/types/query';
 import Box from '@mui/material/Box';
 
+export interface ApplicationModalProps {
+  courseId: string;
+  open: boolean;
+  onClose: () => void;
+  id: string;
+  parentPath: string;
+  documentData?: ApplicationData;
+}
+
 export function ApplicationModal({
   courseId,
   open,
@@ -18,7 +27,7 @@ export function ApplicationModal({
   id,
   parentPath,
   documentData,
-}: Props) {
+}: ApplicationModalProps) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 

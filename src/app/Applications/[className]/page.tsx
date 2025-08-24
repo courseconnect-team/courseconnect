@@ -66,7 +66,7 @@ const ApplicationsPage: FC = () => {
     return (
       <PageLayout mainTitle="Course not Found" navItems={getNavItems(role)} />
     );
-  console.log(hydratedDoc);
+
   return (
     <PageLayout mainTitle={courseId} navItems={getNavItems(role)}>
       <CourseApplicationsTable
