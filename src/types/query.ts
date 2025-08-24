@@ -54,6 +54,8 @@ export type Status =
   | 'denied'
   | 'accepted';
 
+export type ApplicationStatus = 'Approved' | 'Denied' | 'Assigned' | 'applied';
+
 export type AppRow = {
   id: string; // application doc id
   status: string; // 'applied' | 'approved' | 'denied' | 'Admin_denied' | 'assigned'

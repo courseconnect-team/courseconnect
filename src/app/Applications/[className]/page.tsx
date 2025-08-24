@@ -11,7 +11,7 @@ import {
 } from 'next/navigation';
 import { useCourseApplications } from '@/hooks/Applications/useFetchApplications';
 import { LinearProgress } from '@mui/material';
-import { AppRow } from '@/types/query';
+import { AppRow, ApplicationStatus } from '@/types/query';
 import { CourseApplicationsTable } from '@/newcomponents/ApplicationsTable/ApplicationsTable';
 import { ApplicationModal } from './ApplicationsModal';
 import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicationById';
@@ -35,15 +35,26 @@ const ApplicationsPage: FC = () => {
   );
   const rows = data?.all ?? [];
 
-  const initialDoc = useMemo<AppRow | null>(
+  const selectedRow = useMemo<AppRow | null>(
     () => (id ? rows.find((r) => r.id === id) ?? null : null),
     [id, rows]
   );
+
   const { data: hydratedDoc } = useFetchApplicationById(id ?? '', {
-    enabled: Boolean(id && !initialDoc), // fetch only when deep-linked or not in list
-    initialData: initialDoc?.data ?? undefined, // start with what we already have
+    enabled: Boolean(id && !selectedRow),
+    initialData: selectedRow?.data ?? undefined,
     staleTime: 5 * 60 * 1000,
   });
+
+  const courseStatus = useMemo<ApplicationStatus | undefined>(() => {
+    if (selectedRow) return selectedRow.status as ApplicationStatus | undefined;
+
+    // Fallback: compute from the hydrated doc’s courses map
+    const courses = (hydratedDoc as any)?.courses as
+      | Record<string, ApplicationStatus>
+      | undefined;
+    return courses?.[courseId];
+  }, [selectedRow, hydratedDoc, courseId]);
 
   const close = () => {
     const params = new URLSearchParams(search.toString());
@@ -82,6 +93,7 @@ const ApplicationsPage: FC = () => {
           onClose={close}
           parentPath={pathname}
           documentData={hydratedDoc ?? undefined}
+          documentStatus={courseStatus}
         />
       )}
     </PageLayout>

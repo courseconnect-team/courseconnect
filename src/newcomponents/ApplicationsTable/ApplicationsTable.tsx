@@ -3,7 +3,11 @@ import * as React from 'react';
 import ZoomInOutlinedIcon from '@mui/icons-material/ZoomInOutlined';
 import Link from 'next/link';
 import { AppRow } from '@/types/query';
-
+import {
+  denyApplication,
+  approveApplication,
+} from '@/app/applications/[className]/ApplicationFunctions';
+import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 type AdminStatus = 'approved' | 'pending' | 'denied';
 
 export type UIRow = {
@@ -12,6 +16,8 @@ export type UIRow = {
   submitted: string;
   appStatus: 'approved' | 'denied' | 'pending' | 'in-progress' | 'assigned';
   adminStatus: AdminStatus;
+  uf_email: string;
+  position: string;
 };
 
 function Pill({
@@ -74,7 +80,8 @@ function mapToUI(
   const last = d.lastname ?? '';
   const applicantName = d.name ?? `${first} ${last}`.trim();
   const submitted = d.date ?? 'MM/DD/YYYY';
-
+  const uf_email = d.email;
+  const position = d.position;
   // appStatus mapping for UI
   let appStatus: UIRow['appStatus'];
   switch (r.status) {
@@ -109,6 +116,8 @@ function mapToUI(
     submitted,
     appStatus,
     adminStatus,
+    uf_email,
+    position,
   };
 }
 
@@ -117,12 +126,10 @@ function mapToUI(
 export interface CourseApplicationsTableProps {
   rows: AppRow[]; // from your API/hook for ONE course
   openInNewTab?: boolean;
-  onApprove?: (row: AppRow) => void;
-  onDeny?: (row: AppRow) => void;
   getAdminStatus?: (row: AppRow) => AdminStatus; // optional if you compute admin status elsewhere
   loading?: boolean; // optional skeleton state
   emptyMessage?: string;
-  courseId?: string;
+  courseId: string;
 }
 
 export const CourseApplicationsTable: React.FC<
@@ -130,13 +137,52 @@ export const CourseApplicationsTable: React.FC<
 > = ({
   rows,
   openInNewTab = false,
-  onApprove,
-  onDeny,
   getAdminStatus,
   loading = false,
   emptyMessage = 'No applications for this course.',
   courseId,
 }) => {
+  const [confirm, setConfirm] = React.useState<{
+    open: boolean;
+    kind: 'approve' | 'deny' | null;
+    row?: UIRow;
+  }>({ open: false, kind: null });
+
+  const [pending, setPending] = React.useState(false);
+
+  const openConfirm = (kind: 'approve' | 'deny', row: UIRow) =>
+    setConfirm({ open: true, kind, row });
+
+  const closeConfirm = () =>
+    setConfirm({ open: false, kind: null, row: undefined });
+
+  const handleConfirm = async () => {
+    if (!confirm.row) return;
+    try {
+      setPending(true);
+      if (confirm.kind === 'approve') {
+        await approveApplication({
+          documentId: confirm.row.id,
+          classCode: courseId,
+        });
+      } else {
+        await denyApplication({
+          documentId: confirm.row.id,
+          classCode: courseId,
+          name: confirm.row.applicantName,
+          uf_email: confirm.row.uf_email,
+          position: confirm.row.position,
+        });
+      }
+      closeConfirm();
+      // Optional: trigger a refetch or optimistic UI update here
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setPending(false);
+    }
+  };
+
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 
   const uiRows: UIRow[] = rows.map((r) => mapToUI(r, getAdminStatus));
@@ -200,8 +246,6 @@ export const CourseApplicationsTable: React.FC<
               uiRows.map((ui, idx) => {
                 const raw = rows[idx]; // keep 1:1 mapping
                 const zebra = idx % 2 ? 'bg-surface' : 'bg-background';
-                const undecided =
-                  ui.appStatus === 'in-progress' || ui.appStatus === 'pending';
 
                 return (
                   <tr
@@ -253,8 +297,8 @@ export const CourseApplicationsTable: React.FC<
                         </Pill>
                       ) : (
                         <ApproveDeny
-                          onApprove={() => onApprove?.(raw)}
-                          onDeny={() => onDeny?.(raw)}
+                          onApprove={() => openConfirm('approve', ui)}
+                          onDeny={() => openConfirm('deny', ui)}
                         />
                       )}
                     </td>
@@ -275,6 +319,24 @@ export const CourseApplicationsTable: React.FC<
           </tbody>
         </table>
       </div>
+      <ConfirmDialog
+        open={confirm.open}
+        onClose={closeConfirm}
+        onConfirm={handleConfirm}
+        loading={pending}
+        title={
+          confirm.kind === 'approve'
+            ? `Approve ${confirm.row?.applicantName}?`
+            : `Deny ${confirm.row?.applicantName}?`
+        }
+        description={
+          confirm.kind === 'approve'
+            ? `This will mark the application as approved for ${courseId}.`
+            : `This will mark the application as denied and notify the applicant.`
+        }
+        confirmLabel={confirm.kind === 'approve' ? 'Approve' : 'Deny'}
+        confirmColor={confirm.kind === 'approve' ? 'primary' : 'error'}
+      />
 
       {/* optional overlay viewer */}
       {previewUrl && (

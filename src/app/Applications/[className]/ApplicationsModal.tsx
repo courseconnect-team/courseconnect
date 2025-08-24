@@ -8,7 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { ApplicationPreview } from '@/newcomponents/ApplicationPreview/ApplicationPreview';
-import { ApplicationData } from '@/types/query';
+import { ApplicationData, ApplicationStatus } from '@/types/query';
 import Box from '@mui/material/Box';
 
 export interface ApplicationModalProps {
@@ -18,6 +18,7 @@ export interface ApplicationModalProps {
   id: string;
   parentPath: string;
   documentData?: ApplicationData;
+  documentStatus?: ApplicationStatus;
 }
 
 export function ApplicationModal({
@@ -27,6 +28,7 @@ export function ApplicationModal({
   id,
   parentPath,
   documentData,
+  documentStatus,
 }: ApplicationModalProps) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -81,7 +83,12 @@ export function ApplicationModal({
         >
           {/* If your preview has its own max-width, you can center/expand it here */}
           <div className="mx-auto w-full max-w-[1200px]">
-            <ApplicationPreview data={documentData} />
+            <ApplicationPreview
+              data={documentData}
+              courseId={courseId}
+              documentId={id}
+              status={documentStatus}
+            />
           </div>
         </Box>
       </DialogContent>

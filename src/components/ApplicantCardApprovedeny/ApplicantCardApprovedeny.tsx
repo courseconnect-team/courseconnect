@@ -103,6 +103,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   };
 
   const db = firebase.firestore();
+
   const handleApproveSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {

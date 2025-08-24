@@ -1,10 +1,14 @@
+'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { Role } from '@/types/User';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Button from '@mui/material/Button';
 import { updateProfile } from 'firebase/auth';
-/* ---------- helpers ---------- */
+import ConfirmDialog from '@/newcomponents/ConfirmDialog/ConfirmDialog';
+import { HandleDeleteUser } from '@/firebase/auth/auth_delete_prompt';
 
+/* ---------- helpers ---------- */
 const display = (v: unknown, fallback = 'Not listed'): string => {
   if (v == null) return fallback;
   if (typeof v === 'string') {
@@ -45,7 +49,6 @@ const splitName = (full: unknown) => {
       : typeof full === 'number'
       ? String(full)
       : '';
-
   const safe = s.trim();
   if (!safe) return { first: '', last: '' };
   const parts = safe.split(/\s+/);
@@ -54,7 +57,6 @@ const splitName = (full: unknown) => {
 };
 
 /* ---------- shared button styles ---------- */
-
 const BTN_W = 138;
 const BTN_H = 40;
 const RADIUS = 2;
@@ -81,20 +83,17 @@ const textBtnSx = {
 const PrimaryButton: React.FC<React.ComponentProps<typeof Button>> = (
   props
 ) => <Button variant="contained" sx={primaryBtnSx} {...props} />;
-
 const GhostButton: React.FC<React.ComponentProps<typeof Button>> = (props) => (
   <Button variant="text" sx={textBtnSx} {...props} />
 );
 
 /* ---------- main component ---------- */
-
 type ProfileProps = {
   name?: string | null;
   user?: any;
   role?: Role | null;
   email?: string | null;
   avatarUrl?: string | null;
-  /** optional save handler if you want to persist the change */
   onSaveName?: (fullName: string) => Promise<void> | void;
 };
 
@@ -111,13 +110,24 @@ export default function ProfileSection({
   const [updatedLast, setUpdatedLast] = useState<string>('');
   const initial = useMemo(() => splitName(name), [name]);
 
+  // Delete dialog state
+  const [open, setOpen] = useState(false);
+  const [verifyEmail, setVerifyEmail] = useState<string>(email ?? '');
+  const [password, setPassword] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
   // seed inputs from prop name
   useEffect(() => {
     setUpdatedFirst(initial.first);
     setUpdatedLast(initial.last);
   }, [initial.first, initial.last]);
 
-  const displayName = React.useMemo(() => {
+  useEffect(() => {
+    setVerifyEmail(email ?? '');
+  }, [email]);
+
+  const displayName = useMemo(() => {
     if (typeof name === 'string') {
       const t = name.trim();
       return t || 'Not listed';
@@ -125,16 +135,17 @@ export default function ProfileSection({
     return 'Not listed';
   }, [name]);
 
-  const handleSave = async (e: any) => {
-    e.preventDefault(); // Prevent the form from submitting in the traditional way
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (updatedFirst.trim() !== '' && updatedLast.trim() !== '') {
       if (updatedLast !== initial.last || updatedFirst !== initial.first) {
         try {
           await updateProfile(user, {
             displayName: `${updatedFirst} ${updatedLast}`,
           });
-          window.location.reload();
+          // optional: call onSaveName?.(`${updatedFirst} ${updatedLast}`);
           alert('Profile updated successfully');
+          window.location.reload();
         } catch (error) {
           console.error('Error updating profile: ', error);
           alert('Failed to update profile');
@@ -144,6 +155,26 @@ export default function ProfileSection({
       }
     } else {
       alert('First name and last name cannot be empty.');
+    }
+  };
+
+  // Delete dialog handlers
+  const handleOpenDelete = () => setOpen(true);
+  const handleCloseDelete = () => {
+    if (!loading) setOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    setErr(null);
+    setLoading(true);
+    try {
+      await HandleDeleteUser(verifyEmail.trim(), password);
+      setOpen(false);
+      // optionally redirect or show toast
+    } catch (e: any) {
+      setErr(e?.message ?? 'Failed to delete user');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -181,14 +212,14 @@ export default function ProfileSection({
             {editing ? (
               <div className="mt-2 flex gap-3">
                 <input
-                  className="h-10 w-48 border rounded-sm border-#D3D3D3 px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="h-10 w-48 border border-[#D3D3D3] px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
                   type="text"
                   placeholder="First Name"
                   value={updatedFirst}
                   onChange={(e) => setUpdatedFirst(e.target.value)}
                 />
                 <input
-                  className="h-10 w-48 border rounded-sm border-#D3D3D3 px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="h-10 w-48 border border-[#D3D3D3] px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
                   type="text"
                   placeholder="Last Name"
                   value={updatedLast}
@@ -212,7 +243,7 @@ export default function ProfileSection({
       {editing ? (
         <div className="flex flex-col gap-3 mr-12">
           <PrimaryButton onClick={handleSave}>Save Changes</PrimaryButton>
-          <GhostButton>Delete Profile</GhostButton>
+          <GhostButton onClick={handleOpenDelete}>Delete Profile</GhostButton>
         </div>
       ) : (
         <div className="mr-12 self-start">
@@ -221,12 +252,44 @@ export default function ProfileSection({
           </PrimaryButton>
         </div>
       )}
+
+      {/* Delete confirm dialog */}
+      <ConfirmDialog
+        open={open}
+        title="Delete Account?"
+        description="Please re-enter your credentials to confirm."
+        onClose={handleCloseDelete}
+        onConfirm={handleConfirmDelete}
+        confirmLabel="Delete"
+        confirmColor="error"
+        loading={loading}
+        disableBackdropClose={loading}
+      >
+        <div className="mt-3 space-y-3">
+          <input
+            type="email"
+            placeholder="UF Email"
+            value={verifyEmail}
+            onChange={(e) => setVerifyEmail(e.target.value)}
+            className="w-full border border-[#D3D3D3] rounded px-3 py-2 text-sm"
+            autoComplete="email"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border border-[#D3D3D3] rounded px-3 py-2 text-sm"
+            autoComplete="current-password"
+          />
+          {err && <p className="text-sm text-red-600">{err}</p>}
+        </div>
+      </ConfirmDialog>
     </div>
   );
 }
 
 /* ---------- small presentational piece ---------- */
-
 function InfoRow({ title, value }: { title: string; value: string }) {
   return (
     <div>
