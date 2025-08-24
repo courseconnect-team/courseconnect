@@ -27,6 +27,35 @@ export interface CourseDetails {
 
 export type Position = 'TA' | 'UPI' | 'Grader';
 
+export interface ApplicationData {
+  id: string;
+  email: string;
+  firstname: string;
+  lastname: string;
+  phonenumber: string;
+  position: string;
+  semester: string;
+  available_hours: string;
+  department: string;
+  degree: string;
+  collegestatus: string;
+  qualifications: string;
+  resume_link: string;
+  plan: string;
+  gpa: string;
+  status: string;
+}
 
-export type Status = 
-  "applied" | "Assigned" | "Admin_approved" | "Admin_denied" | "denied" | "accepted"
+export type Status =
+  | 'applied'
+  | 'Assigned'
+  | 'Admin_approved'
+  | 'Admin_denied'
+  | 'denied'
+  | 'accepted';
+
+export type AppRow = {
+  id: string; // application doc id
+  status: string; // 'applied' | 'approved' | 'denied' | 'Admin_denied' | 'assigned'
+  data: ApplicationData; // the whole doc (for name, submitted date, etc.)
+};

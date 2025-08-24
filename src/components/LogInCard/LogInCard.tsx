@@ -18,7 +18,13 @@ import FormControl from '@mui/material/FormControl';
 import { toast } from 'react-hot-toast';
 
 import 'firebase/firestore';
-export const LogInCard = ({ className, setSignup }: { className: any, setSignup:(val:boolean) => void  }) => {
+export const LogInCard = ({
+  className,
+  setSignup,
+}: {
+  className: any;
+  setSignup: (val: boolean) => void;
+}) => {
   var res;
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -218,24 +224,30 @@ export const LogInCard = ({ className, setSignup }: { className: any, setSignup:
             </div>
           </div>
         </div>
-        
+
         <div className="sign-in-button">
           <button onClick={(e) => handleSubmit(e)} className="overlap">
             <div className="text-wrapper-5">Log In</div>
           </button>
         </div>
         <div className="password-forgot-text">
-        <div className="cursor-pointer underline hover:no-underline" onClick={(e) => setOpen(true)}>
-          Forgot Password?
+          <div
+            className="cursor-pointer underline hover:no-underline"
+            onClick={(e) => setOpen(true)}
+          >
+            Forgot Password?
+          </div>
         </div>
-      </div>
 
         <div className="sign-up-text">
-            <span className="text-gray-300">Don't have an account? </span>
-            <br/>
-            <button className="cursor-pointer underline hover:no-underline" onClick={() => setSignup(true)}>
-              {'Sign Up'}
-            </button>
+          <span className="text-gray-300">Don&apos;t have an account? </span>
+          <br />
+          <button
+            className="cursor-pointer underline hover:no-underline"
+            onClick={() => setSignup(true)}
+          >
+            {'Sign Up'}
+          </button>
         </div>
       </form>
     </div>

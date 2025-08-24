@@ -1,6 +1,10 @@
 import * as React from 'react';
 import {
-  collection, query, where, getDocs, FieldPath, type Firestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  FieldPath,
 } from 'firebase/firestore';
 import {
   useQuery,
@@ -9,21 +13,14 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 import firebase from '@/firebase/firebase_config';
-import { ALL } from 'dns';
-
-export type AppRow = {
-  id: string; // document id
-  status: string; // 'applied' | 'approved' | 'assigned' | ...
-  source: 'applications' | 'assignments';
-  data: Record<string, any>; // full doc if you need more fields
-};
+import { ApplicationData, AppRow } from '@/types/query';
 export type ByStatus = Record<string, AppRow[]>;
 
 export const ALL_APP_STATUSES = [
   'applied',
   'approved',
   'denied',
-  'Admin_denied',
+  'accepted',
 ] as const;
 const ASSIGNED = 'assigned';
 
@@ -52,11 +49,10 @@ async function fetchApplicationsForCourse(
       const snap = await getDocs(q);
       const out: AppRow[] = [];
       snap.forEach((doc) => {
-        const data = doc.data() as Record<string, any>;
+        const data = doc.data() as ApplicationData;
         out.push({
           id: doc.id,
-          status: data?.courses?.[courseKey],
-          source: 'applications',
+          status: doc.data()?.courses?.[courseKey],
           data,
         });
       });
@@ -85,8 +81,8 @@ async function fetchAssignedForCourse(courseKey: string): Promise<AppRow[]> {
   const snap = await getDocs(q);
   const out: AppRow[] = [];
   snap.forEach((doc) => {
-    const data = doc.data() as Record<string, any>;
-    out.push({ id: doc.id, status: ASSIGNED, source: 'assignments', data });
+    const data = doc.data() as ApplicationData;
+    out.push({ id: doc.id, status: ASSIGNED, data });
   });
   return out;
 }
@@ -99,7 +95,82 @@ export function useCourseApplications(
   { all: AppRow[]; byStatus: ByStatus; counts: Record<string, number> },
   Error
 > {
-    const db = firebase.firestore() as unknown as Firestore;
-    const qc = useQueryClient();
-    
+  const qc = useQueryClient();
+
+  // normalize the requested statuses
+  const wantAssigned = statuses.includes(ASSIGNED);
+  const appStatuses = statuses.filter((s) => s !== ASSIGNED);
+  const key = appsKey(courseKey, statuses);
+
+  return useQuery<
+    AppRow[],
+    Error,
+    { all: AppRow[]; byStatus: ByStatus; counts: Record<string, number> }
+  >({
+    queryKey: key,
+    enabled: enabled && !!courseKey && statuses.length > 0,
+    placeholderData: keepPreviousData,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+
+    // fetch apps (selected statuses) + assignments (if requested)
+    queryFn: async () => {
+      const [apps, assigned] = await Promise.all([
+        appStatuses.length
+          ? fetchApplicationsForCourse(courseKey, appStatuses)
+          : Promise.resolve<AppRow[]>([]),
+        wantAssigned
+          ? fetchAssignedForCourse(courseKey)
+          : Promise.resolve<AppRow[]>([]),
+      ]);
+      return [...apps, ...assigned];
+    },
+
+    // group + counts for consumers
+    select: (rows) => {
+      const by: ByStatus = {};
+      for (const r of rows) (by[r.status] ??= []).push(r);
+
+      const counts: Record<string, number> = {};
+      for (const s of statuses) counts[s] = by[s]?.length ?? 0;
+
+      // ensure deterministic order inside each status (optional)
+      for (const s of Object.keys(by))
+        by[s].sort((a, b) => a.id.localeCompare(b.id));
+
+      return { all: rows, byStatus: by, counts };
+    },
+
+    // seed per-status caches so single-status reads are hot
+    onSuccess: (res) => {
+      for (const s of statuses) {
+        qc.setQueryData<AppRow[]>(
+          appsKey(courseKey, [s]),
+          res.byStatus[s] ?? []
+        );
+      }
+    },
+  });
+}
+
+export function useCourseApplicationsByStatus(
+  courseKey: string,
+  status: string,
+  enabled = true
+): UseQueryResult<AppRow[], Error> {
+  return useQuery<AppRow[], Error>({
+    queryKey: appsKey(courseKey, [status]),
+    enabled: enabled && !!courseKey && !!status,
+    placeholderData: keepPreviousData,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    queryFn: () =>
+      status === ASSIGNED
+        ? fetchAssignedForCourse(courseKey)
+        : fetchApplicationsForCourse(courseKey, [status]),
+  });
 }

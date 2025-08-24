@@ -11,7 +11,7 @@ import { Role, roleMapping } from '@/types/User';
 
 export default function TopNav({}) {
   const [user, role, loading, error] = useUserInfo();
-  
+
   const onNotifications = () => {};
   const display = (v: unknown, fallback = 'Not listed'): string => {
     if (v == null) return fallback; // null/undefined
@@ -38,12 +38,12 @@ export default function TopNav({}) {
           </Link>
         </div>
         {/* User avatar + meta */}
-        <div className="!text-[#FFFFFF] flex items-center gap-6">
+        <div className="!text-[#FFFFFF] flex items-center gap-3">
           {/* Notifications */}
           <IconButton onClick={onNotifications} className="!text-[#FFFFFF]">
-            <Badge color="error" overlap="circular" variant="dot">
-              <NotificationsNoneOutlinedIcon fontSize="medium" />
-            </Badge>
+            {/* <Badge color="error" overlap="circular" variant="dot"> */}
+            <NotificationsNoneOutlinedIcon fontSize="medium" />
+            {/* </Badge> */}
           </IconButton>
 
           {/* User avatar + meta */}
@@ -54,7 +54,10 @@ export default function TopNav({}) {
             </div>
             <div className="text-left text-white leading-tight hidden sm:block">
               <p className="text-sm">{display(user.displayName)}</p>
-              <p className="text-[10px] -mt-0.5 opacity-80"> {display(roleMapping[role as Role])}</p>
+              <p className="text-[10px] -mt-0.5 opacity-80">
+                {' '}
+                {display(roleMapping[role as Role])}
+              </p>
             </div>
           </Link>
         </div>
