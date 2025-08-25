@@ -47,7 +47,7 @@ export default function TopNav({}) {
           </IconButton>
 
           {/* User avatar + meta */}
-          <Link href="/Profile" className="flex items-center gap-2">
+          <Link href="/profile" className="flex items-center gap-2">
             {/* Circle avatar placeholder (letter) */}
             <div className="w-9 h-9 rounded-full bg-opacity-20 flex items-center justify-center">
               <AccountCircleTwoToneIcon className="text-white" />
