@@ -1,8 +1,9 @@
 // components/CourseApplicationsTable.tsx
 import * as React from 'react';
+import { useMemo } from 'react';
 import ZoomInOutlinedIcon from '@mui/icons-material/ZoomInOutlined';
 import Link from 'next/link';
-import { AppRow } from '@/types/query';
+import { ApplicationStatus, AppRow, StatusFilter } from '@/types/query';
 import {
   denyApplication,
   approveApplication,
@@ -41,6 +42,13 @@ function Pill({
     </span>
   );
 }
+
+const toFilterKey = (ui: UIRow): StatusFilter => {
+  if (ui.adminStatus === 'approved' || ui.appStatus === 'assigned')
+    return 'Approved';
+  if (ui.adminStatus === 'denied' || ui.appStatus === 'denied') return 'Denied';
+  return 'All';
+};
 
 function ApproveDeny({
   onApprove,
@@ -126,6 +134,7 @@ function mapToUI(
 export interface CourseApplicationsTableProps {
   rows: AppRow[]; // from your API/hook for ONE course
   openInNewTab?: boolean;
+  selectedFilter: StatusFilter;
   getAdminStatus?: (row: AppRow) => AdminStatus; // optional if you compute admin status elsewhere
   loading?: boolean; // optional skeleton state
   emptyMessage?: string;
@@ -136,6 +145,7 @@ export const CourseApplicationsTable: React.FC<
   CourseApplicationsTableProps
 > = ({
   rows,
+  selectedFilter,
   openInNewTab = false,
   getAdminStatus,
   loading = false,
@@ -183,10 +193,25 @@ export const CourseApplicationsTable: React.FC<
     }
   };
 
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
-
   const uiRows: UIRow[] = rows.map((r) => mapToUI(r, getAdminStatus));
 
+  const filteredUiRows = useMemo(() => {
+    if (selectedFilter === ('All' as StatusFilter)) return uiRows;
+    return uiRows.filter((ui) => toFilterKey(ui) === selectedFilter);
+  }, [uiRows, selectedFilter]);
+
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+
+  const tabCounts = React.useMemo(() => {
+    const counts: Partial<Record<StatusFilter, number>> = {
+      All: uiRows.length,
+    };
+    uiRows.forEach((ui) => {
+      const k = toFilterKey(ui) as StatusFilter; // 'approved' | 'denied' | ('pending' if you add it)
+      counts[k] = (counts[k] ?? 0) + 1;
+    });
+    return counts;
+  }, [uiRows]);
   return (
     <>
       <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
@@ -231,7 +256,7 @@ export const CourseApplicationsTable: React.FC<
               </>
             )}
 
-            {!loading && uiRows.length === 0 && (
+            {!loading && filteredUiRows.length === 0 && (
               <tr>
                 <td
                   className="px-4 py-6 text-center text-sm text-muted-foreground"
@@ -243,8 +268,7 @@ export const CourseApplicationsTable: React.FC<
             )}
 
             {!loading &&
-              uiRows.map((ui, idx) => {
-                const raw = rows[idx]; // keep 1:1 mapping
+              filteredUiRows.map((ui, idx) => {
                 const zebra = idx % 2 ? 'bg-surface' : 'bg-background';
 
                 return (

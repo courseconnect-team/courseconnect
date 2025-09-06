@@ -3,7 +3,7 @@ import './style.css';
 import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import SemesterSelect from './semesterselect';
-import ClassCard from '@/components/ClassCard/ClassCard';
+import ClassCard from '@/component/ClassCard/ClassCard';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
