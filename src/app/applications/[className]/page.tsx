@@ -1,5 +1,5 @@
 'use client';
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useState } from 'react';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
@@ -9,9 +9,10 @@ import {
   useRouter,
   usePathname,
 } from 'next/navigation';
+import ApplicationStatusFilter from '@/components/ApplicationStatusFilter/ApplicationStatusFilter';
 import { useCourseApplications } from '@/hooks/Applications/useFetchApplications';
 import { LinearProgress } from '@mui/material';
-import { AppRow, ApplicationStatus } from '@/types/query';
+import { AppRow, ApplicationStatus, StatusFilter } from '@/types/query';
 import { CourseApplicationsTable } from '@/components/ApplicationsTable/ApplicationsTable';
 import { ApplicationModal } from './ApplicationsModal';
 import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicationById';
@@ -35,6 +36,7 @@ const ApplicationsPage: FC = () => {
   );
   const rows = data?.all ?? [];
 
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
   const selectedRow = useMemo<AppRow | null>(
     () => (id ? rows.find((r) => r.id === id) ?? null : null),
     [id, rows]
@@ -77,11 +79,18 @@ const ApplicationsPage: FC = () => {
     return (
       <PageLayout mainTitle="Course not Found" navItems={getNavItems(role)} />
     );
-
   return (
     <PageLayout mainTitle={courseId} navItems={getNavItems(role)}>
+      <div className="mb-6">
+        <ApplicationStatusFilter
+          applicationState={statusFilter}
+          onChange={setStatusFilter}
+        />
+      </div>
+
       <CourseApplicationsTable
         rows={data?.all}
+        selectedFilter={statusFilter}
         courseId={courseId}
         loading={isLoading}
       />
