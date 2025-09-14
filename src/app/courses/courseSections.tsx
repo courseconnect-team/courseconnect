@@ -4,7 +4,6 @@ import SemesterSelect from '@/components/SemesterSelect/SemesterSelect';
 import { CoursesGrid } from '@/components/CoursesGrid/CoursesGrid';
 import type { Role } from '@/types/User';
 import type { NavbarItem } from '@/types/navigation';
-import { DashboardCard } from '@/components/DashboardCard/DashboardCard';
 import SemesterMultiSelect from '@/components/SemesterMultiSelect/SemesterMultiSelect';
 import { getCurrentSemester, SemesterName } from '@/hooks/useSemesterOptions';
 import { useState } from 'react';

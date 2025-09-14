@@ -78,3 +78,16 @@ export async function denyApplication({
 
   return { ok: true as const };
 }
+
+export function addSemesterToCourseDoc(courseDoc: string, semester: string) {
+  const colon = courseDoc.indexOf(':');
+
+  const left = colon === -1 ? courseDoc : courseDoc.slice(0, colon);
+  const right = colon === -1 ? '' : courseDoc.slice(colon + 1);
+
+  const leftNoTerm = left.replace(/\s*\([^)]*\)\s*$/, '').trim();
+  const newLeft = `${leftNoTerm} (${semester})`;
+
+  const suffix = colon === -1 ? '' : ` : ${right.trim()}`;
+  return `${newLeft}${suffix}`;
+}

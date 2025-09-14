@@ -6,6 +6,7 @@ import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import Divider from '@mui/material/Divider';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import handleSignIn from '../../firebase/auth/auth_signin_password';
@@ -178,6 +179,17 @@ export const LogInCard = ({
       </Dialog>
       <form>
         <div className="div">Log In</div>
+        <Divider
+          sx={{
+            position: 'absolute',
+            top: '115px',
+            left: '30px',
+            width: '475px',
+            borderBottomWidth: 2,
+            borderColor: '#6b46c1',
+          }}
+        />
+
         <div className="email-address-input">
           <div className="text-wrapper-2">Email</div>
           <div className="overlap-group-wrapper">

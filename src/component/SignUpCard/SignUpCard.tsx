@@ -13,6 +13,7 @@ import {
   SelectChangeEvent,
   Snackbar,
   TextField,
+  Divider,
 } from '@mui/material';
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
@@ -215,6 +216,16 @@ export const SignUpCard = ({
       <div className={className}>
         <div className={styles.overlap}>
           <div className={styles.div}>Sign Up</div>
+          <Divider
+            sx={{
+              position: 'absolute',
+              top: '115px',
+              left: '30px',
+              width: '475px',
+              borderBottomWidth: 2,
+              borderColor: '#6b46c1',
+            }}
+          />
           <div className={styles.firstnameinput}>
             <div className={styles.textwrapper2}>First Name</div>
             <div className={styles.overlapgroupwrapper}>

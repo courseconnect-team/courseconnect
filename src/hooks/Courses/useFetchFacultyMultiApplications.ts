@@ -6,8 +6,9 @@ import {
 } from '@tanstack/react-query';
 import * as React from 'react';
 import firebase from '@/firebase/firebase_config';
+import { SemesterName } from '../useSemesterOptions';
 
-export type CourseTuple = [string, string, string];
+export type CourseTuple = [string, string, string, SemesterName];
 interface CourseDoc {
   code?: string | null;
   title?: string | null;
