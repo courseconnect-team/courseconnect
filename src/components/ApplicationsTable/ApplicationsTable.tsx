@@ -9,6 +9,7 @@ import {
   approveApplication,
 } from '@/hooks/Applications/ApplicationFunctions';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
+import { SemesterName } from '@/hooks/useSemesterOptions';
 type AdminStatus = 'approved' | 'pending' | 'denied';
 
 export type UIRow = {
@@ -31,8 +32,9 @@ function Pill({
   const styles: Record<string, string> = {
     approved: 'bg-status-approved text-on-status',
     denied: 'bg-status-error text-on-status',
-    pending: 'bg-status-pending text-on-status',
-    neutral: 'bg-surface text-on-surface border border-gray-300',
+    pending:
+      'bg-status-pendingLt border border-status-pending text-status-pending',
+    neutral: 'bg-gray-100 text-gray-500 border border-gray-500',
   };
   return (
     <span
@@ -139,6 +141,7 @@ export interface CourseApplicationsTableProps {
   loading?: boolean; // optional skeleton state
   emptyMessage?: string;
   courseId: string;
+  semester: SemesterName;
 }
 
 export const CourseApplicationsTable: React.FC<
@@ -147,6 +150,7 @@ export const CourseApplicationsTable: React.FC<
   rows,
   selectedFilter,
   openInNewTab = false,
+  semester,
   getAdminStatus,
   loading = false,
   emptyMessage = 'No applications for this course.',
@@ -223,6 +227,7 @@ export const CourseApplicationsTable: React.FC<
               <th className="px-4 py-3">Applicant Details</th>
               <th className="px-4 py-3">Submitted</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Faculty Approval</th>
               <th className="px-4 py-3">Admin Approval</th>
             </tr>
           </thead>
@@ -244,6 +249,9 @@ export const CourseApplicationsTable: React.FC<
                     </td>
                     <td className="px-4 py-4">
                       <div className="h-3 w-24 bg-gray-200 rounded" />
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="h-6 w-28 bg-gray-200 rounded-full" />
                     </td>
                     <td className="px-4 py-4">
                       <div className="h-6 w-28 bg-gray-200 rounded-full" />
@@ -280,7 +288,7 @@ export const CourseApplicationsTable: React.FC<
                     <td className="px-4 py-3">
                       <Link
                         href={{
-                          pathname: `/applications/${courseId}`,
+                          pathname: `/applications/${semester}/${courseId}`,
                           query: { id: ui.id, modal: '1' },
                         }}
                         scroll={false} // avoid scroll jump
@@ -311,6 +319,23 @@ export const CourseApplicationsTable: React.FC<
                     <td className="px-4 py-3">
                       {ui.adminStatus === 'denied' ||
                       ui.appStatus === 'denied' ? (
+                        <Pill variant="denied">Denied</Pill>
+                      ) : ui.appStatus === 'approved' ||
+                        ui.appStatus === 'assigned' ||
+                        ui.adminStatus === 'approved' ? (
+                        <Pill variant="approved">
+                          {ui.appStatus === 'assigned'
+                            ? 'Assigned'
+                            : 'Approved'}
+                        </Pill>
+                      ) : (
+                        <Pill variant="neutral">Applied</Pill>
+                      )}
+                    </td>
+
+                    {/* faculty status */}
+                    <td className="px-4 py-3">
+                      {ui.appStatus === 'denied' ? (
                         <Pill variant="denied">Denied</Pill>
                       ) : ui.appStatus === 'approved' ||
                         ui.appStatus === 'assigned' ? (

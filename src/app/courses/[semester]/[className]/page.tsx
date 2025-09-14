@@ -8,9 +8,10 @@ import { useCourseDetails } from '@/hooks/Courses/useFetchCourse';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { getNavItems } from '@/hooks/useGetItems';
+import { SemesterName } from '@/hooks/useSemesterOptions';
 
 const StatisticsPage: FC = () => {
-  const params = useParams<{ className: string }>();
+  const params = useParams<{ className: string; semester: SemesterName }>();
   const searchParams = useSearchParams();
   const onGoing = searchParams.get('onGoing') === 'true';
 
@@ -19,8 +20,11 @@ const StatisticsPage: FC = () => {
   const rawId = params.className;
   const courseId = decodeURIComponent(rawId);
 
+  const semesterId = decodeURIComponent(params.semester);
+
   const { course, isLoading, isFetching, error } = useCourseDetails(
     courseId,
+    semesterId as SemesterName,
     onGoing
   );
   if (loading) return <LinearProgress />;

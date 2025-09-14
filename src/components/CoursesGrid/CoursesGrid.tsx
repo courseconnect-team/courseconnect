@@ -3,8 +3,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import { DashboardCard } from '@/components/DashboardCard/DashboardCard';
 import { SemesterName } from '@/hooks/useSemesterOptions';
+import { CourseTuple } from '@/hooks/Courses/useFetchFacultyMultiApplications';
 type Props = {
-  courses: [string, string, string][]; // [id, code, title]
+  courses: CourseTuple[]; // [id, code, title]
   isLoading: boolean;
   isFetching: boolean;
   error: unknown;
@@ -24,6 +25,9 @@ export function CoursesGrid({
   semester,
   path,
 }: Props) {
+  const displaySemester = Array.isArray(semester)
+    ? semester.join(', ')
+    : semester;
   return (
     <>
       {isFetching && !isLoading && (
@@ -51,19 +55,21 @@ export function CoursesGrid({
           semester &&
           semester.length !== 0 && (
             <p className="text-sm text-muted-foreground">
-              No courses for {semester}.
+              No courses for {displaySemester}.
             </p>
           )}
 
         {!isLoading &&
           !error &&
-          courses.map(([id, code, title]) => (
+          courses.map(([id, code, title, semesterId]) => (
             <DashboardCard
-              key={id}
+              key={`${id}${semesterId}`}
               icon={MenuBookIcon}
               label={code}
               subLabel={title}
-              to={`/${path}/${encodeURIComponent(id)}`}
+              to={`/${path}/${encodeURIComponent(
+                semesterId
+              )}/${encodeURIComponent(id)}`}
             />
           ))}
       </div>

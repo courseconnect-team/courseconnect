@@ -14,15 +14,22 @@ import { useCourseApplications } from '@/hooks/Applications/useFetchApplications
 import { LinearProgress } from '@mui/material';
 import { AppRow, ApplicationStatus, StatusFilter } from '@/types/query';
 import { CourseApplicationsTable } from '@/components/ApplicationsTable/ApplicationsTable';
-import { ApplicationModal } from './ApplicationsModal';
+import { ApplicationModal } from '../ApplicationsModal';
 import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicationById';
+import { SemesterName } from '@/hooks/useSemesterOptions';
+import { addSemesterToCourseDoc } from '@/hooks/Applications/ApplicationFunctions';
+
 const ApplicationsPage: FC = () => {
   const [user, role, loading, roleError] = useUserInfo();
-  const params = useParams<{ className: string }>();
+  const params = useParams<{ semester: SemesterName; className: string }>();
   const rawId = params.className;
+  const semester = params.semester;
+
+  const semesterId = decodeURIComponent(semester);
   const courseId = decodeURIComponent(rawId);
   const statuses = ['applied', 'approved', 'denied', 'accepted'];
 
+  const legacyCourseId = addSemesterToCourseDoc(courseId, semesterId);
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
@@ -31,9 +38,11 @@ const ApplicationsPage: FC = () => {
   const modal = search.get('modal') === '1';
 
   const { data, isLoading, isFetching, error } = useCourseApplications(
-    courseId,
+    legacyCourseId,
     statuses
   );
+
+  console.log(legacyCourseId);
   const rows = data?.all ?? [];
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
@@ -80,7 +89,10 @@ const ApplicationsPage: FC = () => {
       <PageLayout mainTitle="Course not Found" navItems={getNavItems(role)} />
     );
   return (
-    <PageLayout mainTitle={courseId} navItems={getNavItems(role)}>
+    <PageLayout
+      mainTitle={`${courseId} - ${semesterId}`}
+      navItems={getNavItems(role)}
+    >
       <div className="mb-6">
         <ApplicationStatusFilter
           applicationState={statusFilter}
@@ -90,6 +102,7 @@ const ApplicationsPage: FC = () => {
 
       <CourseApplicationsTable
         rows={data?.all}
+        semester={semesterId}
         selectedFilter={statusFilter}
         courseId={courseId}
         loading={isLoading}
