@@ -7,12 +7,36 @@ import darkTheme from './theme/darkTheme';
 import lightTheme from './theme/lightTheme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@/styles/tailwind.css';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/firebase/auth/auth_context';
 
 const queryClient = new QueryClient();
 
 const ColorModeContext = React.createContext({
   toggleColorMode: () => {},
 });
+
+function AuthGate({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  // Only protect private routes
+  const isProtectedRoute = !['/signup', '/login', '/about', '/'].includes(
+    window.location.pathname
+  );
+
+  useEffect(() => {
+    if (isProtectedRoute && user === null) {
+      router.push('/');
+    }
+  }, [user, router, isProtectedRoute]);
+
+  if (isProtectedRoute && typeof user === 'undefined')
+    return <div>Loading...</div>;
+  if (isProtectedRoute && user === null) return null;
+
+  return <>{children}</>;
+}
 
 export default function RootLayout({
   children,
@@ -69,7 +93,7 @@ export default function RootLayout({
               <AuthProvider>
                 <CssBaseline />
                 {/*<Header ColorModeContext={ColorModeContext} />*/}
-                {children}
+                <AuthGate>{children}</AuthGate>
               </AuthProvider>
             </ThemeProvider>
           </ColorModeContext.Provider>

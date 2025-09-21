@@ -11,7 +11,7 @@ interface HeaderCardProps {
   children: React.ReactNode;
 }
 
-export default function HeaderCard({ title, children }: HeaderCardProps) {
+function HeaderCard({ title, children }: HeaderCardProps) {
   const [user, role, loading, error] = useUserInfo();
 
   if (loading) return <div>Loading…</div>;
@@ -39,3 +39,5 @@ export default function HeaderCard({ title, children }: HeaderCardProps) {
     </div>
   );
 }
+
+export default HeaderCard;
