@@ -67,9 +67,6 @@ const SemesterSelect: React.FC<SemesterSelectProps> = ({
                   borderRadius: '5px',
                 }}
               >
-                Semesters
-              </span>
-              <span style={{ marginLeft: '10px', letterSpacing: '-0.75px' }}>
                 {selected}
               </span>
             </em>

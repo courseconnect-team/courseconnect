@@ -91,16 +91,6 @@ const SemesterMultiSelect: React.FC<SemesterMultiSelectProps> = ({
           }
           return (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
-              <span
-                style={{
-                  fontWeight: '600',
-                  backgroundColor: '#d9d9d9',
-                  padding: '8px',
-                  borderRadius: '5px',
-                }}
-              >
-                Semesters
-              </span>
               {sel.map((s) => (
                 <Chip
                   key={s}
