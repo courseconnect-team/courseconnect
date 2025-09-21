@@ -2,42 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { useUserRole } from '@/firebase/util/GetUserRole';
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  getDocs,
-  collectionGroup,
-  query,
-  where,
-} from 'firebase/firestore';
-import { testData } from './testdata';
-import {
-  Box,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-  IconButton,
-  InputAdornment,
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Grid,
-  Link,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ProjectCard from '@/components/Research/ProjectCard';
-import SearchBox from '@/components/Research/SearchBox';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
+
 import firebase from '@/firebase/firebase_config';
-import ResearchModal from '@/components/Research/Modal';
-import { JobCard } from '@/components/JobCard/JobCard';
 import StudentResearchView from '@/components/Research/StudentResearchView';
 import FacultyResearchView from '@/components/Research/FacultyResearchView';
 interface ResearchPageProps {
