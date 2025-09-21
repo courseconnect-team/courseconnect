@@ -34,9 +34,7 @@ import FormControl from '@mui/material/FormControl';
 import ListItemText from '@mui/material/ListItemText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
-import TopNav from '@/components/TopBar/TopBar';
-import SideNav from '@/components/SideNavBar/SideNavBar';
-import { getNavItems } from '@/hooks/useGetItems';
+
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 
 const ITEM_HEIGHT = 48;

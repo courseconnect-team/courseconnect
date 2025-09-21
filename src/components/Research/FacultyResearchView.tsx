@@ -11,7 +11,6 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import ResearchModal from '@/components/Research/Modal';
 import ProjectCard from '@/components/Research/ProjectCard';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
@@ -88,7 +87,6 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
 
   return (
     <>
-      <HeaderCard text="Applications" />
 
       {/* Use Container for consistent width constraints */}
       <Container

@@ -1,11 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Toaster } from 'react-hot-toast';
-import HeaderCard from '@/component/HeaderCard/HeaderCard';
-import { getAuth } from 'firebase/auth';
-import { useUserRole } from '@/firebase/util/GetUserRole';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
 
+import { getAuth } from 'firebase/auth';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { getNavItems } from '@/hooks/useGetItems';
+import PageLayout from '@/components/PageLayout/PageLayout';
 import firebase from '@/firebase/firebase_config';
 import StudentResearchView from '@/components/Research/StudentResearchView';
 import FacultyResearchView from '@/components/Research/FacultyResearchView';
@@ -58,13 +58,9 @@ interface ResearchApplication {
 
 const ResearchPage: React.FC<ResearchPageProps> = () => {
   const auth = getAuth();
-  const user = auth.currentUser;
-  const {
-    role,
-    loading: roleLoading,
-    error: roleError,
-  } = useUserRole(user?.uid);
-
+  const [user, role, loading, error] = useUserInfo();
+  
+  
   const [department, setDepartment] = React.useState('');
   const [studentLevel, setStudentLevel] = React.useState('');
   const [termsAvailable, setTermsAvailable] = React.useState('');
@@ -75,12 +71,11 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
     ResearchApplication[]
   >([]);
 
-  useEffect(() => {
-    getResearchListings();
-    getApplications();
-  }, []);
 
-  if (roleError) {
+
+ if (loading) return <div>Loading…</div>;
+
+  if (error) {
     return <p>Error loading role</p>;
   }
 
@@ -135,7 +130,7 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
         // navigate back up to the parent document
         var listingRef = appDoc.ref.parent.parent;
         let listingData: any = {};
-        if (listingRef) {
+      if (listingRef) {
           const listingSnap = await listingRef.get(); // valid in compat
           if (listingSnap.exists) {
             listingData = listingSnap.data();
@@ -188,19 +183,16 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       console.error('Error adding document: ', e);
     }
   };
+  useEffect(() => {
+    getResearchListings();
+    getApplications();
+  }, []);
+
   return (
     <>
-      <Toaster />
-
-      {roleLoading ? (
-        <>
-          <h1>loading</h1>
-        </>
-      ) : (
-        <>
+    <PageLayout mainTitle="Research" navItems={getNavItems(role)}>
           {(role === 'student_applying' || role === 'student_applied') && (
             <>
-              <HeaderCard text="Applications" />
               <StudentResearchView
                 researchListings={researchListings}
                 researchApplications={researchApplications}
@@ -228,8 +220,8 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
               postNewResearchPosition={postNewResearchPosition}
             />
           )}
-        </>
-      )}
+          </PageLayout>
+      
     </>
   );
 };
