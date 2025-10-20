@@ -38,7 +38,6 @@ import TopNav from '@/components/TopBar/TopBar';
 import SideNav from '@/components/SideNavBar/SideNavBar';
 import { getNavItems } from '@/hooks/useGetItems';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
-import { log } from 'console';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -372,8 +371,6 @@ export default function Application() {
           );
 
         setNames(data);
-        console.log(visibleSems);
-
       } catch (err) {
         console.log(err);
       }
