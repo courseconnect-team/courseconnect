@@ -38,6 +38,7 @@ import TopNav from '@/components/TopBar/TopBar';
 import SideNav from '@/components/SideNavBar/SideNavBar';
 import { getNavItems } from '@/hooks/useGetItems';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import { log } from 'console';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -65,9 +66,8 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${
-    current.getMonth() + 1
-  }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -354,7 +354,7 @@ export default function Application() {
           .then((snapshot) =>
             snapshot.docs.map((doc) => {
               if (!doc.data().hidden) {
-                visibleSems.push(doc.data().semester);
+                visibleSems.push(doc.id);
               }
             })
           );
@@ -372,6 +372,8 @@ export default function Application() {
           );
 
         setNames(data);
+        console.log(visibleSems);
+
       } catch (err) {
         console.log(err);
       }
