@@ -62,9 +62,8 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${
-    current.getMonth() + 1
-  }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${current.getMonth() + 1
+    }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -367,14 +366,16 @@ export default function Application() {
               }
             })
           );
-
         setNames(data);
+        console.log(names);
+
       } catch (err) {
         console.log(err);
       }
     }
     fetchData();
   }, []);
+  console.log("eek");
 
   return (
     <>

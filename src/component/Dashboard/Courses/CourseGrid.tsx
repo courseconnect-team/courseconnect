@@ -38,8 +38,8 @@ import {
   LinearProgress,
 } from '@mui/material';
 import UnderDevelopment from '@/component/UnderDevelopment';
-
 import { alpha, styled } from '@mui/material/styles';
+
 interface Course {
   id: string;
   code: string;
@@ -68,67 +68,56 @@ export default function CourseGrid(props: CourseGridProps) {
 
   const [loading, setLoading] = useState(false);
   const [courseData, setCourseData] = React.useState<Course[]>([]);
-  // fetching course data from firestore.
   const userEmail = user?.email;
 
   React.useEffect(() => {
     console.log('SEM ' + semester);
-
     const coursesRef = firebase
       .firestore()
       .collection('courses')
       .where('semester', '==', semester);
     if (userRole === 'admin') {
-      // IF USER IS ADMIN, THEN FETCH ALL COURSES.
       coursesRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Course)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Course)
         );
         setCourseData(data);
       });
     } else if (userRole === 'faculty') {
-      // IF USER IS FACULTY, THEN ONLY FETCH COURSES WHICH CORRESPOND TO PROFESSOR EMAIL
-
-      // Assume 'professor_emails' is an array in Firestore.
       coursesRef
         .where('professor_emails', 'array-contains', userEmail)
         .get()
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
             (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-              } as Course)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Course)
           );
           setCourseData(data);
         });
     } else if (userRole === 'student_assigned') {
-      // IF USER IS ASSIGNED STUDENT, THEN ONLY FETCH COURSES WHICH CORRESPOND TO STUDENT EMAIL
-
-      // Assume 'helper_emails' is an array in Firestore.
       coursesRef
         .where('helper_emails', 'array-contains', userEmail)
         .get()
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
             (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-              } as Course)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Course)
           );
           setCourseData(data);
         });
     }
   }, [userRole, userEmail, semester, processing]);
 
-  // dialog
-  // pop-up view setup
   const [open, setOpen] = React.useState(false);
   const [selectedCourseGrid, setSelectedCourseGrid] =
     React.useState<GridRowId | null>(null);
@@ -137,12 +126,8 @@ export default function CourseGrid(props: CourseGridProps) {
     setSelectedCourseGrid(id);
     setOpen(true);
   };
+  const handleClose = () => setOpen(false);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  // toolbar
   interface EditToolbarProps {
     setCourseData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
     setRowModesModel: (
@@ -152,10 +137,7 @@ export default function CourseGrid(props: CourseGridProps) {
 
   function EditToolbar(props: EditToolbarProps) {
     const { setCourseData, setRowModesModel } = props;
-
-    // Add state to control the dialog open status
     const [open, setOpen] = React.useState(false);
-
     if (userRole === 'faculty' || userRole === 'student_assigned') {
       return (
         <GridToolbarContainer>
@@ -165,11 +147,8 @@ export default function CourseGrid(props: CourseGridProps) {
         </GridToolbarContainer>
       );
     }
-
     return (
       <GridToolbarContainer>
-        {/* Include your Dialog component here and pass the open state and setOpen function as props */}
-
         <GridToolbarExport />
         <GridToolbarFilterButton />
         <GridToolbarColumnsButton />
@@ -181,13 +160,9 @@ export default function CourseGrid(props: CourseGridProps) {
     {}
   );
 
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+  const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
+    if (params.reason === GridRowEditStopReasons.rowFocusOut)
       event.defaultMuiPrevented = true;
-    }
   };
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -195,7 +170,6 @@ export default function CourseGrid(props: CourseGridProps) {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
     setLoading(false);
   };
-
   const handleSaveClick = (id: GridRowId) => () => {
     setLoading(true);
     const updatedRow = courseData.find((row) => row.id === id);
@@ -221,10 +195,8 @@ export default function CourseGrid(props: CourseGridProps) {
       console.error('No matching course data found for id: ', id);
     }
   };
-
   const handleDeleteClick = (id: GridRowId) => () => {
     setLoading(true);
-
     firebase
       .firestore()
       .collection('courses')
@@ -239,7 +211,6 @@ export default function CourseGrid(props: CourseGridProps) {
         console.error('Error removing document: ', error);
       });
   };
-
   const handleCancelClick = (id: GridRowId) => () => {
     setLoading(true);
     const editedRow = courseData.find((row) => row.id === id);
@@ -272,22 +243,18 @@ export default function CourseGrid(props: CourseGridProps) {
       typeof newRow.professor_emails === 'string' && newRow.professor_emails
         ? newRow.professor_emails.split(',').map((p_email) => p_email.trim())
         : oldRow.professor_emails;
-
     const professorNamesArray =
       typeof newRow.professor_names === 'string' && newRow.professor_names
         ? newRow.professor_names.split(',').map((p_name) => p_name.trim())
         : oldRow.professor_names;
-
     const helperEmailsArray =
       typeof newRow.helper_emails === 'string' && newRow.helper_emails
         ? newRow.helper_emails.split(',').map((h_email) => h_email.trim())
         : oldRow.helper_emails;
-
     const helperNamesArray =
       typeof newRow.helper_names === 'string' && newRow.helper_names
         ? newRow.helper_names.split(',').map((h_name) => h_name.trim())
         : oldRow.helper_names;
-
     const updatedRow = {
       ...(newRow as Course),
       professor_emails: professorEmailsArray,
@@ -296,7 +263,6 @@ export default function CourseGrid(props: CourseGridProps) {
       helper_names: helperNamesArray,
       isNew: false,
     };
-
     if (updatedRow) {
       if (updatedRow.isNew) {
         return firebase
@@ -341,12 +307,33 @@ export default function CourseGrid(props: CourseGridProps) {
       );
     }
   };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) =>
     setRowModesModel(newRowModesModel);
-  };
 
   let columns: GridColDef[] = [
+    { field: 'code', headerName: 'Course Code', width: 130, editable: true },
+    { field: 'title', headerName: 'Course Title', width: 200, editable: true },
+    { field: 'credits', headerName: 'Credits', width: 100, editable: true },
+    { field: 'enrolled', headerName: 'Enrolled', width: 100, editable: true },
+    {
+      field: 'enrollment_cap',
+      headerName: 'Capacity',
+      width: 100,
+      editable: true,
+    },
+    {
+      field: 'professor_names',
+      headerName: 'Professor Name',
+      width: 190,
+      editable: true,
+    },
+    {
+      field: 'professor_emails',
+      headerName: 'Professor Email',
+      width: 170,
+      editable: true,
+    },
+    { field: 'semester', headerName: 'Semester', width: 130, editable: true },
     {
       field: 'actions',
       type: 'actions',
@@ -355,16 +342,13 @@ export default function CourseGrid(props: CourseGridProps) {
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
         if (isInEditMode) {
           return [
             <GridActionsCellItem
               key="1"
               icon={<SaveIcon />}
               label="Save"
-              sx={{
-                color: 'primary.main',
-              }}
+              sx={{ color: 'primary.main' }}
               onClick={handleSaveClick(id)}
             />,
             <GridActionsCellItem
@@ -377,7 +361,6 @@ export default function CourseGrid(props: CourseGridProps) {
             />,
           ];
         }
-
         return [
           <GridActionsCellItem
             key="3"
@@ -403,79 +386,55 @@ export default function CourseGrid(props: CourseGridProps) {
           />,
         ];
       },
-    },
-    {
-      field: 'code',
-      headerName: 'Course Code',
-      width: 130,
-      editable: true,
-    },
-    { field: 'title', headerName: 'Course Title', width: 200, editable: true },
-    { field: 'credits', headerName: 'Credits', width: 100, editable: true },
-    {
-      field: 'enrolled',
-      headerName: 'Enrolled',
-      width: 100,
-      editable: true,
-    },
-    {
-      field: 'enrollment_cap',
-      headerName: 'Capacity',
-      width: 100,
-      editable: true,
-    },
-    {
-      field: 'professor_names',
-      headerName: 'Professor Name',
-      width: 190,
-      editable: true,
-    },
-    {
-      field: 'professor_emails',
-      headerName: 'Professor Email',
-      width: 170,
-      editable: true,
-    },
-    {
-      field: 'semester',
-      headerName: 'Semester',
-      width: 130,
-      editable: true,
-    },
+    }
   ];
 
-  const ODD_OPACITY = 0.2;
-
+  // ✅ UI-Only Styling Changes
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    border: 'none',
+    borderRadius: '16px',
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '0.95rem',
+
+    '& .MuiDataGrid-columnHeaders': {
+      backgroundColor: '#D8C6F8',
+      color: '#1C003D',
+      fontWeight: 700,
+      borderBottom: 'none',
+    },
+
+    '& .MuiDataGrid-columnHeaderTitle': {
+      fontWeight: 700,
+    },
+    '& .MuiDataGrid-columnHeader:first-of-type': {
+      paddingLeft: '20px', // ✅ adds spacing before first column header
+    },
+    '& .MuiDataGrid-cell:first-of-type': {
+      paddingLeft: '25px', // ✅ adds spacing before first column cell
+    },
+
     [`& .${gridClasses.row}.even`]: {
-      backgroundColor: '#562EBA1F',
-      '&:hover, &.Mui-hovered': {
-        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
-        '@media (hover: none)': {
-          backgroundColor: 'transparent',
-        },
-      },
-      '&.Mui-selected': {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity
-        ),
-        '&:hover, &.Mui-hovered': {
-          backgroundColor: alpha(
-            theme.palette.primary.main,
-            ODD_OPACITY +
-              theme.palette.action.selectedOpacity +
-              theme.palette.action.hoverOpacity
-          ),
-          // Reset on touch devices, it doesn't add specificity
-          '@media (hover: none)': {
-            backgroundColor: alpha(
-              theme.palette.primary.main,
-              ODD_OPACITY + theme.palette.action.selectedOpacity
-            ),
-          },
-        },
-      },
+      backgroundColor: '#FFFFFF',
+    },
+    [`& .${gridClasses.row}.odd`]: {
+      backgroundColor: '#EEEEEE',
+    },
+
+    '& .MuiDataGrid-row:hover': {
+      backgroundColor: '#EFE6FF',
+    },
+
+    '& .MuiDataGrid-cell': {
+      borderBottom: '1px solid #ECE4FA',
+    },
+
+    '& .MuiDataGrid-footerContainer': {
+      borderTop: 'none',
+    },
+
+    '& .MuiTablePagination-root': {
+      color: '#5D3FC4',
+      fontWeight: 500,
     },
   }));
 
@@ -490,10 +449,7 @@ export default function CourseGrid(props: CourseGridProps) {
     event?: React.SyntheticEvent | Event,
     reason?: string
   ) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
+    if (reason === 'clickaway') return;
     setSuccess(false);
   };
 
@@ -504,20 +460,21 @@ export default function CourseGrid(props: CourseGridProps) {
           Created course successfully!
         </Alert>
       </Snackbar>
+
       <Box
         sx={{
           marginLeft: 10,
           height: 600,
           width: '90%',
-          '& .actions': {
-            color: 'text.secondary',
-          },
-          '& .textPrimary': {
-            color: 'text.primary',
-          },
+          backgroundColor: '#FDFBFF',
+          borderRadius: '16px',
+          boxShadow: '0 2px 8px rgba(128, 90, 213, 0.1)',
+          '& .actions': { color: 'text.secondary' },
+          '& .textPrimary': { color: 'text.primary' },
         }}
       >
         {loading ? <LinearProgress color="warning" /> : null}
+
         <StripedDataGrid
           rows={courseData}
           columns={columns}
@@ -529,29 +486,22 @@ export default function CourseGrid(props: CourseGridProps) {
           onProcessRowUpdateError={(error) =>
             console.error('Error processing row update: ', error)
           }
-          slots={{
-            toolbar: EditToolbar,
-          }}
-          slotProps={{
-            toolbar: { setCourseData, setRowModesModel },
-          }}
+          slots={{ toolbar: EditToolbar }}
+          slotProps={{ toolbar: { setCourseData, setRowModesModel } }}
           initialState={{
             pagination: { paginationModel: { pageSize: 25 } },
           }}
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
           }
-          sx={{ borderRadius: '16px' }}
         />
 
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle>{'Course Data'}</DialogTitle>
           <DialogContent>
-            {/* Display the data of the selected course */}
             {selectedCourseGrid && (
               <div>
                 <p>Class Number: {selectedCourseGrid}</p>
-                {/* Display the course's data in a different format */}
                 <UnderDevelopment />
               </div>
             )}
@@ -561,3 +511,4 @@ export default function CourseGrid(props: CourseGridProps) {
     </>
   );
 }
+

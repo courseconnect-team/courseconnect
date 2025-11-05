@@ -7,7 +7,7 @@ import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import DashboardSections from './DashboardSections';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';
-interface pageProps {}
+interface pageProps { }
 const NewDashboard: FC<pageProps> = () => {
   const [user, role, loading, error] = useUserInfo();
 
