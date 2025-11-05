@@ -26,9 +26,7 @@ export default function ApplicationPage({}: {}) {
   });
 
   // Now only conditional rendering (no more hooks below)
-  if (roleError) return <p>Error loading role</p>;
-  if (!user) return <p>Please sign in.</p>;
-  if (!canView) return <p>Not authorized.</p>;
+
   if (loading || appLoading) return <LinearProgress />;
 
   if (appError) {
@@ -43,7 +41,9 @@ export default function ApplicationPage({}: {}) {
       />
     );
   }
-
+  if (!canView) return <p>Not authorized.</p>;
+  if (roleError) return <p>Error loading role</p>;
+  if (!user) return <p>Please sign in.</p>;
   return (
     <PageLayout mainTitle={cleanClassName} navItems={getNavItems(role)}>
       <ApplicationPreview

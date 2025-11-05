@@ -8,7 +8,6 @@ import Box from '@mui/material/Box';
 import DepartmentSelect from '@/component/FormUtil/DepartmentSelect';
 import GPA_Select from '@/component/FormUtil/GPASelect';
 import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
 import DegreeSelect from '@/component/FormUtil/DegreeSelect';
 import SemesterStatusSelect from '@/component/FormUtil/SemesterStatusSelect';
 import PositionSelect from '@/component/FormUtil/PositionSelect';
@@ -33,8 +32,11 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
-import { fetchClosestSemesters } from '@/hooks/useSemesterOptions';
-
+import {
+  fetchClosestSemesters,
+  parseCoursesMinimal,
+} from '@/hooks/useSemesterOptions';
+import { CourseOption } from '@/hooks/useSemesterOptions';
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -45,7 +47,19 @@ const MenuProps = {
     },
   },
 };
+import { styled, lighten, darken } from '@mui/system';
 
+const GroupHeader = styled('div')(({ theme }) => ({
+  position: 'sticky',
+  top: '-8px',
+  padding: '4px 10px',
+  color: theme.palette.primary.main,
+  backgroundColor: lighten(theme.palette.primary.light, 0.85),
+}));
+
+const GroupItems = styled('ul')({
+  padding: 0,
+});
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
 // the user can indicate whether or not it is unspecified I suppose?
@@ -145,7 +159,7 @@ export default function Application() {
     semesterArray.push(...(await fetchClosestSemesters(1)));
 
     // get courses as array
-    const coursesArray = personName;
+    const coursesArray = selectedCourses;
 
     let coursesMap: { [key: string]: string } = {};
     for (let i = 0; i < coursesArray.length; i++) {
@@ -177,7 +191,7 @@ export default function Application() {
       resume_link: formData.get('resumeLink') as string,
     };
 
-    if (!applicationData.email.includes('ufl')) {
+    if (!applicationData.email.includes('ufl.edu')) {
       toast.error('Please enter a valid ufl email!');
       setLoading(false);
       return;
@@ -303,13 +317,13 @@ export default function Application() {
     setSuccess(false);
   };
 
-  const [personName, setPersonName] = React.useState<string[]>([]);
+  const [selectedCourses, setSelectedCourses] = React.useState<string[]>([]);
 
-  const handleChange = (event: SelectChangeEvent<typeof personName>) => {
+  const handleChange = (event: SelectChangeEvent<typeof selectedCourses>) => {
     const {
       target: { value },
     } = event;
-    setPersonName(
+    setSelectedCourses(
       // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value
     );
@@ -342,6 +356,8 @@ export default function Application() {
     }
     fetchData();
   }, []);
+
+  const courseOptions = parseCoursesMinimal(names);
 
   return (
     <>
@@ -483,51 +499,27 @@ export default function Application() {
                   that you select the courses with your desired semester and
                   instructor.
                 </Typography>
-
+                <br />
                 <FormControl variant="filled" fullWidth>
-                  <InputLabel id="demo-multiple-checkbox-label">
-                    Course(s)*
-                  </InputLabel>
-                  <Select
-                    variant="filled"
-                    labelId="demo-multiple-checkbox-label"
-                    id="course-prompt"
-                    name="course-prompt"
+                  <Autocomplete<CourseOption, true, false, false>
                     multiple
-                    value={personName}
-                    onChange={handleChange}
-                    input={<FilledInput />}
-                    renderValue={(selected) => (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 0.5,
-                        }}
-                      >
-                        {selected.map((value) => (
-                          <Chip key={value} label={value} />
-                        ))}
-                      </Box>
+                    disableCloseOnSelect
+                    options={courseOptions.sort(
+                      (a, b) => -b.code.localeCompare(a.code)
                     )}
-                    MenuProps={MenuProps}
-                    required
-                  >
-                    {names.map((name) => (
-                      <MenuItem key={name} value={name}>
-                        <Checkbox checked={personName.indexOf(name) > -1} />
-                        <ListItemText
-                          primary={`${name.split(':')[0].trim()} : ${
-                            name.split(':')[1]?.trim() &&
-                            name.split(':')[1].trim().toLowerCase() !==
-                              'undefined'
-                              ? name.split(':')[1].trim()
-                              : 'Instructor Unknown'
-                          }`}
-                        />
-                      </MenuItem>
-                    ))}
-                  </Select>
+                    groupBy={(o) => o.department}
+                    getOptionLabel={(o) => o.name}
+                    value={courseOptions.filter((o) =>
+                      selectedCourses.includes(o.value)
+                    )}
+                    onChange={(_, vals) =>
+                      setSelectedCourses(vals.map((v) => v.value))
+                    }
+                    isOptionEqualToValue={(opt, val) => opt.value === val.value}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Course(s)*" />
+                    )}
+                  />
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
@@ -535,6 +527,7 @@ export default function Application() {
                   Please provide your most recently calculated cumulative UF
                   GPA.
                 </Typography>
+                <br />
                 <GPA_Select />
               </Grid>
               <Grid item xs={12}>

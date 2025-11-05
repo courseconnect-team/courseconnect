@@ -76,3 +76,32 @@ export const TERM_CODE: Record<string, number> = {
   Summer: 2,
   Fall: 3,
 };
+
+export type CourseOption = {
+  code: string;
+  instructor: string;
+  department: string;
+  value: string; // stable id (e.g., original raw)
+  name: string; // display label
+};
+
+export function parseCoursesMinimal(names: string[]): CourseOption[] {
+  return names.map((name) => {
+    const safe = String(name ?? '').trim();
+    const [left, right = ''] = safe.split(':', 2);
+    const code = (left ?? '').trim();
+    const instrRaw = right.trim();
+    const instructor =
+      instrRaw && instrRaw.toLowerCase() !== 'undefined'
+        ? instrRaw
+        : 'Instructor Unknown';
+    const department = code.slice(0, 3).toUpperCase();
+    return {
+      code,
+      instructor,
+      department,
+      value: name,
+      name: `${code} : ${instructor}`,
+    };
+  });
+}

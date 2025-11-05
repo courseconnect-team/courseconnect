@@ -29,7 +29,7 @@ const ApplicationsPage: FC = () => {
   const courseId = decodeURIComponent(rawId);
   const statuses = ['applied', 'approved', 'denied', 'accepted'];
 
-  const legacyCourseId = addSemesterToCourseDoc(courseId, semesterId);
+  // const legacyCourseId = addSemesterToCourseDoc(courseId, semesterId);
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
@@ -38,11 +38,10 @@ const ApplicationsPage: FC = () => {
   const modal = search.get('modal') === '1';
 
   const { data, isLoading, isFetching, error } = useCourseApplications(
-    legacyCourseId,
+    courseId,
     statuses
   );
 
-  console.log(legacyCourseId);
   const rows = data?.all ?? [];
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
@@ -78,7 +77,6 @@ const ApplicationsPage: FC = () => {
 
   if (roleError) return <p>Error loading role</p>;
   if (!user) return <p>Please sign in.</p>;
-  if (role !== 'faculty' && role !== 'admin') return <p>Not authorized.</p>;
 
   if (isLoading || loading || isFetching) return <LinearProgress />;
   if (error || roleError)
@@ -88,6 +86,8 @@ const ApplicationsPage: FC = () => {
     return (
       <PageLayout mainTitle="Course not Found" navItems={getNavItems(role)} />
     );
+  if (role !== 'faculty' && role !== 'admin') return <p>Not authorized.</p>;
+
   return (
     <PageLayout
       mainTitle={`${courseId} - ${semesterId}`}
@@ -102,7 +102,7 @@ const ApplicationsPage: FC = () => {
 
       <CourseApplicationsTable
         rows={data?.all}
-        semester={semesterId}
+        semester={semesterId as SemesterName}
         selectedFilter={statusFilter}
         courseId={courseId}
         loading={isLoading}
