@@ -8,7 +8,6 @@ import { useFetchAssignments } from '@/hooks/Applications/useFetchStudentApplica
 import { getNavItems } from '@/hooks/useGetItems';
 
 const StatusPage: FC = () => {
-  /* 1️⃣  Always call both hooks in the same order */
   const [user, role, userLoading, userError] = useUserInfo();
   const {
     assignments,
@@ -20,21 +19,23 @@ const StatusPage: FC = () => {
     error: assignmentsError,
   } = useFetchAssignments(user?.uid); // ok to pass undefined
 
-  /* 2️⃣  Combine loading / error states */
   if (userLoading || assignmentsLoading) return <p>Loading…</p>;
   if (userError) return <p>{userError}</p>;
   if (assignmentsError) return <p>{assignmentsError}</p>;
 
-  /* 3️⃣  Render the layout once everything is loaded */
   return (
     <PageLayout mainTitle="Status" navItems={getNavItems(role)}>
-      <StatusTable
-        assignments={assignments}
-        courses={courses}
-        adminDenied={adminDenied}
-        position={position}
-        dateApplied={dateApplied}
-      />
+      {courses ? (
+        <StatusTable
+          assignments={assignments}
+          courses={courses}
+          adminDenied={adminDenied}
+          position={position}
+          dateApplied={dateApplied}
+        />
+      ) : (
+        <p>You have no applications or assignments at this time.</p>
+      )}
     </PageLayout>
   );
 };
