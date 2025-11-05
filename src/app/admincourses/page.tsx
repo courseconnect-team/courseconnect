@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import styles from './style.module.css';
 import 'firebase/firestore';
-
+import { TERM_CODE } from '@/hooks/useSemesterOptions';
 import firebase from '@/firebase/firebase_config';
 import { read, utils } from 'xlsx';
 import InputLabel from '@mui/material/InputLabel';
@@ -36,7 +36,7 @@ import HeaderCard from '@/component/HeaderCard/HeaderCard';
 export default function User() {
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
-  const [semester, setSemester] = useState<string>('Fall 2024');
+  const [semester, setSemester] = useState<string>('Spring 2026');
   const [menu, setMenu] = useState<string[]>([]);
   const [semesterHidden, setSemesterHidden] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -53,9 +53,14 @@ export default function User() {
     await firebase
       .firestore()
       .collection('semesters')
-      .doc(newSem)
-      .set({ semester: newSem, hidden: false });
-    setSemester(newSem);
+      .doc(semester)
+      .set({
+        hidden: false,
+        sortKey:
+          (semester.split(' ')[1] as unknown as number) * 10 +
+          TERM_CODE[semester.split(' ')[0]],
+      });
+    setSemester(semester);
     setOpen(false);
   };
 
@@ -91,7 +96,7 @@ export default function User() {
     updateMenu();
     setHidden();
     console.log(semesterHidden);
-  }, [semester, processing]);
+  }, [semester, semesterHidden, processing]);
 
   const handleDeleteSem = async () => {
     setProcessing(true);
@@ -123,7 +128,15 @@ export default function User() {
       .firestore()
       .collection('semesters')
       .doc(semester)
-      .set({ hidden: !semesterHidden }, { merge: true });
+      .set(
+        {
+          hidden: !semesterHidden,
+          sortKey:
+            (semester.split(' ')[1] as unknown as number) * 10 +
+            TERM_CODE[semester.split(' ')[0]],
+        },
+        { merge: true }
+      );
 
     setProcessing(false);
     toast.success('Semester visibility toggled!');
@@ -154,49 +167,51 @@ export default function User() {
 
       for (const row of data) {
         console.log(row);
-        const mappedRow: any = {}
-        mappedRow["Session Code"] = row["2258 -- Fall 2025"];
-        mappedRow["Session Begin Date"] = row["__EMPTY"];
-        mappedRow["Session End Date"] = row["__EMPTY_1"];
-        mappedRow["Drop/Add End Date"] = row["__EMPTY_2"];
-        mappedRow["Grading End Date"] = row["__EMPTY_3"];
-        mappedRow["Acad Org"] = row["__EMPTY_4"];
-        mappedRow["Course"] = row["__EMPTY_5"];
-        mappedRow["Gord Rule"] = row["__EMPTY_6"];
-        mappedRow["Gen ED"] = row["__EMPTY_7"];
-        mappedRow["Hons List"] = row["__EMPTY_8"];
-        mappedRow["Sect"] = row["__EMPTY_9"];
-        mappedRow["Class Nbr"] = row["__EMPTY_10"];
-        mappedRow["Assoc Class"] = row["__EMPTY_11"];
-        mappedRow["Min - Max Cred"] = row["__EMPTY_12"];
-        mappedRow["Day/s"] = row["__EMPTY_13"];
-        mappedRow["Time"] = row["__EMPTY_14"];
-        mappedRow["Meeting Pattern"] = row["__EMPTY_15"];
-        mappedRow["Facility"] = row["__EMPTY_16"];
-        mappedRow["Join"] = row["__EMPTY_17"];
-        mappedRow["Site"] = row["__EMPTY_18"];
-        mappedRow["County"] = row["__EMPTY_19"];
-        mappedRow["Spec"] = row["__EMPTY_20"];
-        mappedRow["Book"] = row["__EMPTY_21"];
-        mappedRow["SOC"] = row["__EMPTY_22"];
-        mappedRow["Exam"] = row["__EMPTY_23"];
-        mappedRow["Course Title"] = row["__EMPTY_24"];
-        mappedRow["Instructor"] = row["__EMPTY_25"];
-        mappedRow["Instructor Emails"] = row["__EMPTY_26"];
-        mappedRow["Enr Cap"] = row["__EMPTY_27"];
-        mappedRow["Room Cap"] = row["__EMPTY_28"];
-        mappedRow["Enrolled"] = row["__EMPTY_29"];
-        mappedRow["Current as of 06/18/2025"] = row["__EMPTY_30"];
-        mappedRow["Multi Meet Cap"] = row["__EMPTY_31"];
-        mappedRow["Wait List Cap"] = row["__EMPTY_32"];
-        mappedRow["Wait List Total"] = row["__EMPTY_33"];
-        mappedRow["Sched Codes"] = row["__EMPTY_34"];
-        mappedRow["Class Status"] = row["__EMPTY_35"];
-        mappedRow["DL Fee Per Credit"] = row["__EMPTY_36"];
-        mappedRow["Chartfield"] = row["__EMPTY_37"];
-        mappedRow["DL Fee Status"] = row["__EMPTY_38"];
+        const mappedRow: any = {};
+        mappedRow['Session Code'] = row['2258 -- Fall 2025'];
+        mappedRow['Session Begin Date'] = row['__EMPTY'];
+        mappedRow['Session End Date'] = row['__EMPTY_1'];
+        mappedRow['Drop/Add End Date'] = row['__EMPTY_2'];
+        mappedRow['Grading End Date'] = row['__EMPTY_3'];
+        mappedRow['Acad Org'] = row['__EMPTY_4'];
+        mappedRow['Course'] = row['__EMPTY_5'];
+        mappedRow['Gord Rule'] = row['__EMPTY_6'];
+        mappedRow['Gen ED'] = row['__EMPTY_7'];
+        mappedRow['Hons List'] = row['__EMPTY_8'];
+        mappedRow['Sect'] = row['__EMPTY_9'];
+        mappedRow['Class Nbr'] = row['__EMPTY_10'];
+        mappedRow['Assoc Class'] = row['__EMPTY_11'];
+        mappedRow['Min - Max Cred'] = row['__EMPTY_12'];
+        mappedRow['Day/s'] = row['__EMPTY_13'];
+        mappedRow['Time'] = row['__EMPTY_14'];
+        mappedRow['Meeting Pattern'] = row['__EMPTY_15'];
+        mappedRow['Facility'] = row['__EMPTY_16'];
+        mappedRow['Join'] = row['__EMPTY_17'];
+        mappedRow['Site'] = row['__EMPTY_18'];
+        mappedRow['County'] = row['__EMPTY_19'];
+        mappedRow['Spec'] = row['__EMPTY_20'];
+        mappedRow['Book'] = row['__EMPTY_21'];
+        mappedRow['SOC'] = row['__EMPTY_22'];
+        mappedRow['Exam'] = row['__EMPTY_23'];
+        mappedRow['Course Title'] = row['__EMPTY_24'];
+        mappedRow['Instructor'] = row['__EMPTY_25'];
+        mappedRow['Instructor Emails'] = row['__EMPTY_26'];
+        mappedRow['Enr Cap'] = row['__EMPTY_27'];
+        mappedRow['Room Cap'] = row['__EMPTY_28'];
+        mappedRow['Enrolled'] = row['__EMPTY_29'];
+        mappedRow['Current as of 06/18/2025'] = row['__EMPTY_30'];
+        mappedRow['Multi Meet Cap'] = row['__EMPTY_31'];
+        mappedRow['Wait List Cap'] = row['__EMPTY_32'];
+        mappedRow['Wait List Total'] = row['__EMPTY_33'];
+        mappedRow['Sched Codes'] = row['__EMPTY_34'];
+        mappedRow['Class Status'] = row['__EMPTY_35'];
+        mappedRow['DL Fee Per Credit'] = row['__EMPTY_36'];
+        mappedRow['Chartfield'] = row['__EMPTY_37'];
+        mappedRow['DL Fee Status'] = row['__EMPTY_38'];
 
-        if (!course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)) {
+        if (
+          !course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)
+        ) {
           course.add(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`);
 
           const rawEmails = mappedRow['Instructor Emails'] ?? 'undef';
@@ -207,8 +222,10 @@ export default function User() {
 
           await firebase
             .firestore()
+            .collection('semesters')
+            .doc(semester)
             .collection('courses')
-            .doc(`${mappedRow['Course']} (${semester}) : ${mappedRow['Instructor']}`)
+            .doc(`${mappedRow['Course']} : ${mappedRow['Instructor']}`)
             .set({
               class_number: mappedRow['Class Nbr'] ?? 'undef',
               professor_emails: emailArray,
@@ -370,10 +387,10 @@ export default function User() {
                 mb: 2,
                 width: '100%',
                 display: 'flex',
-                flexWrap: 'nowrap',        // prevent wrapping
-                alignItems: 'center',      // vertical align
+                flexWrap: 'nowrap', // prevent wrapping
+                alignItems: 'center', // vertical align
                 justifyContent: 'center',
-                gap: 5,                    // consistent spacing
+                gap: 5, // consistent spacing
               }}
             >
               <input

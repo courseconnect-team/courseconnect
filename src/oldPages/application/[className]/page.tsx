@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
 import './style.css';
-import CourseNavBar from '@/components/CourseNavBar/CourseNavBar';
 import ApplicantCardApprovedeny from '@/component/ApplicantCardApprovedeny/ApplicantCardApprovedeny';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -353,7 +352,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
           margin: '0 auto',
         }}
       >
-        <CourseNavBar handleClick={toggleSelection} />
+        {/* <CourseNavBar handleClick={toggleSelection} /> */}
       </div>
 
       {loading && <Spinner />}
