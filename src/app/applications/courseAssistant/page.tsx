@@ -23,10 +23,7 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
 import { useState } from 'react';
-import { TopNavBarSigned } from '@/component/TopNavBarSigned/TopNavBarSigned';
-import { EceLogoPng } from '@/component/EceLogoPng/EceLogoPng';
 import Chip from '@mui/material/Chip';
-import styles from './style.module.css';
 import { useRouter } from 'next/navigation';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -34,9 +31,7 @@ import FormControl from '@mui/material/FormControl';
 import ListItemText from '@mui/material/ListItemText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
-import TopNav from '@/components/TopBar/TopBar';
-import SideNav from '@/components/SideNavBar/SideNavBar';
-import { getNavItems } from '@/hooks/useGetItems';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import { fetchClosestSemesters } from '@/hooks/useSemesterOptions';
 
@@ -66,8 +61,9 @@ export default function Application() {
 
   // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${current.getMonth() + 1
-    }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${
+    current.getMonth() + 1
+  }-${current.getDate()}-${current.getFullYear()}`;
 
   // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
@@ -144,15 +140,9 @@ export default function Application() {
       availabilityArray.push('20');
     }
 
-    // extract semester checkbox's values
-    const semesterCheckbox_fall_2023 =
-      formData.get('semesterCheckbox_fall_2024') === 'on';
-    const semesterCheckbox_spring_2024 =
-      formData.get('semesterCheckbox_spring_2025') === 'on';
-
     const semesterArray: string[] = [];
 
-    semesterArray.push(...(await fetchClosestSemesters(2)));
+    semesterArray.push(...(await fetchClosestSemesters(1)));
 
     // get courses as array
     const coursesArray = personName;
@@ -356,6 +346,8 @@ export default function Application() {
   return (
     <>
       <HeaderCard title="Application">
+        <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
+
         <Snackbar
           open={success}
           autoHideDuration={3000}

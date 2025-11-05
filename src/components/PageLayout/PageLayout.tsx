@@ -6,7 +6,6 @@ import TopNav from '@/components/TopBar/TopBar';
 import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { NavbarItem } from '@/types/navigation';
-
 interface PageLayoutProps {
   mainTitle: string;
   navItems: NavbarItem[];
