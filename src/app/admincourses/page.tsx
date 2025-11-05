@@ -10,6 +10,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import 'firebase/firestore';
+import { TERM_CODE } from '@/hooks/useSemesterOptions';
 import firebase from '@/firebase/firebase_config';
 import { read, utils } from 'xlsx';
 import InputLabel from '@mui/material/InputLabel';
@@ -35,7 +36,7 @@ import styles from './style.module.css';
 export default function AdminCoursesPage() {
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
-  const [semester, setSemester] = useState<string>('Fall 2024');
+  const [semester, setSemester] = useState<string>('Spring 2026');
   const [menu, setMenu] = useState<string[]>([]);
   const [semesterHidden, setSemesterHidden] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -132,31 +133,42 @@ export default function AdminCoursesPage() {
         mappedRow['Enr Cap'] = row['__EMPTY_27'];
         mappedRow['Enrolled'] = row['__EMPTY_29'];
 
-        if (!course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)) {
+        if (
+          !course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)
+        ) {
           course.add(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`);
 
           const rawEmails = mappedRow['Instructor Emails'] ?? 'undef';
-          const emailArray = rawEmails === 'undef' ? [] : rawEmails.split(';').map((email: string) => email.trim());
+          const emailArray =
+            rawEmails === 'undef'
+              ? []
+              : rawEmails.split(';').map((email: string) => email.trim());
 
-          await firebase.firestore().collection('courses').doc(`${mappedRow['Course']} (${semester}) : ${mappedRow['Instructor']}`).set({
-            class_number: mappedRow['Class Nbr'] ?? 'undef',
-            professor_emails: emailArray,
-            professor_names: mappedRow['Instructor'] ?? 'undef',
-            code: mappedRow['Course'] ?? 'undef',
-            credits: mappedRow['Min - Max Cred'] ?? 'undef',
-            department: 'ECE',
-            enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
-            enrolled: mappedRow['Enrolled'] ?? 'undef',
-            title: mappedRow['Course Title'] ?? 'undef',
-            semester,
-            meeting_times: [
-              {
-                day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
-                time: mappedRow['Time'] ?? 'undef',
-                location: mappedRow['Facility'] ?? 'undef',
-              },
-            ],
-          });
+          await firebase
+            .firestore()
+            .collection('semesters')
+            .doc(semester)
+            .collection('courses')
+            .doc(`${mappedRow['Course']} : ${mappedRow['Instructor']}`)
+            .set({
+              class_number: mappedRow['Class Nbr'] ?? 'undef',
+              professor_emails: emailArray,
+              professor_names: mappedRow['Instructor'] ?? 'undef',
+              code: mappedRow['Course'] ?? 'undef',
+              credits: mappedRow['Min - Max Cred'] ?? 'undef',
+              department: 'ECE',
+              enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
+              enrolled: mappedRow['Enrolled'] ?? 'undef',
+              title: mappedRow['Course Title'] ?? 'undef',
+              semester: semester,
+              meeting_times: [
+                {
+                  day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
+                  time: mappedRow['Time'] ?? 'undef',
+                  location: mappedRow['Facility'] ?? 'undef',
+                },
+              ],
+            });
         }
       }
 

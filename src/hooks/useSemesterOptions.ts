@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import firebase from '@/firebase/firebase_config';
 
 export type SemesterName = `${'Spring' | 'Summer' | 'Fall'} ${number}`;
 
@@ -6,9 +7,10 @@ export const getCurrentSemester = (): SemesterName => {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1; // 0 = Jan
-  const day = now.getDate()
-  
-  const term =(month < 5 && day < 6) ? 'Spring' : (month < 8 && day < 13) ? 'Summer' : 'Fall';
+  const day = now.getDate();
+
+  const term =
+    month < 5 && day < 6 ? 'Spring' : month < 8 && day < 13 ? 'Summer' : 'Fall';
   return `${term} ${year}` as SemesterName;
 };
 
@@ -53,3 +55,24 @@ export function useSemesters(listLength = 3) {
     currentSemester: current,
   };
 }
+
+export async function fetchSemesterIds(): Promise<string[]> {
+  const snap = await firebase.firestore().collection('semesters').get();
+  return snap.docs.map((doc) => doc.id);
+}
+
+export async function fetchClosestSemesters(n: number): Promise<string[]> {
+  const snap = await firebase
+    .firestore()
+    .collection('semesters')
+    .orderBy('sortKey', 'desc')
+    .limit(n)
+    .get();
+  return snap.docs.map((doc) => doc.id);
+}
+
+export const TERM_CODE: Record<string, number> = {
+  Spring: 1,
+  Summer: 2,
+  Fall: 3,
+};

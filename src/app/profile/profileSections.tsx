@@ -3,11 +3,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Role } from '@/types/User';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Button from '@mui/material/Button';
 import { updateProfile } from 'firebase/auth';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog';
 import { HandleDeleteUser } from '@/firebase/auth/auth_delete_prompt';
-
+import { PrimaryButton } from '@/components/Buttons/PrimaryButton';
+import { GhostButton } from '@/components/Buttons/PrimaryButton';
 /* ---------- helpers ---------- */
 const display = (v: unknown, fallback = 'Not listed'): string => {
   if (v == null) return fallback;
@@ -57,35 +57,6 @@ const splitName = (full: unknown) => {
 };
 
 /* ---------- shared button styles ---------- */
-const BTN_W = 138;
-const BTN_H = 40;
-const RADIUS = 2;
-
-const primaryBtnSx = {
-  textTransform: 'none' as const,
-  backgroundColor: '#6739B7',
-  color: '#fff',
-  width: BTN_W,
-  height: BTN_H,
-  borderRadius: RADIUS,
-  '&:hover': { backgroundColor: '#522DA8' },
-};
-
-const textBtnSx = {
-  textTransform: 'none' as const,
-  color: '#6739B7',
-  width: BTN_W,
-  height: BTN_H,
-  borderRadius: RADIUS,
-  '&:hover': { backgroundColor: 'rgba(103,57,183,0.08)' },
-};
-
-const PrimaryButton: React.FC<React.ComponentProps<typeof Button>> = (
-  props
-) => <Button variant="contained" sx={primaryBtnSx} {...props} />;
-const GhostButton: React.FC<React.ComponentProps<typeof Button>> = (props) => (
-  <Button variant="text" sx={textBtnSx} {...props} />
-);
 
 /* ---------- main component ---------- */
 type ProfileProps = {

@@ -38,6 +38,7 @@ import TopNav from '@/components/TopBar/TopBar';
 import SideNav from '@/components/SideNavBar/SideNavBar';
 import { getNavItems } from '@/hooks/useGetItems';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
+import { fetchClosestSemesters } from '@/hooks/useSemesterOptions';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -151,23 +152,7 @@ export default function Application() {
 
     const semesterArray: string[] = [];
 
-    let f24 = false;
-    let s25 = false;
-    for (let i = 0; i < personName.length; i++) {
-      if (personName[i].includes('Summer 2025')) {
-        f24 = true;
-      }
-      if (personName[i].includes('Fall 2025')) {
-        s25 = true;
-      }
-    }
-
-    if (f24) {
-      semesterArray.push('Summer 2025');
-    }
-    if (s25) {
-      semesterArray.push('Fall 2025');
-    }
+    semesterArray.push(...(await fetchClosestSemesters(2)));
 
     // get courses as array
     const coursesArray = personName;
@@ -345,21 +330,11 @@ export default function Application() {
     async function fetchData() {
       try {
         let data: string[] = [];
-        let visibleSems: string[] = [];
+        let visibleSems: string[] = await fetchClosestSemesters(1);
         await firebase
           .firestore()
           .collection('semesters')
-          .get()
-          .then((snapshot) =>
-            snapshot.docs.map((doc) => {
-              if (!doc.data().hidden) {
-                visibleSems.push(doc.id);
-              }
-            })
-          );
-
-        await firebase
-          .firestore()
+          .doc(visibleSems[0])
           .collection('courses')
           .get()
           .then((snapshot) =>
@@ -549,7 +524,15 @@ export default function Application() {
                     {names.map((name) => (
                       <MenuItem key={name} value={name}>
                         <Checkbox checked={personName.indexOf(name) > -1} />
-                        <ListItemText primary={name} />
+                        <ListItemText
+                          primary={`${name.split(':')[0].trim()} : ${
+                            name.split(':')[1]?.trim() &&
+                            name.split(':')[1].trim().toLowerCase() !==
+                              'undefined'
+                              ? name.split(':')[1].trim()
+                              : 'Instructor Unknown'
+                          }`}
+                        />
                       </MenuItem>
                     ))}
                   </Select>

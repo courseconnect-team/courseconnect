@@ -38,13 +38,16 @@ export default function TopNav({}) {
           </Link>
         </div>
         {/* User avatar + meta */}
+
         <div className="!text-[#FFFFFF] flex items-center gap-3">
           {/* Notifications */}
-          <IconButton onClick={onNotifications} className="!text-[#FFFFFF]">
-            {/* <Badge color="error" overlap="circular" variant="dot"> */}
-            <NotificationsNoneOutlinedIcon fontSize="medium" />
-            {/* </Badge> */}
-          </IconButton>
+          <Link href="/announcements">
+            <IconButton onClick={onNotifications} className="!text-[#FFFFFF]">
+              {/* <Badge color="error" overlap="circular" variant="dot"> */}
+              <NotificationsNoneOutlinedIcon fontSize="medium" />
+              {/* </Badge> */}
+            </IconButton>
+          </Link>
 
           {/* User avatar + meta */}
           <Link href="/profile" className="flex items-center gap-2">
