@@ -12,6 +12,7 @@ const StatusPage: FC = () => {
   const {
     assignments,
     courses,
+    adminApproved,
     adminDenied,
     position,
     dateApplied,
@@ -29,6 +30,7 @@ const StatusPage: FC = () => {
         <StatusTable
           assignments={assignments}
           courses={courses}
+          adminApproved={adminApproved}
           adminDenied={adminDenied}
           position={position}
           dateApplied={dateApplied}

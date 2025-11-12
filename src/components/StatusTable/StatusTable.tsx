@@ -42,6 +42,7 @@ function StatusPill({
 interface StatusTableProps {
   assignments: string[];
   courses: Record<string, string> | null;
+  adminApproved: boolean;
   adminDenied: boolean;
   position: string;
   dateApplied: string;
@@ -57,6 +58,7 @@ type Row = {
 export const StatusTable: React.FC<StatusTableProps> = ({
   assignments,
   courses,
+  adminApproved,
   adminDenied,
   position,
   dateApplied,
@@ -77,7 +79,7 @@ export const StatusTable: React.FC<StatusTableProps> = ({
   if (courses) {
     Object.entries(courses).forEach(([course, state]) => {
       let status: Row['status'] = 'pending';
-      if (state === 'accepted') status = 'accepted';
+      if (state === 'approved' && adminApproved) status = 'accepted';
       else if (state === 'denied') status = 'rejected';
       else if (state === 'applied') status = 'in-progress';
       rows.push({

@@ -317,20 +317,35 @@ export const CourseApplicationsTable: React.FC<
 
                     {/* status */}
                     <td className="px-4 py-3">
-                      {ui.adminStatus === 'denied' ||
-                      ui.appStatus === 'denied' ? (
-                        <Pill variant="denied">Denied</Pill>
-                      ) : ui.appStatus === 'approved' ||
-                        ui.appStatus === 'assigned' ||
-                        ui.adminStatus === 'approved' ? (
-                        <Pill variant="approved">
-                          {ui.appStatus === 'assigned'
-                            ? 'Assigned'
-                            : 'Approved'}
-                        </Pill>
-                      ) : (
-                        <Pill variant="neutral">Applied</Pill>
-                      )}
+                      {(() => {
+                        const denied =
+                          ui.adminStatus === 'denied' ||
+                          ui.appStatus === 'denied';
+
+                        const assigned = ui.appStatus === 'assigned';
+
+                        const adminApproved = ui.adminStatus === 'approved';
+
+                        // user/app approved, but admin hasn't approved or denied yet
+                        const pending =
+                          ui.appStatus === 'approved' &&
+                          ui.adminStatus !== 'approved' &&
+                          ui.adminStatus !== 'denied';
+
+                        if (denied) {
+                          return <Pill variant="denied">Denied</Pill>;
+                        }
+                        if (assigned) {
+                          return <Pill variant="approved">Assigned</Pill>;
+                        }
+                        if (adminApproved) {
+                          return <Pill variant="approved">Approved</Pill>;
+                        }
+                        if (pending) {
+                          return <Pill variant="pending">Pending</Pill>;
+                        }
+                        return <Pill variant="neutral">Applied</Pill>;
+                      })()}
                     </td>
 
                     {/* faculty status */}

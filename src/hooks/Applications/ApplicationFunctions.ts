@@ -14,7 +14,7 @@ const db = firebase.firestore();
 async function setCourseStatusAtomic(
   documentId: string,
   classCode: string,
-  status: 'accepted' | 'denied'
+  status: 'approved' | 'denied'
 ) {
   const ref = doc(db, 'applications', documentId);
   await runTransaction(db, async (tx) => {
@@ -35,8 +35,7 @@ export async function approveApplication({
   documentId,
   classCode,
 }: ApproveParams) {
-  await setCourseStatusAtomic(documentId, classCode, 'accepted');
-  window.location.reload();
+  await setCourseStatusAtomic(documentId, classCode, 'approved');
 
   return { ok: true as const };
 }
