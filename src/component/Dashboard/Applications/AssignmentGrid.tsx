@@ -518,7 +518,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
       valueGetter: (params) =>
         params.row.class_codes != undefined
-          ? params.row.class_codes.split(' ')[4].split(',')[1]
+          ? params.row.class_codes.split(' ')[2].split(',')[1]
           : ' ',
     },
     {
@@ -529,7 +529,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
       valueGetter: (params) =>
         params.row.class_codes != undefined
-          ? params.row.class_codes.split(' ')[4].split(',')[0]
+          ? params.row.class_codes.split(' ')[2].split(',')[0]
           : ' ',
     },
     {
