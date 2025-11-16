@@ -50,7 +50,11 @@ export default function AdminCoursesPage() {
 
   const handleSemesterCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    await firebase.firestore().collection('semesters').doc(newSem).set({ semester: newSem, hidden: false });
+    await firebase
+      .firestore()
+      .collection('semesters')
+      .doc(newSem)
+      .set({ semester: newSem, hidden: false });
     setSemester(newSem);
     setOpen(false);
   };
@@ -58,7 +62,10 @@ export default function AdminCoursesPage() {
   useEffect(() => {
     const updateMenu = async () => {
       const arr: string[] = [];
-      const querySnapshot = await firebase.firestore().collection('semesters').get();
+      const querySnapshot = await firebase
+        .firestore()
+        .collection('semesters')
+        .get();
       querySnapshot.forEach((doc) => {
         arr.push(doc.id);
         if (semester === '') {
@@ -69,7 +76,11 @@ export default function AdminCoursesPage() {
     };
 
     const setHidden = async () => {
-      const doc = await firebase.firestore().collection('semesters').doc(semester).get();
+      const doc = await firebase
+        .firestore()
+        .collection('semesters')
+        .doc(semester)
+        .get();
       setSemesterHidden(!!doc.data()?.hidden);
     };
 
@@ -79,9 +90,16 @@ export default function AdminCoursesPage() {
 
   const handleDeleteSem = async () => {
     setProcessing(true);
-    const toastId = toast.loading('Clearing semester data. This may take a couple minutes.', { duration: 30000000 });
+    const toastId = toast.loading(
+      'Clearing semester data. This may take a couple minutes.',
+      { duration: 30000000 }
+    );
 
-    const querySnapshot = await firebase.firestore().collection('courses').where('semester', '==', semester).get();
+    const querySnapshot = await firebase
+      .firestore()
+      .collection('courses')
+      .where('semester', '==', semester)
+      .get();
     querySnapshot.forEach((doc) => doc.ref.delete());
 
     setProcessing(false);
@@ -91,18 +109,112 @@ export default function AdminCoursesPage() {
 
   const handleSemesterHiddenToggle = async () => {
     setProcessing(true);
-    const toastId = toast.loading('Toggling semester visibility. This may take a couple minutes.', { duration: 30000000 });
+    const toastId = toast.loading(
+      'Toggling semester visibility. This may take a couple minutes.',
+      { duration: 30000000 }
+    );
 
-    await firebase.firestore().collection('semesters').doc(semester).set({ hidden: !semesterHidden }, { merge: true });
+    await firebase
+      .firestore()
+      .collection('semesters')
+      .doc(semester)
+      .set({ hidden: !semesterHidden }, { merge: true });
 
     setProcessing(false);
     toast.success('Semester visibility toggled!');
     toast.dismiss(toastId);
   };
 
+  const readActionsExcelFile = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setProcessing(true);
+    const toastId = toast.loading(
+      'Processing course data. This may take a couple minutes.',
+      { duration: 300000000 }
+    );
+    try {
+      const file = e.target.files?.[0];
+      if (!file) {
+        // User cancelled file picker
+        setProcessing(false);
+        toast.dismiss(toastId);
+        toast.error('No file selected.', { duration: 2000 });
+        return;
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = read(arrayBuffer);
+      const data: any[] = [];
+
+      workbook.SheetNames.forEach((sheetName) => {
+        const sheetData = utils.sheet_to_json(workbook.Sheets[sheetName]);
+        sheetData.forEach((row: any) => data.push(row));
+      });
+
+      const actionByUFID = new Map<string, string>();
+      const CURRENT_SEMESTER = 'Fall 2025';
+      for (const row of data) {
+        const rawUFID = String(row['UFID'] ?? '') as string;
+        const action = (row['ECE - Requested Action'] ?? '') as string;
+        const ufid = rawUFID.trim();
+        const cleanedAction = action.trim();
+
+        if (!ufid || !cleanedAction) continue;
+
+        actionByUFID.set(ufid, cleanedAction);
+      }
+
+      const updateActions = async () => {
+        const db = firebase.firestore();
+        const batch = db.batch();
+
+        const appsSnap = await db.collection('applications').get();
+
+        appsSnap.forEach((doc) => {
+          const data = doc.data();
+          const ufid = (data.ufid ?? data.UFID ?? '').toString().trim();
+          const semesters = (data.available_semesters ?? []) as string[];
+
+          if (
+            !Array.isArray(semesters) ||
+            !semesters.includes(CURRENT_SEMESTER)
+          ) {
+            return;
+          }
+          let action = 'NEW';
+          if (ufid && actionByUFID.has(ufid)) {
+            action = actionByUFID.get(ufid)!;
+          }
+
+          console.log(`Updating UFID ${ufid} with action ${action}`);
+          batch.update(doc.ref, { employmentAction: action });
+        });
+
+        await batch.commit();
+      };
+
+      await updateActions();
+
+      setProcessing(false);
+      toast.dismiss(toastId);
+      toast.success('Employment actions updated successfully!', {
+        duration: 2000,
+      });
+    } catch (err) {
+      console.error(err);
+      setProcessing(false);
+      toast.dismiss(toastId);
+      toast.error('Data upload failed.', { duration: 2000 });
+    }
+  };
+
   const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setProcessing(true);
-    const toastId = toast.loading('Processing course data. This may take a couple minutes.', { duration: 300000000 });
+    const toastId = toast.loading(
+      'Processing course data. This may take a couple minutes.',
+      { duration: 300000000 }
+    );
 
     try {
       const file = e.target.files?.[0];
@@ -202,7 +314,9 @@ export default function AdminCoursesPage() {
         <DialogTitle>Create Semester</DialogTitle>
         <form onSubmit={handleSemesterCreate}>
           <DialogContent>
-            <DialogContentText>Please enter the new semester&apos;s name.</DialogContentText>
+            <DialogContentText>
+              Please enter the new semester&apos;s name.
+            </DialogContentText>
             <FormControl required fullWidth>
               <TextField
                 name="Semester"
@@ -216,12 +330,22 @@ export default function AdminCoursesPage() {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">Confirm</Button>
+            <Button type="submit" variant="contained">
+              Confirm
+            </Button>
           </DialogActions>
         </form>
       </Dialog>
 
-      <Box sx={{ mt: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+      <Box
+        sx={{
+          mt: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
         <Box
           sx={{
             mb: 2,
@@ -234,20 +358,50 @@ export default function AdminCoursesPage() {
           }}
         >
           <input
-            id="raised-button-file"
+            id="employment-actions-file"
+            type="file"
+            multiple
+            onChange={readActionsExcelFile}
+            onClick={(e) => (e.currentTarget.value = '')}
+            style={{ display: 'none' }}
+          />
+          <label htmlFor="employment-actions-file">
+            <Button
+              component="span"
+              variant="contained"
+              startIcon={<FileUploadOutlined />}
+              sx={{ textTransform: 'none' }}
+            >
+              Upload Employment Actions Data
+            </Button>
+          </label>
+
+          {/* Semester Data upload */}
+          <input
+            id="semester-data-file"
             type="file"
             multiple
             onChange={readExcelFile}
             onClick={(e) => (e.currentTarget.value = '')}
             style={{ display: 'none' }}
           />
-          <label htmlFor="raised-button-file">
-            <Button component="span" variant="contained" startIcon={<FileUploadOutlined />} sx={{ textTransform: 'none' }}>
+          <label htmlFor="semester-data-file">
+            <Button
+              component="span"
+              variant="contained"
+              startIcon={<FileUploadOutlined />}
+              sx={{ textTransform: 'none' }}
+            >
               Upload Semester Data
             </Button>
           </label>
 
-          <Button variant="contained" onClick={handleDeleteSem} startIcon={<DeleteOutline />} sx={{ textTransform: 'none' }}>
+          <Button
+            variant="contained"
+            onClick={handleDeleteSem}
+            startIcon={<DeleteOutline />}
+            sx={{ textTransform: 'none' }}
+          >
             Clear Semester Data
           </Button>
 
@@ -262,7 +416,13 @@ export default function AdminCoursesPage() {
 
           <FormControl sx={{ minWidth: 140 }}>
             <InputLabel id="semester-select-label">Semester</InputLabel>
-            <Select labelId="semester-select-label" id="semester-select" value={semester} label="Semester" onChange={handleChange}>
+            <Select
+              labelId="semester-select-label"
+              id="semester-select"
+              value={semester}
+              label="Semester"
+              onChange={handleChange}
+            >
               {menu.map((sem) => (
                 <MenuItem key={sem} value={sem}>
                   {sem}
@@ -273,9 +433,12 @@ export default function AdminCoursesPage() {
           </FormControl>
         </Box>
 
-        <Courses userRole={role as string} semester={semester} processing={processing} />
+        <Courses
+          userRole={role as string}
+          semester={semester}
+          processing={processing}
+        />
       </Box>
     </PageLayout>
   );
 }
-

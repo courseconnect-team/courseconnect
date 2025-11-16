@@ -26,7 +26,7 @@ function Pill({
   variant,
   children,
 }: {
-  variant: 'approved' | 'denied' | 'pending' | 'neutral';
+  variant: 'approved' | 'denied' | 'pending' | 'neutral' | 'request';
   children: React.ReactNode;
 }) {
   const styles: Record<string, string> = {
@@ -35,6 +35,7 @@ function Pill({
     pending:
       'bg-status-pendingLt border border-status-pending text-status-pending',
     neutral: 'bg-gray-100 text-gray-500 border border-gray-500',
+    request: 'w-44 bg-white border border-gray-300 text-gray-700', // <- fixed width
   };
   return (
     <span
@@ -227,6 +228,7 @@ export const CourseApplicationsTable: React.FC<
               <th className="px-4 py-3">Applicant Details</th>
               <th className="px-4 py-3">Submitted</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Employment Action</th>
               <th className="px-4 py-3">Faculty Approval</th>
               <th className="px-4 py-3">Admin Approval</th>
             </tr>
@@ -346,6 +348,11 @@ export const CourseApplicationsTable: React.FC<
                         }
                         return <Pill variant="neutral">Applied</Pill>;
                       })()}
+                    </td>
+
+                    {/*Employement Action */}
+                    <td className="px-4 py-3">
+                      <Pill variant="request">{ui.submitted}</Pill>
                     </td>
 
                     {/* faculty status */}
