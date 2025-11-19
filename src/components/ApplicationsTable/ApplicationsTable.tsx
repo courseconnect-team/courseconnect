@@ -20,6 +20,7 @@ export type UIRow = {
   adminStatus: AdminStatus;
   uf_email: string;
   position: string;
+  employmentAction: string;
 };
 
 function Pill({
@@ -92,6 +93,7 @@ function mapToUI(
   const applicantName = d.name ?? `${first} ${last}`.trim();
   const submitted = d.date ?? 'MM/DD/YYYY';
   const uf_email = d.email;
+  const employmentAction = d.employmentAction ?? 'NEW HIRE';
   const position = d.position;
   // appStatus mapping for UI
   let appStatus: UIRow['appStatus'];
@@ -128,6 +130,7 @@ function mapToUI(
     appStatus,
     adminStatus,
     uf_email,
+    employmentAction,
     position,
   };
 }
@@ -352,7 +355,7 @@ export const CourseApplicationsTable: React.FC<
 
                     {/*Employement Action */}
                     <td className="px-4 py-3">
-                      <Pill variant="request">{ui.submitted}</Pill>
+                      <Pill variant="request">{ui.employmentAction}</Pill>
                     </td>
 
                     {/* faculty status */}

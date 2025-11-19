@@ -153,7 +153,7 @@ export default function AdminCoursesPage() {
       });
 
       const actionByUFID = new Map<string, string>();
-      const CURRENT_SEMESTER = 'Fall 2025';
+      const CURRENT_SEMESTER = 'Spring 2026';
       for (const row of data) {
         const rawUFID = String(row['UFID'] ?? '') as string;
         const action = (row['ECE - Requested Action'] ?? '') as string;
@@ -182,7 +182,7 @@ export default function AdminCoursesPage() {
           ) {
             return;
           }
-          let action = 'NEW';
+          let action = 'NEW HIRE';
           if (ufid && actionByUFID.has(ufid)) {
             action = actionByUFID.get(ufid)!;
           }

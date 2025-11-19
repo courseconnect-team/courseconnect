@@ -361,7 +361,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 id: doc.id,
                 ...doc.data(),
                 courses: Object.entries(doc.data().courses)
-                  .filter(([key, value]) => value == 'accepted')
+                  .filter(([key, value]) => value == 'approved')
                   .map(([key, value]) => key),
                 allcourses: Object.entries(doc.data().courses).map(
                   ([key, value]) => key

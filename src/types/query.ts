@@ -35,6 +35,7 @@ export interface ApplicationData {
   phonenumber: string;
   position: string;
   semester: string;
+  employmentAction?: string;
   available_hours: string;
   department: string;
   degree: string;
@@ -43,6 +44,7 @@ export interface ApplicationData {
   resume_link: string;
   plan: string;
   gpa: string;
+  date: string;
   status: string;
 }
 
