@@ -55,26 +55,45 @@ const toFilterKey = (ui: UIRow): StatusFilter => {
 };
 
 function ApproveDeny({
+  status, // 'approved' | 'denied' | null
   onApprove,
   onDeny,
 }: {
+  status: 'approved' | 'pending' | 'denied' | 'in-progress' | 'assigned';
   onApprove: () => void;
   onDeny: () => void;
 }) {
+  const baseBtn =
+    'px-4 py-1 rounded-lg text-xs font-semibold border transition hover:cursor-pointer';
+
+  const approveSelected = status === 'approved';
+  const denySelected = status === 'denied';
+
+  const approveClasses = approveSelected
+    ? // ACTIVE approve state
+      'bg-status-approved text-on-primary border-status-approved'
+    : // idle/hover approve state
+      'bg-status-approvedLt text-status-approved border-status-approved hover:bg-status-approved hover:text-on-primary';
+
+  const denyClasses = denySelected
+    ? // ACTIVE deny state
+      'bg-status-error text-on-primary border-status-error'
+    : // idle/hover deny state
+      'bg-status-errorLt text-status-error border-status-error hover:bg-status-error hover:text-on-primary';
+
   return (
     <div className="flex items-center gap-2">
       <button
-        onClick={onApprove}
-        className="px-3 py-1 rounded-lg text-xs font-semibold border transition
-                   bg-status-approvedLt text-status-approved border-status-approved
-                 hover:bg-status-approved hover:cursor-pointer hover:text-on-primary"
+        type="button"
+        onClick={approveSelected ? undefined : onApprove}
+        className={`${baseBtn} ${approveClasses}`}
       >
         Approve
       </button>
       <button
-        onClick={onDeny}
-        className="px-5 py-1 rounded-lg text-xs font-semibold border transition
-                   bg-status-errorLt text-status-error border-status-error hover:bg-status-error hover:cursor-pointer  hover:text-on-primary"
+        type="button"
+        onClick={denySelected ? undefined : onDeny}
+        className={`${baseBtn} ${denyClasses}`}
       >
         Deny
       </button>
@@ -360,21 +379,11 @@ export const CourseApplicationsTable: React.FC<
 
                     {/* faculty status */}
                     <td className="px-4 py-3">
-                      {ui.appStatus === 'denied' ? (
-                        <Pill variant="denied">Denied</Pill>
-                      ) : ui.appStatus === 'approved' ||
-                        ui.appStatus === 'assigned' ? (
-                        <Pill variant="approved">
-                          {ui.appStatus === 'assigned'
-                            ? 'Assigned'
-                            : 'Approved'}
-                        </Pill>
-                      ) : (
-                        <ApproveDeny
-                          onApprove={() => openConfirm('approve', ui)}
-                          onDeny={() => openConfirm('deny', ui)}
-                        />
-                      )}
+                      <ApproveDeny
+                        onApprove={() => openConfirm('approve', ui)}
+                        onDeny={() => openConfirm('deny', ui)}
+                        status={ui.appStatus}
+                      />
                     </td>
 
                     {/* admin approval */}
