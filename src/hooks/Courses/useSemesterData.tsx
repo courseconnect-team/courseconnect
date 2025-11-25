@@ -12,7 +12,7 @@ export function useSemesterData(
   semesters?: SemesterName[]
 ) {
   const { currentSemester, options } = useSemesters();
-  
+
 
   const names: SemesterName[] = semesters?.length ? semesters : [];
   const enabled =
@@ -20,8 +20,8 @@ export function useSemesterData(
   const result = useQueries({
     queries: names.map((sem: SemesterName) => ({
       queryKey: ['facultyCourses', uemail, sem],
-      queryFn: () => getFacultyCourses(sem, uemail!), 
-      enabled, 
+      queryFn: () => getFacultyCourses(sem, uemail!),
+      enabled,
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,
