@@ -9,13 +9,9 @@ export const getCurrentSemester = (): SemesterName => {
   const month = now.getMonth() + 1; // 0 = Jan
   const day = now.getDate();
 
-  if (month < 5 && day < 6) {
-    return `Summer ${year}` as SemesterName;
-  } else if (month < 8 && day < 13) {
-    return `Fall ${year}` as SemesterName;
-  } else {
-    return `Spring ${year + 1}` as SemesterName;
-  }
+  const term =
+    month < 5 && day < 6 ? 'Spring' : month < 8 && day < 13 ? 'Summer' : 'Fall';
+  return `${term} ${year}` as SemesterName;
 };
 
 export function generateSemesters(startYear = 2023): SemesterName[] {
