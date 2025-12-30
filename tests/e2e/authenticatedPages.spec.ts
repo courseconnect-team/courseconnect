@@ -58,6 +58,7 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
       '/faculty',
       '/faculty-stats',
       '/features',
+      '/underDevelopment',
     ],
     forbidden: [
       '/admincourses',
@@ -66,7 +67,6 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
       '/applications' /* if not faculty */,
       '/status' /* if admin-only */,
       '/Research',
-      '/underDevelopment',
     ],
   },
   admin: {
