@@ -306,6 +306,7 @@ export default function AdminCoursesPage() {
 
   if (loading) return <div>Loading…</div>;
   if (error) return <div>Error loading role</div>;
+  if (role !== 'admin') return <div> Forbidden </div>;
 
   return (
     <PageLayout mainTitle="Admin Courses" navItems={getNavItems(role)}>

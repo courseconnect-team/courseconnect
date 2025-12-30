@@ -104,6 +104,7 @@ export default function User() {
     toast.dismiss(toastId);
   };
 
+  if (role !== 'admin') return <div> Forbidden </div>;
   return (
     <>
       <HeaderCard text="Faculty Statistics" />

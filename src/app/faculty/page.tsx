@@ -94,6 +94,8 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
   //     </div>
   //   ));
   // };
+  if (role !== 'admin') return <div> Forbidden </div>;
+
   console.log(facultyData);
   return (
     <>
