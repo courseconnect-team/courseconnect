@@ -12,6 +12,7 @@ import HeaderCard from '@/component/HeaderCard/HeaderCard';
 export default function AdminApplications() {
   let { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
+  if (role !== 'admin') return <div> Forbidden </div>;
 
   return (
     <>
