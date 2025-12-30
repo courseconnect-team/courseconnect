@@ -40,3 +40,7 @@ yarn-error.log*
 next-env.d.ts
 .vscode
 courseconnect-c6a7b-firebase-adminsdk-dqqis-af57e2e045.json
+playwright-report
+test-results
+playwright/.auth
+playwright/creds.local.json

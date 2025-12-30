@@ -15,7 +15,7 @@ const CoursesPage: FC<pageProps> = () => {
   // ② handle loading / error
   if (loading) return <div>Loading…</div>;
   if (error) return <div>Error loading user info</div>;
-  if (role !== 'faculty' && role !== 'admin') return <div> Inaccessible </div>;
+  if (role !== 'faculty' && role !== 'admin') return <div> Forbidden </div>;
   return (
     <PageLayout mainTitle="Courses" navItems={getNavItems(role)}>
       <CourseSections role={role} uemail={uemail} navItems={getCourses(role)} />

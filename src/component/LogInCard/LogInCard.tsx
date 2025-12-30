@@ -177,7 +177,11 @@ export const LogInCard = ({
           </DialogActions>
         </form>
       </Dialog>
-      <form>
+      <form
+        onSubmit={(e) => {
+          void handleSubmit(e);
+        }}
+      >
         <div className="div">Log In</div>
         <Divider
           sx={{
@@ -195,10 +199,8 @@ export const LogInCard = ({
           <div className="overlap-group-wrapper">
             <div className="overlap-group">
               <TextField
+                label="Email"
                 variant="outlined"
-                InputProps={{
-                  disableUnderline: true,
-                }}
                 placeholder="email@ufl.edu"
                 required
                 fullWidth
@@ -218,10 +220,8 @@ export const LogInCard = ({
           <div className="overlap-group-wrapper">
             <div className="overlap-group">
               <TextField
+                label="Password"
                 variant="outlined"
-                InputProps={{
-                  disableUnderline: true,
-                }}
                 placeholder="1234567890"
                 required
                 fullWidth
@@ -238,23 +238,32 @@ export const LogInCard = ({
         </div>
 
         <div className="sign-in-button">
-          <button onClick={(e) => handleSubmit(e)} className="overlap">
+          <button
+            type="submit"
+            aria-label="Log in"
+            onClick={(e) => handleSubmit(e)}
+            className="overlap"
+          >
             <div className="text-wrapper-5">Log In</div>
           </button>
         </div>
         <div className="password-forgot-text">
-          <div
+          <button
+            type="button"
+            aria-label="Forgot Password"
             className="cursor-pointer underline hover:no-underline"
             onClick={(e) => setOpen(true)}
           >
             Forgot Password?
-          </div>
+          </button>
         </div>
 
         <div className="sign-up-text">
           <span className="text-gray-300">Don&apos;t have an account? </span>
           <br />
           <button
+            type="button"
+            aria-label="Sign up"
             className="cursor-pointer underline hover:no-underline"
             onClick={() => setSignup(true)}
           >
