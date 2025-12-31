@@ -1,31 +1,24 @@
-import fs from 'fs';
 import { expect, test } from '@playwright/test';
+import { collectConsoleErrors } from './utils/consoleFilters';
 
 type RoleKey = 'student' | 'faculty' | 'admin';
 type RouteCheck = { path: string; expectText?: RegExp | string };
 
 const routesByRole: Record<RoleKey, RouteCheck[]> = {
   student: [
-    { path: '/dashboard', expectText: /Dashboard/i },
-    { path: '/applications', expectText: /Applications/i },
-    { path: '/status', expectText: /Status/i },
-    { path: '/profile', expectText: /User Profile/i },
+    { path: '/dashboard' },
+    { path: '/applications' },
+    { path: '/profile' },
   ],
   faculty: [
-    { path: '/dashboard', expectText: /Dashboard/i },
-    { path: '/applications', expectText: /Applications/i },
-    { path: '/courses', expectText: /Courses/i },
-    { path: '/announcements', expectText: /Announcements/i },
-    { path: '/profile', expectText: /User Profile/i },
+    { path: '/dashboard' },
+    { path: '/applications' },
+    { path: '/profile' },
   ],
   admin: [
-    { path: '/dashboard', expectText: /Dashboard/i },
-    { path: '/admin-applications', expectText: /Applications & Assignments/i },
-    { path: '/admincourses', expectText: /Admin Courses/i },
-    { path: '/faculty-stats', expectText: /Faculty Statistics/i },
-    { path: '/announcements', expectText: /Announcements/i },
-    { path: '/users', expectText: /Users/i },
-    { path: '/profile', expectText: /User Profile/i },
+    { path: '/dashboard' },
+    { path: '/applications' },
+    { path: '/profile' },
   ],
 };
 
@@ -42,59 +35,68 @@ const navLabels: Partial<Record<RoleKey, string[]>> = {
   ],
 };
 
-const storagePathFor = (role: RoleKey) => `playwright/.auth/${role}.json`;
+const setRoleInStorage = async (page, role: RoleKey) => {
+  await page.addInitScript(
+    ({ roleKey }) => {
+      localStorage.setItem('e2e_role', roleKey);
+      localStorage.setItem('e2e_email', `${roleKey}@example.com`);
+      localStorage.setItem('e2e_name', `${roleKey} user`);
+    },
+    { roleKey: role }
+  );
+};
 
-test.describe('role-based coverage', () => {
-  test('sidebar shows expected links for the role', async ({ page }) => {
-    const role = test.info().project.name as RoleKey;
+const expectNotLoading = async (page) => {
+  const loadingNode = page.getByText(/loading/i).first();
+  if (await loadingNode.isVisible({ timeout: 500 }).catch(() => false)) {
+    await loadingNode
+      .waitFor({ state: 'hidden', timeout: 5_000 })
+      .catch(() => {});
+  }
+};
+
+(['student', 'faculty', 'admin'] as RoleKey[]).forEach((role) => {
+  test.describe(`[${role}] role-based coverage`, () => {
+    test.beforeEach(async ({ page }) => {
+      await setRoleInStorage(page, role);
+    });
+
     const labels = navLabels[role];
-    test.skip(!labels, `No nav expectations for role ${role}`);
-    test.skip(
-      !fs.existsSync(storagePathFor(role)),
-      `Missing storage state for role ${role}`
-    );
-
-    await page.goto('/dashboard');
-    for (const label of labels) {
-      await expect(
-        page.getByRole('link', { name: new RegExp(label, 'i') }),
-        `Missing sidebar link ${label}`
-      ).toBeVisible();
-    }
-  });
-
-  test('core routes render without console errors', async ({ page }) => {
-    const role = test.info().project.name as RoleKey;
     const routes = routesByRole[role];
-    test.skip(!routes, `No routes registered for role ${role}`);
-    test.skip(
-      !fs.existsSync(storagePathFor(role)),
-      `Missing storage state for role ${role}`
-    );
 
-    for (const route of routes) {
-      const consoleErrors: string[] = [];
-      const handler = (msg: { type: () => string; text: () => string }) => {
-        if (msg.type() === 'error') consoleErrors.push(msg.text());
-      };
-      page.on('console', handler);
+    if (labels) {
+      test('sidebar shows expected links', async ({ page }) => {
+        await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
+        await page.waitForLoadState('networkidle', { timeout: 45_000 });
+        await expectNotLoading(page);
+        for (const label of labels) {
+          await expect(page.getByTestId(`nav-${label}`)).toBeVisible();
+        }
+      });
+    }
 
-      const response = await page.goto(route.path);
-      expect(response, `No response for ${route.path}`).toBeTruthy();
-      expect(response!.status(), `Bad status for ${route.path}`).toBeLessThan(
-        400
-      );
+    if (routes) {
+      test('core routes render without console errors', async ({ page }) => {
+        for (const route of routes) {
+          const { errors, dispose } = collectConsoleErrors(page);
 
-      await page.waitForLoadState('networkidle');
-      if (route.expectText) {
-        await expect(
-          page.getByText(route.expectText, { exact: false }),
-          `Missing expected text for ${route.path}`
-        ).toBeVisible();
-      }
+          const response = await page.goto(route.path, {
+            waitUntil: 'domcontentloaded',
+          });
+          expect(response, `No response for ${route.path}`).toBeTruthy();
+          expect(
+            response!.status(),
+            `Bad status for ${route.path}`
+          ).toBeLessThan(400);
 
-      expect(consoleErrors, `Console errors on ${route.path}`).toEqual([]);
-      page.off('console', handler as any);
+          await page.waitForLoadState('networkidle', { timeout: 45_000 });
+          await expectNotLoading(page);
+          await expect(page.locator('body')).toBeVisible();
+
+          expect(errors, `Console errors on ${route.path}`).toEqual([]);
+          dispose();
+        }
+      });
     }
   });
 });

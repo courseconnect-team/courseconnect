@@ -1,32 +1,25 @@
 'use client';
-import { FC, useEffect, useState } from 'react';
-import FacultyApplication from '@/app/Applications/page';
-import { getAuth } from 'firebase/auth';
-import { useUserRole } from '@/firebase/util/GetUserRole';
+import { FC, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import FacultyDetails from '@/component/FacultyDetails/FacultyDetails';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
-import SmallClassCard from '@/component/SmallClassCard/SmallClassCard';
 import { FacultyStats } from '@/types/User';
 // import { useFacultyStats } from '@/hooks/useFacultyStats';
-import { LinearProgress } from '@mui/material';
-import { CourseType } from '@/types/User';
-import useFetchPastCourses from '@/hooks/old/usePastCourses';
 import { Toaster } from 'react-hot-toast';
-
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
+import { isE2EMode } from '@/utils/featureFlags';
 interface pageProps {
   params: { name: string };
 }
 
 const FacultyStatistics: FC<pageProps> = ({ params }) => {
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const [user, role, loading, error] = useUserInfo();
   const searchParams = useSearchParams();
   const FacultyId = searchParams.get('name');
-  console.log(FacultyId);
   const db = firebase.firestore();
+
   // const [selectedYear, setSelectedYear] = useState<number>(1);
   // const {
   //   data: facultyStats,
@@ -34,12 +27,6 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
   //   error: statsError,
   // } = useFacultyStats();
   const [facultyData, setFacultyData] = useState<FacultyStats | null>(null);
-
-  const {
-    role,
-    loading: roleLoading,
-    error: roleError,
-  } = useUserRole(user?.uid);
 
   // const getFacultyDetails = (FacultyId: string): FacultyStats | undefined => {
   //   return FacultyId in facultyStats! ? facultyStats![FacultyId] : undefined;
@@ -56,7 +43,7 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
   //   }
   // }, [FacultyId, facultyStats]);
 
-  if (roleError) {
+  if (error) {
     return <p>Error loading role</p>;
   }
 
@@ -96,7 +83,6 @@ const FacultyStatistics: FC<pageProps> = ({ params }) => {
   // };
   if (role !== 'admin') return <div> Forbidden </div>;
 
-  console.log(facultyData);
   return (
     <>
       <Toaster />

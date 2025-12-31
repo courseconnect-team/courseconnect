@@ -20,7 +20,13 @@ export default function DashboardSections({
       return (
         <div className="flex flex-wrap gap-6">
           {navItems.map(({ label, to, icon: Icon }: NavbarItem) => (
-            <DashboardCard key={to} icon={Icon} label={label} to={to} />
+            <DashboardCard
+              data-testid={`nav-${label}`}
+              key={to}
+              icon={Icon}
+              label={label}
+              to={to}
+            />
           ))}
         </div>
       );
@@ -30,7 +36,13 @@ export default function DashboardSections({
       return (
         <div className="flex flex-wrap gap-6">
           {navItems.map(({ label, to, icon: Icon }: NavbarItem) => (
-            <DashboardCard key={to} icon={Icon} label={label} to={to} />
+            <DashboardCard
+              data-testid={`nav-${label}`}
+              key={to}
+              icon={Icon}
+              label={label}
+              to={to}
+            />
           ))}
         </div>
       );

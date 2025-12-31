@@ -7,7 +7,6 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
-import CreateCourseDialog from './Create_Course';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import {
@@ -25,7 +24,6 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-  useGridApiContext,
   gridClasses,
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
@@ -38,7 +36,8 @@ import {
   LinearProgress,
 } from '@mui/material';
 import UnderDevelopment from '@/component/UnderDevelopment';
-import { alpha, styled } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
+import { isE2EMode } from '@/utils/featureFlags';
 
 interface Course {
   id: string;
@@ -64,6 +63,7 @@ interface CourseGridProps {
 export default function CourseGrid(props: CourseGridProps) {
   const { userRole, semester, processing } = props;
   const { user } = useAuth();
+  const e2e = isE2EMode();
   const [success, setSuccess] = React.useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -72,6 +72,10 @@ export default function CourseGrid(props: CourseGridProps) {
 
   React.useEffect(() => {
     console.log('SEM ' + semester);
+    if (e2e) {
+      setCourseData([]);
+      return;
+    }
     const coursesRef = firebase
       .firestore()
       .collection('courses')
@@ -80,10 +84,10 @@ export default function CourseGrid(props: CourseGridProps) {
       coursesRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Course)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Course)
         );
         setCourseData(data);
       });
@@ -94,10 +98,10 @@ export default function CourseGrid(props: CourseGridProps) {
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
             (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Course)
+              ({
+                id: doc.id,
+                ...doc.data(),
+              } as Course)
           );
           setCourseData(data);
         });
@@ -108,15 +112,15 @@ export default function CourseGrid(props: CourseGridProps) {
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
             (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Course)
+              ({
+                id: doc.id,
+                ...doc.data(),
+              } as Course)
           );
           setCourseData(data);
         });
     }
-  }, [userRole, userEmail, semester, processing]);
+  }, [userRole, userEmail, semester, processing, e2e]);
 
   const [open, setOpen] = React.useState(false);
   const [selectedCourseGrid, setSelectedCourseGrid] =
@@ -160,7 +164,10 @@ export default function CourseGrid(props: CourseGridProps) {
     {}
   );
 
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
+  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
+    params,
+    event
+  ) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut)
       event.defaultMuiPrevented = true;
   };
@@ -386,7 +393,7 @@ export default function CourseGrid(props: CourseGridProps) {
           />,
         ];
       },
-    }
+    },
   ];
 
   // ✅ UI-Only Styling Changes
@@ -511,4 +518,3 @@ export default function CourseGrid(props: CourseGridProps) {
     </>
   );
 }
-

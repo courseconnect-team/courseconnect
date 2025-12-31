@@ -1,10 +1,11 @@
 // hooks/useSemesterCourses.ts
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSemesters, type SemesterName } from '@/hooks/useSemesterOptions';
 import type { Role } from '@/types/User';
 import { useQueries } from '@tanstack/react-query';
 import { getFacultyCourses } from './useFetchFacultyApplications';
 import { CourseTuple } from './useFetchFacultyMultiApplications';
+import { isE2EMode } from '@/utils/featureFlags';
 
 export function useSemesterData(
   role: Role,
@@ -12,16 +13,20 @@ export function useSemesterData(
   semesters?: SemesterName[]
 ) {
   const { currentSemester, options } = useSemesters();
-  
+  const e2e = isE2EMode();
 
-  const names: SemesterName[] = semesters?.length ? semesters : [];
+  const names: SemesterName[] = e2e ? [] : semesters?.length ? semesters : [];
   const enabled =
-    (role === 'faculty' || role === 'admin') && !!uemail && !!semesters && names.length > 0;
+    !e2e &&
+    (role === 'faculty' || role === 'admin') &&
+    !!uemail &&
+    !!semesters &&
+    names.length > 0;
   const result = useQueries({
     queries: names.map((sem: SemesterName) => ({
       queryKey: ['facultyCourses', uemail, sem],
-      queryFn: () => getFacultyCourses(sem, uemail!), 
-      enabled, 
+      queryFn: () => getFacultyCourses(sem, uemail!),
+      enabled,
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,

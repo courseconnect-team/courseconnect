@@ -1,16 +1,13 @@
 'use client';
 import * as React from 'react';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Toaster, toast } from 'react-hot-toast';
-
 import { useState, useEffect } from 'react';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import 'firebase/firestore';
-import { TERM_CODE } from '@/hooks/useSemesterOptions';
 import firebase from '@/firebase/firebase_config';
 import { read, utils } from 'xlsx';
 import InputLabel from '@mui/material/InputLabel';
@@ -31,11 +28,12 @@ import {
 } from '@mui/icons-material';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { getNavItems } from '@/hooks/useGetItems';
-import styles from './style.module.css';
+import { isE2EMode } from '@/utils/featureFlags';
 
 export default function AdminCoursesPage() {
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
+  const isE2E = isE2EMode();
   const [semester, setSemester] = useState<string>('Spring 2026');
   const [menu, setMenu] = useState<string[]>([]);
   const [semesterHidden, setSemesterHidden] = useState(false);
@@ -59,7 +57,15 @@ export default function AdminCoursesPage() {
     setOpen(false);
   };
 
+  //Testing Code Start
   useEffect(() => {
+    if (isE2E) {
+      setMenu([]);
+      setSemesterHidden(false);
+      return;
+    }
+    //Testing Code End
+
     const updateMenu = async () => {
       const arr: string[] = [];
       const querySnapshot = await firebase
@@ -86,7 +92,7 @@ export default function AdminCoursesPage() {
 
     updateMenu();
     setHidden();
-  }, [semester, processing]);
+  }, [semester, processing, isE2E]);
 
   const handleDeleteSem = async () => {
     setProcessing(true);

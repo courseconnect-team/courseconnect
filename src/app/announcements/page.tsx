@@ -14,7 +14,7 @@ const AnnouncementsPage: FC<pageProps> = () => {
   // ② handle loading / error
   if (loading) return <div>Loading…</div>;
   if (error) return <div>Error loading user info</div>;
-  if (role !== 'faculty' && role !== 'admin') return <div> Forbidden </div>;
+
   return (
     <PageLayout mainTitle="Announcements" navItems={getNavItems(role)}>
       <AnnouncementSections role={role} navItems={getCourses(role)} />

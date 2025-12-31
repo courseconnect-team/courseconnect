@@ -2,9 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useUserRole } from '@/firebase/util/GetUserRole';
 import { JobCard } from '@/component/JobCard/JobCard';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 interface ResearchPageProps {
   user: {
     uid: string;
@@ -58,21 +57,14 @@ const researchJobs = [
   },
 ];
 const ResearchPage: React.FC<ResearchPageProps> = () => {
-  const auth = getAuth();
-  const user = auth.currentUser;
-  const {
-    role,
-    loading: roleLoading,
-    error: roleError,
-  } = useUserRole(user?.uid);
+  const [user, role, loading, error] = useUserInfo();
 
-  if (roleError) {
+  if (error) {
     return <p>Error loading role</p>;
   }
 
-  if (!user) {
-    return <p>Please sign in.</p>;
-  }
+  if (loading) return <p>Loading…</p>;
+  if (!user) return <div> Forbidden </div>;
   return (
     <>
       <Toaster />
