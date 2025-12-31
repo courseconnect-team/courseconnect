@@ -129,6 +129,20 @@ Automated linting and code formatting upon git commit was set up using ESLint, P
 - The automation commands executed upon git commit are customizable within the `lint-staged` object within the `package.json` file.
   - See reference <a href="https://github.com/okonet/lint-staged#Configuration">here</a>.
 
+## Testing
+
+Tests are written using <a href="https://playwright.dev/"> Playwright </a>
+
+After every push, the tests are automatically executed to ensure production quality by verifying all paths are stable and generate no errors.
+
+Should tests fail, running:
+`npx playwright show-report`
+Will provide a report of any failed cases as well as image/video documentation of the moment of failure.
+
+To run tests manually:
+
+`npm run test:e2e`
+
 ## Production Environment
 
 Use the following steps to test your changes in a production-ready build.
