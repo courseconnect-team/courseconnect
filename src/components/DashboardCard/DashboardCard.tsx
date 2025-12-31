@@ -21,6 +21,7 @@ const BaseCard: React.FC<NavbarItem> = ({
 }) => {
   return (
     <Link
+      data-testid={`nav-${label}`}
       href={{
         pathname: to,
         query: { ...queryParams },

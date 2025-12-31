@@ -124,6 +124,8 @@ export default function User() {
       console.log(err);
     }
   };
+  if (loading) return <div>Loadingƒ?İ</div>;
+  if (error) return <div>Error loading role</div>;
   if (role !== 'admin') return <div> Forbidden </div>;
 
   return (

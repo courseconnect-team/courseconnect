@@ -36,6 +36,7 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { LinearProgress, Button } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
+import { isE2EMode } from '@/utils/featureFlags';
 
 interface User {
   id: string;
@@ -79,12 +80,17 @@ interface UserGridProps {
 
 export default function UserGrid(props: UserGridProps) {
   const { userRole } = props;
+  const e2e = isE2EMode();
   const [userData, setUserData] = React.useState<User[]>([]);
   const [open, setOpen] = React.useState(false);
   const [delDia, setDelDia] = React.useState(false);
   const [delId, setDelId] = React.useState();
 
   React.useEffect(() => {
+    if (e2e) {
+      setUserData([]);
+      return;
+    }
     const usersRef = firebase.firestore().collection('users');
     const unsubscribe = usersRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
@@ -100,7 +106,7 @@ export default function UserGrid(props: UserGridProps) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [e2e]);
   const handleDeleteDiagClose = () => {
     setDelDia(false);
   };

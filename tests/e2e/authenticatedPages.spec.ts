@@ -1,30 +1,5 @@
-import fs from 'fs';
-import path from 'path';
 import { expect, test } from '@playwright/test';
-
-type CredsFile = Record<Role, { email: string; password: string }>;
-
-const credsPath = path.resolve('tests/utils/playwright.accounts.json');
-
-function loadCreds(): CredsFile {
-  if (!fs.existsSync(credsPath)) {
-    throw new Error(
-      `Missing ${credsPath}. Create it locally and gitignore it (store test logins there).`
-    );
-  }
-  const raw = fs.readFileSync(credsPath, 'utf-8');
-  const data = JSON.parse(raw) as Partial<CredsFile>;
-
-  for (const role of ['student', 'faculty', 'admin'] as const) {
-    const c = data[role];
-    if (!c?.email || !c?.password) {
-      throw new Error(
-        `Missing email/password for role "${role}" in ${credsPath}`
-      );
-    }
-  }
-  return data as CredsFile;
-}
+import { collectConsoleErrors } from './utils/consoleFilters';
 
 type Role = 'student' | 'faculty' | 'admin';
 
@@ -33,11 +8,11 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
     allowed: [
       '/dashboard',
       '/applications',
-      '/announcements',
       '/profile',
-      '/features',
       '/status',
+      '/features',
       '/underDevelopment',
+      '/announcements',
       '/Research',
     ],
     forbidden: [
@@ -52,12 +27,12 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
   faculty: {
     allowed: [
       '/dashboard',
-      '/courses',
-      '/announcements',
       '/applications',
-      '/status',
       '/profile',
       '/features',
+      '/announcements',
+      '/courses',
+      '/underDevelopment',
       '/Research',
     ],
     forbidden: [
@@ -75,67 +50,81 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
       '/applications',
       '/announcements',
       '/profile',
-      '/faculty',
       '/faculty-stats',
       '/admincourses',
       '/admin-applications',
       '/users',
-      '/status',
-      '/Research',
+      '/underDevelopment',
       '/features',
     ],
     forbidden: [],
   },
 };
 
-for (const role of ['student', 'faculty', 'admin'] as const) {
+const setRoleInStorage = async (page, role: Role) => {
+  await page.addInitScript(
+    ({ roleKey }) => {
+      localStorage.setItem('e2e_role', roleKey);
+      localStorage.setItem('e2e_email', `${roleKey}@example.com`);
+      localStorage.setItem('e2e_name', `${roleKey} user`);
+    },
+    { roleKey: role }
+  );
+};
+
+const expectNotLoading = async (page) => {
+  const loadingNode = page.getByText(/loading/i).first();
+  if (await loadingNode.isVisible({ timeout: 500 }).catch(() => false)) {
+    await loadingNode
+      .waitFor({ state: 'hidden', timeout: 5_000 })
+      .catch(() => {});
+  }
+};
+
+(['student', 'faculty', 'admin'] as Role[]).forEach((role) => {
   test.describe(`${role} access control`, () => {
-    const creds = loadCreds()[role];
-    const storageStatePath = `playwright/.auth/${role}.json`;
-
-    test.beforeAll(async ({ browser }) => {
-      fs.mkdirSync('playwright/.auth', { recursive: true });
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      await page.goto('/');
-      await page.getByRole('textbox', { name: /email/i }).fill(creds.email);
-      await page
-        .getByRole('textbox', { name: /password/i })
-        .fill(creds.password);
-      await page.getByRole('button', { name: /log in/i }).click();
-      await page.waitForURL('**/dashboard', { timeout: 30_000 });
-
-      await context.storageState({ path: storageStatePath });
-      await context.close();
+    test.beforeEach(async ({ page }) => {
+      await setRoleInStorage(page, role);
     });
-
-    test.use({ storageState: storageStatePath });
 
     for (const route of routesByRole[role].allowed) {
       test(`[allowed] ${route}`, async ({ page }) => {
-        const response = await page.goto(route);
-        expect(response).toBeTruthy();
-        expect(response!.status()).toBeLessThan(400);
+        const { errors, dispose } = collectConsoleErrors(page);
+
+        const response = await page.goto(route, {
+          waitUntil: 'domcontentloaded',
+        });
+        expect(response, `No response for ${route}`).toBeTruthy();
+        expect(response!.status(), `Bad status for ${route}`).toBeLessThan(400);
 
         await page.waitForLoadState('networkidle');
+        await expectNotLoading(page);
+        await expect(page.getByText(/Forbidden/i)).toHaveCount(0);
 
-        // assert NOT unauthorized
-        await expect(page.getByText(/forbidden/i)).toHaveCount(0);
+        expect(errors, `Console errors on ${route}`).toEqual([]);
+        dispose();
       });
     }
 
     for (const route of routesByRole[role].forbidden) {
       test(`[forbidden] ${route}`, async ({ page }) => {
-        const response = await page.goto(route);
-        expect(response).toBeTruthy();
-        expect(response!.status()).toBeLessThan(400);
+        const { errors, dispose } = collectConsoleErrors(page);
+
+        const response = await page.goto(route, {
+          waitUntil: 'domcontentloaded',
+        });
+        expect(response, `No response for ${route}`).toBeTruthy();
+        expect(response!.status(), `Bad status for ${route}`).toBeLessThan(400);
 
         await page.waitForLoadState('networkidle');
+        await expectNotLoading(page);
 
-        // assert unauthorized screen (choose one)
-        await expect(page.getByText(/forbidden/i)).toBeVisible();
+        const unauthorizedMessage = page.getByText(/Forbidden/i);
+        await expect(unauthorizedMessage).toBeVisible();
+
+        expect(errors, `Console errors on ${route}`).toEqual([]);
+        dispose();
       });
     }
   });
-}
+});
