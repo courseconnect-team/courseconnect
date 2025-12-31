@@ -32,7 +32,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run build && npm run start -- -p 3000',
+    command: 'NEXT_PUBLIC_E2E=1 npm run dev -- -p 3000',
     url: 'http://127.0.0.1:3000',
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,
