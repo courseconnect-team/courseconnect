@@ -36,13 +36,10 @@ const GetUserRole = (userId) => {
   const [snapshot, loading, error] = useDocument(docRef);
 
   useEffect(() => {
-    if (snapshot) {
-      const data = snapshot.data();
-      if (data) {
-        setRole(data.role);
-      }
-    }
-  }, [snapshot]);
+    if (e2e) return;
+    const data = snapshot?.data();
+    if (data?.role) setRole(data.role);
+  }, [e2e, snapshot]);
 
   if (e2e) return STUB;
   return [role, loading, error];
