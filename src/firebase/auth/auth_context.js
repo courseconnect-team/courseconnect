@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import firebase from '../firebase_config';
 import { isE2EMode, getE2EUser } from '@/utils/featureFlags';
 
-const auth = firebase.auth();
 const AuthContext = createContext();
 
 export function useAuth() {
@@ -25,6 +24,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
+    const auth = firebase.auth();
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
