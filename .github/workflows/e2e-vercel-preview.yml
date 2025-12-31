@@ -1,63 +1,63 @@
-name: E2E (after Vercel deploy)
+# name: E2E (after Vercel deploy)
 
-on:
-  repository_dispatch:
-    types:
-      # "ready" = built but not promoted; commonly preview
-      - vercel.deployment.ready
-      # "success" = built and automatically promoted; commonly production
-      - vercel.deployment.success
+# on:
+#   repository_dispatch:
+#     types:
+#       # "ready" = built but not promoted; commonly preview
+#       - vercel.deployment.ready
+#       # "success" = built and automatically promoted; commonly production
+#       - vercel.deployment.success
 
-  # Useful because repository_dispatch only triggers if the workflow exists on the default branch
-  workflow_dispatch:
+#   # Useful because repository_dispatch only triggers if the workflow exists on the default branch
+#   workflow_dispatch:
 
-permissions:
-  contents: read
+# permissions:
+#   contents: read
 
-concurrency:
-  group: e2e-${{ github.event.client_payload.git.sha || github.sha }}
-  cancel-in-progress: true
+# concurrency:
+#   group: e2e-${{ github.event.client_payload.git.sha || github.sha }}
+#   cancel-in-progress: true
 
-jobs:
-  e2e:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+# jobs:
+#   e2e:
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 20
 
-    # Only run automatically for preview deploys (you can remove/adjust this if you also want prod)
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event.client_payload.environment == 'preview'
+#     # Only run automatically for preview deploys (you can remove/adjust this if you also want prod)
+#     if: |
+#       github.event_name == 'workflow_dispatch' ||
+#       github.event.client_payload.environment == 'preview'
 
-    steps:
-      # IMPORTANT: repository_dispatch runs with default-branch SHA by default,
-      # so check out the SHA that actually got deployed.
-      - name: Checkout deployed commit
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.git.sha || github.sha }}
-          fetch-depth: 0
+#     steps:
+#       # IMPORTANT: repository_dispatch runs with default-branch SHA by default,
+#       # so check out the SHA that actually got deployed.
+#       - name: Checkout deployed commit
+#         uses: actions/checkout@v4
+#         with:
+#           ref: ${{ github.event.client_payload.git.sha || github.sha }}
+#           fetch-depth: 0
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+#           cache: npm
 
-      - name: Install deps
-        run: npm ci
+#       - name: Install deps
+#         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+#       - name: Install Playwright browsers
+#         run: npx playwright install --with-deps
 
-      - name: Run Playwright
-        env:
-          BASE_URL: ${{ github.event.client_payload.url }}
-          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
-        run: npx playwright test
+#       - name: Run Playwright
+#         env:
+#           BASE_URL: ${{ github.event.client_payload.url }}
+#           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+#         run: npx playwright test
 
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report
+#       - name: Upload Playwright report
+#         if: always()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: playwright-report
+#           path: playwright-report
