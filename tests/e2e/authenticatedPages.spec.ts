@@ -63,7 +63,7 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
 
 const setRoleInStorage = async (page, role: Role) => {
   await page.addInitScript(
-    ({ roleKey }) => {
+    (roleKey: string) => {
       localStorage.setItem('e2e_role', roleKey);
       localStorage.setItem('e2e_email', `${roleKey}@example.com`);
       localStorage.setItem('e2e_name', `${roleKey} user`);
