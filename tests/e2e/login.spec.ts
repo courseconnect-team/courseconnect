@@ -1,10 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { collectConsoleErrors } from './utils/consoleFilters';
-
-const emptyStorage = { cookies: [], origins: [] };
+import { storageStateForRole } from './utils/stub';
 
 test.describe('login screen', () => {
-  test.use({ storageState: emptyStorage });
+  test.use({ storageState: storageStateForRole('student') });
 
   test('shows email/password inputs and login button without console errors', async ({
     page,
