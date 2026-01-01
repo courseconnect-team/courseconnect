@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 import { collectConsoleErrors } from './utils/consoleFilters';
 import { storageStateForRole } from './utils/stub';
 
+const emptyStorage = { cookies: [], origins: [] };
+
 test.describe('login screen', () => {
   test.use({ storageState: storageStateForRole('student') });
 
@@ -25,6 +27,8 @@ test.describe('login screen', () => {
   });
 
   test('login with example student account', async ({ page }) => {
+    test.use({ storageState: emptyStorage });
+
     const { errors, dispose } = collectConsoleErrors(page);
     const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
     expect(response, 'No response for home').toBeTruthy();
