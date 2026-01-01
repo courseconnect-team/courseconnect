@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { collectConsoleErrors } from './utils/consoleFilters';
-
-type Role = 'student' | 'faculty' | 'admin';
-
+import { storageStateForRole } from './utils/stub';
+import { Role } from './utils/types';
 const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
   student: {
     allowed: [
@@ -61,17 +60,6 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
   },
 };
 
-const setRoleInStorage = async (page, role: Role) => {
-  await page.addInitScript(
-    (roleKey: string) => {
-      localStorage.setItem('e2e_role', roleKey);
-      localStorage.setItem('e2e_email', `${roleKey}@example.com`);
-      localStorage.setItem('e2e_name', `${roleKey} user`);
-    },
-    { roleKey: role }
-  );
-};
-
 const expectNotLoading = async (page) => {
   const loadingNode = page.getByText(/loading/i).first();
   if (await loadingNode.isVisible({ timeout: 500 }).catch(() => false)) {
@@ -83,9 +71,7 @@ const expectNotLoading = async (page) => {
 
 (['student', 'faculty', 'admin'] as Role[]).forEach((role) => {
   test.describe(`${role} access control`, () => {
-    test.beforeEach(async ({ page }) => {
-      await setRoleInStorage(page, role);
-    });
+    test.use({ storageState: storageStateForRole(role) });
 
     for (const route of routesByRole[role].allowed) {
       test(`[allowed] ${route}`, async ({ page }) => {

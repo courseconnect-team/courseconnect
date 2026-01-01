@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { collectConsoleErrors } from './utils/consoleFilters';
-
-type RoleKey = 'student' | 'faculty' | 'admin';
+import { Role } from './utils/types';
+import { storageStateForRole } from './utils/stub';
 type RouteCheck = { path: string; expectText?: RegExp | string };
 
-const routesByRole: Record<RoleKey, RouteCheck[]> = {
+const routesByRole: Record<Role, RouteCheck[]> = {
   student: [
     { path: '/dashboard' },
     { path: '/applications' },
@@ -22,7 +22,7 @@ const routesByRole: Record<RoleKey, RouteCheck[]> = {
   ],
 };
 
-const navLabels: Partial<Record<RoleKey, string[]>> = {
+const navLabels: Partial<Record<Role, string[]>> = {
   student: ['Applications', 'Status'],
   faculty: ['Applications', 'Courses'],
   admin: [
@@ -35,17 +35,6 @@ const navLabels: Partial<Record<RoleKey, string[]>> = {
   ],
 };
 
-const setRoleInStorage = async (page, role: RoleKey) => {
-  await page.addInitScript(
-    ({ roleKey }) => {
-      localStorage.setItem('e2e_role', roleKey);
-      localStorage.setItem('e2e_email', `${roleKey}@example.com`);
-      localStorage.setItem('e2e_name', `${roleKey} user`);
-    },
-    { roleKey: role }
-  );
-};
-
 const expectNotLoading = async (page) => {
   const loadingNode = page.getByText(/loading/i).first();
   if (await loadingNode.isVisible({ timeout: 500 }).catch(() => false)) {
@@ -55,11 +44,9 @@ const expectNotLoading = async (page) => {
   }
 };
 
-(['student', 'faculty', 'admin'] as RoleKey[]).forEach((role) => {
+(['student', 'faculty', 'admin'] as Role[]).forEach((role) => {
   test.describe(`[${role}] role-based coverage`, () => {
-    test.beforeEach(async ({ page }) => {
-      await setRoleInStorage(page, role);
-    });
+    test.use({ storageState: storageStateForRole(role) });
 
     const labels = navLabels[role];
     const routes = routesByRole[role];
