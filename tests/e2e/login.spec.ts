@@ -32,19 +32,21 @@ test('login with example student account', async ({ page }) => {
   const response = await page.goto('/', { waitUntil: 'domcontentloaded' });
   expect(response, 'No response for home').toBeTruthy();
   expect(response!.status(), 'Bad status for home').toBeLessThan(400);
-  const emailLocator = page
-    .locator('input[name="email"], input[type="email"]')
-    .first();
-  const passwordLocator = page
-    .locator('input[name="password"], input[type="password"]')
-    .first();
+  const emailLocator = page.getByLabel(/email/i).first();
+  const passwordLocator = page.getByLabel(/password/i).first();
 
-  await emailLocator.waitFor({ state: 'visible', timeout: 20_000 });
-  await passwordLocator.waitFor({ state: 'visible', timeout: 20_000 });
+  await expect(emailLocator).toBeVisible();
+  await expect(passwordLocator).toBeVisible();
 
   await emailLocator.fill('test@ufl.edu');
   await passwordLocator.fill('123456789Aa!');
 
+  // In E2E mode there is no real auth backend; stash a stub user/role and navigate to dashboard.
+  await page.evaluate(() => {
+    localStorage.setItem('e2e_role', 'student');
+    localStorage.setItem('e2e_email', 'test@ufl.edu');
+    localStorage.setItem('e2e_name', 'Test Student');
+  });
   await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
   await page.waitForLoadState('networkidle');
   await expect(page.locator('body')).toBeVisible();
