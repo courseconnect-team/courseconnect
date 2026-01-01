@@ -1,3 +1,4 @@
+import { isE2EMode } from '@/utils/featureFlags';
 import firebase from '../firebase_config';
 import {
   User,
@@ -5,21 +6,21 @@ import {
   sendEmailVerification,
   updateProfile,
 } from 'firebase/auth';
-
-const auth = firebase.auth();
+isE2EMode;
 
 export default async function handleSignUp(
   name: string,
   email: string,
-  password: string,
+  password: string
 ): Promise<string> {
   // use fetch to send the user data to the server
   // this goes to a cloud function which creates a document based on
   // the data from the form, identified by the user's firebase auth uid
-
+  if (isE2EMode()) return '';
 
   var errorTag: string = '';
 
+  const auth = firebase.auth();
 
   try {
     await createUserWithEmailAndPassword(auth, email, password).catch(
