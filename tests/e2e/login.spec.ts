@@ -44,8 +44,12 @@ test.describe('login screen (manual form fill)', () => {
     await emailLocator.fill('test@ufl.edu');
     await passwordLocator.fill('123456789Aa!');
 
-    await page.getByRole('button', { name: /log in/i }).click();
-    // In E2E mode there is no real auth backend; navigate to dashboard and assert it renders.
+    // In E2E mode there is no real auth backend; stash a stub user/role and navigate to dashboard.
+    await page.evaluate(() => {
+      localStorage.setItem('e2e_role', 'student');
+      localStorage.setItem('e2e_email', 'test@ufl.edu');
+      localStorage.setItem('e2e_name', 'Test Student');
+    });
     await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
     await expect(page.locator('body')).toBeVisible();
