@@ -1,6 +1,9 @@
 import { expect, test } from '@playwright/test';
+import { storageStateForRole } from './utils/stub';
 
 test.describe('public routes', () => {
+  test.use({ storageState: storageStateForRole('student') });
+
   test('home renders login screen without errors', async ({ page }) => {
     const consoleErrors: string[] = [];
     page.on('console', (msg) => {

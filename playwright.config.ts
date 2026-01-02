@@ -6,8 +6,8 @@ const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 3 : undefined, // try 2 or 3 first
+  retries: process.env.CI ? 1 : 0,
   testIgnore: /auth\.setup\.ts/, // prevent setup file from running in main project
   reporter: [
     ['list'],
