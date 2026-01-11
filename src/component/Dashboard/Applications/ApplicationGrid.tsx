@@ -86,7 +86,7 @@ interface ApplicationGridProps {
 }
 
 function getFullName(params: GridValueGetterParams) {
-  return `${params.row.firstname || ''} ${params.row.lastname || ''}`;
+  return `${params?.row.firstname || ''} ${params?.row.lastname || ''}`;
 }
 
 export default function ApplicationGrid(props: ApplicationGridProps) {

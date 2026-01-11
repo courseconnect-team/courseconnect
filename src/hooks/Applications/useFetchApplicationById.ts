@@ -6,6 +6,7 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 
+import { Options, AppQueryKey } from '@/types/query';
 /** Low-level fetcher: returns `null` if the doc doesn't exist. Throws on network errors. */
 async function fetchApplicationById(
   id: string
@@ -19,20 +20,6 @@ async function fetchApplicationById(
   const d = snap.data() as Omit<ApplicationData, 'id'>;
   return { id: snap.id, ...d };
 }
-
-/** Typed query key for easy invalidation elsewhere */
-type AppQueryKey = ['application', string];
-
-/** Allow callers to pass common RQ options, but keep the key/fn internal */
-type Options = Omit<
-  UseQueryOptions<
-    ApplicationData | null,
-    Error,
-    ApplicationData | null,
-    AppQueryKey
-  >,
-  'queryKey' | 'queryFn'
->;
 
 /** Hook: hydrate from cache/initialData if provided; fetch by id only when enabled. */
 export function useFetchApplicationById(

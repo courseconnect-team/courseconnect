@@ -18,70 +18,70 @@ import {
   Divider,
 } from '@mui/material';
 import MessageBody from '@/components/Messagebody/MessageBody';
-import { usePostAnnouncement } from '@/hooks/Announcements/usePostAnnouncement';
-import { AnnouncementDraft, AudienceType } from '@/types/announcement';
+import {
+  Announcement,
+  AudienceDepartment,
+  AudienceRole,
+  AudienceType,
+} from '@/types/announcement';
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (draft: AnnouncementDraft) => Promise<void> | void;
+  onSubmit: (draft: Announcement) => Promise<void> | void;
   loading?: boolean;
-  // optional seed values
-  defaultValues?: Partial<AnnouncementDraft>;
   // options for audience pickers
-  roleOptions?: string[];
-  departmentOptions?: string[];
+  roleOptions?: AudienceRole[];
+  departmentOptions?: AudienceDepartment[];
 };
 
 const toPreview = (s: string, n = 140) =>
   s.replace(/\s+/g, ' ').trim().slice(0, n);
+
+const generateTokens = (type: AudienceType, values: string[]) => {
+  const norm = (s: string) => s.trim().toLowerCase();
+
+  if (type === 'all') return ['all'];
+
+  if (type === 'roles') {
+    return values.map((r) => `role:${norm(r)}`);
+  }
+
+  if (type === 'departments') {
+    return values.map((d) => `dept:${norm(d)}`);
+  }
+
+  // users
+  return values.map((email) => `user:${norm(email)}`);
+};
 
 export default function AnnouncementDialog({
   open,
   onClose,
   onSubmit,
   loading = false,
-  defaultValues,
-  roleOptions = ['admin', 'instructor', 'student'],
+  roleOptions = ['admin', 'faculty', 'student'],
   departmentOptions = ['ECE', 'CISE', 'MAE'],
 }: Props) {
-  const { postAnnouncement, posting, error } = usePostAnnouncement();
+  const formatDateInputValue = (value: Date | null) => {
+    if (!value) return '';
+    const d = new Date(value);
+    const pad = (n: number) => `${n}`.padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+      d.getDate()
+    )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
 
-  async function onSend() {
-    await postAnnouncement({
-      title,
-      body: bodyMd,
-      pin: pinned,
-      scheduledAt,
-    });
-  }
-
-  const [title, setTitle] = React.useState(defaultValues?.title ?? '');
-  const [bodyMd, setBodyMd] = React.useState(defaultValues?.bodyMd ?? '');
-  const [pinned, setPinned] = React.useState(!!defaultValues?.pinned);
-  const [requireAck, setRequireAck] = React.useState(
-    !!defaultValues?.requireAck
-  );
-  const [scheduledAt, setScheduledAt] = React.useState<string | null>(
-    defaultValues?.scheduledAt ?? null
-  );
-  const [expiresAt, setExpiresAt] = React.useState<string | null>(
-    defaultValues?.expiresAt ?? null
-  );
+  const [title, setTitle] = React.useState('');
+  const [bodyMd, setBodyMd] = React.useState('');
+  const [pinned, setPinned] = React.useState(false);
+  const [requireAck, setRequireAck] = React.useState(false);
+  const [scheduledAt, setScheduledAt] = React.useState<Date | null>(null);
+  const [expiresAt, setExpiresAt] = React.useState<Date | null>(null);
   const [email, setEmail] = React.useState<boolean>(false);
 
-  const [audType, setAudType] = React.useState<AudienceType>(
-    defaultValues?.audience?.type ?? 'all'
-  );
-  const [audRoles, setAudRoles] = React.useState<string[]>(
-    defaultValues?.audience?.roles ?? []
-  );
-  const [audDepts, setAudDepts] = React.useState<string[]>(
-    defaultValues?.audience?.departments ?? []
-  );
-  const [audUsers, setAudUsers] = React.useState<string[]>(
-    defaultValues?.audience?.userIds ?? []
-  );
+  const [audType, setAudType] = React.useState<AudienceType>('all');
+  const [audValues, setAudValues] = React.useState<string[]>([]);
 
   const [touched, setTouched] = React.useState(false);
 
@@ -106,22 +106,31 @@ export default function AnnouncementDialog({
     setTouched(true);
     if (!canSubmit) return;
 
-    const draft: AnnouncementDraft = {
+    const channelFlags = {
+      inApp: true,
+      email: email,
+    };
+
+    const draft: Announcement = {
       title: title.trim(),
       bodyMd: bodyMd.trim(),
       pinned,
       requireAck,
       scheduledAt: scheduledAt || null,
       expiresAt: expiresAt || null,
-      channels: email,
+      channels: channelFlags,
       audience:
         audType === 'all'
           ? { type: 'all' }
           : audType === 'roles'
-          ? { type: 'roles', roles: audRoles }
+          ? { type: 'roles', roles: audValues as AudienceRole[] }
           : audType === 'departments'
-          ? { type: 'departments', departments: audDepts }
-          : { type: 'users', userIds: audUsers },
+          ? {
+              type: 'departments',
+              departments: audValues as AudienceDepartment[],
+            }
+          : { type: 'users', emails: audValues },
+      audienceTokens: generateTokens(audType, audValues),
     };
 
     await onSubmit(draft);
@@ -174,15 +183,15 @@ export default function AnnouncementDialog({
               <option value="all">All users</option>
               <option value="roles">By roles</option>
               <option value="departments">By departments</option>
-              <option value="users">Specific users (UIDs)</option>
+              <option value="users">Specific users (email)</option>
             </TextField>
 
             {audType === 'roles' && (
               <Autocomplete
                 multiple
                 options={roleOptions}
-                value={audRoles}
-                onChange={(_, v) => setAudRoles(v)}
+                value={audValues}
+                onChange={(_, v) => setAudValues(v)}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
                     <Chip
@@ -204,8 +213,8 @@ export default function AnnouncementDialog({
               <Autocomplete
                 multiple
                 options={departmentOptions}
-                value={audDepts}
-                onChange={(_, v) => setAudDepts(v)}
+                value={audValues}
+                onChange={(_, v) => setAudValues(v)}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
                     <Chip
@@ -228,13 +237,13 @@ export default function AnnouncementDialog({
                 multiple
                 freeSolo
                 options={[]}
-                value={audUsers}
-                onChange={(_, v) => setAudUsers(v)}
+                value={audValues}
+                onChange={(_, v) => setAudValues(v)}
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="User IDs (UIDs)"
-                    placeholder="Add UID and press Enter"
+                    label="User IDs (ufl.edu)"
+                    placeholder="Add email and press Enter"
                   />
                 )}
                 sx={{ flex: 1 }}
@@ -247,8 +256,10 @@ export default function AnnouncementDialog({
             <TextField
               label="Schedule (optional)"
               type="datetime-local"
-              value={scheduledAt ?? ''}
-              onChange={(e) => setScheduledAt(e.target.value || null)}
+              value={formatDateInputValue(scheduledAt)}
+              onChange={(e) =>
+                setScheduledAt(e.target.value ? new Date(e.target.value) : null)
+              }
               InputLabelProps={{ shrink: true }}
               sx={{ minWidth: 260 }}
               error={!!badSchedule}
@@ -257,8 +268,10 @@ export default function AnnouncementDialog({
             <TextField
               label="Expires (optional)"
               type="datetime-local"
-              value={expiresAt ?? ''}
-              onChange={(e) => setExpiresAt(e.target.value || null)}
+              value={formatDateInputValue(expiresAt)}
+              onChange={(e) =>
+                setExpiresAt(e.target.value ? new Date(e.target.value) : null)
+              }
               InputLabelProps={{ shrink: true }}
               sx={{ minWidth: 260 }}
               error={!!badExpiry}

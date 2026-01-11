@@ -65,3 +65,19 @@ export type AppRow = {
   status: string; // 'applied' | 'approved' | 'denied' | 'Admin_denied' | 'assigned'
   data: ApplicationData; // the whole doc (for name, submitted date, etc.)
 };
+
+import { UseQueryOptions } from '@tanstack/react-query';
+/** Typed query key for easy invalidation elsewhere */
+export type AppQueryKey = ['application', string];
+
+/** Allow callers to pass common RQ options, but keep the key/fn internal */
+
+export type Options = Omit<
+  UseQueryOptions<
+    ApplicationData | null,
+    Error,
+    ApplicationData | null,
+    AppQueryKey
+  >,
+  'queryKey' | 'queryFn'
+>;
