@@ -6,7 +6,7 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import { Options, AppQueryKey } from '@/types/query';
+import { ApplicationOptions, AppQueryKey } from '@/types/query';
 /** Low-level fetcher: returns `null` if the doc doesn't exist. Throws on network errors. */
 async function fetchApplicationById(
   id: string
@@ -24,7 +24,7 @@ async function fetchApplicationById(
 /** Hook: hydrate from cache/initialData if provided; fetch by id only when enabled. */
 export function useFetchApplicationById(
   id: string | undefined,
-  opts?: Options
+  opts?: ApplicationOptions
 ): UseQueryResult<ApplicationData | null, Error> {
   return useQuery<
     ApplicationData | null,

@@ -101,7 +101,7 @@ export function useFetchAnnouncementsForAccount(
   });
 
   const applyCommon = (q: firebase.firestore.Query) => {
-    q = q.where(`channelFlags.${channel}`, '==', true);
+    q = q.where(`channels.${channel}`, '==', true);
 
     if (!includePending) {
       q = q.where('dispatchStatus', '==', 'completed');
@@ -121,6 +121,9 @@ export function useFetchAnnouncementsForAccount(
     const col = firebase.firestore().collection('announcements');
     let q = applyCommon(col);
 
+    if (userRole === 'admin') {
+      return q;
+    }
     const isNonEmpty = (v: string | null | undefined): v is string =>
       typeof v === 'string' && v.trim().length > 0;
 
@@ -129,6 +132,7 @@ export function useFetchAnnouncementsForAccount(
     const tokens = [
       'all',
       userRole ? `role:${norm(userRole)}` : null,
+      userRole === 'faculty' ? `role:student` : null,
       userDepartment ? `dept:${norm(userDepartment)}` : null,
       userEmail ? `user:${norm(userEmail)}` : null,
     ].filter(isNonEmpty);

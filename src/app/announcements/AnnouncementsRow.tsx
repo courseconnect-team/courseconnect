@@ -5,12 +5,18 @@ function getInitial(name: string) {
   const trimmed = name.trim();
   return trimmed ? trimmed[0].toUpperCase() : '?';
 }
+type TimestampLike = { seconds: number; nanoseconds: number };
 
-function getDate(dateVariable: Date) {
-  const month = dateVariable.getMonth();
-  const date = dateVariable.getDate();
+function tsToDate(ts: TimestampLike) {
+  const ms = ts.seconds * 1000 + Math.floor(ts.nanoseconds / 1_000_000);
+  return new Date(ms);
+}
+function getDate(d: Date) {
+  const dateVariable = tsToDate(d);
+  const month = (dateVariable.getMonth() + 1).toString();
+  const date = dateVariable.getDate().toString();
   const year = dateVariable.getFullYear();
-  return month + date + ', ' + year;
+  return `${month} ${date}, ${year}`;
 }
 
 export default function AnnouncementsRow({
@@ -21,7 +27,6 @@ export default function AnnouncementsRow({
   sendDate,
 }: AnnouncementData & { id: string }) {
   const initial = getInitial(senderName);
-
   return (
     <Link
       href={`/announcements/${id}`}

@@ -90,9 +90,8 @@ export default function AnnouncementSections({
     role === 'student_applied' ||
     role === 'student_applying';
   const canCreate = role === 'admin' || role === 'faculty';
-
+  console.log(fetchError);
   if (!canView) return null;
-
   return (
     <div className="flex flex-col gap-4">
       {canCreate ? (
