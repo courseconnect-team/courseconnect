@@ -17,7 +17,7 @@ const AnnouncementsPage: FC<pageProps> = () => {
 
   return (
     <PageLayout mainTitle="Announcements" navItems={getNavItems(role)}>
-      <AnnouncementSections role={role} navItems={getCourses(role)} />
+      <AnnouncementSections role={role} uemail={uemail} />
     </PageLayout>
   );
 };
