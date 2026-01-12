@@ -1,3 +1,4 @@
+import { Announcement } from './announcement';
 interface TA {
   name: string;
   email: string;
@@ -72,12 +73,24 @@ export type AppQueryKey = ['application', string];
 
 /** Allow callers to pass common RQ options, but keep the key/fn internal */
 
-export type Options = Omit<
+export type ApplicationOptions = Omit<
   UseQueryOptions<
     ApplicationData | null,
     Error,
     ApplicationData | null,
     AppQueryKey
+  >,
+  'queryKey' | 'queryFn'
+>;
+
+type AnnouncementByIdKey = ['announcements', 'id', string];
+
+export type AnnouncementByIdOptions = Omit<
+  UseQueryOptions<
+    Announcement | null,
+    Error,
+    Announcement | null,
+    AnnouncementByIdKey
   >,
   'queryKey' | 'queryFn'
 >;
