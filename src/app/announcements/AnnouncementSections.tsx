@@ -12,21 +12,6 @@ import { useFetchAnnouncementsForAccount } from '@/hooks/Announcements/useFetchA
 
 import { Announcement, AudienceRole } from '@/types/announcement';
 
-function convertRole(role: string): AudienceRole | null {
-  switch (role) {
-    case 'Student':
-    case 'student_applied':
-    case 'student_applying':
-      return 'student';
-    case 'admin':
-      return 'admin';
-    case 'faculty':
-      return 'faculty';
-    default:
-      return null;
-  }
-}
-
 export default function AnnouncementSections({
   role,
   uemail,
@@ -37,34 +22,22 @@ export default function AnnouncementSections({
   const [open, setOpen] = useState(false);
   const { postAnnouncement, posting, error: postError } = usePostAnnouncement();
 
-  const userRole = useMemo(() => convertRole(role), [role]);
-
   const {
-    announcements,
+    read,
+    unread,
     loading,
     loadingMore,
     hasMore,
     error: fetchError,
     refresh,
     loadMore,
-  } = useFetchAnnouncementsForAccount(
-    userRole
-      ? {
-          userRole,
-          userEmail: uemail,
-          userDepartment: 'ECE', // TODO: make real
-          channel: 'inApp',
-          realtime: true,
-        }
-      : // If role is unknown, still call the hook with safe defaults
-        {
-          userRole: 'student',
-          userEmail: uemail,
-          userDepartment: 'ECE',
-          channel: 'inApp',
-          realtime: true,
-        }
-  );
+  } = useFetchAnnouncementsForAccount({
+    userRole: role,
+    userEmail: uemail,
+    userDepartment: 'ECE', // TODO: make real
+    channel: 'inApp',
+    realtime: true,
+  });
 
   async function handleSubmit(draft: Announcement) {
     await postAnnouncement({
@@ -90,7 +63,6 @@ export default function AnnouncementSections({
     role === 'student_applied' ||
     role === 'student_applying';
   const canCreate = role === 'admin' || role === 'faculty';
-  console.log(fetchError);
   if (!canView) return null;
   return (
     <div className="flex flex-col gap-4">
@@ -118,33 +90,57 @@ export default function AnnouncementSections({
       ) : null}
 
       {/* the announcements list stays for everyone who canView */}
-      <div className="border rounded-md overflow-hidden bg-white">
-        {loading ? (
-          <div className="p-4 text-sm text-gray-600">
-            Loading announcements…
-          </div>
-        ) : fetchError ? (
-          <div className="p-4 text-sm text-red-600">
-            Failed to load announcements.{' '}
-            <button className="underline" onClick={() => refresh()}>
-              Retry
-            </button>
-          </div>
-        ) : announcements.length === 0 ? (
-          <div className="p-4 text-sm text-gray-600">No announcements yet.</div>
-        ) : (
-          announcements.map((a) => (
-            <AnnouncementsRow
-              key={a.id}
-              id={a.id!}
-              senderName={a.senderName ?? 'Unknown'}
-              title={a.title}
-              body={a.bodyMd}
-              sendDate={a.createdAt ?? new Date(0)}
-            />
-          ))
-        )}
-      </div>
+      {loading ? (
+        <div className="p-4 text-sm text-gray-600">Loading announcements…</div>
+      ) : fetchError ? (
+        <div className="p-4 text-sm text-red-600">
+          Failed to load announcements.{' '}
+          <button className="underline" onClick={() => refresh()}>
+            Retry
+          </button>
+        </div>
+      ) : read.length === 0 && unread.length === 0 ? (
+        <div className="p-4 text-sm text-gray-600">No announcements yet.</div>
+      ) : (
+        <div>
+          {unread.length > 0 && (
+            <>
+              <div className="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-50 border-b">
+                Unread
+              </div>
+              {unread.map((a) => (
+                <AnnouncementsRow
+                  key={a.id}
+                  id={a.id!}
+                  senderName={a.senderName ?? 'Unknown'}
+                  title={a.title}
+                  body={a.bodyMd}
+                  sendDate={a.createdAt ?? new Date(0)}
+                  unread
+                />
+              ))}
+            </>
+          )}
+
+          {read.length > 0 && (
+            <>
+              <div className="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-50 border-t border-b">
+                Read
+              </div>
+              {read.map((a) => (
+                <AnnouncementsRow
+                  key={a.id}
+                  id={a.id!}
+                  senderName={a.senderName ?? 'Unknown'}
+                  title={a.title}
+                  body={a.bodyMd}
+                  sendDate={a.createdAt ?? new Date(0)}
+                />
+              ))}
+            </>
+          )}
+        </div>
+      )}
 
       {hasMore ? (
         <div className="flex justify-center">

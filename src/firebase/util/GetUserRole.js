@@ -46,11 +46,3 @@ const GetUserRole = (userId) => {
 };
 
 export default GetUserRole;
-
-// Wrapper hook
-const useUserRole = (userId) => {
-  const [role, loading, error] = GetUserRole(userId);
-  return { role, loading, error };
-};
-
-export { useUserRole };
