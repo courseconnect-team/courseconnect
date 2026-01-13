@@ -510,41 +510,41 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       editable: true,
     },
 
-    {
-      field: 'sf',
-      headerName: 'Supervisor First Name',
-      width: 190,
-      editable: true,
+    // {
+    //   field: 'sf',
+    //   headerName: 'Supervisor First Name',
+    //   width: 190,
+    //   editable: true,
 
-      valueGetter: (params) =>
-        params.row.class_codes != undefined
-          ? params.row.class_codes.split(' ')[2].split(',')[1]
-          : ' ',
-    },
-    {
-      field: 'supervisorLastName',
-      headerName: 'Supervisor Last Name',
-      width: 190,
-      editable: true,
+    //   valueGetter: (params) =>
+    //     params.row.class_codes != undefined
+    //       ? params.row.class_codes.split(' ')[2].split(',')[1]
+    //       : ' ',
+    // },
+    // {
+    //   field: 'supervisorLastName',
+    //   headerName: 'Supervisor Last Name',
+    //   width: 190,
+    //   editable: true,
 
-      valueGetter: (params) =>
-        params.row.class_codes != undefined
-          ? params.row.class_codes.split(' ')[2].split(',')[0]
-          : ' ',
-    },
-    {
-      field: 'supervisorEmail',
-      headerName: 'Supervisor Email',
-      width: 190,
-      editable: true,
-      valueGetter: (params) => {
-        if (params.row.class_codes != undefined) {
-          return courseEmailMap.get(params.row.class_codes);
-        } else {
-          return ' ';
-        }
-      },
-    },
+    //   valueGetter: (params) =>
+    //     params.row.class_codes != undefined
+    //       ? params.row.class_codes.split(' ')[2].split(',')[0]
+    //       : ' ',
+    // },
+    // {
+    //   field: 'supervisorEmail',
+    //   headerName: 'Supervisor Email',
+    //   width: 190,
+    //   editable: true,
+    //   valueGetter: (params) => {
+    //     if (params.row.class_codes != undefined) {
+    //       return courseEmailMap.get(params.row.class_codes);
+    //     } else {
+    //       return ' ';
+    //     }
+    //   },
+    // },
     {
       field: 'proxyUfid',
       headerName: 'Proxy UFID',
@@ -611,10 +611,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 110,
       editable: true,
       valueGetter: (value) => {
-        return value.value;
+        return value;
       },
       valueFormatter: (value) => {
-        const val = value.value;
+        const val = value as Array<string>;
         try {
           if (val[0].includes('Fall')) {
             return 'FALL';
@@ -677,7 +677,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 140,
       editable: true,
       valueFormatter: (value) => {
-        return Number(value.value[0]);
+        return Number(value[0]);
       },
     },
 
@@ -720,25 +720,23 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       headerName: 'Duties',
       width: 180,
       editable: true,
-      valueFormatter: (value) => {
-        return `${'UPI in ' + value.value.replace(/,/g, ' ')}`;
-      },
+      valueFormatter: (value) =>
+        `UPI in ${String(value ?? '').replace(/,/g, ' ')}`,
     },
 
     {
       field: 'fte',
       headerName: 'FTE',
       width: 110,
-      editable: true,
-      valueGetter: (params) => {
-        if (params.row.hours != undefined) {
-          return Math.floor((params.row.hours[0] / 1.029411 / 40) * 100) / 100;
-        } else {
-          return ' ';
-        }
+      // If FTE is derived from hours, editable should probably be false
+      editable: false,
+      valueGetter: (_value, row) => {
+        const h = row.hours?.[0];
+        if (typeof h !== 'number') return null;
+        return Math.floor((h / 1.029411 / 40) * 100) / 100;
       },
+      valueFormatter: (value) => (value == null ? '' : String(value)),
     },
-
     {
       field: 'Imported',
       headerName: 'Imported',
@@ -754,11 +752,11 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       width: 140,
       editable: false,
       valueFormatter: (value) => {
-        if (value.value === undefined) {
+        if (value === undefined) {
           return 'No';
         }
 
-        return value.value;
+        return value;
       },
     },
   ];
