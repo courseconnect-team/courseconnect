@@ -27,7 +27,7 @@ const GetAnnouncementTimestamp = (userId) => {
     if (!data) return;
 
     if (data.timestamp) {
-      setTimestamp(data.timestamp);
+      setTimestamp(data.lastSeenAnnouncementsAt);
     } else {
       //Temp Code
       const d = new Date();
