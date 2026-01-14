@@ -11,5 +11,6 @@ export const useUserInfo = () => {
 export const useUserTimestamp = () => {
   const { user } = useAuth();
   const [timestamp, loading, error] = GetAnnouncementTimestamp(user?.uid);
+
   return [user, timestamp, loading, error];
 };

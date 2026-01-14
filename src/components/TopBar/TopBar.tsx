@@ -33,7 +33,6 @@ export default function TopNav() {
     channel: 'inApp',
     realtime: true,
   });
-
   const onNotifications = () => {};
   const display = (v: unknown, fallback = 'Not listed'): string => {
     if (v == null) return fallback; // null/undefined
@@ -66,7 +65,7 @@ export default function TopNav() {
           <Link href="/announcements">
             <IconButton onClick={onNotifications} className="!text-[#FFFFFF]">
               {/* <Badge color="error" overlap="circular" variant="dot"> */}
-              {unread ? (
+              {(unread?.length ?? 0) > 0 ? (
                 <NotificationsActiveOutlinedIcon fontSize="medium" />
               ) : (
                 <NotificationsNoneOutlinedIcon fontSize="medium" />

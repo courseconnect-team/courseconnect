@@ -49,13 +49,6 @@ function toDate(v: any): Date | null {
   return null;
 }
 
-function toMillis(v: any): number | null {
-  if (!v) return null;
-  if (v instanceof Date) return v.getTime();
-  if (typeof v.toMillis === 'function') return v.toMillis(); // Firestore Timestamp
-  return null;
-}
-
 function mapDoc(doc: firebase.firestore.QueryDocumentSnapshot): Announcement {
   const d = doc.data() as any;
 
@@ -239,11 +232,11 @@ export function useFetchAnnouncementsForAccount(
     return out;
   }, [query.data]);
 
-  const lastSeenMs = toMillis(useUserTimestamp());
+  const [timestamp] = useUserTimestamp();
   const { unread, read } = announcements.reduce(
     (acc, a) => {
-      const tMs = toMillis(a.scheduledAt ?? a.createdAt);
-      const isUnread = lastSeenMs === null ? true : (tMs ?? 0) > lastSeenMs;
+      const tMs = a.scheduledAt ?? a.createdAt ?? new Date(Date.now());
+      const isUnread = timestamp === null ? true : tMs > timestamp;
 
       (isUnread ? acc.unread : acc.read).push(a);
       return acc;
