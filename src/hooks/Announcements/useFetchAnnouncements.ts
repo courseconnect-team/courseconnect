@@ -5,14 +5,16 @@ import {
   AudienceDepartment,
   AudienceRole,
 } from '@/types/announcement';
+import { useUserTimestamp } from '../User/useGetUserInfo';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { Role } from '@/types/User';
 
 type UseFetchAnnouncementsOptions = {
   limit?: number;
   realtime?: boolean;
-  userRole: AudienceRole;
+  userRole: Role;
   userEmail: string;
   userDepartment: AudienceDepartment;
   channel?: string; // default: 'inApp'
@@ -30,6 +32,29 @@ type UseFetchAnnouncementsOptions = {
    */
   onlyPinned?: boolean;
 };
+function convertRole(role: string): AudienceRole {
+  switch (role) {
+    case 'admin':
+      return 'admin';
+    case 'faculty':
+      return 'faculty';
+    default:
+      return 'student';
+  }
+}
+function toDate(v: any): Date | null {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+  if (typeof v.toDate === 'function') return v.toDate(); // Firestore Timestamp
+  return null;
+}
+
+function toMillis(v: any): number | null {
+  if (!v) return null;
+  if (v instanceof Date) return v.getTime();
+  if (typeof v.toMillis === 'function') return v.toMillis(); // Firestore Timestamp
+  return null;
+}
 
 function mapDoc(doc: firebase.firestore.QueryDocumentSnapshot): Announcement {
   const d = doc.data() as any;
@@ -40,10 +65,10 @@ function mapDoc(doc: firebase.firestore.QueryDocumentSnapshot): Announcement {
     bodyMd: d.bodyMd ?? '',
     pinned: !!d.pinned,
 
-    createdAt: d.createdAt,
-    updatedAt: d.updatedAt,
-    scheduledAt: d.scheduledAt,
-    expiresAt: d.expiresAt,
+    createdAt: toDate(d.createdAt),
+    updatedAt: toDate(d.updatedAt),
+    scheduledAt: toDate(d.scheduledAt),
+    expiresAt: toDate(d.expiresAt),
 
     senderId: d.senderId ?? '',
     senderName: d.senderName ?? null,
@@ -81,7 +106,7 @@ export function useFetchAnnouncementsForAccount(
     limit = 20,
     realtime = true,
     channel = 'inApp',
-    userRole,
+    userRole: roleKey,
     userEmail,
     userDepartment,
     includePending = false,
@@ -89,16 +114,16 @@ export function useFetchAnnouncementsForAccount(
   } = options;
 
   const queryClient = useQueryClient();
-
   const baseKey = announcementsQueryKey({
     limit,
     channel,
-    userRole,
+    userRole: roleKey,
     userEmail,
     userDepartment,
     includePending,
     onlyPinned,
   });
+  const userRole = convertRole(roleKey);
 
   const applyCommon = (q: firebase.firestore.Query) => {
     q = q.where(`channels.${channel}`, '==', true);
@@ -170,7 +195,7 @@ export function useFetchAnnouncementsForAccount(
     queryKey: baseKey,
     initialPageParam: null as firebase.firestore.QueryDocumentSnapshot | null,
     queryFn: async ({ pageParam }) => fetchPage(pageParam),
-    getNextPageParam: (lastPage) => lastPage.lastDoc, // if null, no more
+    getNextPageParam: (lastPage) => lastPage.lastDoc,
     staleTime: 10_000,
   });
 
@@ -214,8 +239,20 @@ export function useFetchAnnouncementsForAccount(
     return out;
   }, [query.data]);
 
+  const lastSeenMs = toMillis(useUserTimestamp());
+  const { unread, read } = announcements.reduce(
+    (acc, a) => {
+      const tMs = toMillis(a.scheduledAt ?? a.createdAt);
+      const isUnread = lastSeenMs === null ? true : (tMs ?? 0) > lastSeenMs;
+
+      (isUnread ? acc.unread : acc.read).push(a);
+      return acc;
+    },
+    { unread: [] as Announcement[], read: [] as Announcement[] }
+  );
   return {
-    announcements,
+    read,
+    unread,
     loading: query.isLoading,
     loadingMore: query.isFetchingNextPage,
     hasMore: query.hasNextPage,

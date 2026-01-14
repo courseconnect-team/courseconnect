@@ -23,6 +23,11 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           icon: DescriptionOutlinedIcon,
         },
         { label: 'Status', to: '/status', icon: CheckBoxOutlinedIcon },
+        {
+          label: 'Announcements',
+          to: '/announcements',
+          icon: CampaignOutlinedIcon,
+        },
       ];
 
     /* ────────────────────────────────── Faculty ────────────────────────────────── */
@@ -34,6 +39,11 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           icon: DescriptionOutlinedIcon,
         },
         { label: 'Courses', to: '/courses', icon: BookOutlinedIcon },
+        {
+          label: 'Announcements',
+          to: '/announcements',
+          icon: CampaignOutlinedIcon,
+        },
       ];
 
     /* ─────────────────────────────────── Admin ─────────────────────────────────── */
@@ -142,20 +152,39 @@ export const getCourses = (userRole: Role): NavbarItem[] => {
       return [];
     case 'faculty':
       return [
-        { label: 'Applications', to: '/applications', icon: DescriptionOutlinedIcon },
+        {
+          label: 'Applications',
+          to: '/applications',
+          icon: DescriptionOutlinedIcon,
+        },
         { label: 'Courses', to: '/courses', icon: BookOutlinedIcon },
       ];
     case 'admin':
       return [
         { label: 'Users', to: '/users', icon: PersonOutlineOutlinedIcon },
-        { label: 'Application', to: '/application', icon: DescriptionOutlinedIcon },
+        {
+          label: 'Application',
+          to: '/application',
+          icon: DescriptionOutlinedIcon,
+        },
         { label: 'Courses', to: '/courses', icon: BookOutlinedIcon },
-        { label: 'Scheduling', to: '/scheduling', icon: CalendarTodayOutlinedIcon },
-        { label: 'Faculty Stats', to: '/faculty-stats', icon: BarChartOutlinedIcon },
-        { label: 'Announcements', to: '/announcements', icon: CampaignOutlinedIcon },
+        {
+          label: 'Scheduling',
+          to: '/scheduling',
+          icon: CalendarTodayOutlinedIcon,
+        },
+        {
+          label: 'Faculty Stats',
+          to: '/faculty-stats',
+          icon: BarChartOutlinedIcon,
+        },
+        {
+          label: 'Announcements',
+          to: '/announcements',
+          icon: CampaignOutlinedIcon,
+        },
       ];
     default:
       return [];
   }
 };
-
