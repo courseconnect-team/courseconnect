@@ -9,8 +9,8 @@ export const getCurrentSemester = (): SemesterName => {
   const month = now.getMonth() + 1; // 0 = Jan
   const day = now.getDate();
 
-  const term =
-    month < 5 && day < 6 ? 'Spring' : month < 8 && day < 13 ? 'Summer' : 'Fall';
+  const term = month < 5 ? 'Spring' : month < 8 ? 'Summer' : 'Fall';
+
   return `${term} ${year}` as SemesterName;
 };
 
@@ -20,7 +20,7 @@ export function generateSemesters(startYear = 2023): SemesterName[] {
   for (let y = startYear; y <= currentYear; y++) {
     out.push(`Spring ${y}`, `Summer ${y}`, `Fall ${y}`);
   }
-  // Most recent first, if you prefer:
+
   return out.reverse() as SemesterName[];
 }
 
@@ -30,7 +30,6 @@ const generateSemesterNames = (
 ): SemesterName[] => {
   const result: SemesterName[] = [start];
   let [term, year] = start.split(' ') as ['Spring' | 'Summer' | 'Fall', string];
-
   for (let i = 0; i < count - 1; i++) {
     if (term === 'Spring') term = 'Summer';
     else if (term === 'Summer') term = 'Fall';
