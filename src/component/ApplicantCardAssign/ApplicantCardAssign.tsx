@@ -20,7 +20,6 @@ import {
   Typography,
 } from '@mui/material';
 import FocusTrap from '@mui/material/Unstable_TrapFocus';
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
   id: string;
   uf_email: string;
@@ -91,8 +90,8 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
 
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      let doc = await getDoc(statusRef);
-      let coursesMap = doc.data()?.courses;
+      let docSnap = await statusRef.get();
+      let coursesMap = docSnap.data()?.courses;
 
       coursesMap[className] = 'applied';
       await statusRef.update({ courses: coursesMap });

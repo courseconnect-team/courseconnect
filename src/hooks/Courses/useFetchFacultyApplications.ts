@@ -1,12 +1,6 @@
 // firebase/courses.ts
 import firebase from '@/firebase/firebase_config';
-import {
-  collection,
-  collectionGroup,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
+import 'firebase/firestore';
 import {
   useQuery,
   UseQueryResult,
@@ -29,14 +23,17 @@ export async function getFacultyCourses(
 ): Promise<CourseTuple[]> {
   // semesters/{termId}/courses
   const db = firebase.firestore();
-  const col = collection(db, 'semesters', semester, 'courses');
-  const q = query(col, where('professor_emails', 'array-contains', uemail));
+  const q = db
+    .collection('semesters')
+    .doc(semester)
+    .collection('courses')
+    .where('professor_emails', 'array-contains', uemail);
 
-  const snap = await getDocs(q);
+  const snap = await q.get();
   const rows: CourseTuple[] = [];
-  snap.forEach((doc) => {
-    const d = doc.data() as CourseDoc;
-    if (d.code && d.title) rows.push([doc.id, d.code, d.title, semester]);
+  snap.forEach((docSnap) => {
+    const d = docSnap.data() as CourseDoc;
+    if (d.code && d.title) rows.push([docSnap.id, d.code, d.title, semester]);
   });
   return rows;
 }
@@ -48,19 +45,18 @@ export async function getFacultyCoursesAllTerms(
   const db = firebase.firestore();
 
   // requires a composite index if you also filter/order by other fields
-  const q = query(
-    collectionGroup(db, 'courses'),
-    where('professor_emails', 'array-contains', uemail)
-  );
-  const snap = await getDocs(q);
+  const q = db
+    .collectionGroup('courses')
+    .where('professor_emails', 'array-contains', uemail);
+  const snap = await q.get();
 
   const rows: CourseTuple[] = [];
-  snap.forEach((doc) => {
-    const d = doc.data() as CourseDoc;
+  snap.forEach((docSnap) => {
+    const d = docSnap.data() as CourseDoc;
     // recover the termId from the parent doc id (semesters/{termId}/courses/{offeringId})
-    const termId = doc.ref.parent.parent?.id as SemesterName;
+    const termId = docSnap.ref.parent.parent?.id as SemesterName;
     if (d.code && d.title && termId)
-      rows.push([doc.id, d.code, d.title, termId]);
+      rows.push([docSnap.id, d.code, d.title, termId]);
   });
   return rows;
 }

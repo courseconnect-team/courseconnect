@@ -1,8 +1,8 @@
 import firebase from '@/firebase/firebase_config';
+import 'firebase/firestore';
 import type { CourseDetails } from '@/types/query';
 import { useQuery } from '@tanstack/react-query';
 import { SemesterName } from '../useSemesterOptions';
-import { doc, getDoc } from 'firebase/firestore';
 
 // Generic Firestore fetch by id + flag
 async function fetchCourse(
@@ -12,8 +12,12 @@ async function fetchCourse(
 ): Promise<CourseDetails | null> {
   const db = firebase.firestore();
 
-  const ref = await doc(db, 'semesters', semester, 'courses', courseId);
-  const snap = await getDoc(ref);
+  const ref = db
+    .collection('semesters')
+    .doc(semester)
+    .collection('courses')
+    .doc(courseId);
+  const snap = await ref.get();
   if (!snap.exists) return null;
 
   const data = snap.data()!;

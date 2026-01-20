@@ -12,8 +12,6 @@ import Button from '@mui/material/Button';
 import { wrap } from 'module';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
   id: string;
   uf_email: string;
@@ -111,8 +109,8 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      let doc = await getDoc(statusRef);
-      let coursesMap = doc.data().courses;
+      let docSnap = await statusRef.get();
+      let coursesMap = docSnap.data()?.courses;
 
       coursesMap[className] = 'accepted';
       await statusRef.update({ courses: coursesMap });
@@ -127,8 +125,8 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
     event.preventDefault();
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      let doc = await getDoc(statusRef);
-      let coursesMap = doc.data().courses;
+      let docSnap = await statusRef.get();
+      let coursesMap = docSnap.data()?.courses;
 
       coursesMap[className] = 'denied';
       await statusRef.update({ courses: coursesMap });

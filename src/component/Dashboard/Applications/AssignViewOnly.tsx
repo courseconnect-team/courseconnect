@@ -8,7 +8,6 @@ import 'firebase/firestore';
 import { Button, Grid, Input } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { table } from 'console';
-import { setDoc } from 'firebase/firestore';
 
 export interface AppViewProps {
   uid: string;
@@ -35,7 +34,7 @@ export default function AppView({ uid }: AppViewProps) {
   const docRef = applicationsRef.doc(uid);
 
   function handleSave(event: any) {
-    setDoc(docRef, {
+    docRef.set({
       name: studentName,
       email: studentEmail,
       ufid: studentId,

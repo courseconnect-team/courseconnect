@@ -28,8 +28,6 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { alpha, styled } from '@mui/material/styles';
 import { gridClasses } from '@mui/x-data-grid';
-
-import { getDoc, getDocs, collection, query, where } from 'firebase/firestore';
 import {
   Button,
   Dialog,
@@ -211,9 +209,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
       .map((classNumber) => classNumber.trim());
 
     // get the courses collection
-    const coursesRef = collection(firebase.firestore(), 'courses');
-    const q = query(coursesRef, where('id', 'in', classNumberArray));
-    const snapshot = await getDocs(q);
+    const coursesRef = firebase.firestore().collection('courses');
+    const q = coursesRef.where('id', 'in', classNumberArray);
+    const snapshot = await q.get();
 
     // the snapshot will contain all the courses that match the class numbers in the array
     // therefore, if the length of the array is greater than the length of the snapshot,

@@ -1,4 +1,3 @@
-import { collection, query, where, getDocs } from 'firebase/firestore';
 import {
   useQuery,
   keepPreviousData,
@@ -6,6 +5,7 @@ import {
 } from '@tanstack/react-query';
 import * as React from 'react';
 import firebase from '@/firebase/firebase_config';
+import 'firebase/firestore';
 import { SemesterName } from '../useSemesterOptions';
 
 export type CourseTuple = [string, string, string, SemesterName];
@@ -35,18 +35,17 @@ export async function getFacultyCoursesMany(
 
   const results = await Promise.all(
     chunks.map(async (semChunk) => {
-      const q = query(
-        collection(db, 'courses'),
-        where('semester', 'in', semChunk),
-        where('professor_emails', 'array-contains', uemail)
-      );
-      const snap = await getDocs(q);
+      const q = db
+        .collection('courses')
+        .where('semester', 'in', semChunk)
+        .where('professor_emails', 'array-contains', uemail);
+      const snap = await q.get();
       const rows: CourseRow[] = [];
-      snap.forEach((doc) => {
-        const d = doc.data() as CourseDoc;
+      snap.forEach((docSnap) => {
+        const d = docSnap.data() as CourseDoc;
         if (d.code && d.title)
           rows.push({
-            id: doc.id,
+            id: docSnap.id,
             code: d.code,
             title: d.title,
             semester: d.semester,

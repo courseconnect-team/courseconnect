@@ -9,8 +9,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
-
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
   id: string;
   uf_email: string;
@@ -66,8 +64,8 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
 
     try {
       const statusRef = db.collection('applications').doc(currentStu);
-      let doc = await getDoc(statusRef);
-      let coursesMap = doc.data().courses;
+      let docSnap = await statusRef.get();
+      let coursesMap = docSnap.data()?.courses;
 
       coursesMap[className] = 'applied';
       await statusRef.update({ courses: coursesMap });

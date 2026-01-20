@@ -5,7 +5,6 @@ import { Button } from '@mui/material';
 import './style.css';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
 import DeleteUserButton from './DeleteUserButton';
-import { updateProfile } from 'firebase/auth';
 
 interface ProfileProps {
   userRole: string;
@@ -28,7 +27,7 @@ export default function Profile(props: ProfileProps) {
     e.preventDefault(); // Prevent the form from submitting in the traditional way
     if (updatedFirst.trim() !== '' && updatedLast.trim() !== '') {
       try {
-        await updateProfile(user, {
+        await user?.updateProfile({
           displayName: `${updatedFirst} ${updatedLast}`,
         });
         window.location.reload();

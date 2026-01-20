@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Role } from '@/types/User';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { updateProfile } from 'firebase/auth';
 import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog';
 import { HandleDeleteUser } from '@/firebase/auth/auth_delete_prompt';
 import { PrimaryButton } from '@/components/Buttons/PrimaryButton';
@@ -111,7 +110,7 @@ export default function ProfileSection({
     if (updatedFirst.trim() !== '' && updatedLast.trim() !== '') {
       if (updatedLast !== initial.last || updatedFirst !== initial.first) {
         try {
-          await updateProfile(user, {
+          await user?.updateProfile({
             displayName: `${updatedFirst} ${updatedLast}`,
           });
           // optional: call onSaveName?.(`${updatedFirst} ${updatedLast}`);

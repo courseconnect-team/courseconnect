@@ -1,6 +1,5 @@
 import * as React from 'react';
-import type firebase from 'firebase/app';
-import 'firebase/firestore';
+import 'firebase/compat/firestore';
 import type { Announcement } from '@/types/announcement';
 
 type TimestampLike =

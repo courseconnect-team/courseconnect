@@ -1,5 +1,5 @@
 import firebase from '../firebase_config';
-import { signOut as firebaseSignOut } from 'firebase/auth';
+import 'firebase/compat/auth';
 import { isE2EMode } from '@/utils/featureFlags';
 
 // Lazily get auth so it doesn't run during import/SSR/build

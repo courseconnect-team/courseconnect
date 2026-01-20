@@ -35,7 +35,6 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserName from '@/firebase/util/GetUserName';
 import { alpha, styled } from '@mui/material/styles';
@@ -119,7 +118,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .collection('applications')
       .doc(id.toString());
 
-    const doc = await getDoc(statusRef);
+    const doc = await statusRef.get();
     setCodes(
       Object.entries(doc.data().courses)
         .filter(([key, value]) => value == 'approved')
@@ -136,7 +135,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       .collection('applications')
       .doc(id.toString());
 
-    const doc = await getDoc(statusRef);
+    const doc = await statusRef.get();
 
     setCodes(
       Object.entries(doc.data().courses)
@@ -167,13 +166,13 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .firestore()
         .collection('applications')
         .doc(student_uid.toString());
-      let doc = await getDoc(statusRef);
+      let doc = await statusRef.get();
 
       const courseDetails = firebase
         .firestore()
         .collection('courses')
         .doc(valueRadio);
-      const courseDoc = await getDoc(courseDetails);
+      const courseDoc = await courseDetails.get();
 
       // Update student's application to approved
       await firebase
@@ -379,12 +378,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       // if there is an intersection, then the faculty member can see the application
 
       // find courses that the faculty member teaches
-      const facultyCourses = collection(firebase.firestore(), 'courses');
-      const q = query(
-        facultyCourses,
-        where('professor_emails', 'array-contains', user?.email)
-      );
-      const facultyCoursesSnapshot = getDocs(q);
+      const facultyCoursesQuery = firebase
+        .firestore()
+        .collection('courses')
+        .where('professor_emails', 'array-contains', user?.email);
+      const facultyCoursesSnapshot = facultyCoursesQuery.get();
 
       // now we have every course that the faculty member teaches
       // we need the course code from each of them

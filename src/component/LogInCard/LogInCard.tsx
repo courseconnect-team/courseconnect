@@ -1,5 +1,6 @@
 'use client';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import firebase from '@/firebase/firebase_config';
+import 'firebase/compat/auth';
 
 import React from 'react';
 import Dialog from '@mui/material/Dialog';
@@ -40,8 +41,9 @@ export const LogInCard = ({
   const handleForgotPassword = (e: any) => {
     //handleSignOut();
     e.preventDefault();
-    const auth = getAuth();
-    sendPasswordResetEmail(auth, emailVal)
+    const auth = firebase.auth();
+    auth
+      .sendPasswordResetEmail(emailVal)
       .then(() => {
         // Password reset email sent!
         // ..

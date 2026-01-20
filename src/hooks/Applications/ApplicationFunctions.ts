@@ -1,6 +1,6 @@
 // api/applications.ts
-import { doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
+import 'firebase/firestore';
 
 type ApproveParams = { documentId: string; classCode: string };
 type DenyParams = ApproveParams & {
@@ -16,10 +16,10 @@ async function setCourseStatusAtomic(
   classCode: string,
   status: 'approved' | 'denied'
 ) {
-  const ref = doc(db, 'applications', documentId);
-  await runTransaction(db, async (tx) => {
+  const ref = db.collection('applications').doc(documentId);
+  await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error('Application not found');
+    if (!snap.exists) throw new Error('Application not found');
 
     // Optionally validate existing map:
     // const data = snap.data() as any;

@@ -1,18 +1,11 @@
 import * as React from 'react';
 import {
-  collection,
-  query,
-  where,
-  getDocs,
-  FieldPath,
-} from 'firebase/firestore';
-import {
   useQuery,
-  useQueryClient,
   keepPreviousData,
   type UseQueryResult,
 } from '@tanstack/react-query';
 import firebase from '@/firebase/firebase_config';
+import 'firebase/firestore';
 import { ApplicationData, AppRow } from '@/types/query';
 export type ByStatus = Record<string, AppRow[]>;
 
@@ -36,7 +29,7 @@ async function fetchApplicationsForCourse(
   statuses: string[]
 ): Promise<AppRow[]> {
   if (!statuses.length) return [];
-  const field = new FieldPath('courses', courseKey);
+  const field = new firebase.firestore.FieldPath('courses', courseKey);
 
   // Firestore 'in' supports up to 10 values; chunk if needed
   const chunks: string[][] = [];
@@ -45,8 +38,8 @@ async function fetchApplicationsForCourse(
 
   const batches = await Promise.all(
     chunks.map(async (stk) => {
-      const q = query(collection(db, 'applications'), where(field, 'in', stk));
-      const snap = await getDocs(q);
+      const q = db.collection('applications').where(field, 'in', stk);
+      const snap = await q.get();
       const out: AppRow[] = [];
       snap.forEach((doc) => {
         const data = doc.data() as ApplicationData;
@@ -74,11 +67,8 @@ async function fetchApplicationsForCourse(
 }
 
 async function fetchAssignedForCourse(courseKey: string): Promise<AppRow[]> {
-  const q = query(
-    collection(db, 'assignments'),
-    where('class_codes', '==', courseKey)
-  );
-  const snap = await getDocs(q);
+  const q = db.collection('assignments').where('class_codes', '==', courseKey);
+  const snap = await q.get();
   const out: AppRow[] = [];
   snap.forEach((doc) => {
     const data = doc.data() as ApplicationData;

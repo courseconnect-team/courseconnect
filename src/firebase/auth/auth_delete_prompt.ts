@@ -1,20 +1,19 @@
 import firebase from '../firebase_config';
-import {
-  User,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-  EmailAuthCredential,
-} from 'firebase/auth';
+import 'firebase/compat/auth';
 import { deleteUserHTTPRequest } from './auth_delete_user';
 
 const auth = firebase.auth();
 
 // TODO(you): prompt the user to re-provide their sign-in credentials
 export async function HandleDeleteUser(email: string, password: string) {
-  const credential = EmailAuthProvider.credential(email, password);
+  const credential = firebase.auth.EmailAuthProvider.credential(
+    email,
+    password
+  );
   const user = auth.currentUser;
 
-  reauthenticateWithCredential(user as User, credential as EmailAuthCredential)
+  user
+    ?.reauthenticateWithCredential(credential)
     .then(async () => {
       console.log('User re-authenticated.');
       // now that the user is re-authenticated, they may be deleted.

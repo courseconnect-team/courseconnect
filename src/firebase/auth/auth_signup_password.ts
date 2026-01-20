@@ -1,12 +1,6 @@
 import { isE2EMode } from '@/utils/featureFlags';
 import firebase from '../firebase_config';
-import {
-  User,
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  updateProfile,
-} from 'firebase/auth';
-isE2EMode;
+import 'firebase/compat/auth';
 
 export default async function handleSignUp(
   name: string,
@@ -23,30 +17,30 @@ export default async function handleSignUp(
   const auth = firebase.auth();
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password).catch(
-      (error) => {
+    await auth
+      .createUserWithEmailAndPassword(email, password)
+      .catch((error) => {
         console.log(error);
         if (error.message.includes('already in use')) {
           errorTag = '-5';
         } else {
           errorTag = '-2';
         }
-      }
-    );
+      });
     if (errorTag != '') {
       return errorTag;
     }
-    await sendEmailVerification(auth.currentUser as User).catch((error) => {
+    await auth.currentUser?.sendEmailVerification().catch((error) => {
       console.log(error);
       errorTag = '-3';
     });
-    await updateProfile(auth.currentUser as User, { displayName: name }).catch(
-      (error) => {
+    await auth.currentUser
+      ?.updateProfile({ displayName: name })
+      .catch((error) => {
         console.log(error);
 
         errorTag = '-4';
-      }
-    );
+      });
     if (errorTag === '') {
       console.log('User created successfully!!!');
       return auth.currentUser?.uid as string;
