@@ -1,10 +1,13 @@
 import firebase from '../firebase_config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import toast, { Toaster } from 'react-hot-toast';
-const auth = firebase.auth();
+import { isE2EMode } from '@/utils/featureFlags';
 var tag: boolean = true;
 
 async function handleSignIn(email: string, password: string): Promise<boolean> {
+  if (isE2EMode()) return true;
+  const auth = firebase.auth();
+
   await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       // Signed in

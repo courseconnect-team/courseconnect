@@ -4,11 +4,10 @@
   flex-direction: row;
   justify-content: center;
   position: relative;
-  overflow-x: hidden;
 }
 
 .loginlowfi .logincardinstance {
-  left: 55% ;
+  left: 58% ;
   position: absolute ;
   top: 150px ;
 }
@@ -25,7 +24,7 @@
 }
 
 .loginlowfi .overlap2 {
-  height: 777px;
+  height: 1100px;
   left: 0;
   position: relative;
   top: 0;
@@ -42,7 +41,7 @@
 
 .loginlowfi .signintitle {
   height: 154px;
-  left: 73px;
+  left: 8% ;
   position: absolute;
   top: 141px;
   width: 100%;
@@ -101,8 +100,7 @@
   left: 0;
   letter-spacing: 0;
   line-height: normal;
-  top: 48px;
-  width: 549px;
+
 }
 
 .loginlowfi .registerheretext {

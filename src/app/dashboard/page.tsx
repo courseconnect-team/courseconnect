@@ -1,35 +1,22 @@
 'use client';
-import React from 'react';
-import { useAuth } from '@/firebase/auth/auth_context';
-import GetUserRole from '@/firebase/util/GetUserRole';
-import BottomMenu from '@/components/BottomMenu/BottomMenu';
 
-// dashboard components
-import DashboardWelcome from '@/components/Dashboard/Welcome/Welcome';
-import Profile from '@/components/Dashboard/Profile/Profile';
-import Users from '@/components/Dashboard/Users/Users';
-import Courses from '@/components/Dashboard/Courses/Courses';
-import Applications from '@/components/Dashboard/Applications/Applications';
-import Application from '@/components/Dashboard/Applications/Application';
-import ShowApplicationStatus from '@/components/Dashboard/Applications/AppStatus';
-import { Toaster } from 'react-hot-toast';
-import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
+import { getNavItems } from '@/hooks/useGetItems';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
+import DashboardSections from './DashboardSections';
+import PageLayout from '@/components/PageLayout/PageLayout';
+import { FC, useEffect, useState } from 'react';
+interface pageProps {}
+const NewDashboard: FC<pageProps> = () => {
+  const [user, role, loading, error] = useUserInfo();
 
-// user information reference: https://firebase.google.com/docs/auth/web/manage-users
-
-export default function Dashboard() {
-  const { user } = useAuth();
-  const [role, loading, error] = GetUserRole(user?.uid);
-  const [activeComponent, setActiveComponent] = React.useState('welcome');
-
-  const handleComponentChange = (componentName: string) => {
-    setActiveComponent(componentName);
-  };
+  // ② handle loading / error
+  if (loading) return <div>Loading…</div>;
+  if (error) return <div>Error loading user info</div>;
 
   return (
-    <>
-      <Toaster />
-      <DashboardWelcome user={user} userRole={role as string} emailVerified={user.emailVerified} />
-    </>
+    <PageLayout mainTitle="Dashboard" navItems={getNavItems(role)}>
+      <DashboardSections navItems={getNavItems(role)} role={role} />
+    </PageLayout>
   );
-}
+};
+export default NewDashboard;

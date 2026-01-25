@@ -1,0 +1,74 @@
+.text-wrapper-11 {
+  
+  font-family: 'SF Pro Display-Medium', Helvetica;
+  color: #000;
+  text-align: left;
+  margin-top: 18px;
+  margin-bottom: 26px;
+
+}
+.courses {
+  font-size: 36px;
+}
+.text-past {
+  margin-top: 18px;
+  font-size: 36px;
+  font-weight: 500;
+  font-family: 'SF Pro Display-Medium', Helvetica;
+  color: #000;
+  margin-bottom: 26px;
+}
+
+.ta {
+  font-size: 40px;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: row;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-top: 175px;
+  justify-content: space-around;
+  width: calc(100% - 40px); 
+  box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+  .page-container {
+    padding-left: 40px; /* Adjust padding */
+    gap: 10%; /* Decrease gap */
+  }
+}
+
+@media (max-width: 900px) {
+  .page-container {
+    padding-left: 30px; /* Adjust padding */
+    gap: 7%; /* Further decrease gap */
+  }
+}
+
+@media (max-width: 600px) {
+  .page-container {
+    padding-left: 20px; /* Adjust padding */
+    gap: 5%; /* Minimal gap */
+  }
+}
+
+
+
+.class-cards-container {
+  display: flex;
+  margin-top: 8px;
+  height: 100%;
+}
+.class {
+  margin: 22px;
+}
+.full-name-and-bio-instance {
+  left: 50%;
+  position: absolute !important;
+  top: 200px !important;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
+}

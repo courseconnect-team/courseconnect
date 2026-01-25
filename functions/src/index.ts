@@ -17,6 +17,9 @@ import {
   sendFacultyNotificationEmail,
   sendUnapprovedUserNotificationEmail,
   sendFacultyAssignedNotificationEmail,
+  sendRenewTAEmail,
+  sendApplicantToFaculty,
+  sendStatusUpdateToApplicant,
 } from './nodemailer';
 
 const admin = require('firebase-admin');
@@ -34,6 +37,12 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
   } else {
     const { type, data } = req.body;
     switch (type) {
+      case 'sendApplicantToFaculty':
+        sendApplicantToFaculty(data.project_title);
+        break;
+      case 'sendStatusUpdateToApplicant':
+        sendStatusUpdateToApplicant(data.project_title, data.status);
+        break;
       case 'forgotPassword':
         sendForgotPasswordEmail(data.user, data.resetLink);
         break;
@@ -72,6 +81,9 @@ exports.sendEmail = functions.https.onRequest((req, res) => {
         break;
       case 'unapprovedUser':
         sendUnapprovedUserNotificationEmail(data.user);
+        break;
+      case 'renewTA':
+        sendRenewTAEmail(data.userEmail, data.message, data.subject);
         break;
       default:
         res.status(400).json({ message: 'Invalid email type' });
@@ -311,4 +323,3 @@ export const deleteUserFromID = functions.https.onRequest(
     }
   }
 );
-module.exports = { db, auth }; // this is needed to export the db to work with an API for the research job board

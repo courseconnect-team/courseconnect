@@ -1,0 +1,60 @@
+/* components/HeaderCard/style.css */
+.header {
+  position: relative;
+  height: 300px;
+  background: linear-gradient(
+    90deg,
+    #21207a 0%,
+    #34218f 10%,
+    #33228e 20%,
+    #1b5c93 30%,
+    #159ca5 35%,
+    #19a0a7 38%,
+    #2196a7 41%,
+    #306e9c 46%,
+    #35228f 60%,
+    #34218f 70%,
+    #241b75 80%,
+    #231d7b 90%,
+    #21207a 100%
+  );
+  display: flex;
+  
+  padding: 1.5rem 1rem;
+  color: #fff;
+ 
+}
+.header .ece-logo-png-2 {
+  position:absolute;
+  margin-left: 10px;
+  }
+  
+  .header .top-nav-bar-signed-in {
+    position: absolute;
+    right: 85px;
+  
+  }
+  
+.header .text-wrapper-10 {
+  color: #ffffff;
+  font-family: 'SF Pro Display-Medium', Helvetica;
+  font-size: 50px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  left: 50%;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
+  top: 120px;
+}
+.header .crumbs{
+  position:absolute;
+  top:360px;
+  left:50px;
+}
+@media (max-width: 570px) {
+  .ece-logo-png-2 {
+    display: none;
+  }
+}
