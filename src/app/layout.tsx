@@ -1,5 +1,6 @@
 'use client';
 import { AuthProvider } from '@/firebase/auth/auth_context';
+import { AnnouncementsProvider } from '@/contexts/AnnouncementsContext';
 import React, { useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
