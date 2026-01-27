@@ -8,6 +8,9 @@ import GetUserRole from '@/firebase/util/GetUserRole';
 import 'firebase/firestore';
 import Applications from '@/component/Dashboard/Applications/Applications';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import PageLayout from '@/components/PageLayout/PageLayout';
+import { CssBaseline } from '@mui/material';
+import { getNavItems } from '@/hooks/useGetItems';
 
 export default function AdminApplications() {
   let { user } = useAuth();
@@ -17,22 +20,10 @@ export default function AdminApplications() {
   if (role !== 'admin') return <div> Forbidden </div>;
 
   return (
-    <>
+    <PageLayout mainTitle="Applications" navItems={getNavItems(role)}>
+      <CssBaseline />
       <Toaster />
-      <HeaderCard text="Applications & Assignments" />
-      <Box
-        sx={{
-          marginTop: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '100%',
-        }}
-      >
-        <Box sx={{ mb: 2, width: '120%' }}>
-          <Applications userRole={role as string} />
-        </Box>
-      </Box>
-    </>
+      <Applications userRole={role as string} />
+    </PageLayout>
   );
 }
