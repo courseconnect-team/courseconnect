@@ -43,8 +43,15 @@ export default function ApplicationSections({
                 .map(({ label, to, icon: Icon }: NavbarItem) => (
                   <DashboardCard key={to} icon={Icon} label={label} to={to} />
                 ))}
+
+              {navItems
+                .filter((item) => item.type === 'supervised-teaching')
+                .map(({ label, to, icon: Icon }: NavbarItem) => (
+                  <DashboardCard key={to} icon={Icon} label={label} to={to} />
+                ))}
             </div>
           </div>
+
           <div>
             <h1 className="text-h6 mb-3 ">Research</h1>
             <p className="text-sm">No available applications at this time.</p>
