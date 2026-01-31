@@ -2,17 +2,37 @@ import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { AppBar } from '@mui/material';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
+import Badge from '@mui/material/Badge';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import NotificationsActiveOutlinedIcon from '@mui/icons-material/NotificationsActiveOutlined';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import { EceLogoPng } from '@/component/EceLogoPng/EceLogoPng';
 import Link from 'next/link';
 import { Role, roleMapping } from '@/types/User';
-import { useAnnouncements } from '@/contexts/AnnouncementsContext';
+import { useFetchAnnouncementsForAccount } from '@/hooks/Announcements/useFetchAnnouncements';
+// type TopNavProps = {
+//   notification?: boolean;
+// };
 
 export default function TopNav() {
   const [user, role, loading, error] = useUserInfo();
-  const { unread } = useAnnouncements();
+  const uemail = user?.email;
+  const {
+    read,
+    unread,
+    loading: announcementLoading,
+    loadingMore,
+    hasMore,
+    error: fetchError,
+    refresh,
+    loadMore,
+  } = useFetchAnnouncementsForAccount({
+    userRole: role,
+    userEmail: uemail,
+    userDepartment: 'ECE',
+    channel: 'inApp',
+    realtime: true,
+  });
   const onNotifications = () => {};
   const display = (v: unknown, fallback = 'Not listed'): string => {
     if (v == null) return fallback; // null/undefined
