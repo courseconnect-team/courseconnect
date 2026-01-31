@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(git -C \"C:\\\\Users\\\\Oling\\\\documents\\\\courseconnect\" log --oneline -20)"
     ]
   }
 }
