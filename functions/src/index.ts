@@ -24,7 +24,7 @@ import {
 
 const admin = require('firebase-admin');
 admin.initializeApp();
-const db = admin.firestore();
+export const db = admin.firestore();
 const auth = admin.auth();
 db.settings({ ignoreUndefinedProperties: true });
 
