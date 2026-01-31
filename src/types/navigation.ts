@@ -1,6 +1,6 @@
 import { SvgIconComponent } from '@mui/icons-material';
 
-export type CardType = 'research' | 'ta' | 'supervised-teaching';
+export type CardType = 'research' | 'ta';
 export type QueryParams = Record<string, string | number | boolean | undefined>;
 
 export type NavbarItem = {
