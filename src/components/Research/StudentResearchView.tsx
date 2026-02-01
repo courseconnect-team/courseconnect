@@ -7,9 +7,7 @@ import {
   Select,
   MenuItem,
   Button,
-  Typography,
   Grid,
-  Container,
 } from '@mui/material';
 import ProjectCard from '@/components/Research/ProjectCard';
 import ApplicationCard from '@/components/Research/ApplicationCard';
@@ -142,28 +140,8 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   };
 
   return (
-    <Container
-      sx={{
-        mt: '380px',
-        mb: 8,
-        maxWidth: {
-          xs: '100%',
-          sm: '95%',
-          md: '90%',
-          lg: '85%',
-          xl: '80%',
-        },
-        mx: 'auto',
-      }}
-    >
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={4}
-      >
-        <Typography variant="h4">Research</Typography>
-
+    <>
+      <Box display="flex" justifyContent="flex-end" alignItems="center" mb={4}>
         <Button
           sx={{
             backgroundColor: '#5A41D8',
@@ -254,7 +232,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
           </Box>
         ) : null}
 
-        {/* Content Display remains the same */}
+        {/* Content Display */}
         {myApplications ? (
           <Grid container spacing={4}>
             {researchListings.map((item, index) => (
@@ -312,7 +290,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
           </Grid>
         )}
       </Box>
-    </Container>
+    </>
   );
 };
 

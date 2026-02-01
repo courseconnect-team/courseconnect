@@ -1,0 +1,40 @@
+import { defineConfig, devices } from '@playwright/test';
+
+const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: true,
+  workers: process.env.CI ? 3 : undefined, // try 2 or 3 first
+  retries: process.env.CI ? 1 : 0,
+  testIgnore: /auth\.setup\.ts/, // prevent setup file from running in main project
+  reporter: [
+    ['list'],
+    ['html', { open: 'never', outputFolder: 'playwright-report' }],
+  ],
+  use: {
+    baseURL,
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    extraHTTPHeaders: bypass
+      ? {
+          'x-vercel-protection-bypass': bypass,
+          'x-vercel-set-bypass-cookie': 'true',
+        }
+      : undefined,
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+  webServer: {
+    command: 'NEXT_PUBLIC_E2E=1 npm run dev -- -p 3000',
+    url: 'http://127.0.0.1:3000',
+    timeout: 120_000,
+    reuseExistingServer: !process.env.CI,
+  },
+});

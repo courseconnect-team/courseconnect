@@ -22,7 +22,6 @@
 .DS_Store
 *.pem
 .eslintcache
-.vscode
 
 # debug
 npm-debug.log*
@@ -39,5 +38,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-nul
+.vscode
 courseconnect-c6a7b-firebase-adminsdk-dqqis-af57e2e045.json
+playwright-report
+test-results
+playwright/.auth
+playwright.accounts.json

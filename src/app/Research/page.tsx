@@ -1,45 +1,14 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import HeaderCard from '@/components/HeaderCard/HeaderCard';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useUserRole } from '@/firebase/util/GetUserRole';
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  getDocs,
-  collectionGroup,
-  query,
-  where,
-} from 'firebase/firestore';
-import { testData } from './testdata';
-import {
-  Box,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-  IconButton,
-  InputAdornment,
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Grid,
-  Link,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ProjectCard from '@/components/Research/ProjectCard';
-import SearchBox from '@/components/Research/SearchBox';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
+import { getNavItems } from '@/hooks/useGetItems';
+import PageLayout from '@/components/PageLayout/PageLayout';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
-import ResearchModal from '@/components/Research/Modal';
-import { JobCard } from '@/components/JobCard/JobCard';
 import StudentResearchView from '@/components/Research/StudentResearchView';
 import FacultyResearchView from '@/components/Research/FacultyResearchView';
+
 interface ResearchPageProps {
   user: {
     uid: string;
@@ -88,13 +57,7 @@ interface ResearchApplication {
 }
 
 const ResearchPage: React.FC<ResearchPageProps> = () => {
-  const auth = getAuth();
-  const user = auth.currentUser;
-  const {
-    role,
-    loading: roleLoading,
-    error: roleError,
-  } = useUserRole(user?.uid);
+  const [user, role, loading, error] = useUserInfo();
 
   const [department, setDepartment] = React.useState('');
   const [studentLevel, setStudentLevel] = React.useState('');
@@ -107,12 +70,18 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   >([]);
 
   useEffect(() => {
-    getResearchListings();
-    getApplications();
-  }, []);
+    if (user) {
+      getResearchListings();
+      getApplications();
+    }
+  }, [user]);
 
-  if (roleError) {
+  if (error) {
     return <p>Error loading role</p>;
+  }
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   if (!user) {
@@ -128,13 +97,6 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
     if (studentLevel) {
       collectionRef = collectionRef.where('student_level', '==', studentLevel);
     }
-    // if (termsAvailable) {
-    //   collectionRef = collectionRef.where(
-    //     'terms_available',
-    //     '==',
-    //     termsAvailable
-    //   );
-    // }
     let snapshot = await collectionRef.get();
     let researchListings: ResearchListing[] = await Promise.all(
       snapshot.docs.map(async (doc: any) => {
@@ -167,7 +129,7 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
         var listingRef = appDoc.ref.parent.parent;
         let listingData: any = {};
         if (listingRef) {
-          const listingSnap = await listingRef.get(); // valid in compat
+          const listingSnap = await listingRef.get();
           if (listingSnap.exists) {
             listingData = listingSnap.data();
           }
@@ -219,48 +181,39 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       console.error('Error adding document: ', e);
     }
   };
+
   return (
     <>
       <Toaster />
-
-      {roleLoading ? (
-        <>
-          <h1>loading</h1>
-        </>
-      ) : (
-        <>
-          {(role === 'student_applying' || role === 'student_applied') && (
-            <>
-              <HeaderCard text="Applications" />
-              <StudentResearchView
-                researchListings={researchListings}
-                researchApplications={researchApplications}
-                role={role}
-                uid={user.uid}
-                department={department}
-                setDepartment={setDepartment}
-                studentLevel={studentLevel}
-                setStudentLevel={setStudentLevel}
-                getResearchListings={getResearchListings}
-                setResearchListings={setResearchListings}
-                getApplications={getApplications}
-                termsAvailable={termsAvailable}
-                setTermsAvailable={setTermsAvailable}
-                setResearchApplications={setResearchApplications}
-              />
-            </>
-          )}
-          {role === 'faculty' && (
-            <FacultyResearchView
-              researchListings={researchListings}
-              role={role}
-              uid={user.uid}
-              getResearchListings={getResearchListings}
-              postNewResearchPosition={postNewResearchPosition}
-            />
-          )}
-        </>
-      )}
+      <PageLayout mainTitle="Research" navItems={getNavItems(role)}>
+        {(role === 'student_applying' || role === 'student_applied') && (
+          <StudentResearchView
+            researchListings={researchListings}
+            researchApplications={researchApplications}
+            role={role}
+            uid={user.uid}
+            department={department}
+            setDepartment={setDepartment}
+            studentLevel={studentLevel}
+            setStudentLevel={setStudentLevel}
+            getResearchListings={getResearchListings}
+            setResearchListings={setResearchListings}
+            getApplications={getApplications}
+            termsAvailable={termsAvailable}
+            setTermsAvailable={setTermsAvailable}
+            setResearchApplications={setResearchApplications}
+          />
+        )}
+        {role === 'faculty' && (
+          <FacultyResearchView
+            researchListings={researchListings}
+            role={role}
+            uid={user.uid}
+            getResearchListings={getResearchListings}
+            postNewResearchPosition={postNewResearchPosition}
+          />
+        )}
+      </PageLayout>
     </>
   );
 };

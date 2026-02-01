@@ -1,0 +1,39 @@
+.text-wrapper-11 {
+  position: relative;
+  font-size: 36px;
+  font-weight: 500;
+  font-family: 'SF Pro Display-Medium', Helvetica;
+  color: #000;
+  text-align: left;
+
+}
+
+
+ .courses{
+  font-size: 36px;
+  padding-top: 34px;
+}
+
+.ta{
+  font-size: 40px;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  padding-left: 27px;
+  padding-bottom: 90px;
+}
+
+
+.class-cards-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  
+  
+}
+.class{
+  margin:22px
+}

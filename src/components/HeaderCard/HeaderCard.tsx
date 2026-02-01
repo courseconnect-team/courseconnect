@@ -1,38 +1,41 @@
-// components/HeaderCard/HeaderCard.tsx
-import React, { FC } from "react";
-import {EceLogoPng} from "@/components/EceLogoPng/EceLogoPng";
-import {TopNavBarSigned} from "@/components/TopNavBarSigned/TopNavBarSigned";
-import "./style.css";
+'use client';
+
+import React from 'react';
+import SideNav from '@/components/SideNavBar/SideNavBar';
+import TopNav from '@/components/TopBar/TopBar';
+import { useUserInfo } from '@/hooks/User/useGetUserInfo';
+import { getNavItems } from '@/hooks/useGetItems';
 
 interface HeaderCardProps {
-  text: string;
+  title: string;
+  children: React.ReactNode;
 }
 
-const HeaderCard: FC<HeaderCardProps> = ({ text }) => {
+export default function HeaderCard({ title, children }: HeaderCardProps) {
+  const [user, role, loading, error] = useUserInfo();
+
+  if (loading) return <div>Loading…</div>;
+  if (error) return <div>Error loading user info</div>;
+
+  const navItems = getNavItems(role);
+
   return (
-    <div className="header">
-      <div className="overlap-wrapper">
-        <div className="overlap">
-          <div className="overlap-2">
-            <div className="color-block-frame">
-              <div className="overlap-group-2">
-                <div className="color-block" />
-                <img
-                  className="GRADIENTS"
-                  alt="Gradients"
-                  src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                />
-                <div className="glass-card" />
-              </div>
-            </div>
-          </div>
-          <EceLogoPng className="ece-logo-png-2" />
-          <TopNavBarSigned className="top-nav-bar-signed-in" />
-          <div className="text-wrapper-10">{text}</div>
-        </div>
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <SideNav navItems={navItems} />
+
+      {/* TopNav + Content */}
+      <div className="flex flex-col flex-1">
+        <TopNav />
+
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto pt-14 px-6 md:px-12">
+          <h1 className="text-5xl md:text-3xl font-bold text-black mb-8 mt-8">
+            {title}
+          </h1>
+          {children}
+        </main>
       </div>
     </div>
   );
-};
-
-export default HeaderCard;
+}

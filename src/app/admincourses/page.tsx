@@ -1,41 +1,44 @@
 'use client';
 import * as React from 'react';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Toaster, toast } from 'react-hot-toast';
-
 import { useState, useEffect } from 'react';
-import { TopNavBarSigned } from '@/components/TopNavBarSigned/TopNavBarSigned';
-import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import styles from './style.module.css';
 import 'firebase/firestore';
-
 import firebase from '@/firebase/firebase_config';
 import { read, utils } from 'xlsx';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Courses from '@/components/Dashboard/AdminCourses/Courses';
+import Courses from '@/component/Dashboard/AdminCourses/Courses';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { DeleteOutline, FileUploadOutlined, HideSource, Visibility, VisibilityOff } from '@mui/icons-material';
+import {
+  DeleteOutline,
+  FileUploadOutlined,
+  Visibility,
+  VisibilityOff,
+} from '@mui/icons-material';
+import PageLayout from '@/components/PageLayout/PageLayout';
+import { getNavItems } from '@/hooks/useGetItems';
+import { isE2EMode } from '@/utils/featureFlags';
 
-export default function User() {
+export default function AdminCoursesPage() {
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
-  const [semester, setSemester] = useState<string>('Fall 2024');
+  const isE2E = isE2EMode();
+  const [semester, setSemester] = useState<string>('Spring 2026');
   const [menu, setMenu] = useState<string[]>([]);
   const [semesterHidden, setSemesterHidden] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [newSem, setNewSem] = useState(false);
+  const [newSem, setNewSem] = useState('');
   const [open, setOpen] = useState(false);
 
   const handleClose = () => {
@@ -54,7 +57,15 @@ export default function User() {
     setOpen(false);
   };
 
+  //Testing Code Start
   useEffect(() => {
+    if (isE2E) {
+      setMenu([]);
+      setSemesterHidden(false);
+      return;
+    }
+    //Testing Code End
+
     const updateMenu = async () => {
       const arr: string[] = [];
       const querySnapshot = await firebase
@@ -76,17 +87,12 @@ export default function User() {
         .collection('semesters')
         .doc(semester)
         .get();
-      if (doc.data()?.hidden) {
-        setSemesterHidden(doc.data().hidden);
-      } else {
-        setSemesterHidden(false);
-      }
+      setSemesterHidden(!!doc.data()?.hidden);
     };
 
     updateMenu();
     setHidden();
-    console.log(semesterHidden);
-  }, [semester, processing]);
+  }, [semester, processing, isE2E]);
 
   const handleDeleteSem = async () => {
     setProcessing(true);
@@ -123,8 +129,91 @@ export default function User() {
     setProcessing(false);
     toast.success('Semester visibility toggled!');
     toast.dismiss(toastId);
-  }
-  const db = firebase.firestore();
+  };
+
+  const readActionsExcelFile = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setProcessing(true);
+    const toastId = toast.loading(
+      'Processing course data. This may take a couple minutes.',
+      { duration: 300000000 }
+    );
+    try {
+      const file = e.target.files?.[0];
+      if (!file) {
+        // User cancelled file picker
+        setProcessing(false);
+        toast.dismiss(toastId);
+        toast.error('No file selected.', { duration: 2000 });
+        return;
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = read(arrayBuffer);
+      const data: any[] = [];
+
+      workbook.SheetNames.forEach((sheetName) => {
+        const sheetData = utils.sheet_to_json(workbook.Sheets[sheetName]);
+        sheetData.forEach((row: any) => data.push(row));
+      });
+
+      const actionByUFID = new Map<string, string>();
+      const CURRENT_SEMESTER = 'Spring 2026';
+      for (const row of data) {
+        const rawUFID = String(row['UFID'] ?? '') as string;
+        const action = (row['ECE - Requested Action'] ?? '') as string;
+        const ufid = rawUFID.trim();
+        const cleanedAction = action.trim();
+
+        if (!ufid || !cleanedAction) continue;
+
+        actionByUFID.set(ufid, cleanedAction);
+      }
+
+      const updateActions = async () => {
+        const db = firebase.firestore();
+        const batch = db.batch();
+
+        const appsSnap = await db.collection('applications').get();
+
+        appsSnap.forEach((doc) => {
+          const data = doc.data();
+          const ufid = (data.ufid ?? data.UFID ?? '').toString().trim();
+          const semesters = (data.available_semesters ?? []) as string[];
+
+          if (
+            !Array.isArray(semesters) ||
+            !semesters.includes(CURRENT_SEMESTER)
+          ) {
+            return;
+          }
+          let action = 'NEW HIRE';
+          if (ufid && actionByUFID.has(ufid)) {
+            action = actionByUFID.get(ufid)!;
+          }
+
+          console.log(`Updating UFID ${ufid} with action ${action}`);
+          batch.update(doc.ref, { employmentAction: action });
+        });
+
+        await batch.commit();
+      };
+
+      await updateActions();
+
+      setProcessing(false);
+      toast.dismiss(toastId);
+      toast.success('Employment actions updated successfully!', {
+        duration: 2000,
+      });
+    } catch (err) {
+      console.error(err);
+      setProcessing(false);
+      toast.dismiss(toastId);
+      toast.error('Data upload failed.', { duration: 2000 });
+    }
+  };
 
   const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setProcessing(true);
@@ -146,29 +235,59 @@ export default function User() {
         sheetData.forEach((row: any) => data.push(row));
       });
 
+      const course = new Set();
+
       for (const row of data) {
-        console.log(row);
+        const mappedRow: any = {};
+        mappedRow['Course'] = row['__EMPTY_5'];
+        mappedRow['Course Title'] = row['__EMPTY_24'];
+        mappedRow['Instructor'] = row['__EMPTY_25'];
+        mappedRow['Instructor Emails'] = row['__EMPTY_26'];
+        mappedRow['Class Nbr'] = row['__EMPTY_10'];
+        mappedRow['Min - Max Cred'] = row['__EMPTY_12'];
+        mappedRow['Day/s'] = row['__EMPTY_13'];
+        mappedRow['Time'] = row['__EMPTY_14'];
+        mappedRow['Facility'] = row['__EMPTY_16'];
+        mappedRow['Enr Cap'] = row['__EMPTY_27'];
+        mappedRow['Enrolled'] = row['__EMPTY_29'];
 
-        const rawEmails = row['__EMPTY_26'] ?? 'undef';
-        const emailArray =
-          rawEmails === 'undef'
-            ? []
-            : rawEmails.split(';').map((email: string) => email.trim());
+        if (
+          !course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)
+        ) {
+          course.add(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`);
 
-        await firebase
-          .firestore()
-          .collection('courses')
-          .doc(`${row['__EMPTY_5']} (${semester}) : ${row['__EMPTY_22']}`)
-          .set({
-            professor_emails: emailArray,
-            professor_names: row['__EMPTY_25'] ?? 'undef',
-            code: row['__EMPTY_5'] ?? 'undef',
-            credits: row['__EMPTY_9'] ?? 'undef',
-            enrollment_cap: row['__EMPTY_24'] ?? 'undef',
-            enrolled: row['__EMPTY_26'] ?? 'undef',
-            title: row['__EMPTY_21'] ?? 'undef',
-            semester: semester,
-          });
+          const rawEmails = mappedRow['Instructor Emails'] ?? 'undef';
+          const emailArray =
+            rawEmails === 'undef'
+              ? []
+              : rawEmails.split(';').map((email: string) => email.trim());
+
+          await firebase
+            .firestore()
+            .collection('semesters')
+            .doc(semester)
+            .collection('courses')
+            .doc(`${mappedRow['Course']} : ${mappedRow['Instructor']}`)
+            .set({
+              class_number: mappedRow['Class Nbr'] ?? 'undef',
+              professor_emails: emailArray,
+              professor_names: mappedRow['Instructor'] ?? 'undef',
+              code: mappedRow['Course'] ?? 'undef',
+              credits: mappedRow['Min - Max Cred'] ?? 'undef',
+              department: 'ECE',
+              enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
+              enrolled: mappedRow['Enrolled'] ?? 'undef',
+              title: mappedRow['Course Title'] ?? 'undef',
+              semester: semester,
+              meeting_times: [
+                {
+                  day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
+                  time: mappedRow['Time'] ?? 'undef',
+                  location: mappedRow['Facility'] ?? 'undef',
+                },
+              ],
+            });
+        }
       }
 
       setProcessing(false);
@@ -191,209 +310,142 @@ export default function User() {
     }
   };
 
+  if (loading) return <div>Loading…</div>;
+  if (error) return <div>Error loading role</div>;
+  if (role !== 'admin') return <div> Forbidden </div>;
+
   return (
-    <>
+    <PageLayout mainTitle="Admin Courses" navItems={getNavItems(role)}>
       <Toaster />
-      <div className={styles.studentlandingpage}>
-        <Dialog
-          style={{
-            borderImage:
-              'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-            boxShadow: '0px 2px 20px 4px #00000040',
-            borderRadius: '20px',
-            border: '2px solid',
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Create Semester</DialogTitle>
+        <form onSubmit={handleSemesterCreate}>
+          <DialogContent>
+            <DialogContentText>
+              Please enter the new semester&apos;s name.
+            </DialogContentText>
+            <FormControl required fullWidth>
+              <TextField
+                name="Semester"
+                variant="filled"
+                onChange={(e) => setNewSem(e.target.value)}
+                required
+                label="Semester"
+                autoFocus
+              />
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button type="submit" variant="contained">
+              Confirm
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      <Box
+        sx={{
+          mt: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        <Box
+          sx={{
+            mb: 2,
+            width: '100%',
+            display: 'flex',
+            flexWrap: 'nowrap',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
           }}
-          PaperProps={{ style: { borderRadius: 20 } }}
-          open={open}
-          onClose={handleClose}
         >
-          <DialogTitle
-            style={{
-              fontFamily: 'SF Pro Display-Medium, Helvetica',
-              textAlign: 'center',
-              fontSize: '40px',
-              fontWeight: '540',
-            }}
+          <input
+            id="employment-actions-file"
+            type="file"
+            multiple
+            onChange={readActionsExcelFile}
+            onClick={(e) => (e.currentTarget.value = '')}
+            style={{ display: 'none' }}
+          />
+          <label htmlFor="employment-actions-file">
+            <Button
+              component="span"
+              variant="contained"
+              startIcon={<FileUploadOutlined />}
+              sx={{ textTransform: 'none' }}
+            >
+              Upload Employment Actions Data
+            </Button>
+          </label>
+
+          {/* Semester Data upload */}
+          <input
+            id="semester-data-file"
+            type="file"
+            multiple
+            onChange={readExcelFile}
+            onClick={(e) => (e.currentTarget.value = '')}
+            style={{ display: 'none' }}
+          />
+          <label htmlFor="semester-data-file">
+            <Button
+              component="span"
+              variant="contained"
+              startIcon={<FileUploadOutlined />}
+              sx={{ textTransform: 'none' }}
+            >
+              Upload Semester Data
+            </Button>
+          </label>
+
+          <Button
+            variant="contained"
+            onClick={handleDeleteSem}
+            startIcon={<DeleteOutline />}
+            sx={{ textTransform: 'none' }}
           >
-            Create Semester
-          </DialogTitle>
-          <form onSubmit={handleSemesterCreate}>
-            <DialogContent>
-              <DialogContentText
-                style={{
-                  marginTop: '35px',
-                  fontFamily: 'SF Pro Display-Medium, Helvetica',
-                  textAlign: 'center',
-                  fontSize: '20px',
-                  color: 'black',
-                }}
-              >
-                Please enter the new semester&apos;s name.
-              </DialogContentText>
-              <br />
-              <br />
-              <FormControl required>
-                <TextField
-                  style={{ left: '160px' }}
-                  name="Semester"
-                  variant="filled"
-                  onChange={(e) => setNewSem(e.target.value)}
-                  required
-                  fullWidth
-                  id="Semester"
-                  label="Semester"
-                  autoFocus
-                />
-              </FormControl>
-            </DialogContent>
-            <DialogActions
-              style={{
-                marginTop: '30px',
-                marginBottom: '42px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: '93px',
-              }}
+            Clear Semester Data
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleSemesterHiddenToggle}
+            startIcon={semesterHidden ? <Visibility /> : <VisibilityOff />}
+            sx={{ textTransform: 'none' }}
+          >
+            {semesterHidden ? 'Unhide' : 'Hide'} Semester Data
+          </Button>
+
+          <FormControl sx={{ minWidth: 140 }}>
+            <InputLabel id="semester-select-label">Semester</InputLabel>
+            <Select
+              labelId="semester-select-label"
+              id="semester-select"
+              value={semester}
+              label="Semester"
+              onChange={handleChange}
             >
-              <Button
-                variant="outlined"
-                style={{
-                  fontSize: '17px',
-                  marginLeft: '110px',
-                  borderRadius: '10px',
-                  height: '43px',
-                  width: '120px',
-                  textTransform: 'none',
-                  fontFamily: 'SF Pro Display-Bold , Helvetica',
-                  borderColor: '#5736ac',
-                  color: '#5736ac',
-                  borderWidth: '3px',
-                }}
-                onClick={handleClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                style={{
-                  fontSize: '17px',
-                  marginRight: '110px',
-                  borderRadius: '10px',
-                  height: '43px',
-                  width: '120px',
-                  textTransform: 'none',
-                  fontFamily: 'SF Pro Display-Bold , Helvetica',
-                  backgroundColor: '#5736ac',
-                  color: '#ffffff',
-                }}
-                type="submit"
-              >
-                Confirm
-              </Button>
-            </DialogActions>
-          </form>
-        </Dialog>
-        <div className={styles.overlapwrapper}>
-          <div className={styles.overlap}>
-            <div className={styles.overlap2}>
-              <div className={styles.colorblockframe}>
-                <div className={styles.overlapgroup2}>
-                  <div className={styles.colorblock} />
-                  <img
-                    className={styles.GRADIENTS}
-                    alt="Gradients"
-                    src="https://c.animaapp.com/vYQBTcnO/img/gradients.png"
-                  />
-                  <div className={styles.glasscard} />
-                </div>
-              </div>
-              <EceLogoPng className={styles.ecelogopng2} />
-              <TopNavBarSigned className={styles.topnavbarsignedin} />
-              <div className={styles.textwrapper8}>Courses</div>
-            </div>
-            <CssBaseline />
-            <Box
-              sx={{
-                marginTop: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                width: '100%',
-              }}
-            >
-              <Box sx={{ minWidth: 120 }} />
-              <Box sx={{ mt: 50, mb: 2, width: '100%' }}>
-                <input
-                  style={{ display: 'none' }}
-                  id="raised-button-file"
-                  multiple
-                  type="file"
-                  onChange={readExcelFile}
-                  onClick={(event) => (event.currentTarget.value = '')}
-                />
-                <label htmlFor="raised-button-file">
-                  <Button
-                    sx={{ ml: 40, mt: 1.5 }}
-                    style={{ textTransform: 'none' }}
-                    variant="contained"
-                    component="span"
-                    startIcon={<FileUploadOutlined />}
-                  >
-                    Upload Semester Data
-                  </Button>
-                </label>
-                <Button
-                  sx={{ ml: 10, mt: 1.5 }}
-                  onClick={handleDeleteSem}
-                  style={{ textTransform: 'none' }}
-                  variant="contained"
-                  component="span"
-                  startIcon={<DeleteOutline />}
-                >
-                  Clear Semester Data
-                </Button>
-                <Button
-                  sx={{ ml: 10, mt: 1.5 }}
-                  onClick={handleSemesterHiddenToggle}
-                  style={{ textTransform: 'none' }}
-                  variant="contained"
-                  component="span"
-                  startIcon={semesterHidden ? <Visibility /> : <VisibilityOff />}
-                >
-                  {semesterHidden ? "Unhide" : "Hide"} Semester Data
-                </Button>
-                <FormControl sx={{ ml: 40, mb: 5, minWidth: 140 }}>
-                  <InputLabel id="demo-simple-select-label">
-                    Semester
-                  </InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={semester}
-                    label="Semester"
-                    onChange={handleChange}
-                  >
-                    {menu.map((i) => (
-                      <MenuItem key={i} value={i}>
-                        {i}
-                      </MenuItem>
-                    ))}
-                    <MenuItem value={'New Semester'}>
-                      Create New Semester
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-                <br />
-                <Courses
-                  userRole={role as string}
-                  semester={semester}
-                  processing={processing}
-                />
-              </Box>
-            </Box>
-          </div>
-        </div>
-      </div>
-    </>
+              {menu.map((sem) => (
+                <MenuItem key={sem} value={sem}>
+                  {sem}
+                </MenuItem>
+              ))}
+              <MenuItem value="New Semester">Create New Semester</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Courses
+          userRole={role as string}
+          semester={semester}
+          processing={processing}
+        />
+      </Box>
+    </PageLayout>
   );
 }

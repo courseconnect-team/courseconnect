@@ -1,9 +1,10 @@
 'use client';
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import firebase from '../firebase_config';
+import { isE2EMode, getE2EUser } from '@/utils/featureFlags';
 
-const auth = firebase.auth();
 const AuthContext = createContext();
 
 export function useAuth() {
@@ -17,11 +18,18 @@ export function AuthProvider({ children }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (isE2EMode()) {
+      const stubUser = getE2EUser();
+      setUser(stubUser);
+      setLoading(false);
+      return;
+    }
+    const auth = firebase.auth();
+
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       setLoading(false);
 
-      // if the user is not authenticated and the current page is not the signin screen, the signup screen, or the about page, then push to './'
       if (
         !user &&
         pathname !== '/' &&
@@ -32,7 +40,6 @@ export function AuthProvider({ children }) {
       ) {
         router.push('/');
       }
-      // if the user is authenticated and the current page is the signin screen or the signup screen, then push to './dashboard'
       if (
         user &&
         (pathname === '/' || pathname === '/signup' || pathname === '/signin')
@@ -42,7 +49,8 @@ export function AuthProvider({ children }) {
     });
 
     return () => unsubscribe();
-  }, [router, pathname]);
+    // run once to avoid re-entrant updates during tests
+  }, [pathname, router]);
 
   const value = {
     user,
