@@ -1,10 +1,9 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { getNavItems } from '@/hooks/useGetItems';
 import PageLayout from '@/components/PageLayout/PageLayout';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
 import StudentResearchView from '@/components/Research/StudentResearchView';
 import FacultyResearchView from '@/components/Research/FacultyResearchView';
@@ -69,26 +68,7 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
     ResearchApplication[]
   >([]);
 
-  useEffect(() => {
-    if (user) {
-      getResearchListings();
-      getApplications();
-    }
-  }, [user]);
-
-  if (error) {
-    return <p>Error loading role</p>;
-  }
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return <p>Please sign in.</p>;
-  }
-
-  const getResearchListings = async () => {
+  const getResearchListings = useCallback(async () => {
     let collectionRef: firebase.firestore.Query<firebase.firestore.DocumentData> =
       firebase.firestore().collection('research-listings');
     if (department) {
@@ -98,13 +78,15 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       collectionRef = collectionRef.where('student_level', '==', studentLevel);
     }
     let snapshot = await collectionRef.get();
-    let researchListings: ResearchListing[] = await Promise.all(
+    let listings: ResearchListing[] = await Promise.all(
       snapshot.docs.map(async (doc: any) => {
-        const detailsSnap = await getDocs(collection(doc.ref, 'applications'));
-        const apps = detailsSnap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        }));
+        const detailsSnap = await doc.ref.collection('applications').get();
+        const apps = detailsSnap.docs.map(
+          (d: firebase.firestore.QueryDocumentSnapshot) => ({
+            id: d.id,
+            ...d.data(),
+          })
+        );
         return {
           docID: doc.id,
           applications: apps,
@@ -112,10 +94,11 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
         };
       })
     );
-    setResearchListings(researchListings);
-  };
+    setResearchListings(listings);
+  }, [department, studentLevel]);
 
-  const getApplications = async () => {
+  const getApplications = useCallback(async () => {
+    if (!user?.uid) return;
     const snapshot = await firebase
       .firestore()
       .collectionGroup('applications')
@@ -144,43 +127,60 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
       })
     );
 
-    let researchApplications: ResearchApplication[] = results.map(
-      (doc: any) => ({
-        appid: doc.appId,
-        app_status: doc.app_status,
-        terms_available: doc.listingData.terms_available,
-        date_applied: doc.date,
-        degree: doc.degree,
-        department: doc.department,
-        email: doc.email,
-        first_name: doc.firstname,
-        last_name: doc.lastname,
-        gpa: doc.gpa,
-        graduation_date: doc.graduation_date,
-        phone_number: doc.phone_number,
-        qualifications: doc.qualifications,
-        resume: doc.resume,
-        uid: doc.uid,
-        weekly_hours: doc.weekly_hours,
-        faculty_mentor: doc.listingData.faculty_mentor,
-        project_title: doc.listingData.project_title,
-        project_description: doc.listingData.project_description,
-      })
-    );
-    setResearchApplications(researchApplications);
-  };
+    let applications: ResearchApplication[] = results.map((doc: any) => ({
+      appid: doc.appId,
+      app_status: doc.app_status,
+      terms_available: doc.listingData.terms_available,
+      date_applied: doc.date,
+      degree: doc.degree,
+      department: doc.department,
+      email: doc.email,
+      first_name: doc.firstname,
+      last_name: doc.lastname,
+      gpa: doc.gpa,
+      graduation_date: doc.graduation_date,
+      phone_number: doc.phone_number,
+      qualifications: doc.qualifications,
+      resume: doc.resume,
+      uid: doc.uid,
+      weekly_hours: doc.weekly_hours,
+      faculty_mentor: doc.listingData.faculty_mentor,
+      project_title: doc.listingData.project_title,
+      project_description: doc.listingData.project_description,
+    }));
+    setResearchApplications(applications);
+  }, [user?.uid]);
 
-  const postNewResearchPosition = async (formData: any) => {
+  const postNewResearchPosition = useCallback(async (formData: any) => {
     try {
-      const docRef = await addDoc(
-        collection(firebase.firestore(), 'research-listings'),
-        formData
-      );
+      const docRef = await firebase
+        .firestore()
+        .collection('research-listings')
+        .add(formData);
       console.log('Document written with ID: ', docRef.id);
     } catch (e) {
       console.error('Error adding document: ', e);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      getResearchListings();
+      getApplications();
+    }
+  }, [user, getResearchListings, getApplications]);
+
+  if (error) {
+    return <p>Error loading role</p>;
+  }
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <p>Please sign in.</p>;
+  }
 
   return (
     <>
