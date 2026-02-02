@@ -7,6 +7,7 @@ import SemesterSelect from '@/components/SemesterSelect/SemesterSelect';
 import { useSemesterData } from '@/hooks/Courses/useSemesterData';
 import { CoursesGrid } from '@/components/CoursesGrid/CoursesGrid';
 import { type SemesterName } from '@/hooks/useSemesterOptions';
+import SchoolIcon from '@mui/icons-material/School';
 export default function ApplicationSections({
   role,
   navItems,
@@ -45,6 +46,19 @@ export default function ApplicationSections({
                 ))}
             </div>
           </div>
+
+          <div className="mb-5">
+            <h1 className="text-h6 mb-3 ">Supervised Teaching</h1>
+            <div className="flex flex-wrap gap-6">
+              <DashboardCard
+                key={'/applications/supervised-teaching'}
+                icon={SchoolIcon}
+                label={'Supervised Teaching'}
+                to={'/applications/supervised-teaching'}
+              />
+            </div>
+          </div>
+
           <div>
             <h1 className="text-h6 mb-3 ">Research</h1>
             <p className="text-sm">No available applications at this time.</p>
