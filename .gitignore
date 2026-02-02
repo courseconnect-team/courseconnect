@@ -44,3 +44,4 @@ playwright-report
 test-results
 playwright/.auth
 playwright.accounts.json
+nul

@@ -9,6 +9,7 @@ import { markAnnouncementsSeen } from '@/hooks/Announcements/markAnnouncementAsS
 
 const AnnouncementsPage: FC = () => {
   const [user, role, loading, error] = useUserInfo();
+  const uemail = user?.email;
 
   // prevent double-call in dev Strict Mode
   const didMarkRef = useRef(false);
@@ -26,7 +27,7 @@ const AnnouncementsPage: FC = () => {
 
   return (
     <PageLayout mainTitle="Announcements" navItems={getNavItems(role)}>
-      <AnnouncementSections role={role} />
+      <AnnouncementSections role={role} uemail={uemail} />
     </PageLayout>
   );
 };
