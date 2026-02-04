@@ -73,7 +73,6 @@ export default function Applications(props: ApplicationsProps) {
 
       {tab === 0 ? (
         <Box>
-
           <ApplicationGrid userRole={userRole} />
         </Box>
       ) : (

@@ -966,44 +966,59 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   }
   const ODD_OPACITY = 0.2;
 
-  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  // ✅ Copy CourseGrid UI styling
+  const StripedDataGrid = styled(DataGrid)(() => ({
+    border: 'none',
+    borderRadius: '16px',
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '0.95rem',
+
+    '& .MuiDataGrid-columnHeaders': {
+      backgroundColor: '#D8C6F8',
+      color: '#1C003D',
+      fontWeight: 700,
+      borderBottom: 'none',
+    },
+
+    '& .MuiDataGrid-columnHeaderTitle': {
+      fontWeight: 700,
+    },
+
+    '& .MuiDataGrid-columnHeader:first-of-type': {
+      paddingLeft: '20px',
+    },
+    '& .MuiDataGrid-cell:first-of-type': {
+      paddingLeft: '25px',
+    },
+
     [`& .${gridClasses.row}.even`]: {
-      backgroundColor: '#562EBA1F',
-      '&:hover, &.Mui-hovered': {
-        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
-        '@media (hover: none)': {
-          backgroundColor: 'transparent',
-        },
-      },
-      '&.Mui-selected': {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity
-        ),
-        '&:hover, &.Mui-hovered': {
-          backgroundColor: alpha(
-            theme.palette.primary.main,
-            ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
-          ),
-          // Reset on touch devices, it doesn't add specificity
-          '@media (hover: none)': {
-            backgroundColor: alpha(
-              theme.palette.primary.main,
-              ODD_OPACITY + theme.palette.action.selectedOpacity
-            ),
-          },
-        },
-      },
+      backgroundColor: '#FFFFFF',
+    },
+    [`& .${gridClasses.row}.odd`]: {
+      backgroundColor: '#EEEEEE',
+    },
+
+    '& .MuiDataGrid-row:hover': {
+      backgroundColor: '#EFE6FF',
+    },
+
+    '& .MuiDataGrid-cell': {
+      borderBottom: '1px solid #ECE4FA',
+    },
+
+    '& .MuiDataGrid-footerContainer': {
+      borderTop: 'none',
+    },
+
+    '& .MuiTablePagination-root': {
+      color: '#5D3FC4',
+      fontWeight: 500,
     },
   }));
 
   return (
     <Box
       sx={{
-        height: '600px',
-        maxWidth: '85%',
         '& .actions': {
           color: 'text.secondary',
         },
@@ -1033,7 +1048,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         getRowClassName={(params) =>
           params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
         }
-        sx={{ borderRadius: '16px' }}
+        sx={{
+          borderRadius: '16px', maxHeight: '80vh', maxWidth: '180vh',
+          minHeight: '80vh', minWidth: '180vh'
+        }}
       />
       <Dialog
         open={open}
