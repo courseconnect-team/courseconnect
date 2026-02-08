@@ -168,6 +168,7 @@ export default function Application() {
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
+      application_type: 'course_assistant',
       firstname: formData.get('firstName') as string,
       lastname: formData.get('lastName') as string,
       email: formData.get('email') as string,
