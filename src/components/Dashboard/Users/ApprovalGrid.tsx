@@ -1,11 +1,12 @@
 'use client';
+
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import CancelIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
+import { ThumbDownOffAlt, ThumbUpOffAlt } from '@mui/icons-material';
 
 import {
   GridRowModesModel,
@@ -22,17 +23,16 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-  useGridApiContext,
   gridClasses,
 } from '@mui/x-data-grid';
-import { Button } from '@mui/material';
+
+import { LinearProgress } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { LinearProgress } from '@mui/material';
-import { alpha, styled } from '@mui/material/styles';
-import CheckIcon from '@mui/icons-material/Check';
-import { ThumbDownOffAlt, ThumbUp, ThumbUpOffAlt } from '@mui/icons-material';
+
 interface User {
   id: string;
   firstname: string;
@@ -54,17 +54,13 @@ interface EditToolbarProps {
   ) => void;
 }
 
-function EditToolbar(props: EditToolbarProps) {
-  const { setApplicationData, setRowModesModel } = props;
-
-  // Add state to control the dialog open status
-  const [open, setOpen] = React.useState(false);
-
+function EditToolbar(_props: EditToolbarProps) {
+  // ✅ match CourseGrid toolbar (default styling)
   return (
     <GridToolbarContainer>
-      <GridToolbarExport style={{ color: '#562EBA' }} />
-      <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-      <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
     </GridToolbarContainer>
   );
 }
@@ -75,6 +71,8 @@ interface ApprovalGridProps {
 
 export default function ApprovalGrid(props: ApprovalGridProps) {
   const { userRole } = props;
+
+  const [loading, setLoading] = React.useState(false);
   const [userData, setUserData] = React.useState<User[]>([]);
 
   React.useEffect(() => {
@@ -82,12 +80,15 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
       .firestore()
       .collection('users')
       .where('role', '==', 'unapproved');
+
     const unsubscribe = usersRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
           ({
             id: doc.id,
-            fullname: doc.data().firstname + ' ' + doc.data().lastname,
+            fullname: `${doc.data().firstname ?? ''} ${
+              doc.data().lastname ?? ''
+            }`,
             ...doc.data(),
           } as User)
       );
@@ -112,164 +113,157 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
+    setLoading(true);
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+    setLoading(false);
   };
 
-  const handleSaveClick = (id: GridRowId) => () => {
-    const updatedRow = userData.find((row) => row.id === id);
-    if (updatedRow) {
-      firebase
+  const handleSaveClick = (id: GridRowId) => async () => {
+    setLoading(true);
+    try {
+      const updatedRow = userData.find((row) => row.id === id);
+      if (!updatedRow)
+        throw new Error(`No matching user data found for id: ${id}`);
+
+      await firebase
         .firestore()
         .collection('users')
         .doc(id.toString())
-        .update(updatedRow)
-        .then(() => {
-          setRowModesModel({
-            ...rowModesModel,
-            [id]: { mode: GridRowModes.View },
-          });
-        })
-        .catch((error) => {
-          console.error('Error updating document: ', error);
-        });
-    } else {
-      console.error('No matching user data found for id: ', id);
-    }
-  };
+        .update(updatedRow);
 
-  const handleApproveClick = (id: GridRowId) => () => {
-    const updatedRow = userData.find((row) => row.id === id);
-    if (updatedRow) {
-      firebase
-        .firestore()
-        .collection('users')
-        .doc(id.toString())
-        .update({ role: 'faculty' })
-        .then(() => {
-          setRowModesModel({
-            ...rowModesModel,
-            [id]: { mode: GridRowModes.View },
-          });
-        })
-        .catch((error) => {
-          console.error('Error updating document: ', error);
-        });
-    } else {
-      console.error('No matching user data found for id: ', id);
-    }
-  };
-
-  const handleDenyClick = (id: GridRowId) => () => {
-    const updatedRow = userData.find((row) => row.id === id);
-    if (updatedRow) {
-      firebase
-        .firestore()
-        .collection('users')
-        .doc(id.toString())
-        .update({ role: 'denied' })
-        .then(() => {
-          setRowModesModel({
-            ...rowModesModel,
-            [id]: { mode: GridRowModes.View },
-          });
-        })
-        .catch((error) => {
-          console.error('Error updating document: ', error);
-        });
-    } else {
-      console.error('No matching user data found for id: ', id);
-    }
-  };
-
-  const handleDeleteClick = (id: GridRowId) => () => {
-    firebase
-      .firestore()
-      .collection('users')
-      .doc(id.toString())
-      .delete()
-      .then(() => {
-        deleteUserHTTPRequest(id.toString());
-        setUserData(userData.filter((row) => row.id !== id));
-      })
-      .catch((error) => {
-        console.error('Error removing document: ', error);
-      });
-  };
-
-  const handleCancelClick = (id: GridRowId) => () => {
-    const editedRow = userData.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      firebase
-        .firestore()
-        .collection('users')
-        .doc(id.toString())
-        .delete()
-        .then(() => {
-          setUserData(userData.filter((row) => row.id !== id));
-        })
-        .catch((error) => {
-          console.error('Error removing document: ', error);
-        });
-    } else {
       setRowModesModel({
         ...rowModesModel,
-        [id]: { mode: GridRowModes.View, ignoreModifications: true },
+        [id]: { mode: GridRowModes.View },
       });
+    } catch (error) {
+      console.error('Error updating document: ', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...(newRow as User), isNew: false };
-    if (updatedRow) {
-      if (updatedRow.isNew) {
-        return firebase
+  const handleApproveClick = (id: GridRowId) => async () => {
+    setLoading(true);
+    try {
+      await firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .update({ role: 'faculty' });
+      setRowModesModel({
+        ...rowModesModel,
+        [id]: { mode: GridRowModes.View },
+      });
+    } catch (error) {
+      console.error('Error updating document: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDenyClick = (id: GridRowId) => async () => {
+    setLoading(true);
+    try {
+      await firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .update({ role: 'denied' });
+      setRowModesModel({
+        ...rowModesModel,
+        [id]: { mode: GridRowModes.View },
+      });
+    } catch (error) {
+      console.error('Error updating document: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (id: GridRowId) => async () => {
+    setLoading(true);
+    try {
+      await firebase
+        .firestore()
+        .collection('users')
+        .doc(id.toString())
+        .delete();
+      deleteUserHTTPRequest(id.toString());
+      setUserData((prev) => prev.filter((row) => row.id !== id));
+    } catch (error) {
+      console.error('Error removing document: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelClick = (id: GridRowId) => async () => {
+    setLoading(true);
+    try {
+      const editedRow = userData.find((row) => row.id === id);
+      if (editedRow?.isNew) {
+        await firebase
           .firestore()
           .collection('users')
-          .add(updatedRow)
-          .then(() => {
-            setUserData(
-              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
-            );
-            return updatedRow;
-          })
-          .catch((error) => {
-            console.error('Error adding document: ', error);
-            throw error;
-          });
+          .doc(id.toString())
+          .delete();
+        setUserData((prev) => prev.filter((row) => row.id !== id));
       } else {
-        return firebase
+        setRowModesModel({
+          ...rowModesModel,
+          [id]: { mode: GridRowModes.View, ignoreModifications: true },
+        });
+      }
+    } catch (error) {
+      console.error('Error removing document: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    setLoading(true);
+    try {
+      const updatedRow = { ...(newRow as User), isNew: false };
+
+      if ((updatedRow as any).isNew) {
+        await firebase.firestore().collection('users').add(updatedRow);
+      } else {
+        await firebase
           .firestore()
           .collection('users')
           .doc(updatedRow.id)
-          .update(updatedRow)
-          .then(() => {
-            setUserData(
-              userData.map((row) => (row.id === newRow.id ? updatedRow : row))
-            );
-            return updatedRow;
-          })
-          .catch((error) => {
-            console.error('Error updating document: ', error);
-            throw error;
-          });
+          .update(updatedRow);
       }
-    } else {
-      return Promise.reject(
-        new Error('No matching user data found for id: ' + newRow.id)
+
+      setUserData((prev) =>
+        prev.map((row) => (row.id === newRow.id ? (updatedRow as User) : row))
       );
+
+      return updatedRow;
+    } catch (error) {
+      console.error('Error processing row update: ', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-  let columns: GridColDef[] = [
+  const columns: GridColDef[] = [
+    { field: 'fullname', headerName: 'Full Name', width: 202, editable: true },
+    { field: 'email', headerName: 'Email', width: 215, editable: true },
+    {
+      field: 'department',
+      headerName: 'Department',
+      width: 119,
+      editable: true,
+    },
+    { field: 'role', headerName: 'Role', width: 150, editable: true },
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 280,
+      width: 180,
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -277,18 +271,17 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
         if (isInEditMode) {
           return [
             <GridActionsCellItem
-              key="1"
+              key="save"
               icon={<SaveIcon />}
               label="Save"
-              sx={{
-                color: 'primary.main',
-              }}
+              sx={{ color: 'primary.main' }}
               onClick={handleSaveClick(id)}
             />,
             <GridActionsCellItem
-              key="2"
+              key="cancel"
               icon={<CancelIcon />}
               label="Cancel"
+              className="textPrimary"
               onClick={handleCancelClick(id)}
               color="inherit"
             />,
@@ -296,42 +289,30 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
         }
 
         return [
-          <Button
-            key="8"
-            variant="outlined"
-            color="inherit"
-            size="small"
-            style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
-            startIcon={<EditIcon />}
-            onClick={handleEditClick(id)}
-          >
-            Edit
-          </Button>,
-
-          <Button
-            key="7"
-            variant="outlined"
-            color="primary"
-            size="small"
-            style={{
-              marginRight: '20px',
-              height: '25px',
-              textTransform: 'none',
-            }}
-            startIcon={<DeleteIcon />}
-            onClick={handleDeleteClick(id)}
-          >
-            Delete
-          </Button>,
           <GridActionsCellItem
-            key="4"
+            key="edit"
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key="delete"
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={handleDeleteClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key="approve"
             icon={<ThumbUpOffAlt />}
             label="Approve"
             onClick={handleApproveClick(id)}
             color="success"
           />,
           <GridActionsCellItem
-            key="5"
+            key="deny"
             icon={<ThumbDownOffAlt />}
             label="Deny"
             onClick={handleDenyClick(id)}
@@ -340,103 +321,94 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
         ];
       },
     },
-    {
-      field: 'fullname',
-      headerName: 'Full Name',
-      width: 202,
-      editable: true,
-    },
-    { field: 'email', headerName: 'Email', width: 215, editable: true },
-    {
-      field: 'department',
-      headerName: 'Department',
-      width: 119,
-      editable: true,
-    },
-    {
-      field: 'courses',
-      headerName: 'Course Code',
-      width: 300,
-      editable: true,
-    },
-    {
-      field: 'semester',
-      headerName: 'Semester',
-      width: 130,
-      editable: true,
-    },
-    { field: 'role', headerName: 'Role', width: 100, editable: true },
   ];
-  const ODD_OPACITY = 0.2;
 
-  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  // ✅ Copy CourseGrid UI styling
+  const StripedDataGrid = styled(DataGrid)(() => ({
+    border: 'none',
+    borderRadius: '16px',
+    fontFamily: 'Inter, sans-serif',
+    fontSize: '0.95rem',
+
+    '& .MuiDataGrid-columnHeaders': {
+      backgroundColor: '#D8C6F8',
+      color: '#1C003D',
+      fontWeight: 700,
+      borderBottom: 'none',
+    },
+
+    '& .MuiDataGrid-columnHeaderTitle': {
+      fontWeight: 700,
+    },
+
+    '& .MuiDataGrid-columnHeader:first-of-type': {
+      paddingLeft: '20px',
+    },
+    '& .MuiDataGrid-cell:first-of-type': {
+      paddingLeft: '25px',
+    },
+
     [`& .${gridClasses.row}.even`]: {
-      backgroundColor: '#562EBA1F',
-      '&:hover, &.Mui-hovered': {
-        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
-        '@media (hover: none)': {
-          backgroundColor: 'transparent',
-        },
-      },
-      '&.Mui-selected': {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity
-        ),
-        '&:hover, &.Mui-hovered': {
-          backgroundColor: alpha(
-            theme.palette.primary.main,
-            ODD_OPACITY +
-              theme.palette.action.selectedOpacity +
-              theme.palette.action.hoverOpacity
-          ),
-          // Reset on touch devices, it doesn't add specificity
-          '@media (hover: none)': {
-            backgroundColor: alpha(
-              theme.palette.primary.main,
-              ODD_OPACITY + theme.palette.action.selectedOpacity
-            ),
-          },
-        },
-      },
+      backgroundColor: '#FFFFFF',
+    },
+    [`& .${gridClasses.row}.odd`]: {
+      backgroundColor: '#EEEEEE',
+    },
+
+    '& .MuiDataGrid-row:hover': {
+      backgroundColor: '#EFE6FF',
+    },
+
+    '& .MuiDataGrid-cell': {
+      borderBottom: '1px solid #ECE4FA',
+    },
+
+    '& .MuiDataGrid-footerContainer': {
+      borderTop: 'none',
+    },
+
+    '& .MuiTablePagination-root': {
+      color: '#5D3FC4',
+      fontWeight: 500,
     },
   }));
 
   return (
     <Box
       sx={{
+        marginLeft: 10,
         height: 600,
-        width: '100%',
-        '& .actions': {
-          color: 'text.secondary',
-        },
-        '& .textPrimary': {
-          color: 'text.primary',
-        },
+        width: '90%',
+        backgroundColor: '#FDFBFF',
+        borderRadius: '16px',
+        boxShadow: '0 2px 8px rgba(128, 90, 213, 0.1)',
+        '& .actions': { color: 'text.secondary' },
+        '& .textPrimary': { color: 'text.primary' },
       }}
     >
+      {loading ? <LinearProgress color="warning" /> : null}
+
       <StripedDataGrid
         rows={userData}
         columns={columns}
-        slots={{
-          toolbar: EditToolbar,
-          loadingOverlay: LinearProgress,
-        }}
-        slotProps={{
-          toolbar: { setUserData, setRowModesModel },
-        }}
         editMode="row"
         rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
+        onRowModesModelChange={(m) => setRowModesModel(m)}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        onProcessRowUpdateError={(error) =>
+          console.error('Error processing row update: ', error)
+        }
+        slots={{ toolbar: EditToolbar }}
+        slotProps={{
+          toolbar: { setApplicationData: setUserData, setRowModesModel },
+        }}
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
         }}
         getRowClassName={(params) =>
           params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
         }
-        sx={{ borderRadius: '16px' }}
       />
     </Box>
   );

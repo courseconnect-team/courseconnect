@@ -1,24 +1,17 @@
 /* components/DashboardSections.tsx */
 import { PrimaryButton } from '@/components/Buttons/PrimaryButton';
-import { NavbarItem } from '@/types/navigation';
 import { Role } from '@/types/User';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import AnnouncementDialog from './AnnouncementDialogue';
 import AnnouncementsRow from './AnnouncementsRow';
 
 import { usePostAnnouncement } from '@/hooks/Announcements/usePostAnnouncement';
-import { useFetchAnnouncementsForAccount } from '@/hooks/Announcements/useFetchAnnouncements';
+import { useAnnouncements } from '@/contexts/AnnouncementsContext';
 
-import { Announcement, AudienceRole } from '@/types/announcement';
+import { Announcement } from '@/types/announcement';
 
-export default function AnnouncementSections({
-  role,
-  uemail,
-}: {
-  role: Role;
-  uemail: string;
-}) {
+export default function AnnouncementSections({ role }: { role: Role }) {
   const [open, setOpen] = useState(false);
   const { postAnnouncement, posting, error: postError } = usePostAnnouncement();
 
@@ -26,18 +19,9 @@ export default function AnnouncementSections({
     read,
     unread,
     loading,
-    loadingMore,
-    hasMore,
     error: fetchError,
     refresh,
-    loadMore,
-  } = useFetchAnnouncementsForAccount({
-    userRole: role,
-    userEmail: uemail,
-    userDepartment: 'ECE', // TODO: make real
-    channel: 'inApp',
-    realtime: true,
-  });
+  } = useAnnouncements();
 
   async function handleSubmit(draft: Announcement) {
     await postAnnouncement({
@@ -141,18 +125,6 @@ export default function AnnouncementSections({
           )}
         </div>
       )}
-
-      {hasMore ? (
-        <div className="flex justify-center">
-          <button
-            className="px-3 py-2 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
-            onClick={() => loadMore()}
-            disabled={loadingMore}
-          >
-            {loadingMore ? 'Loading…' : 'Load more'}
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 }
