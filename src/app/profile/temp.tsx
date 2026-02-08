@@ -14,7 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import './style.css';
-import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import DeleteUserButton from './DeleteUserButton';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import { updateProfile } from 'firebase/auth';

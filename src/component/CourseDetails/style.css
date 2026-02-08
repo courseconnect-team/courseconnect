@@ -1,0 +1,43 @@
+.course-details {
+  padding: 20px;
+  margin: 25px 50px;
+  border-radius: 50px;
+ 
+}
+
+.instructor,
+.students-enrolled,
+.course-info,
+.tas,
+.schedule {
+  margin-bottom: 20px;
+}
+.text-highlight {
+  color: #000; /* Change to desired text color */
+  font-family: SF Pro Display;
+  font-weight: 400;
+  line-height: 36px;
+  word-wrap: break-word;
+}
+
+.enrollment-bar {
+  background-color: lightgray;
+  border-radius: 5px;
+  height: 10px;
+  width: 100%;
+}
+
+.enrollment-percentage {
+  height: 100%;
+  border-radius: 5px;
+}
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.schedule-item .MuiSvgIcon-root {
+  margin-right: 8px;
+}

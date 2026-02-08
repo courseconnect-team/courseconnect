@@ -1,0 +1,128 @@
+.studentlandingpage {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.studentlandingpage .overlapwrapper {
+  width: 100%;
+}
+
+.studentlandingpage .overlap {
+  position: absolute;
+  width: 100%;
+  
+}
+
+.studentlandingpage .overlap2 {
+  
+  height: 545px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .colorblockframe {
+  height: 350px;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .overlapgroup2 {
+  height: 458px;
+  left: -5px;
+  position: absolute;
+  width: 100%;
+}
+
+.studentlandingpage .colorblock {
+  background-color: #001776;
+  height: 458px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .GRADIENTS {
+  height: 350px;
+  left: 5px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.studentlandingpage .glasscard {
+  -webkit-backdrop-filter: blur(200px) brightness(100%);
+  backdrop-filter: blur(200px) brightness(100%);
+  background-blend-mode: luminosity;
+  height: 458px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 101%;
+}
+
+.studentlandingpage .ecelogopng2 {
+  left: 27px !important;
+  position: absolute !important;
+  top: 23px !important;
+}
+
+.studentlandingpage .fullnameandbioinstance {
+  left: 50%;
+  top: 250px !important;
+  position: absolute;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
+}
+
+.studentlandingpage .topnavbarsignedin {
+  right: 70px;
+  top: 27px !important;
+  position: absolute; 
+
+}
+
+.studentlandingpage .textwrapper8 {
+  color: #ffffff;
+  font-family: 'SF Pro Display-Medium', Helvetica;
+  font-size: 50px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  left: 50%;
+  transform: translateY(-50%);
+  transform: translateX(-50%);
+  top: 150px;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  left: 50%;
+  gap: 50px;
+  top: 700px;
+  transform: translate(-50%, -50%);
+
+}
+
+
+@media (max-width: 570px) {
+  .ecelogopng2 {
+    display: none;
+  }
+  .container{
+    flex-direction: column;
+    margin-top: 380px;
+  }
+}

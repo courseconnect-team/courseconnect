@@ -1,0 +1,66 @@
+.fullnameandbio {
+  height: 295px;
+  position: relative;
+  width: 408px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.fullnameandbio .ellipse {
+  background-color: #9d9d9d;
+  border: 5px solid;
+  border-color: #ffffff;
+  border-radius: 100px;
+  height: 200px;
+  left: 26%;
+  position: absolute;
+  top: 0;
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fullnameandbio .initial {
+  color:#ffffff;
+  font-size: 100px;
+}
+.fullnameandbio .textwrapper {
+  color: #000000;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 48px;
+  font-weight: 400;
+  margin: auto;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  top: 200px;
+  white-space: nowrap;
+}
+
+.fullnameandbio .div {
+  color: #6c6c6c;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 24px;
+  font-weight: 400;
+  text-align: center;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  top: 200px;
+}
+
+.fullnameandbio .textwrapper2 {
+  color: #6c6c6c;
+  font-family: "SF Pro Display-Regular", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  left: 308px;
+  letter-spacing: 0;
+  line-height: normal;
+  position: absolute;
+  top: 190px;
+}
+
+

@@ -6,8 +6,7 @@ import { Toaster, toast } from 'react-hot-toast';
 import GetUserRole from '@/firebase/util/GetUserRole';
 
 import 'firebase/firestore';
-import Applications from '@/component/Dashboard/Applications/Applications';
-import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import Applications from '@/components/Dashboard/Applications/Applications';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { CssBaseline } from '@mui/material';
 import { getNavItems } from '@/hooks/useGetItems';

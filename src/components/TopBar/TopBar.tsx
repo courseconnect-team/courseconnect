@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import NotificationsActiveOutlinedIcon from '@mui/icons-material/NotificationsActiveOutlined';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
-import { EceLogoPng } from '@/component/EceLogoPng/EceLogoPng';
+import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import Link from 'next/link';
 import { Role, roleMapping } from '@/types/User';
 import { useAnnouncements } from '@/contexts/AnnouncementsContext';
