@@ -7,55 +7,12 @@ import PageLayout from '@/components/PageLayout/PageLayout';
 import firebase from '@/firebase/firebase_config';
 import StudentResearchView from '@/components/Research/StudentResearchView';
 import FacultyResearchView from '@/components/Research/FacultyResearchView';
+import {
+  ResearchListing,
+  normalizeResearchListing,
+} from '@/app/models/ResearchModel';
 
-interface ResearchPageProps {
-  user: {
-    uid: string;
-    fullName: string;
-    bio: string;
-  };
-}
-
-interface ResearchListing {
-  id: string;
-  project_title: string;
-  department: string;
-  faculty_mentor: {};
-  phd_student_mentor: string | {};
-  terms_available: string;
-  student_level: string;
-  prerequisites: string;
-  credit: string;
-  stipend: string;
-  application_requirements: string;
-  application_deadline: string;
-  website: string;
-  project_description: string;
-}
-
-interface ResearchApplication {
-  appid: string;
-  app_status: string;
-  terms_available: string;
-  date_applied: string;
-  degree: string;
-  department: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  gpa: string;
-  graduation_date: string;
-  phone_number: string;
-  qualifications: string;
-  resume: string;
-  uid: string;
-  weekly_hours: string;
-  project_title: string;
-  faculty_mentor: {};
-  project_description: string;
-}
-
-const ResearchPage: React.FC<ResearchPageProps> = () => {
+const ResearchPage: React.FC = () => {
   const [user, role, loading, error] = useUserInfo();
 
   const [department, setDepartment] = React.useState('');
@@ -64,9 +21,6 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   const [researchListings, setResearchListings] = useState<ResearchListing[]>(
     []
   );
-  const [researchApplications, setResearchApplications] = useState<
-    ResearchApplication[]
-  >([]);
 
   const getResearchListings = useCallback(async () => {
     let collectionRef: firebase.firestore.Query<firebase.firestore.DocumentData> =
@@ -87,69 +41,15 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
             ...d.data(),
           })
         );
-        return {
+        return normalizeResearchListing({
           docID: doc.id,
           applications: apps,
           ...doc.data(),
-        };
+        });
       })
     );
     setResearchListings(listings);
   }, [department, studentLevel]);
-
-  const getApplications = useCallback(async () => {
-    if (!user?.uid) return;
-    const snapshot = await firebase
-      .firestore()
-      .collectionGroup('applications')
-      .where('uid', '==', user.uid)
-      .get();
-    const results = await Promise.all(
-      snapshot.docs.map(async (appDoc) => {
-        const appData = appDoc.data();
-
-        // navigate back up to the parent document
-        var listingRef = appDoc.ref.parent.parent;
-        let listingData: any = {};
-        if (listingRef) {
-          const listingSnap = await listingRef.get();
-          if (listingSnap.exists) {
-            listingData = listingSnap.data();
-          }
-        }
-
-        return {
-          appId: appDoc.id,
-          ...appData,
-          listingId: listingRef?.id ?? null,
-          listingData,
-        };
-      })
-    );
-
-    let applications: ResearchApplication[] = results.map((doc: any) => ({
-      appid: doc.appId,
-      app_status: doc.app_status,
-      terms_available: doc.listingData.terms_available,
-      date_applied: doc.date,
-      degree: doc.degree,
-      department: doc.department,
-      email: doc.email,
-      first_name: doc.firstname,
-      last_name: doc.lastname,
-      gpa: doc.gpa,
-      graduation_date: doc.graduation_date,
-      phone_number: doc.phone_number,
-      qualifications: doc.qualifications,
-      resume: doc.resume,
-      uid: doc.uid,
-      weekly_hours: doc.weekly_hours,
-      faculty_mentor: doc.listingData.faculty_mentor,
-      project_title: doc.listingData.project_title,
-      project_description: doc.listingData.project_description,
-    }));
-    setResearchApplications(applications);
-  }, [user?.uid]);
 
   const postNewResearchPosition = useCallback(async (formData: any) => {
     try {
@@ -166,9 +66,8 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   useEffect(() => {
     if (user) {
       getResearchListings();
-      getApplications();
     }
-  }, [user, getResearchListings, getApplications]);
+  }, [user, getResearchListings]);
 
   if (error) {
     return <p>Error loading role</p>;
@@ -185,11 +84,13 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
   return (
     <>
       <Toaster />
-      <PageLayout mainTitle="Research" navItems={getNavItems(role)}>
+      <PageLayout
+        mainTitle="Research Applications"
+        navItems={getNavItems(role)}
+      >
         {(role === 'student_applying' || role === 'student_applied') && (
           <StudentResearchView
             researchListings={researchListings}
-            researchApplications={researchApplications}
             role={role}
             uid={user.uid}
             department={department}
@@ -198,10 +99,8 @@ const ResearchPage: React.FC<ResearchPageProps> = () => {
             setStudentLevel={setStudentLevel}
             getResearchListings={getResearchListings}
             setResearchListings={setResearchListings}
-            getApplications={getApplications}
             termsAvailable={termsAvailable}
             setTermsAvailable={setTermsAvailable}
-            setResearchApplications={setResearchApplications}
           />
         )}
         {role === 'faculty' && (

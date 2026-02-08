@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, Typography, Button, Box } from '@mui/material';
 
 interface ApplicationCardProps {
@@ -6,7 +6,7 @@ interface ApplicationCardProps {
   uid?: string;
   project_title: string;
   department: string;
-  faculty_mentor: { name: string; email: string };
+  faculty_mentor?: { [email: string]: string } | string;
   date_applied: string;
   terms_available: string;
   student_level: string;
@@ -20,6 +20,8 @@ interface ApplicationCardProps {
   application_deadline?: string;
   website?: string;
   app_status: string;
+  faculty_contact?: string;
+  compensation?: string;
   onEdit?: () => void;
   onShowApplications?: () => void;
 }
@@ -31,51 +33,38 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
   department,
   date_applied,
   faculty_mentor,
-  terms_available,
-  student_level,
-  project_description,
   faculty_members = [],
   app_status,
-  phd_student_mentor,
-  prerequisites,
-  credit,
-  stipend,
-  application_requirements,
-  application_deadline,
-  website,
+  project_description,
+  faculty_contact,
   onEdit,
   onShowApplications,
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const [needsExpansion, setNeedsExpansion] = useState(false);
-  const descriptionRef = useRef<HTMLDivElement>(null);
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
 
-  useEffect(() => {
-    const checkTextOverflow = () => {
-      const element = descriptionRef.current;
-      if (!element) return;
+  // Backward-compatible faculty display
+  const facultyDisplay =
+    faculty_contact ||
+    (typeof faculty_mentor === 'object' && faculty_mentor
+      ? Object.values(faculty_mentor).join(', ')
+      : typeof faculty_mentor === 'string'
+      ? faculty_mentor
+      : 'N/A');
 
-      if (expanded) {
-        setNeedsExpansion(true);
-        return;
-      }
-
-      const isOverflowing = element.scrollHeight > element.clientHeight;
-      setNeedsExpansion(isOverflowing);
-    };
-
-    checkTextOverflow();
-
-    window.addEventListener('resize', checkTextOverflow);
-    return () => window.removeEventListener('resize', checkTextOverflow);
-  }, [expanded, project_description]);
+  const sectionHeaderSx = {
+    color: '#5A41D8',
+    fontWeight: 'bold',
+    fontSize: '0.95rem',
+    mt: 2,
+    mb: 0.5,
+  };
 
   return (
     <Card
       sx={{
-        p: 3,
+        p: 2,
         borderRadius: '16px',
         boxShadow: 3,
         backgroundColor: '#fff',
@@ -84,107 +73,100 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({
         height: '100%',
       }}
     >
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h5" fontWeight="bold">
+      <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+        <Typography variant="h6" fontWeight="bold" gutterBottom>
           {project_title}
         </Typography>
-        <Typography variant="subtitle2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" gutterBottom>
           {department}
         </Typography>
-        <Box mt={2}>
-          <Typography fontWeight="bold" display="inline">
-            Status:
-          </Typography>{' '}
-          <Typography
-            variant="subtitle1"
-            color={
-              app_status === 'Pending'
-                ? 'warning.main'
-                : app_status === 'Denied'
-                ? 'error.main'
-                : 'success.main'
-            }
-            display="inline"
-          >
-            {app_status}
+
+        <Box mt={1}>
+          <Typography variant="body2">
+            <strong>Status:</strong>{' '}
+            <Typography
+              component="span"
+              variant="body2"
+              sx={{
+                color:
+                  app_status === 'Pending'
+                    ? 'warning.main'
+                    : app_status === 'Denied'
+                    ? 'error.main'
+                    : 'success.main',
+                fontWeight: 600,
+              }}
+            >
+              {app_status}
+            </Typography>
           </Typography>
-          <br />
-          <Typography fontWeight="bold" display="inline">
-            Date Applied:
-          </Typography>{' '}
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            display="inline"
-          >
-            {date_applied}
+          <Typography variant="body2">
+            <strong>Date Applied:</strong> {date_applied}
+          </Typography>
+          <Typography variant="body2">
+            <strong>Faculty Mentor:</strong> {facultyDisplay}
           </Typography>
         </Box>
-        <Box mt={2}>
-          <Typography fontWeight="bold" display="inline">
-            Faculty Mentor:
-          </Typography>{' '}
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            display="inline"
-          >
-            {Object.entries(faculty_mentor ?? {})
-              .map(([key, value]) => `${value}`)
-              .join(', ')}
-          </Typography>
-          <br />
-          <Typography fontWeight="bold" display="inline">
-            Faculty Email:
-          </Typography>{' '}
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            display="inline"
-          >
-            {Object.entries(faculty_mentor ?? {})
-              .map(([key, value]) => `${key}`)
-              .join(', ')}
-          </Typography>
-        </Box>
-        <Box mt={2} sx={{ flexGrow: 1 }}>
-          <Typography fontWeight="bold">Research Description</Typography>
-          <Typography
-            ref={descriptionRef}
-            sx={{
-              display: expanded ? 'block' : '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: expanded ? 'unset' : 3,
-              overflow: 'hidden',
-            }}
-          >
-            {project_description}
-          </Typography>
-        </Box>
+
+        <Typography sx={sectionHeaderSx}>Research Description</Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            display: expanded ? 'block' : '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: expanded ? 'unset' : 3,
+            overflow: 'hidden',
+          }}
+        >
+          {project_description}
+        </Typography>
       </CardContent>
-      <Box display="flex" justifyContent="space-between" p={2}>
-        {needsExpansion ? (
-          <Button variant="outlined" onClick={() => setExpanded(!expanded)}>
-            {expanded ? 'Read Less' : 'Read More'}
-          </Button>
-        ) : (
-          <div></div>
-        )}
+
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        px={2}
+        pb={1}
+      >
+        <Button
+          variant="text"
+          onClick={() => setExpanded(!expanded)}
+          sx={{
+            textTransform: 'none',
+            color: '#5A41D8',
+            fontWeight: 500,
+            fontSize: '0.85rem',
+          }}
+        >
+          {expanded ? 'View Less' : 'View More'}
+        </Button>
+
         {isFacultyInvolved && (
           <Box display="flex" gap={1}>
             <Button
               variant="contained"
-              sx={{ backgroundColor: '#4CAF50', color: '#FFFFFF' }}
+              size="small"
+              sx={{
+                backgroundColor: '#4CAF50',
+                color: '#FFFFFF',
+                textTransform: 'none',
+              }}
               onClick={onEdit}
             >
-              Edit Application
+              Edit
             </Button>
             <Button
               variant="contained"
-              sx={{ backgroundColor: '#2196F3', color: '#FFFFFF' }}
+              size="small"
+              sx={{
+                backgroundColor: '#2196F3',
+                color: '#FFFFFF',
+                textTransform: 'none',
+              }}
               onClick={onShowApplications}
             >
-              Show Applications
+              Applications
             </Button>
           </Box>
         )}

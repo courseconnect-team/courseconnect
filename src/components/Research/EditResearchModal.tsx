@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -10,14 +10,32 @@ import {
   Button,
   Grid,
   Typography,
+  MenuItem,
+  IconButton,
+  Box,
+  CircularProgress,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import firebase from '@/firebase/firebase_config';
+import { normalizeResearchListing } from '@/app/models/ResearchModel';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
+
+const NATURE_OF_JOB_OPTIONS = [
+  'Research Assistant',
+  'Lab Assistant',
+  'Teaching Assistant',
+  'Field Work',
+  'Data Analysis',
+  'Other',
+];
 
 interface EditResearchModalProps {
   open: boolean;
   onClose: () => void;
-  listingData: any; // The current listing's data (pre-filled)
-  onSubmitSuccess: () => void; // Callback to refresh the listings
+  listingData: any;
+  onSubmitSuccess: () => void;
 }
 
 const EditResearchModal: React.FC<EditResearchModalProps> = ({
@@ -26,58 +44,90 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
   listingData,
   onSubmitSuccess,
 }) => {
-  const [formData, setFormData] = useState({ ...listingData });
-  const [facultyEmail, setFacultyEmail] = useState('');
-  const [facultyName, setFacultyName] = useState('');
+  const [formData, setFormData] = useState<any>({});
+  const [uploading, setUploading] = useState(false);
+  const [imageFileName, setImageFileName] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setFormData({ ...listingData });
+    const normalized = normalizeResearchListing(listingData);
+    setFormData(normalized);
+    if (normalized.image_url) {
+      setImageFileName('Current image');
+    }
   }, [listingData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData((prev: typeof formData) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  /** Adds a faculty mentor to the map. */
-  const handleAddFacultyMentor = () => {
-    if (facultyEmail && facultyName) {
-      setFormData((prev) => ({
-        ...prev,
-        faculty_mentor: {
-          ...prev.faculty_mentor,
-          [facultyEmail]: facultyName,
-        },
-      }));
-      setFacultyEmail('');
-      setFacultyName('');
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const storage = getStorage();
+      const storageRef = ref(
+        storage,
+        `research-images/${uuidv4()}_${file.name}`
+      );
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      setFormData((prev: any) => ({ ...prev, image_url: downloadURL }));
+      setImageFileName(file.name);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setUploading(false);
     }
   };
 
-  /** Removes a faculty mentor from the map. */
-  const handleRemoveFacultyMentor = (email: string) => {
-    setFormData((prev) => {
-      const updatedMentors = { ...prev.faculty_mentor };
-      delete updatedMentors[email];
-      return { ...prev, faculty_mentor: updatedMentors };
-    });
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      handleImageUpload(file);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
   };
 
   const handleSubmit = async () => {
     try {
       const db = firebase.firestore();
-      const querySnapshot = await db
-        .collection('research-listings')
-        .where('id', '==', listingData.id)
-        .get();
+      const docID = listingData.docID || listingData.id;
+      const listingRef = db.collection('research-listings').doc(docID);
+      const doc = await listingRef.get();
 
-      if (querySnapshot.empty) {
+      if (!doc.exists) {
         throw new Error('No matching listing found!');
       }
 
-      const listingRef = querySnapshot.docs[0].ref;
-      await listingRef.update(formData);
+      const updateData = {
+        project_title: formData.project_title || '',
+        project_description: formData.project_description || '',
+        department: formData.department || '',
+        nature_of_job: formData.nature_of_job || '',
+        compensation: formData.compensation || '',
+        faculty_contact: formData.faculty_contact || '',
+        phd_student_contact: formData.phd_student_contact || '',
+        application_deadline: formData.application_deadline || '',
+        hours_per_week: formData.hours_per_week || '',
+        prerequisites: formData.prerequisites || '',
+        image_url: formData.image_url || '',
+        terms_available: formData.terms_available || '',
+        student_level: formData.student_level || '',
+        application_requirements: formData.application_requirements || '',
+        website: formData.website || '',
+      };
 
+      await listingRef.update(updateData);
       alert('Research listing updated!');
       onSubmitSuccess();
       onClose();
@@ -88,181 +138,300 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Edit Research Listing</DialogTitle>
-      <DialogContent
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{ sx: { borderRadius: '12px' } }}
+    >
+      <DialogTitle
         sx={{
-          maxHeight: '70vh', // Adjust the height as needed
-          overflowY: 'auto', // Enables scrolling
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontWeight: 'bold',
+          fontSize: '1.25rem',
         }}
       >
+        Edit Position
+        <IconButton onClick={onClose} size="small">
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent dividers>
         <Grid container spacing={2}>
-          <Grid item xs={12} sx={{ marginTop: 2 }}>
+          {/* Title + Description */}
+          <Grid item xs={12} sm={6}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: '#5A41D8' }}>*</span> Title
+            </Typography>
             <TextField
-              label="Project Title"
               name="project_title"
+              placeholder="Ex. Research Assistant"
               value={formData.project_title || ''}
               onChange={handleChange}
               fullWidth
+              size="small"
             />
           </Grid>
-
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: '#5A41D8' }}>*</span> Position Description
+            </Typography>
             <TextField
-              label="Department"
-              name="department"
-              value={formData.department || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          {/* Faculty Mentor */}
-          <Grid item xs={12}>
-            <Typography variant="subtitle1">Faculty Mentors</Typography>
-            <TextField
-              label="Faculty Mentor Email"
-              value={facultyEmail}
-              onChange={(e) => setFacultyEmail(e.target.value)}
-              fullWidth
-              margin="dense"
-            />
-            <TextField
-              label="Faculty Mentor Name"
-              value={facultyName}
-              onChange={(e) => setFacultyName(e.target.value)}
-              fullWidth
-              margin="dense"
-            />
-            <Button
-              onClick={handleAddFacultyMentor}
-              sx={{
-                textTransform: 'none',
-                color: '#5A41D8',
-                fontWeight: 500,
-                marginTop: '8px',
-              }}
-            >
-              Add Faculty Mentor
-            </Button>
-            <Grid container spacing={1} sx={{ marginTop: '8px' }}>
-              {formData.faculty_mentor &&
-                Object.entries(formData.faculty_mentor).map(([email, name]) => (
-                  <Grid item xs={12} key={email}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span>
-                        {name} ({email})
-                      </span>
-                      <Button
-                        onClick={() => handleRemoveFacultyMentor(email)}
-                        sx={{
-                          textTransform: 'none',
-                          color: '#D32F2F',
-                          fontWeight: 500,
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </Grid>
-                ))}
-            </Grid>
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="PhD Student Mentor"
-              name="phd_student_mentor"
-              value={formData.phd_student_mentor || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Credit"
-              name="credit"
-              value={formData.credit || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Stipend"
-              name="stipend"
-              value={formData.stipend || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Website"
-              name="website"
-              value={formData.website || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Application Requirements"
-              name="application_requirements"
-              value={formData.application_requirements || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Application Deadline"
-              name="application_deadline"
-              value={formData.application_deadline || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              label="Project Description"
               name="project_description"
+              placeholder="Enter description"
               value={formData.project_description || ''}
               onChange={handleChange}
               fullWidth
+              size="small"
               multiline
-              rows={3}
+              rows={4}
             />
           </Grid>
 
-          <Grid item xs={12}>
+          {/* Department */}
+          <Grid item xs={12} sm={6}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: '#5A41D8' }}>*</span> Department
+            </Typography>
             <TextField
-              label="Prerequisites"
+              name="department"
+              placeholder="Ex. ECE"
+              value={formData.department || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+
+          {/* Image Upload */}
+          <Grid item xs={12}>
+            <Box
+              onDrop={handleFileDrop}
+              onDragOver={(e) => e.preventDefault()}
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                border: '2px dashed #ccc',
+                borderRadius: '12px',
+                p: 3,
+                textAlign: 'center',
+                cursor: 'pointer',
+                backgroundColor: '#fafafa',
+                '&:hover': { borderColor: '#5A41D8' },
+              }}
+            >
+              {uploading ? (
+                <CircularProgress size={24} />
+              ) : imageFileName ? (
+                <Typography variant="body2" color="text.secondary">
+                  {imageFileName}
+                </Typography>
+              ) : (
+                <>
+                  <ImageOutlinedIcon
+                    sx={{ fontSize: 40, color: '#999', mb: 1 }}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    Drop your image here, or{' '}
+                    <span style={{ color: '#5A41D8', fontWeight: 'bold' }}>
+                      browse
+                    </span>
+                  </Typography>
+                </>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleFileSelect}
+              />
+            </Box>
+          </Grid>
+
+          {/* Nature of Job, Compensation, Faculty Contact, PhD Student Contact */}
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: '#5A41D8' }}>*</span> Nature of Job
+            </Typography>
+            <TextField
+              name="nature_of_job"
+              select
+              value={formData.nature_of_job || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            >
+              {NATURE_OF_JOB_OPTIONS.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: '#5A41D8' }}>*</span> Compensation
+            </Typography>
+            <TextField
+              name="compensation"
+              placeholder="Ex. $10/hr or 2 credits"
+              value={formData.compensation || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: '#5A41D8' }}>*</span> Faculty Contact
+            </Typography>
+            <TextField
+              name="faculty_contact"
+              placeholder="Ex. albertgator@ufl.edu"
+              value={formData.faculty_contact || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              PhD Student Contact
+            </Typography>
+            <TextField
+              name="phd_student_contact"
+              placeholder="Ex. alberta@ufl.edu"
+              value={formData.phd_student_contact || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+
+          {/* Application Deadline, Hours per Week, Prerequisites */}
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: '#5A41D8' }}>*</span> Application Deadline
+            </Typography>
+            <TextField
+              name="application_deadline"
+              type="date"
+              value={formData.application_deadline || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: '#5A41D8' }}>*</span> Hours per Week
+            </Typography>
+            <TextField
+              name="hours_per_week"
+              placeholder="Ex. 10"
+              value={formData.hours_per_week || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Prerequisites
+            </Typography>
+            <TextField
               name="prerequisites"
+              placeholder="Enter description"
               value={formData.prerequisites || ''}
               onChange={handleChange}
               fullWidth
+              size="small"
+              multiline
+              rows={2}
+            />
+          </Grid>
+
+          {/* Terms Available, Student Level, Website, Application Requirements */}
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Terms Available
+            </Typography>
+            <TextField
+              name="terms_available"
+              placeholder="Ex. Fall, Spring"
+              value={formData.terms_available || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Student Level
+            </Typography>
+            <TextField
+              name="student_level"
+              placeholder="Ex. Junior, Senior"
+              value={formData.student_level || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Website
+            </Typography>
+            <TextField
+              name="website"
+              placeholder="Ex. https://lab.ufl.edu"
+              value={formData.website || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Application Requirements
+            </Typography>
+            <TextField
+              name="application_requirements"
+              placeholder="Ex. Resume, Transcript"
+              value={formData.application_requirements || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
             />
           </Grid>
         </Grid>
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          Save
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <Button
+          onClick={onClose}
+          sx={{ textTransform: 'none', color: '#5A41D8', fontWeight: 500 }}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          sx={{
+            backgroundColor: '#5A41D8',
+            color: '#FFFFFF',
+            textTransform: 'none',
+            fontWeight: 500,
+            borderRadius: '8px',
+            '&:hover': { backgroundColor: '#4A35B8' },
+          }}
+        >
+          Save Changes
         </Button>
       </DialogActions>
     </Dialog>
