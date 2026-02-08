@@ -30,7 +30,12 @@ export interface ResearchListing {
   // System fields
   creator_id?: string;
   faculty_members?: string[];
-  applications?: any[];
+  applications?: Array<{
+    id: string;
+    student_id: string;
+    app_status: 'Pending' | 'Approved' | 'Denied';
+    [key: string]: any;
+  }>;
 }
 
 /**

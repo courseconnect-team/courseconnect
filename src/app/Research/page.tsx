@@ -4,13 +4,13 @@ import { Toaster } from 'react-hot-toast';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { getNavItems } from '@/hooks/useGetItems';
 import PageLayout from '@/components/PageLayout/PageLayout';
-import firebase from '@/firebase/firebase_config';
 import StudentResearchView from '@/components/Research/StudentResearchView';
 import FacultyResearchView from '@/components/Research/FacultyResearchView';
+import { ResearchListing } from '@/app/models/ResearchModel';
 import {
-  ResearchListing,
-  normalizeResearchListing,
-} from '@/app/models/ResearchModel';
+  fetchResearchListings,
+  createResearchListing,
+} from '@/services/researchService';
 
 const ResearchPage: React.FC = () => {
   const [user, role, loading, error] = useUserInfo();
@@ -23,41 +23,22 @@ const ResearchPage: React.FC = () => {
   );
 
   const getResearchListings = useCallback(async () => {
-    let collectionRef: firebase.firestore.Query<firebase.firestore.DocumentData> =
-      firebase.firestore().collection('research-listings');
-    if (department) {
-      collectionRef = collectionRef.where('department', '==', department);
+    try {
+      const listings = await fetchResearchListings({
+        department,
+        studentLevel,
+      });
+      setResearchListings(listings);
+    } catch (error) {
+      console.error('Error fetching research listings:', error);
+      setResearchListings([]);
     }
-    if (studentLevel) {
-      collectionRef = collectionRef.where('student_level', '==', studentLevel);
-    }
-    let snapshot = await collectionRef.get();
-    let listings: ResearchListing[] = await Promise.all(
-      snapshot.docs.map(async (doc: any) => {
-        const detailsSnap = await doc.ref.collection('applications').get();
-        const apps = detailsSnap.docs.map(
-          (d: firebase.firestore.QueryDocumentSnapshot) => ({
-            id: d.id,
-            ...d.data(),
-          })
-        );
-        return normalizeResearchListing({
-          docID: doc.id,
-          applications: apps,
-          ...doc.data(),
-        });
-      })
-    );
-    setResearchListings(listings);
   }, [department, studentLevel]);
 
   const postNewResearchPosition = useCallback(async (formData: any) => {
     try {
-      const docRef = await firebase
-        .firestore()
-        .collection('research-listings')
-        .add(formData);
-      console.log('Document written with ID: ', docRef.id);
+      const docId = await createResearchListing(formData);
+      console.log('Document written with ID: ', docId);
     } catch (e) {
       console.error('Error adding document: ', e);
     }

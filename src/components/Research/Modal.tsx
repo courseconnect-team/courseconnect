@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -11,57 +11,16 @@ import {
   IconButton,
   Box,
   Typography,
-  CircularProgress,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
-
-interface FormData {
-  project_title: string;
-  project_description: string;
-  department: string;
-  image_url: string;
-  nature_of_job: string;
-  compensation: string;
-  faculty_contact: string;
-  phd_student_contact: string;
-  application_deadline: string;
-  hours_per_week: string;
-  prerequisites: string;
-  terms_available: string;
-  student_level: string;
-  application_requirements: string;
-  website: string;
-}
-
-const INITIAL_FORM_DATA: FormData = {
-  project_title: '',
-  project_description: '',
-  department: '',
-  image_url: '',
-  nature_of_job: '',
-  compensation: '',
-  faculty_contact: '',
-  phd_student_contact: '',
-  application_deadline: '',
-  hours_per_week: '',
-  prerequisites: '',
-  terms_available: '',
-  student_level: '',
-  application_requirements: '',
-  website: '',
-};
-
-const NATURE_OF_JOB_OPTIONS = [
-  'Research Assistant',
-  'Lab Assistant',
-  'Teaching Assistant',
-  'Field Work',
-  'Data Analysis',
-  'Other',
-];
+import {
+  INITIAL_FORM_DATA,
+  NATURE_OF_JOB_OPTIONS,
+  validateResearchForm,
+  ResearchFormData,
+} from './shared/researchModalUtils';
+import ImageUploadField from './shared/ImageUploadField';
+import { COLORS } from '@/constants/theme';
 
 interface ResearchModalProps {
   open: boolean;
@@ -78,71 +37,32 @@ const ResearchModal: React.FC<ResearchModalProps> = ({
   firebaseQuery,
   uid,
 }) => {
-  const [formData, setFormData] = useState<FormData>({ ...INITIAL_FORM_DATA });
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>(
-    {}
-  );
+  const [formData, setFormData] = useState<ResearchFormData>({
+    ...INITIAL_FORM_DATA,
+  });
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof ResearchFormData, string>>
+  >({});
   const [uploading, setUploading] = useState(false);
   const [imageFileName, setImageFileName] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof FormData]) {
+    if (errors[name as keyof ResearchFormData]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
-  const handleImageUpload = async (file: File) => {
-    setUploading(true);
-    try {
-      const storage = getStorage();
-      const storageRef = ref(
-        storage,
-        `research-images/${uuidv4()}_${file.name}`
-      );
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setFormData((prev) => ({ ...prev, image_url: downloadURL }));
-      setImageFileName(file.name);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleFileDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      handleImageUpload(file);
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleImageUpload(file);
-    }
+  const handleImageUpload = (url: string, fileName: string) => {
+    setFormData((prev) => ({ ...prev, image_url: url }));
+    setImageFileName(fileName);
   };
 
   const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof FormData, string>> = {};
-    if (!formData.project_title.trim()) newErrors.project_title = 'Required';
-    if (!formData.project_description.trim())
-      newErrors.project_description = 'Required';
-    if (!formData.department.trim()) newErrors.department = 'Required';
-    if (!formData.nature_of_job) newErrors.nature_of_job = 'Required';
-    if (!formData.compensation.trim()) newErrors.compensation = 'Required';
-    if (!formData.faculty_contact.trim())
-      newErrors.faculty_contact = 'Required';
-    if (!formData.application_deadline.trim())
-      newErrors.application_deadline = 'Required';
-    if (!formData.hours_per_week.trim()) newErrors.hours_per_week = 'Required';
+    const newErrors = validateResearchForm(formData);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -205,7 +125,7 @@ const ResearchModal: React.FC<ResearchModalProps> = ({
           {/* Row 1: Title + Position Description */}
           <Grid item xs={12} sm={6}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Title
+              <span style={{ color: COLORS.primary }}>*</span> Title
             </Typography>
             <TextField
               name="project_title"
@@ -255,47 +175,13 @@ const ResearchModal: React.FC<ResearchModalProps> = ({
 
           {/* Image Upload */}
           <Grid item xs={12}>
-            <Box
-              onDrop={handleFileDrop}
-              onDragOver={(e) => e.preventDefault()}
-              onClick={() => fileInputRef.current?.click()}
-              sx={{
-                border: '2px dashed #ccc',
-                borderRadius: '12px',
-                p: 3,
-                textAlign: 'center',
-                cursor: 'pointer',
-                backgroundColor: '#fafafa',
-                '&:hover': { borderColor: '#5A41D8' },
-              }}
-            >
-              {uploading ? (
-                <CircularProgress size={24} />
-              ) : imageFileName ? (
-                <Typography variant="body2" color="text.secondary">
-                  {imageFileName}
-                </Typography>
-              ) : (
-                <>
-                  <ImageOutlinedIcon
-                    sx={{ fontSize: 40, color: '#999', mb: 1 }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    Drop your image here, or{' '}
-                    <span style={{ color: '#5A41D8', fontWeight: 'bold' }}>
-                      browse
-                    </span>
-                  </Typography>
-                </>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleFileSelect}
-              />
-            </Box>
+            <ImageUploadField
+              imageFileName={imageFileName}
+              uploading={uploading}
+              onImageUpload={handleImageUpload}
+              onUploadStart={() => setUploading(true)}
+              onUploadEnd={() => setUploading(false)}
+            />
           </Grid>
 
           {/* Row 3: Nature of Job, Compensation, Faculty Contact, PhD Student Contact */}
@@ -474,7 +360,7 @@ const ResearchModal: React.FC<ResearchModalProps> = ({
           onClick={handleDiscard}
           sx={{
             textTransform: 'none',
-            color: '#5A41D8',
+            color: COLORS.primary,
             fontWeight: 500,
           }}
         >
@@ -485,7 +371,7 @@ const ResearchModal: React.FC<ResearchModalProps> = ({
             onClick={handleSaveAndExit}
             sx={{
               textTransform: 'none',
-              color: '#5A41D8',
+              color: COLORS.primary,
               fontWeight: 500,
             }}
           >
@@ -495,13 +381,13 @@ const ResearchModal: React.FC<ResearchModalProps> = ({
             variant="contained"
             onClick={handleSubmit}
             sx={{
-              backgroundColor: '#5A41D8',
-              color: '#FFFFFF',
+              backgroundColor: COLORS.primary,
+              color: COLORS.white,
               textTransform: 'none',
               fontWeight: 500,
               borderRadius: '8px',
               '&:hover': {
-                backgroundColor: '#4A35B8',
+                backgroundColor: COLORS.primaryDark,
               },
             }}
           >

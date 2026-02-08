@@ -6,8 +6,8 @@ import { Toaster, toast } from 'react-hot-toast';
 import GetUserRole from '@/firebase/util/GetUserRole';
 
 import 'firebase/firestore';
-import Applications from '@/component/Dashboard/Applications/Applications';
-import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import Applications from '@/components/Dashboard/Applications/Applications';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 
 export default function AdminApplications() {
   let { user } = useAuth();
@@ -19,20 +19,21 @@ export default function AdminApplications() {
   return (
     <>
       <Toaster />
-      <HeaderCard text="Applications & Assignments" />
-      <Box
-        sx={{
-          marginTop: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '100%',
-        }}
-      >
-        <Box sx={{ mb: 2, width: '120%' }}>
-          <Applications userRole={role as string} />
+      <HeaderCard title="Applications & Assignments">
+        <Box
+          sx={{
+            marginTop: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <Box sx={{ mb: 2, width: '120%' }}>
+            <Applications userRole={role as string} />
+          </Box>
         </Box>
-      </Box>
+      </HeaderCard>
     </>
   );
 }

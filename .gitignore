@@ -45,3 +45,7 @@ nul
 test-results
 playwright/.auth
 playwright.accounts.json
+
+# Claude Code
+.claude/
+CLAUDE.md

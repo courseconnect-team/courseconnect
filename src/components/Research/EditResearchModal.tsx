@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -13,23 +13,17 @@ import {
   MenuItem,
   IconButton,
   Box,
-  CircularProgress,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import firebase from '@/firebase/firebase_config';
+import { toast } from 'react-hot-toast';
 import { normalizeResearchListing } from '@/app/models/ResearchModel';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
-
-const NATURE_OF_JOB_OPTIONS = [
-  'Research Assistant',
-  'Lab Assistant',
-  'Teaching Assistant',
-  'Field Work',
-  'Data Analysis',
-  'Other',
-];
+import { updateResearchListing } from '@/services/researchService';
+import {
+  NATURE_OF_JOB_OPTIONS,
+  ResearchFormData,
+} from './shared/researchModalUtils';
+import ImageUploadField from './shared/ImageUploadField';
+import { COLORS } from '@/constants/theme';
 
 interface EditResearchModalProps {
   open: boolean;
@@ -44,10 +38,11 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
   listingData,
   onSubmitSuccess,
 }) => {
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<ResearchFormData>(
+    {} as ResearchFormData
+  );
   const [uploading, setUploading] = useState(false);
   const [imageFileName, setImageFileName] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const normalized = normalizeResearchListing(listingData);
@@ -61,79 +56,24 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev: any) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = async (file: File) => {
-    setUploading(true);
-    try {
-      const storage = getStorage();
-      const storageRef = ref(
-        storage,
-        `research-images/${uuidv4()}_${file.name}`
-      );
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setFormData((prev: any) => ({ ...prev, image_url: downloadURL }));
-      setImageFileName(file.name);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleFileDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      handleImageUpload(file);
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleImageUpload(file);
-    }
+  const handleImageUpload = (url: string, fileName: string) => {
+    setFormData((prev) => ({ ...prev, image_url: url }));
+    setImageFileName(fileName);
   };
 
   const handleSubmit = async () => {
     try {
-      const db = firebase.firestore();
       const docID = listingData.docID || listingData.id;
-      const listingRef = db.collection('research-listings').doc(docID);
-      const doc = await listingRef.get();
-
-      if (!doc.exists) {
-        throw new Error('No matching listing found!');
-      }
-
-      const updateData = {
-        project_title: formData.project_title || '',
-        project_description: formData.project_description || '',
-        department: formData.department || '',
-        nature_of_job: formData.nature_of_job || '',
-        compensation: formData.compensation || '',
-        faculty_contact: formData.faculty_contact || '',
-        phd_student_contact: formData.phd_student_contact || '',
-        application_deadline: formData.application_deadline || '',
-        hours_per_week: formData.hours_per_week || '',
-        prerequisites: formData.prerequisites || '',
-        image_url: formData.image_url || '',
-        terms_available: formData.terms_available || '',
-        student_level: formData.student_level || '',
-        application_requirements: formData.application_requirements || '',
-        website: formData.website || '',
-      };
-
-      await listingRef.update(updateData);
-      alert('Research listing updated!');
+      await updateResearchListing(docID, formData);
+      toast.success('Research listing updated!');
       onSubmitSuccess();
       onClose();
     } catch (error) {
       console.error('Update failed:', error);
-      alert('Failed to update listing.');
+      toast.error('Failed to update listing.');
     }
   };
 
@@ -165,7 +105,7 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
           {/* Title + Description */}
           <Grid item xs={12} sm={6}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Title
+              <span style={{ color: COLORS.primary }}>*</span> Title
             </Typography>
             <TextField
               name="project_title"
@@ -178,7 +118,8 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
           </Grid>
           <Grid item xs={12} sm={6}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Position Description
+              <span style={{ color: COLORS.primary }}>*</span> Position
+              Description
             </Typography>
             <TextField
               name="project_description"
@@ -195,7 +136,7 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
           {/* Department */}
           <Grid item xs={12} sm={6}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Department
+              <span style={{ color: COLORS.primary }}>*</span> Department
             </Typography>
             <TextField
               name="department"
@@ -209,53 +150,19 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
 
           {/* Image Upload */}
           <Grid item xs={12}>
-            <Box
-              onDrop={handleFileDrop}
-              onDragOver={(e) => e.preventDefault()}
-              onClick={() => fileInputRef.current?.click()}
-              sx={{
-                border: '2px dashed #ccc',
-                borderRadius: '12px',
-                p: 3,
-                textAlign: 'center',
-                cursor: 'pointer',
-                backgroundColor: '#fafafa',
-                '&:hover': { borderColor: '#5A41D8' },
-              }}
-            >
-              {uploading ? (
-                <CircularProgress size={24} />
-              ) : imageFileName ? (
-                <Typography variant="body2" color="text.secondary">
-                  {imageFileName}
-                </Typography>
-              ) : (
-                <>
-                  <ImageOutlinedIcon
-                    sx={{ fontSize: 40, color: '#999', mb: 1 }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    Drop your image here, or{' '}
-                    <span style={{ color: '#5A41D8', fontWeight: 'bold' }}>
-                      browse
-                    </span>
-                  </Typography>
-                </>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleFileSelect}
-              />
-            </Box>
+            <ImageUploadField
+              imageFileName={imageFileName}
+              uploading={uploading}
+              onImageUpload={handleImageUpload}
+              onUploadStart={() => setUploading(true)}
+              onUploadEnd={() => setUploading(false)}
+            />
           </Grid>
 
           {/* Nature of Job, Compensation, Faculty Contact, PhD Student Contact */}
           <Grid item xs={12} sm={3}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Nature of Job
+              <span style={{ color: COLORS.primary }}>*</span> Nature of Job
             </Typography>
             <TextField
               name="nature_of_job"
@@ -274,7 +181,7 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
           </Grid>
           <Grid item xs={12} sm={3}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Compensation
+              <span style={{ color: COLORS.primary }}>*</span> Compensation
             </Typography>
             <TextField
               name="compensation"
@@ -287,7 +194,7 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
           </Grid>
           <Grid item xs={12} sm={3}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Faculty Contact
+              <span style={{ color: COLORS.primary }}>*</span> Faculty Contact
             </Typography>
             <TextField
               name="faculty_contact"
@@ -315,7 +222,8 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
           {/* Application Deadline, Hours per Week, Prerequisites */}
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Application Deadline
+              <span style={{ color: COLORS.primary }}>*</span> Application
+              Deadline
             </Typography>
             <TextField
               name="application_deadline"
@@ -329,7 +237,7 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" fontWeight="bold" mb={0.5}>
-              <span style={{ color: '#5A41D8' }}>*</span> Hours per Week
+              <span style={{ color: COLORS.primary }}>*</span> Hours per Week
             </Typography>
             <TextField
               name="hours_per_week"
@@ -415,7 +323,7 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button
           onClick={onClose}
-          sx={{ textTransform: 'none', color: '#5A41D8', fontWeight: 500 }}
+          sx={{ textTransform: 'none', color: COLORS.primary, fontWeight: 500 }}
         >
           Cancel
         </Button>
@@ -423,12 +331,12 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
           variant="contained"
           onClick={handleSubmit}
           sx={{
-            backgroundColor: '#5A41D8',
-            color: '#FFFFFF',
+            backgroundColor: COLORS.primary,
+            color: COLORS.white,
             textTransform: 'none',
             fontWeight: 500,
             borderRadius: '8px',
-            '&:hover': { backgroundColor: '#4A35B8' },
+            '&:hover': { backgroundColor: COLORS.primaryDark },
           }}
         >
           Save Changes
