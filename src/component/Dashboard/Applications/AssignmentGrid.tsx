@@ -143,26 +143,26 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     const unsubscribe = assignmentsRef.onSnapshot((querySnapshot) => {
       const data = querySnapshot.docs.map(
         (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-          firstName:
-            doc.data().name != undefined
-              ? doc.data().name.split(' ')[0]
-              : ' ',
-          lastName:
-            doc.data().name != undefined
-              ? doc.data().name.split(' ')[1]
-              : ' ',
-          year:
-            doc.data().semesters != undefined
-              ? doc.data().semesters[0].split(' ')[1]
-              : ' ',
-          fte: 15,
-          pname: 'DEPARTMENT TA/UPIS',
-          pid: '000108927',
-          hr: 15,
-        } as Assignment)
+          ({
+            id: doc.id,
+            ...doc.data(),
+            firstName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[0]
+                : ' ',
+            lastName:
+              doc.data().name != undefined
+                ? doc.data().name.split(' ')[1]
+                : ' ',
+            year:
+              doc.data().semesters != undefined
+                ? doc.data().semesters[0].split(' ')[1]
+                : ' ',
+            fte: 15,
+            pname: 'DEPARTMENT TA/UPIS',
+            pid: '000108927',
+            hr: 15,
+          } as Assignment)
       );
       setAssignmentData(data);
     });
@@ -762,61 +762,44 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   ];
   const ODD_OPACITY = 0.2;
 
-  // ✅ Copy CourseGrid UI styling
-  const StripedDataGrid = styled(DataGrid)(() => ({
-    border: 'none',
-    borderRadius: '16px',
-    fontFamily: 'Inter, sans-serif',
-    fontSize: '0.95rem',
-
-    '& .MuiDataGrid-columnHeaders': {
-      backgroundColor: '#D8C6F8',
-      color: '#1C003D',
-      fontWeight: 700,
-      borderBottom: 'none',
-    },
-
-    '& .MuiDataGrid-columnHeaderTitle': {
-      fontWeight: 700,
-    },
-
-    '& .MuiDataGrid-columnHeader:first-of-type': {
-      paddingLeft: '20px',
-    },
-    '& .MuiDataGrid-cell:first-of-type': {
-      paddingLeft: '25px',
-    },
-
+  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     [`& .${gridClasses.row}.even`]: {
-      backgroundColor: '#FFFFFF',
-    },
-    [`& .${gridClasses.row}.odd`]: {
-      backgroundColor: '#EEEEEE',
-    },
-
-    '& .MuiDataGrid-row:hover': {
-      backgroundColor: '#EFE6FF',
-    },
-
-    '& .MuiDataGrid-cell': {
-      borderBottom: '1px solid #ECE4FA',
-    },
-
-    '& .MuiDataGrid-footerContainer': {
-      borderTop: 'none',
-    },
-
-    '& .MuiTablePagination-root': {
-      color: '#5D3FC4',
-      fontWeight: 500,
+      backgroundColor: '#562EBA1F',
+      '&:hover, &.Mui-hovered': {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        '@media (hover: none)': {
+          backgroundColor: 'transparent',
+        },
+      },
+      '&.Mui-selected': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY + theme.palette.action.selectedOpacity
+        ),
+        '&:hover, &.Mui-hovered': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY +
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
+          ),
+          // Reset on touch devices, it doesn't add specificity
+          '@media (hover: none)': {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY + theme.palette.action.selectedOpacity
+            ),
+          },
+        },
+      },
     },
   }));
 
   return (
     <Box
       sx={{
-        height: '600px',
-        maxWidth: '33%',
+        height: 300,
+        width: '100%',
         '& .actions': {
           color: 'text.secondary',
         },
@@ -846,11 +829,8 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         }}
         getRowClassName={(params) =>
           params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-        } sx={{
-          borderRadius: '16px', maxHeight: '70vh', maxWidth: '170vh',
-          minHeight: '70vh', minWidth: '170vh'
-        }}
-
+        }
+        sx={{ borderRadius: '16px' }}
       />
       <Dialog
         PaperProps={{ sx: { borderRadius: 4 } }}

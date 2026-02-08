@@ -1,20 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
-  TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Button,
   Grid,
+  InputBase,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import ProjectCard from '@/components/Research/ProjectCard';
-import ApplicationCard from '@/components/Research/ApplicationCard';
 
 interface StudentResearchViewProps {
   researchListings: any[];
-  researchApplications: any[];
   role: string;
   uid: string;
   department: string;
@@ -25,24 +23,21 @@ interface StudentResearchViewProps {
   setTermsAvailable: (value: string) => void;
   getResearchListings: () => void;
   setResearchListings: (listings: any[]) => void;
-  getApplications: () => void;
-  setResearchApplications: (Applications: any[]) => void;
 }
 
 const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   researchListings,
-  researchApplications,
   role,
   uid,
   department,
   setDepartment,
+  studentLevel,
   setStudentLevel,
+  termsAvailable,
   setTermsAvailable,
   getResearchListings,
   setResearchListings,
-  getApplications,
 }) => {
-  const [myApplications, showMyApplications] = useState(true);
   const [originalListings, setOriginalListings] = useState<any[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -52,12 +47,8 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
     }
   }, [researchListings, originalListings.length]);
 
-  useEffect(() => {
-    getApplications();
-  }, []);
-
   const handleSearch = (searchText: string) => {
-    if (!searchText && department === '') {
+    if (!searchText && department === '' && termsAvailable === '') {
       setResearchListings([...originalListings]);
       return;
     }
@@ -85,16 +76,15 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
           item.project_description.toLowerCase().includes(searchLower);
 
         const mentorMatch =
-          item.faculty_mentor &&
-          typeof item.faculty_mentor === 'string' &&
-          item.faculty_mentor.toLowerCase().includes(searchLower);
+          item.faculty_contact &&
+          typeof item.faculty_contact === 'string' &&
+          item.faculty_contact.toLowerCase().includes(searchLower);
 
         return titleMatch || descriptionMatch || mentorMatch;
       });
-      console.log('Filtered Listings: ', filteredListings);
     }
 
-    // Department filter with special handling for CISE
+    // Department filter
     if (department) {
       filteredListings = filteredListings.filter((item) => {
         const normalized = item.department?.toLowerCase().trim();
@@ -110,187 +100,184 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
 
         return normalized === department.toLowerCase();
       });
+    }
 
-      console.log('Filtered Listings by Department: ', filteredListings);
+    // Terms Available filter
+    if (termsAvailable) {
+      filteredListings = filteredListings.filter((item) =>
+        item.terms_available
+          ?.toLowerCase()
+          .includes(termsAvailable.toLowerCase())
+      );
     }
 
     setResearchListings(filteredListings);
   };
 
-  const handleClearFilters = () => {
-    setDepartment('');
-    setStudentLevel('');
-    setTermsAvailable('');
-
-    if (searchInputRef.current) {
-      searchInputRef.current.value = '';
-    }
-
-    if (originalListings.length > 0) {
-      setResearchListings([...originalListings]);
-    } else {
-      getResearchListings();
-    }
-  };
-
   const handleDepartmentChange = (value: string) => {
     setDepartment(value);
-    const searchText = searchInputRef.current?.value || '';
-    handleSearch(searchText);
+    setTimeout(() => {
+      const searchText = searchInputRef.current?.value || '';
+      handleSearch(searchText);
+    }, 0);
+  };
+
+  const handleTermsChange = (value: string) => {
+    setTermsAvailable(value);
+    setTimeout(() => {
+      const searchText = searchInputRef.current?.value || '';
+      handleSearch(searchText);
+    }, 0);
   };
 
   return (
-    <>
-      <Box display="flex" justifyContent="flex-end" alignItems="center" mb={4}>
-        <Button
+    <Box sx={{ mb: 4 }}>
+      {/* Search + filter bar */}
+      <Box display="flex" alignItems="center" gap={2} mb={3} flexWrap="wrap">
+        {/* Pill-shaped search bar */}
+        <Box
           sx={{
-            backgroundColor: '#5A41D8',
-            color: '#FFFFFF',
-            textTransform: 'none',
-            borderRadius: '8px',
-            boxShadow: '0px 0px 8px #E5F0DC',
-            fontWeight: 500,
-            padding: '10px 24px',
-            '&:hover': {
-              backgroundColor: '#4A35B8',
-              boxShadow: '0px 0px 12px #E5F0DC',
-            },
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: '#f2ecf9',
+            borderRadius: '9999px',
+            px: 2,
+            height: 48,
+            flex: 1,
+            minWidth: 200,
           }}
-          onClick={() => showMyApplications(!myApplications)}
         >
-          {myApplications ? 'Show My Applications' : 'Switch to Default View'}
-        </Button>
-      </Box>
+          <SearchIcon sx={{ color: '#5A41D8', mr: 1 }} />
+          <InputBase
+            placeholder="Search"
+            inputRef={searchInputRef}
+            onChange={(e) => {
+              if (e.target.value === '') {
+                handleSearch('');
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const searchText = (e.target as HTMLInputElement).value;
+                handleSearch(searchText);
+              }
+            }}
+            sx={{ flex: 1 }}
+          />
+          <SearchIcon
+            sx={{ color: '#999', cursor: 'pointer' }}
+            onClick={() => {
+              const searchText = searchInputRef.current?.value || '';
+              handleSearch(searchText);
+            }}
+          />
+        </Box>
 
-      <Box sx={{ mb: 4 }}>
-        {/* Only show search controls when viewing research listings (not applications) */}
-        {myApplications ? (
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            gap={2}
-            mb={3}
+        {/* Department filter */}
+        <FormControl
+          size="small"
+          sx={{
+            minWidth: 160,
+            '& .MuiOutlinedInput-root': { borderRadius: '20px' },
+          }}
+        >
+          <InputLabel>Department</InputLabel>
+          <Select
+            value={department}
+            label="Department"
+            onChange={(e) => handleDepartmentChange(e.target.value as string)}
           >
-            <TextField
-              label="Search Positions"
-              variant="outlined"
-              size="small"
-              inputRef={searchInputRef}
-              onChange={(e) => {
-                if (e.target.value === '') {
-                  handleSearch('');
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  const searchText = (e.target as HTMLInputElement).value;
-                  handleSearch(searchText);
-                }
-              }}
-              sx={{ flex: 1 }}
-            />
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="Computer and Information Sciences and Engineering">
+              CISE
+            </MenuItem>
+            <MenuItem value="Electrical and Computer Engineering">ECE</MenuItem>
+            <MenuItem value="Engineering Education">Education</MenuItem>
+          </Select>
+        </FormControl>
 
-            <Button
-              variant="outlined"
-              onClick={handleClearFilters}
-              sx={{
-                height: '40px',
-                minWidth: '80px',
-                borderColor: '#5A41D8',
-                color: '#5A41D8',
-                '&:hover': {
-                  borderColor: '#4A35B8',
-                  backgroundColor: 'rgba(90, 65, 216, 0.04)',
-                },
-              }}
-            >
-              Clear
-            </Button>
+        {/* Student Level filter */}
+        <FormControl
+          size="small"
+          sx={{
+            minWidth: 160,
+            '& .MuiOutlinedInput-root': { borderRadius: '20px' },
+          }}
+        >
+          <InputLabel>Student Level</InputLabel>
+          <Select
+            value={studentLevel}
+            label="Student Level"
+            onChange={(e) => {
+              setStudentLevel(e.target.value as string);
+              getResearchListings();
+            }}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="Freshman">Freshman</MenuItem>
+            <MenuItem value="Sophomore">Sophomore</MenuItem>
+            <MenuItem value="Junior">Junior</MenuItem>
+            <MenuItem value="Senior">Senior</MenuItem>
+            <MenuItem value="Graduate">Graduate</MenuItem>
+          </Select>
+        </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Department</InputLabel>
-              <Select
-                value={department}
-                onChange={(e) =>
-                  handleDepartmentChange(e.target.value as string)
-                }
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem
-                  value={'Computer and Information Science and Engineering'}
-                >
-                  ECE
-                </MenuItem>
-                <MenuItem value="Electrical and Computer Engineering">
-                  CISE
-                </MenuItem>
-                <MenuItem value="Engineering Education">Education</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        ) : null}
-
-        {/* Content Display */}
-        {myApplications ? (
-          <Grid container spacing={4}>
-            {researchListings.map((item, index) => (
-              <Grid item xs={12} md={12} lg={6} key={index}>
-                <ProjectCard
-                  uid={uid}
-                  applications={item.applications}
-                  listingId={item.docID}
-                  userRole={role}
-                  project_title={item.project_title}
-                  department={item.department}
-                  faculty_mentor={item.faculty_mentor}
-                  terms_available={item.terms_available}
-                  student_level={item.student_level}
-                  project_description={item.project_description}
-                  phd_student_mentor={item.phd_student_mentor}
-                  prerequisites={item.prerequisites}
-                  credit={item.credit}
-                  stipend={item.stipend}
-                  application_requirements={item.application_requirements}
-                  application_deadline={item.application_deadline}
-                  website={item.website}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Grid container spacing={4}>
-            {researchApplications.map((item, index) => {
-              return (
-                <Grid item xs={12} md={12} lg={6} key={index}>
-                  <ApplicationCard
-                    app_status={item.app_status}
-                    userRole={role}
-                    project_title={item.project_title}
-                    department={item.department || 'N/A'}
-                    date_applied={item.date_applied}
-                    faculty_mentor={item.faculty_mentor}
-                    terms_available={item.terms_available}
-                    student_level={item.degree || 'N/A'}
-                    project_description={
-                      item.project_description || 'No description provided'
-                    }
-                    phd_student_mentor="N/A"
-                    prerequisites="N/A"
-                    credit="N/A"
-                    stipend="N/A"
-                    application_requirements="N/A"
-                    application_deadline={item.date_applied || 'N/A'}
-                    website="N/A"
-                  />
-                </Grid>
-              );
-            })}
-          </Grid>
-        )}
+        {/* Terms Available filter */}
+        <FormControl
+          size="small"
+          sx={{
+            minWidth: 180,
+            '& .MuiOutlinedInput-root': { borderRadius: '20px' },
+          }}
+        >
+          <InputLabel>Terms Available</InputLabel>
+          <Select
+            value={termsAvailable}
+            label="Terms Available"
+            onChange={(e) => handleTermsChange(e.target.value as string)}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="Fall">Fall</MenuItem>
+            <MenuItem value="Spring">Spring</MenuItem>
+            <MenuItem value="Summer">Summer</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
-    </>
+
+      {/* Research Listings */}
+      <Grid container spacing={3}>
+        {researchListings.map((item, index) => (
+          <Grid item xs={12} md={6} key={index}>
+            <ProjectCard
+              uid={uid}
+              applications={item.applications}
+              listingId={item.docID}
+              userRole={role}
+              project_title={item.project_title}
+              department={item.department}
+              faculty_mentor={item.faculty_mentor}
+              terms_available={item.terms_available}
+              student_level={item.student_level}
+              project_description={item.project_description}
+              phd_student_mentor={item.phd_student_mentor}
+              prerequisites={item.prerequisites}
+              credit={item.credit}
+              stipend={item.stipend}
+              application_requirements={item.application_requirements}
+              application_deadline={item.application_deadline}
+              website={item.website}
+              faculty_contact={item.faculty_contact}
+              phd_student_contact={item.phd_student_contact}
+              compensation={item.compensation}
+              nature_of_job={item.nature_of_job}
+              hours_per_week={item.hours_per_week}
+              image_url={item.image_url}
+            />
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 };
 

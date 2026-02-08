@@ -16,10 +16,10 @@ import { getNavItems } from '@/hooks/useGetItems';
 
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import UserGrid from '@/component/Dashboard/Users/UserGrid';
-import ApprovalGrid from '@/component/Dashboard/Users/ApprovalGrid';
+import UserGrid from '@/components/Dashboard/Users/UserGrid';
+import ApprovalGrid from '@/components/Dashboard/Users/ApprovalGrid';
 
-interface PageProps { }
+interface PageProps {}
 
 const User: FC<PageProps> = () => {
   const { user } = useAuth();
@@ -91,4 +91,3 @@ const User: FC<PageProps> = () => {
 };
 
 export default User;
-

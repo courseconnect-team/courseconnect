@@ -90,13 +90,6 @@ export default function DashboardWelcome(props: DashboardProps) {
                       image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
                     />
                   </Link>
-                  <Link href="/Research">
-                    <DashboardCard
-                      text="Research"
-                      className={styles}
-                      image="https://unpkg.com/feather-icons@4.29.2/dist/icons/search.svg"
-                    />
-                  </Link>
                 </div>
               </div>
             )}
@@ -228,13 +221,6 @@ export default function DashboardWelcome(props: DashboardProps) {
                       image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
                     />
                   </Link>
-                  <Link href="/Research">
-                    <DashboardCard
-                      text="Research"
-                      className={styles}
-                      image="https://unpkg.com/feather-icons@4.29.2/dist/icons/search.svg"
-                    />
-                  </Link>
                 </div>
               </div>
             )}
@@ -289,13 +275,6 @@ export default function DashboardWelcome(props: DashboardProps) {
                     className={styles}
                     image="https://c.animaapp.com/vYQBTcnO/img/profile@2x.png"
                     text="Profile"
-                  />
-                </Link>
-                <Link href="/Research">
-                  <DashboardCard
-                    text="Research"
-                    className={styles}
-                    image="https://unpkg.com/feather-icons@4.29.2/dist/icons/search.svg"
                   />
                 </Link>
               </div>

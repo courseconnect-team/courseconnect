@@ -6,6 +6,7 @@ import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
+import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import { NavbarItem } from '@/types/navigation';
 import { SemesterName } from './useSemesterOptions';
 import { useMemo } from 'react';
@@ -15,13 +16,14 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
     /* ─────────────────────────────── Student buckets ───────────────────────────── */
     case 'Student':
     case 'student_applied':
-    case 'student_applying': // <- you had “student_applying” in code
+    case 'student_applying': // <- you had "student_applying" in code
       return [
         {
           label: 'Applications',
           to: '/applications',
           icon: DescriptionOutlinedIcon,
         },
+        { label: 'Research', to: '/Research', icon: ScienceOutlinedIcon },
         { label: 'Status', to: '/status', icon: CheckBoxOutlinedIcon },
         {
           label: 'Announcements',
@@ -38,6 +40,7 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           to: '/applications',
           icon: DescriptionOutlinedIcon,
         },
+        { label: 'Research', to: '/Research', icon: ScienceOutlinedIcon },
         { label: 'Courses', to: '/courses', icon: BookOutlinedIcon },
         {
           label: 'Announcements',

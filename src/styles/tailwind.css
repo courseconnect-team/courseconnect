@@ -2,6 +2,10 @@
 /* Tailwind v4 entry */
 @import "tailwindcss";
 
+/* Explicit content sources for class detection */
+@source "../../src/**/*.{js,ts,jsx,tsx}";
+@source "../../components/**/*.{js,ts,jsx,tsx}";
+
 /* ---- Design tokens (Tailwind v4) --------------------------------------- */
 @theme {
   /* ---------- Colors ---------- */

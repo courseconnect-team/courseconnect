@@ -15,8 +15,8 @@ import GetUserRole from '@/firebase/util/GetUserRole';
 import 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
 import { read, utils, writeFile, readFile } from 'xlsx';
-import FacultyStats from '@/component/Dashboard/Users/FacultyStats';
-import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import FacultyStats from '@/components/Dashboard/Users/FacultyStats';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 
 export default function User() {
   const { user } = useAuth();
@@ -107,140 +107,141 @@ export default function User() {
   if (role !== 'admin') return <div> Forbidden </div>;
   return (
     <>
-      <HeaderCard text="Faculty Statistics" />
       <Toaster />
-      <Box
-        sx={{
-          marginTop: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '100%',
-        }}
-      >
-        <Box sx={{ mb: 2, width: '100%' }}>
-          <input
-            style={{ display: 'none' }}
-            id="raised-button-file"
-            multiple
-            type="file"
-            onChange={readExcelFile}
-            onClick={(event) => (event.currentTarget.value = '')}
-          />
-          <label htmlFor="raised-button-file">
+      <HeaderCard title="Faculty Statistics">
+        <Box
+          sx={{
+            marginTop: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+          }}
+        >
+          <Box sx={{ mb: 2, width: '100%' }}>
+            <input
+              style={{ display: 'none' }}
+              id="raised-button-file"
+              multiple
+              type="file"
+              onChange={readExcelFile}
+              onClick={(event) => (event.currentTarget.value = '')}
+            />
+            <label htmlFor="raised-button-file">
+              <Button
+                sx={{ ml: 15, mt: 1.5 }}
+                style={{ textTransform: 'none' }}
+                variant="contained"
+                component="span"
+                startIcon={<FileUploadOutlined />}
+              >
+                Upload Semester Data
+              </Button>
+            </label>
             <Button
-              sx={{ ml: 15, mt: 1.5 }}
+              sx={{ ml: 10, mt: 1.5 }}
+              onClick={() => setOpen(true)}
               style={{ textTransform: 'none' }}
               variant="contained"
               component="span"
-              startIcon={<FileUploadOutlined />}
+              startIcon={<DeleteOutline />}
             >
-              Upload Semester Data
+              Clear Semester Data
             </Button>
-          </label>
-          <Button
-            sx={{ ml: 10, mt: 1.5 }}
-            onClick={() => setOpen(true)}
-            style={{ textTransform: 'none' }}
-            variant="contained"
-            component="span"
-            startIcon={<DeleteOutline />}
-          >
-            Clear Semester Data
-          </Button>
-          <br />
-          <br />
+            <br />
+            <br />
 
-          <FacultyStats userRole={role as string} />
-          <Dialog
-            style={{
-              borderImage:
-                'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-              boxShadow: '0px 2px 20px 4px #00000040',
-              borderRadius: '20px',
-              border: '2px solid',
-            }}
-            PaperProps={{
-              style: { borderRadius: 20 },
-            }}
-            open={open}
-            onClose={() => setOpen(false)}
-          >
-            <DialogTitle
+            <FacultyStats userRole={role as string} />
+            <Dialog
               style={{
-                fontFamily: 'SF Pro Display-Medium, Helvetica',
-                textAlign: 'center',
-                fontSize: '35px',
-                fontWeight: '540',
+                borderImage:
+                  'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
+                boxShadow: '0px 2px 20px 4px #00000040',
+                borderRadius: '20px',
+                border: '2px solid',
               }}
+              PaperProps={{
+                style: { borderRadius: 20 },
+              }}
+              open={open}
+              onClose={() => setOpen(false)}
             >
-              Clear Data
-            </DialogTitle>
-            <form onSubmit={handleSubmit}>
-              <DialogContent>
-                <DialogContentText
-                  style={{
-                    marginTop: '35px',
-                    fontFamily: 'SF Pro Display-Medium, Helvetica',
-                    textAlign: 'center',
-                    fontSize: '24px',
-                    color: 'black',
-                  }}
-                >
-                  Are you sure you want to clear all existing faculty
-                  statistics?
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions
+              <DialogTitle
                 style={{
-                  marginTop: '30px',
-                  marginBottom: '42px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: '93px',
+                  fontFamily: 'SF Pro Display-Medium, Helvetica',
+                  textAlign: 'center',
+                  fontSize: '35px',
+                  fontWeight: '540',
                 }}
               >
-                <Button
-                  variant="outlined"
+                Clear Data
+              </DialogTitle>
+              <form onSubmit={handleSubmit}>
+                <DialogContent>
+                  <DialogContentText
+                    style={{
+                      marginTop: '35px',
+                      fontFamily: 'SF Pro Display-Medium, Helvetica',
+                      textAlign: 'center',
+                      fontSize: '24px',
+                      color: 'black',
+                    }}
+                  >
+                    Are you sure you want to clear all existing faculty
+                    statistics?
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions
                   style={{
-                    fontSize: '17px',
-                    marginLeft: '110px',
-                    borderRadius: '10px',
-                    height: '43px',
-                    width: '120px',
-                    textTransform: 'none',
-                    fontFamily: 'SF Pro Display-Bold , Helvetica',
-                    borderColor: '#5736ac',
-                    color: '#5736ac',
-                    borderWidth: '3px',
+                    marginTop: '30px',
+                    marginBottom: '42px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: '93px',
                   }}
-                  onClick={() => setOpen(false)}
                 >
-                  Cancel
-                </Button>
+                  <Button
+                    variant="outlined"
+                    style={{
+                      fontSize: '17px',
+                      marginLeft: '110px',
+                      borderRadius: '10px',
+                      height: '43px',
+                      width: '120px',
+                      textTransform: 'none',
+                      fontFamily: 'SF Pro Display-Bold , Helvetica',
+                      borderColor: '#5736ac',
+                      color: '#5736ac',
+                      borderWidth: '3px',
+                    }}
+                    onClick={() => setOpen(false)}
+                  >
+                    Cancel
+                  </Button>
 
-                <Button
-                  variant="contained"
-                  style={{
-                    fontSize: '17px',
-                    marginRight: '110px',
-                    borderRadius: '10px',
-                    height: '43px',
-                    width: '120px',
-                    textTransform: 'none',
-                    fontFamily: 'SF Pro Display-Bold , Helvetica',
-                    backgroundColor: '#5736ac',
-                    color: '#ffffff',
-                  }}
-                  type="submit"
-                >
-                  Delete
-                </Button>
-              </DialogActions>
-            </form>
-          </Dialog>
+                  <Button
+                    variant="contained"
+                    style={{
+                      fontSize: '17px',
+                      marginRight: '110px',
+                      borderRadius: '10px',
+                      height: '43px',
+                      width: '120px',
+                      textTransform: 'none',
+                      fontFamily: 'SF Pro Display-Bold , Helvetica',
+                      backgroundColor: '#5736ac',
+                      color: '#ffffff',
+                    }}
+                    type="submit"
+                  >
+                    Delete
+                  </Button>
+                </DialogActions>
+              </form>
+            </Dialog>
+          </Box>
         </Box>
-      </Box>
+      </HeaderCard>
     </>
   );
 }

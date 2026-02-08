@@ -4,14 +4,19 @@ import {
   Typography,
   Button,
   Grid,
+  Card,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControl,
+  Select,
+  MenuItem,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import ResearchModal from '@/components/Research/Modal';
-import ProjectCard from '@/components/Research/ProjectCard';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
 import { deleteDoc, doc } from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
@@ -32,37 +37,35 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   getResearchListings,
   postNewResearchPosition,
 }) => {
-  const [studentView, showStudentView] = useState(true);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingForm, setEditingForm] = useState<any | null>(null);
   const [selectedResearchId, setSelectedResearchId] = useState<string | null>(
     null
   );
+  const [selectedSemester, setSelectedSemester] = useState('Spring 2026');
+  const [showAll, setShowAll] = useState(false);
 
   // State for delete confirmation modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteDocID, setDeleteDocID] = useState<string | null>(null);
 
-  // Open delete confirmation modal
   const handleOpenDeleteModal = (docID: string) => {
     setDeleteDocID(docID);
     setDeleteModalOpen(true);
   };
 
-  // Close delete confirmation modal
   const handleCloseDeleteModal = () => {
     setDeleteModalOpen(false);
     setDeleteDocID(null);
   };
 
-  // Handle delete action
   const handleDelete = async () => {
     if (!deleteDocID) return;
     try {
       const db = firebase.firestore();
       const docRef = doc(db, 'research-listings', deleteDocID);
       await deleteDoc(docRef);
-      console.log(`Listing with ID ${deleteDocID} deleted successfully.`);
       getResearchListings();
     } catch (error) {
       console.error('Error deleting listing:', error);
@@ -76,10 +79,8 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
     item.faculty_members?.includes(uid)
   );
 
-  // Check if there are no positions when in my positions view
-  const hasNoPositions = studentView && myPositions.length === 0;
+  const displayedPositions = showAll ? myPositions : myPositions.slice(0, 6);
 
-  // Callback to go back to the research listings view
   const handleBackToListings = () => {
     setSelectedResearchId(null);
   };
@@ -98,76 +99,59 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
         </Box>
       ) : (
         <>
-          {/* Header section with buttons */}
+          {/* Header row */}
           <Box
             display="flex"
             justifyContent="space-between"
             alignItems="center"
-            mb={4}
+            mb={3}
           >
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                My Positions:
+            <Box display="flex" alignItems="center" gap={2}>
+              <Typography variant="h5" fontWeight="bold">
+                Research
               </Typography>
-              <Button
+              <FormControl
+                size="small"
                 sx={{
-                  backgroundColor: '#5A41D8',
-                  color: '#FFFFFF',
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  boxShadow: '0px 0px 8px #E5F0DC',
-                  fontWeight: 500,
-                  padding: '10px 24px',
-                  marginBottom: '16px',
-                  '&:hover': {
-                    backgroundColor: '#4A35B8',
-                    boxShadow: '0px 0px 12px #E5F0DC',
-                  },
+                  minWidth: 160,
+                  '& .MuiOutlinedInput-root': { borderRadius: '20px' },
                 }}
-                onClick={() => showStudentView(!studentView)}
               >
-                {studentView ? 'View all Positions' : 'View my Positions'}
-              </Button>
+                <Select
+                  value={selectedSemester}
+                  onChange={(e) =>
+                    setSelectedSemester(e.target.value as string)
+                  }
+                >
+                  <MenuItem value="Spring 2026">Spring 2026</MenuItem>
+                  <MenuItem value="Fall 2025">Fall 2025</MenuItem>
+                  <MenuItem value="Summer 2025">Summer 2025</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
 
-            <ResearchModal
-              uid={uid}
-              onSubmitSuccess={getResearchListings}
-              firebaseQuery={postNewResearchPosition}
-              buttonText="Create New Position"
-              currentFormData={{
-                id: '',
-                project_title: '',
-                department: '',
-                faculty_mentor: {},
-                phd_student_mentor: '',
-                terms_available: '',
-                student_level: '',
-                prerequisites: '',
-                credit: '',
-                stipend: '',
-                application_requirements: '',
-                application_deadline: '',
-                website: '',
-                project_description: '',
-              }}
-              buttonStyle={{
+            <Button
+              startIcon={<AddIcon />}
+              variant="contained"
+              sx={{
                 backgroundColor: '#5A41D8',
                 color: '#FFFFFF',
                 textTransform: 'none',
                 borderRadius: '8px',
-                boxShadow: '0px 0px 8px #E5F0DC',
                 fontWeight: 500,
                 padding: '10px 24px',
                 '&:hover': {
                   backgroundColor: '#4A35B8',
-                  boxShadow: '0px 0px 12px #E5F0DC',
                 },
               }}
-            />
+              onClick={() => setCreateModalOpen(true)}
+            >
+              Create Position
+            </Button>
           </Box>
 
-          {hasNoPositions ? (
+          {/* Position cards grid */}
+          {myPositions.length === 0 ? (
             <Box
               sx={{
                 display: 'flex',
@@ -186,81 +170,114 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
               </Typography>
               <Typography variant="body1" sx={{ mb: 4, maxWidth: 600 }}>
                 You haven&apos;t created any research positions yet. Get started
-                by creating your first position using the &quot;Create New
+                by creating your first position using the &quot;Create
                 Position&quot; button above.
               </Typography>
             </Box>
           ) : (
-            <Grid container spacing={4}>
-              {studentView
-                ? myPositions.map((item, index) => (
-                    <Grid item xs={12} md={12} lg={6} key={index}>
-                      <ProjectCard
-                        listingId={item.docID}
-                        userRole={role}
-                        uid={uid}
-                        project_title={item.project_title}
-                        department={item.department}
-                        faculty_mentor={item.faculty_mentor}
-                        terms_available={item.terms_available}
-                        student_level={item.student_level}
-                        project_description={item.project_description}
-                        faculty_members={item.faculty_members}
-                        phd_student_mentor={item.phd_student_mentor}
-                        prerequisites={item.prerequisites}
-                        credit={item.credit}
-                        stipend={item.stipend}
-                        application_requirements={item.application_requirements}
-                        application_deadline={item.application_deadline}
-                        website={item.website}
-                        onShowApplications={() => {
-                          setSelectedResearchId(item.docID);
-                        }}
-                        onEdit={() => {
-                          console.log('Opening edit modal');
-                          setEditingForm(item);
-                          setEditModalOpen(true);
-                        }}
-                        onDelete={() => handleOpenDeleteModal(item.docID)}
+            <>
+              <Grid container spacing={3}>
+                {displayedPositions.map((item, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Card
+                      sx={{
+                        p: 2,
+                        borderRadius: '12px',
+                        border: '1px solid #e0e0e0',
+                        cursor: 'pointer',
+                        transition: 'box-shadow 0.2s',
+                        '&:hover': { boxShadow: 4 },
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                      }}
+                      onClick={() => setSelectedResearchId(item.docID)}
+                    >
+                      <FolderOutlinedIcon
+                        sx={{ color: '#5A41D8', fontSize: 40 }}
                       />
-                    </Grid>
-                  ))
-                : researchListings.map((item, index) => (
-                    <Grid item xs={12} md={12} lg={6} key={index}>
-                      <ProjectCard
-                        listingId={item.id || item.docID}
-                        userRole={role}
-                        uid={uid}
-                        project_title={item.project_title}
-                        department={item.department}
-                        faculty_mentor={item.faculty_mentor}
-                        terms_available={item.terms_available}
-                        student_level={item.student_level}
-                        project_description={item.project_description}
-                        faculty_members={item.faculty_members}
-                        phd_student_mentor={item.phd_student_mentor}
-                        prerequisites={item.prerequisites}
-                        credit={item.credit}
-                        stipend={item.stipend}
-                        application_requirements={item.application_requirements}
-                        application_deadline={item.application_deadline}
-                        website={item.website}
-                        onShowApplications={() => {
-                          setSelectedResearchId(item.docID);
-                        }}
-                        onEdit={() => {
-                          console.log('Opening edit modal');
-                          setEditingForm(item);
-                          setEditModalOpen(true);
-                        }}
-                        onDelete={() => handleOpenDeleteModal(item.docID)}
-                      />
-                    </Grid>
-                  ))}
-            </Grid>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          fontWeight="bold"
+                          noWrap
+                          sx={{ fontSize: '0.95rem' }}
+                        >
+                          {item.project_title}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          {item.department}
+                        </Typography>
+                      </Box>
+                      <Box display="flex" gap={0.5}>
+                        <Button
+                          size="small"
+                          sx={{
+                            minWidth: 'auto',
+                            textTransform: 'none',
+                            color: '#4CAF50',
+                            fontSize: '0.75rem',
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingForm(item);
+                            setEditModalOpen(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="small"
+                          sx={{
+                            minWidth: 'auto',
+                            textTransform: 'none',
+                            color: '#F44336',
+                            fontSize: '0.75rem',
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDeleteModal(item.docID);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+
+              {/* See More link */}
+              {myPositions.length > 6 && !showAll && (
+                <Box textAlign="right" mt={2}>
+                  <Button
+                    sx={{
+                      color: '#5A41D8',
+                      textTransform: 'none',
+                      fontWeight: 500,
+                    }}
+                    onClick={() => setShowAll(true)}
+                  >
+                    See More
+                  </Button>
+                </Box>
+              )}
+            </>
           )}
         </>
       )}
+
+      {/* Create Position Modal */}
+      <ResearchModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        uid={uid}
+        onSubmitSuccess={getResearchListings}
+        firebaseQuery={postNewResearchPosition}
+      />
 
       {/* Delete Confirmation Modal */}
       <Dialog
@@ -307,6 +324,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
         </DialogActions>
       </Dialog>
 
+      {/* Edit Modal */}
       {editingForm && (
         <EditResearchModal
           open={editModalOpen}

@@ -10,14 +10,26 @@ import {
   Button,
   Grid,
   Typography,
+  MenuItem,
+  IconButton,
+  Box,
 } from '@mui/material';
-import firebase from '@/firebase/firebase_config';
+import CloseIcon from '@mui/icons-material/Close';
+import { toast } from 'react-hot-toast';
+import { normalizeResearchListing } from '@/app/models/ResearchModel';
+import { updateResearchListing } from '@/services/researchService';
+import {
+  NATURE_OF_JOB_OPTIONS,
+  ResearchFormData,
+} from './shared/researchModalUtils';
+import ImageUploadField from './shared/ImageUploadField';
+import { COLORS } from '@/constants/theme';
 
 interface EditResearchModalProps {
   open: boolean;
   onClose: () => void;
-  listingData: any; // The current listing's data (pre-filled)
-  onSubmitSuccess: () => void; // Callback to refresh the listings
+  listingData: any;
+  onSubmitSuccess: () => void;
 }
 
 const EditResearchModal: React.FC<EditResearchModalProps> = ({
@@ -26,243 +38,308 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
   listingData,
   onSubmitSuccess,
 }) => {
-  const [formData, setFormData] = useState({ ...listingData });
-  const [facultyEmail, setFacultyEmail] = useState('');
-  const [facultyName, setFacultyName] = useState('');
+  const [formData, setFormData] = useState<ResearchFormData>(
+    {} as ResearchFormData
+  );
+  const [uploading, setUploading] = useState(false);
+  const [imageFileName, setImageFileName] = useState('');
 
   useEffect(() => {
-    setFormData({ ...listingData });
+    const normalized = normalizeResearchListing(listingData);
+    setFormData(normalized);
+    if (normalized.image_url) {
+      setImageFileName('Current image');
+    }
   }, [listingData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData((prev: typeof formData) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /** Adds a faculty mentor to the map. */
-  const handleAddFacultyMentor = () => {
-    if (facultyEmail && facultyName) {
-      setFormData((prev) => ({
-        ...prev,
-        faculty_mentor: {
-          ...prev.faculty_mentor,
-          [facultyEmail]: facultyName,
-        },
-      }));
-      setFacultyEmail('');
-      setFacultyName('');
-    }
-  };
-
-  /** Removes a faculty mentor from the map. */
-  const handleRemoveFacultyMentor = (email: string) => {
-    setFormData((prev) => {
-      const updatedMentors = { ...prev.faculty_mentor };
-      delete updatedMentors[email];
-      return { ...prev, faculty_mentor: updatedMentors };
-    });
+  const handleImageUpload = (url: string, fileName: string) => {
+    setFormData((prev) => ({ ...prev, image_url: url }));
+    setImageFileName(fileName);
   };
 
   const handleSubmit = async () => {
     try {
-      const db = firebase.firestore();
-      const querySnapshot = await db
-        .collection('research-listings')
-        .where('id', '==', listingData.id)
-        .get();
-
-      if (querySnapshot.empty) {
-        throw new Error('No matching listing found!');
-      }
-
-      const listingRef = querySnapshot.docs[0].ref;
-      await listingRef.update(formData);
-
-      alert('Research listing updated!');
+      const docID = listingData.docID || listingData.id;
+      await updateResearchListing(docID, formData);
+      toast.success('Research listing updated!');
       onSubmitSuccess();
       onClose();
     } catch (error) {
       console.error('Update failed:', error);
-      alert('Failed to update listing.');
+      toast.error('Failed to update listing.');
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Edit Research Listing</DialogTitle>
-      <DialogContent
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{ sx: { borderRadius: '12px' } }}
+    >
+      <DialogTitle
         sx={{
-          maxHeight: '70vh', // Adjust the height as needed
-          overflowY: 'auto', // Enables scrolling
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontWeight: 'bold',
+          fontSize: '1.25rem',
         }}
       >
+        Edit Position
+        <IconButton onClick={onClose} size="small">
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent dividers>
         <Grid container spacing={2}>
-          <Grid item xs={12} sx={{ marginTop: 2 }}>
+          {/* Title + Description */}
+          <Grid item xs={12} sm={6}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: COLORS.primary }}>*</span> Title
+            </Typography>
             <TextField
-              label="Project Title"
               name="project_title"
+              placeholder="Ex. Research Assistant"
               value={formData.project_title || ''}
               onChange={handleChange}
               fullWidth
+              size="small"
             />
           </Grid>
-
-          <Grid item xs={6}>
+          <Grid item xs={12} sm={6}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: COLORS.primary }}>*</span> Position
+              Description
+            </Typography>
             <TextField
-              label="Department"
-              name="department"
-              value={formData.department || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          {/* Faculty Mentor */}
-          <Grid item xs={12}>
-            <Typography variant="subtitle1">Faculty Mentors</Typography>
-            <TextField
-              label="Faculty Mentor Email"
-              value={facultyEmail}
-              onChange={(e) => setFacultyEmail(e.target.value)}
-              fullWidth
-              margin="dense"
-            />
-            <TextField
-              label="Faculty Mentor Name"
-              value={facultyName}
-              onChange={(e) => setFacultyName(e.target.value)}
-              fullWidth
-              margin="dense"
-            />
-            <Button
-              onClick={handleAddFacultyMentor}
-              sx={{
-                textTransform: 'none',
-                color: '#5A41D8',
-                fontWeight: 500,
-                marginTop: '8px',
-              }}
-            >
-              Add Faculty Mentor
-            </Button>
-            <Grid container spacing={1} sx={{ marginTop: '8px' }}>
-              {formData.faculty_mentor &&
-                Object.entries(formData.faculty_mentor).map(([email, name]) => (
-                  <Grid item xs={12} key={email}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span>
-                        {name} ({email})
-                      </span>
-                      <Button
-                        onClick={() => handleRemoveFacultyMentor(email)}
-                        sx={{
-                          textTransform: 'none',
-                          color: '#D32F2F',
-                          fontWeight: 500,
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </Grid>
-                ))}
-            </Grid>
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="PhD Student Mentor"
-              name="phd_student_mentor"
-              value={formData.phd_student_mentor || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Credit"
-              name="credit"
-              value={formData.credit || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Stipend"
-              name="stipend"
-              value={formData.stipend || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Website"
-              name="website"
-              value={formData.website || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Application Requirements"
-              name="application_requirements"
-              value={formData.application_requirements || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={6}>
-            <TextField
-              label="Application Deadline"
-              name="application_deadline"
-              value={formData.application_deadline || ''}
-              onChange={handleChange}
-              fullWidth
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              label="Project Description"
               name="project_description"
+              placeholder="Enter description"
               value={formData.project_description || ''}
               onChange={handleChange}
               fullWidth
+              size="small"
               multiline
-              rows={3}
+              rows={4}
             />
           </Grid>
 
-          <Grid item xs={12}>
+          {/* Department */}
+          <Grid item xs={12} sm={6}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: COLORS.primary }}>*</span> Department
+            </Typography>
             <TextField
-              label="Prerequisites"
+              name="department"
+              placeholder="Ex. ECE"
+              value={formData.department || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+
+          {/* Image Upload */}
+          <Grid item xs={12}>
+            <ImageUploadField
+              imageFileName={imageFileName}
+              uploading={uploading}
+              onImageUpload={handleImageUpload}
+              onUploadStart={() => setUploading(true)}
+              onUploadEnd={() => setUploading(false)}
+            />
+          </Grid>
+
+          {/* Nature of Job, Compensation, Faculty Contact, PhD Student Contact */}
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: COLORS.primary }}>*</span> Nature of Job
+            </Typography>
+            <TextField
+              name="nature_of_job"
+              select
+              value={formData.nature_of_job || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            >
+              {NATURE_OF_JOB_OPTIONS.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: COLORS.primary }}>*</span> Compensation
+            </Typography>
+            <TextField
+              name="compensation"
+              placeholder="Ex. $10/hr or 2 credits"
+              value={formData.compensation || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: COLORS.primary }}>*</span> Faculty Contact
+            </Typography>
+            <TextField
+              name="faculty_contact"
+              placeholder="Ex. albertgator@ufl.edu"
+              value={formData.faculty_contact || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              PhD Student Contact
+            </Typography>
+            <TextField
+              name="phd_student_contact"
+              placeholder="Ex. alberta@ufl.edu"
+              value={formData.phd_student_contact || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+
+          {/* Application Deadline, Hours per Week, Prerequisites */}
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: COLORS.primary }}>*</span> Application
+              Deadline
+            </Typography>
+            <TextField
+              name="application_deadline"
+              type="date"
+              value={formData.application_deadline || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              <span style={{ color: COLORS.primary }}>*</span> Hours per Week
+            </Typography>
+            <TextField
+              name="hours_per_week"
+              placeholder="Ex. 10"
+              value={formData.hours_per_week || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Prerequisites
+            </Typography>
+            <TextField
               name="prerequisites"
+              placeholder="Enter description"
               value={formData.prerequisites || ''}
               onChange={handleChange}
               fullWidth
+              size="small"
+              multiline
+              rows={2}
+            />
+          </Grid>
+
+          {/* Terms Available, Student Level, Website, Application Requirements */}
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Terms Available
+            </Typography>
+            <TextField
+              name="terms_available"
+              placeholder="Ex. Fall, Spring"
+              value={formData.terms_available || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Student Level
+            </Typography>
+            <TextField
+              name="student_level"
+              placeholder="Ex. Junior, Senior"
+              value={formData.student_level || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Website
+            </Typography>
+            <TextField
+              name="website"
+              placeholder="Ex. https://lab.ufl.edu"
+              value={formData.website || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={12} sm={3}>
+            <Typography variant="body2" fontWeight="bold" mb={0.5}>
+              Application Requirements
+            </Typography>
+            <TextField
+              name="application_requirements"
+              placeholder="Ex. Resume, Transcript"
+              value={formData.application_requirements || ''}
+              onChange={handleChange}
+              fullWidth
+              size="small"
             />
           </Grid>
         </Grid>
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          Save
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <Button
+          onClick={onClose}
+          sx={{ textTransform: 'none', color: COLORS.primary, fontWeight: 500 }}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          sx={{
+            backgroundColor: COLORS.primary,
+            color: COLORS.white,
+            textTransform: 'none',
+            fontWeight: 500,
+            borderRadius: '8px',
+            '&:hover': { backgroundColor: COLORS.primaryDark },
+          }}
+        >
+          Save Changes
         </Button>
       </DialogActions>
     </Dialog>

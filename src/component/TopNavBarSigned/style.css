@@ -1,7 +1,7 @@
 .top-nav-bar-signed {
   height: 37px;
   position: fixed;
-  width: 379px;
+  width: 279px;
 }
 
 .top-nav-bar-signed .text-wrapper-3 {
@@ -9,7 +9,7 @@
   font-family: "SF Pro Display-Bold", Helvetica;
   font-size: 16px;
   font-weight: 700;
-  left: 210px;
+  left: 100px;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
@@ -23,21 +23,7 @@
   font-family: "SF Pro Display-Bold", Helvetica;
   font-size: 16px;
   font-weight: 700;
-  left: 130px;
-  letter-spacing: 0;
-  line-height: normal;
-  position: absolute;
-  top: 8px;
-  white-space: nowrap;
-  width: 51px;
-}
-
-.top-nav-bar-signed .text-wrapper-2 {
-  color: #ffffff;
-  font-family: "SF Pro Display-Bold", Helvetica;
-  font-size: 18px;
-  font-weight: 700;
-  left: 25px;
+  left: 0;
   letter-spacing: 0;
   line-height: normal;
   position: absolute;
@@ -50,7 +36,7 @@
   all: unset;
   box-sizing: border-box;
   height: 37px;
-  left: 307px;
+  left: 207px;
   position: absolute;
   top: 0;
   width: 117px;

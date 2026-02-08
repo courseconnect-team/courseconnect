@@ -16,8 +16,8 @@ const PageLayout: FC<PageLayoutProps> = ({ mainTitle, navItems, children }) => {
       <SideNav navItems={navItems} />
       <div className="flex flex-col flex-1">
         <TopNav />
-        <main className="flex-1 overflow-y-auto pt-14 px-6 md:px-12 ml-10">
-          <h1 className="text-5xl md:text-3xl font-bold text-black mb-8 mt-8">
+        <main className="flex-1 overflow-y-auto pt-16 px-6 md:px-12 ml-10">
+          <h1 className="text-5xl md:text-3xl font-bold text-black mb-6 mt-4">
             {mainTitle}
           </h1>
           {children}
