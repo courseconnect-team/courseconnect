@@ -1,5 +1,5 @@
 'use client';
-import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import Link from 'next/link';
 import { Toaster } from 'react-hot-toast';
 import { redirect } from 'next/navigation';

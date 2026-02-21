@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import FacultyDetails from '@/component/FacultyDetails/FacultyDetails';
-import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import { FacultyStats } from '@/types/User';
 // import { useFacultyStats } from '@/hooks/useFacultyStats';
 import { Toaster } from 'react-hot-toast';

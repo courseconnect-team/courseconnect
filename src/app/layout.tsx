@@ -1,5 +1,6 @@
 'use client';
 import { AuthProvider } from '@/firebase/auth/auth_context';
+import { AnnouncementsProvider } from '@/contexts/AnnouncementsContext';
 import React, { useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -67,9 +68,11 @@ export default function RootLayout({
               theme={mode === 'dark' ? darkThemeChosen : lightThemeChosen}
             >
               <AuthProvider>
-                <CssBaseline />
-                {/*<Header ColorModeContext={ColorModeContext} />*/}
-                {children}
+                <AnnouncementsProvider>
+                  <CssBaseline />
+                  {/*<Header ColorModeContext={ColorModeContext} />*/}
+                  {children}
+                </AnnouncementsProvider>
               </AuthProvider>
             </ThemeProvider>
           </ColorModeContext.Provider>
