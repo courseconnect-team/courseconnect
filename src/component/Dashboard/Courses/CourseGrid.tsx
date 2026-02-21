@@ -57,7 +57,7 @@ interface Course {
 interface CourseGridProps {
   userRole: string;
   semester: string;
-  processing: boolean;
+  processing?: boolean;
 }
 
 export default function CourseGrid(props: CourseGridProps) {
@@ -493,8 +493,8 @@ export default function CourseGrid(props: CourseGridProps) {
           onProcessRowUpdateError={(error) =>
             console.error('Error processing row update: ', error)
           }
-          slots={{ toolbar: EditToolbar }}
-          slotProps={{ toolbar: { setCourseData, setRowModesModel } }}
+          slots={{ toolbar: EditToolbar as any }}
+          slotProps={{ toolbar: { setCourseData, setRowModesModel } as any }}
           initialState={{
             pagination: { paginationModel: { pageSize: 25 } },
           }}

@@ -89,9 +89,9 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
 
     return (
       <GridToolbarContainer>
-        <GridToolbarExport style={{ color: '#562EBA' }} />
-        <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-        <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+        <GridToolbarExport />
+        <GridToolbarFilterButton />
+        <GridToolbarColumnsButton />
       </GridToolbarContainer>
     );
   }
@@ -819,10 +819,10 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
         slots={{
-          toolbar: EditToolbar,
+          toolbar: EditToolbar as any,
         }}
         slotProps={{
-          toolbar: { setAssignmentData, setRowModesModel },
+          toolbar: { setAssignmentData, setRowModesModel } as any,
         }}
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },

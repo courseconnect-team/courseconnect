@@ -64,70 +64,71 @@ export default function AppView({ uid }: AppViewProps) {
       .get()
       .then((doc) => {
         if (doc.exists) {
-          setDocData(doc.data());
-          console.log(doc.data());
+          const data = doc.data()!;
+          setDocData(data);
+          console.log(data);
 
-          setStudentName(doc.data().name);
-          setStudentEmail(doc.data().email);
-          setHours(doc.data().hours[0]);
-          if (doc.data().ufid === undefined) {
+          setStudentName(data.name);
+          setStudentEmail(data.email);
+          setHours(data.hours[0]);
+          if (data.ufid === undefined) {
             setStudentId('');
           } else {
-            setStudentId(doc.data().ufid);
+            setStudentId(data.ufid);
           }
 
-          if (doc.data().supervisor_ufid === undefined) {
+          if (data.supervisor_ufid === undefined) {
             setFacultyId('');
           } else {
-            setFacultyId(doc.data().supervisor_ufid);
+            setFacultyId(data.supervisor_ufid);
           }
 
-          if (doc.data().start_date === undefined) {
+          if (data.start_date === undefined) {
             setStartDate('');
           } else {
-            setStartDate(doc.data().start_date);
+            setStartDate(data.start_date);
           }
 
-          if (doc.data().end_date === undefined) {
+          if (data.end_date === undefined) {
             setEndDate('');
           } else {
-            setEndDate(doc.data().end_date);
+            setEndDate(data.end_date);
           }
 
-          if (doc.data().title === undefined) {
+          if (data.title === undefined) {
             setTitle('');
           } else {
-            setTitle(doc.data().title);
+            setTitle(data.title);
           }
 
-          if (doc.data().percentage === undefined) {
+          if (data.percentage === undefined) {
             setPercentage('');
           } else {
-            setPercentage(doc.data().percentage);
+            setPercentage(data.percentage);
           }
 
-          if (doc.data().annual_rate === undefined) {
+          if (data.annual_rate === undefined) {
             setAnnualRate('');
           } else {
-            setAnnualRate(doc.data().annual_rate);
+            setAnnualRate(data.annual_rate);
           }
 
-          if (doc.data().biweekly_rate === undefined) {
+          if (data.biweekly_rate === undefined) {
             setBiweeklyRate('');
           } else {
-            setBiweeklyRate(doc.data().biweekly_rate);
+            setBiweeklyRate(data.biweekly_rate);
           }
 
-          if (doc.data().target_amount === undefined) {
+          if (data.target_amount === undefined) {
             setTargetAmt('');
           } else {
-            setTargetAmt(doc.data().target_amount);
+            setTargetAmt(data.target_amount);
           }
 
-          if (doc.data().remote === undefined) {
+          if (data.remote === undefined) {
             setRemote('No');
           } else {
-            setRemote(doc.data().remote);
+            setRemote(data.remote);
           }
           console.log(studentName);
         } else {

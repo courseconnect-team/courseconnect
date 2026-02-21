@@ -9,11 +9,11 @@ import Container from '@mui/material/Container';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Toaster } from 'react-hot-toast';
 
-import { ApplicationStatusCard } from '@/components/ApplicationStatusCard/ApplicationStatusCard';
+import { ApplicationStatusCard } from '@/component/ApplicationStatusCard/ApplicationStatusCard';
 import { useState } from 'react';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import { ApplicationStatusCardDenied } from '@/components/ApplicationStatusCardDenied/ApplicationStatusCardDenied';
-import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCardAccepted/ApplicationStatusCardAccepted';
+import { ApplicationStatusCardDenied } from '@/component/ApplicationStatusCardDenied/ApplicationStatusCardDenied';
+import { ApplicationStatusCardAccepted } from '@/component/ApplicationStatusCardAccepted/ApplicationStatusCardAccepted';
 import './style.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -66,7 +66,7 @@ export default function Status() {
   const userId = user.uid;
   const [role, loading, error] = GetUserRole(user?.uid);
 
-  const [courses, setCourses] = useState(null);
+  const [courses, setCourses] = useState<Record<string, string> | null>(null);
   const [adminDenied, setAdminDenied] = useState(false);
 
   const [assignment, setAssignment] = useState<string[]>([]);
@@ -104,7 +104,7 @@ export default function Status() {
       const latestApp = await repo.getLatestApplication(userId, 'course_assistant');
       if (latestApp) {
         setAdminDenied(latestApp.status == 'Admin_denied');
-        setCourses(latestApp.courses);
+        setCourses(latestApp.courses ?? null);
       }
 
       return;

@@ -7,7 +7,7 @@ import HeaderCard from '@/component/HeaderCard/HeaderCard';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { Bio } from '@/components/Bio/Bio';
+import { Bio } from '@/component/Bio/Bio';
 import { SemesterTimeline } from '@/component/SemesterTimeline/SemesterTimeline';
 import useFetchPastCourses from '@/hooks/old/usePastCourses';
 import { CourseType } from '@/types/User';

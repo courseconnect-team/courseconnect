@@ -368,8 +368,8 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
         onProcessRowUpdateError={(error) =>
           console.error('Error processing row update: ', error)
         }
-        slots={{ toolbar: EditToolbar }}
-        slotProps={{ toolbar: { setApplicationData: setUserData, setRowModesModel } }}
+        slots={{ toolbar: EditToolbar as any }}
+        slotProps={{ toolbar: { setApplicationData: setUserData, setRowModesModel } as any }}
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
         }}

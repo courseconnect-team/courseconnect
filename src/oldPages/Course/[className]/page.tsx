@@ -7,7 +7,7 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import CourseDetails from '@/component/CourseDetails/CourseDetails';
 import { getAuth } from 'firebase/auth';
-import { useUserRole } from '@/firebase/util/GetUserRole';
+import useUserRole from '@/firebase/util/GetUserRole';
 import { useSearchParams } from 'next/navigation';
 import { LinearProgress } from '@mui/material';
 
@@ -48,11 +48,7 @@ const StatisticsPage: FC<pageProps> = ({ params }) => {
   const searchParams = useSearchParams();
   const courseId = searchParams.get('courseId');
   const onGoing = searchParams.get('onGoing') === 'true';
-  const {
-    role,
-    loading: roleLoading,
-    error: roleError,
-  } = useUserRole(user?.uid);
+  const [role, roleLoading, roleError] = useUserRole(user?.uid);
 
   const [courseData, setCourseData] = useState<CourseDetails | null>(null);
 

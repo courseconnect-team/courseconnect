@@ -27,7 +27,7 @@ export const SignUpCard = ({
   setSignup,
 }: {
   className: any;
-  setSignup: (val: boolean) => void;
+  setSignup?: (val: boolean) => void;
 }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -411,7 +411,7 @@ export const SignUpCard = ({
             <br></br>
             <button
               className="cursor-pointer underline hover:no-underline"
-              onClick={() => setSignup(false)}
+              onClick={() => setSignup?.(false)}
             >
               {'Log In'}
             </button>

@@ -21,7 +21,7 @@ interface ApplicantCardProps {
   number: string;
   position: string;
   semester: string;
-  availability: string;
+  availability: string | string[];
   department: string;
   degree: string;
   collegestatus: string;
@@ -416,7 +416,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50">Available Hours Per Week:</div>
-                <div className="availability1">{availability.join(', ')}</div>
+                <div className="availability1">{Array.isArray(availability) ? availability.join(', ') : availability}</div>
               </div>
 
               <br></br>

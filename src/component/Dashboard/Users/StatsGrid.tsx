@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import ZoomIn from '@mui/icons-material/ZoomIn';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import {
+  GridRowModes,
   GridRowModesModel,
   GridToolbarContainer,
   GridToolbarExport,
@@ -36,7 +37,7 @@ import {
   useDeleteFacultyStat,
   useUpdateFacultyStat,
 } from '@/hooks/useFacultyStats';
-import { User } from '@/types/User';
+import { User, FacultyStats } from '@/types/User';
 import { alpha, styled } from '@mui/material/styles';
 
 interface EditToolbarProps {
@@ -50,9 +51,9 @@ function EditToolbar(props: EditToolbarProps) {
 
   return (
     <GridToolbarContainer>
-      <GridToolbarExport style={{ color: '#562EBA' }} />
-      <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-      <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
     </GridToolbarContainer>
   );
 }
@@ -131,7 +132,7 @@ export default function StatsGrid(props: UserGridProps) {
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = data?.find((row) => row.id === id);
     if (editedRow && editedRow.isNew) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate(id.toString());
     } else {
       setRowModesModel({
         ...rowModesModel,
@@ -141,7 +142,7 @@ export default function StatsGrid(props: UserGridProps) {
   };
 
   const processRowUpdate = async (newRow: GridRowModel) => {
-    const updatedRow = { ...(newRow as User), isNew: false };
+    const updatedRow = { ...(newRow as FacultyStats), isNew: false };
     try {
       await updateMutation.mutateAsync(updatedRow);
       return updatedRow;
@@ -378,12 +379,12 @@ export default function StatsGrid(props: UserGridProps) {
       <StripedDataGrid
         rows={data || []}
         columns={columns}
-        components={{
-          Toolbar: EditToolbar,
-          LoadingOverlay: LinearProgress,
+        slots={{
+          toolbar: EditToolbar as any,
+          loadingOverlay: LinearProgress as any,
         }}
-        componentsProps={{
-          toolbar: { setRowModesModel },
+        slotProps={{
+          toolbar: { setRowModesModel } as any,
         }}
         editMode="row"
         getRowId={(row) => row.instructor}

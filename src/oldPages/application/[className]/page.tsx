@@ -12,7 +12,7 @@ import ApplicantCardAssign from '@/component/ApplicantCardAssign/ApplicantCardAs
 import ApplicantCardApprove from '@/component/ApplicantCardApprove/ApplicantCardApprove';
 import ApplicantCardDeny from '@/component/ApplicantCardDeny/ApplicantCardDeny';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useUserRole } from '@/firebase/util/GetUserRole';
+import useUserRole from '@/firebase/util/GetUserRole';
 import { useSearchParams } from 'next/navigation';
 
 interface pageProps {
@@ -61,11 +61,7 @@ const CoursePage: FC<pageProps> = ({ params }) => {
   const db = firebase.firestore();
   const auth = getAuth();
   const user = auth.currentUser;
-  const {
-    role,
-    loading: roleLoading,
-    error: roleError,
-  } = useUserRole(user?.uid);
+  const [role, roleLoading, roleError] = useUserRole(user?.uid);
 
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
   const [openDenyDialog, setOpenDenyDialog] = useState(false);

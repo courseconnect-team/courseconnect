@@ -69,7 +69,7 @@ export function ApplicationPreview({
           classCode: courseId,
           name: name,
           uf_email: email,
-          position: position,
+          position: position ?? '',
         });
       }
       closeConfirm();
