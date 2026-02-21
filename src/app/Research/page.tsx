@@ -1,16 +1,8 @@
 'use client';
-import React, { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
 import { JobCard } from '@/component/JobCard/JobCard';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
-interface ResearchPageProps {
-  user: {
-    uid: string;
-    fullName: string;
-    bio: string;
-  };
-}
 
 const researchJobs = [
   {
@@ -56,7 +48,7 @@ const researchJobs = [
     contact: 'timothy.brown@ufl.edu',
   },
 ];
-const ResearchPage: React.FC<ResearchPageProps> = () => {
+const ResearchPage = () => {
   const [user, role, loading, error] = useUserInfo();
 
   if (error) {
