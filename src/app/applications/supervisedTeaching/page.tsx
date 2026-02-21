@@ -19,6 +19,8 @@ import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
+import { getFirestore } from 'firebase/firestore';
 
 export default function SupervisedTeachingApplication() {
   const { user } = useAuth();
@@ -114,7 +116,7 @@ export default function SupervisedTeachingApplication() {
     }-${current.getDate()}-${current.getFullYear()}`;
 
     const applicationData = {
-      application_type: 'supervised_teaching',
+      application_type: 'supervised_teaching' as const,
       firstname: firstName,
       lastname: lastName,
       ufid,
@@ -136,29 +138,26 @@ export default function SupervisedTeachingApplication() {
 
     try {
       const toastId = toast.loading('Submitting application...');
-      const response = await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(applicationData),
-        }
+
+      // Save application directly to Firestore using repository
+      const db = getFirestore();
+      const repo = new ApplicationRepository(db);
+      const applicationId = await repo.saveApplication(
+        userId,
+        'supervised_teaching',
+        applicationData
       );
 
-      if (response.ok) {
-        toast.dismiss(toastId);
-        toast.success('Application submitted!');
-        setSuccess(true);
-        // optional: update role or navigate
-        router.push('/');
-      } else {
-        toast.dismiss(toastId);
-        toast.error('Submission failed. Please try again later.');
-      }
+      console.log('Application saved with ID:', applicationId);
+
+      toast.dismiss(toastId);
+      toast.success('Application submitted!');
+      setSuccess(true);
+
+      // Navigate to home
+      router.push('/');
     } catch (err) {
-      console.error(err);
+      console.error('ERROR: Failed to save application:', err);
       toast.error('Submission failed. Please try again later.');
     }
 
@@ -296,6 +295,7 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="registerTerm"
                   label="Which term to register for EEL 6940"
+                  defaultValue=""
                   SelectProps={{ displayEmpty: true }}
                 >
                   <MenuItem value="">Select term</MenuItem>

@@ -29,24 +29,51 @@ export interface CourseDetails {
 export type Position = 'TA' | 'UPI' | 'Grader';
 
 export interface ApplicationData {
-  id: string;
+  id?: string;
   email: string;
   firstname: string;
   lastname: string;
-  phonenumber: string;
-  position: string;
-  semester: string;
-  employmentAction?: string;
-  available_hours: string;
-  department: string;
-  degree: string;
-  collegestatus: string;
-  qualifications: string;
-  resume_link: string;
-  plan: string;
-  gpa: string;
+  ufid?: string;
+  uid?: string;
   date: string;
   status: string;
+  application_type?: 'course_assistant' | 'supervised_teaching';
+
+  // Course Assistant fields
+  phonenumber?: string;
+  position?: string;
+  semester?: string;
+  employmentAction?: string;
+  available_hours?: string | string[];
+  available_semesters?: string[];
+  department?: string;
+  degree?: string;
+  collegestatus?: string;
+  semesterstatus?: string;
+  qualifications?: string;
+  resume_link?: string;
+  plan?: string;
+  gpa?: string;
+  nationality?: string;
+  englishproficiency?: string;
+  additionalprompt?: string;
+  courses?: { [courseKey: string]: 'applied' | 'approved' | 'denied' | 'accepted' };
+
+  // Supervised Teaching fields
+  phdAdmissionTerm?: string;
+  phdAdvisor?: string;
+  admittedToCandidacy?: string;
+  registerTerm?: string;
+  previouslyRegistered?: string;
+  previousDetails?: string;
+  coursesComfortable?: string;
+  teachingFirst?: string;
+  teachingSecond?: string;
+  teachingThird?: string;
+
+  // Timestamps
+  created_at?: any;
+  updated_at?: any;
 }
 
 export type Status =

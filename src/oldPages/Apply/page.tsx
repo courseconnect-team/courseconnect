@@ -35,6 +35,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import HeaderCard from '@/component/HeaderCard/HeaderCard';
+import { callFunction } from '@/firebase/functions/callFunction';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -84,33 +85,17 @@ export default function Application() {
         });
         let resultString = courseNamesWithSemester.join(', ');
 
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+        await callFunction('sendEmail', {
+          type: 'applicationConfirmation',
+          data: {
+            user: {
+              name: user.displayName,
+              email: applicationData.email,
             },
-            body: JSON.stringify({
-              type: 'applicationConfirmation',
-              data: {
-                user: {
-                  name: user.displayName,
-                  email: applicationData.email,
-                },
-                position: applicationData.position,
-                classCode: resultString,
-              },
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Email sent successfully:', data);
-        } else {
-          throw new Error('Failed to send email');
-        }
+            position: applicationData.position,
+            classCode: resultString,
+          },
+        });
       } catch (error) {
         console.error('Error sending email:', error);
       }
@@ -276,18 +261,8 @@ export default function Application() {
       // use fetch to send the application data to the server
       // this goes to a cloud function which creates a document based on
       // the data from the form, identified by the user's firebase auth uid
-      const response = await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(applicationData),
-        }
-      );
-
-      if (response.ok) {
+      try {
+        await callFunction('processApplicationForm', applicationData);
         await handleSendEmail();
         toast.dismiss(toastId);
         toast.success('Application submitted!');
@@ -298,7 +273,8 @@ export default function Application() {
         // so the form goes away and the user can see the status of their application
 
         router.push('/');
-      } else {
+      } catch (error) {
+        console.error(error);
         toast.dismiss(toastId);
         toast.error('Application data failed to send to server!');
         console.log('ERROR: Application data failed to send to server');

@@ -1,0 +1,36 @@
+
+> courseconnect@0.1.0 migrate:applications
+> ts-node src/scripts/migrateApplications.ts --execute
+
+============================================================
+Application Migration Script
+============================================================
+Mode: EXECUTE
+Delete old data: NO
+Overwrite existing: NO
+Batch size: 400
+============================================================
+
+Migration failed: Error: The file at C:/Program Files/Git/serviceAccountKey.json does not exist, or it is not a file. ENOENT: no such file or directory, lstat 'C:\Program Files\Git\serviceAccountKey.json'
+    at Object.realpathSync (node:fs:2729:29)
+    at GoogleAuth._getApplicationCredentialsFromFilePath (c:\Users\Oling\Documents\courseconnect\node_modules\google-auth-library\build\src\auth\googleauth.js:375:27)
+    at GoogleAuth._tryGetApplicationCredentialsFromEnvironmentVariable (c:\Users\Oling\Documents\courseconnect\node_modules\google-auth-library\build\src\auth\googleauth.js:316:25)
+    at GoogleAuth.getFileProjectId (c:\Users\Oling\Documents\courseconnect\node_modules\google-auth-library\build\src\auth\googleauth.js:606:30)
+    at GoogleAuth.findAndCacheProjectId (c:\Users\Oling\Documents\courseconnect\node_modules\google-auth-library\build\src\auth\googleauth.js:161:46)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Caused by: Error
+    at QueryUtil._getResponse (c:\Users\Oling\Documents\courseconnect\node_modules\@google-cloud\firestore\build\src\reference\query-util.js:44:23)
+    at Query._getResponse (c:\Users\Oling\Documents\courseconnect\node_modules\@google-cloud\firestore\build\src\reference\query.js:784:32)
+    at Query._get (c:\Users\Oling\Documents\courseconnect\node_modules\@google-cloud\firestore\build\src\reference\query.js:777:35)
+    at c:\Users\Oling\Documents\courseconnect\node_modules\@google-cloud\firestore\build\src\reference\query.js:745:43
+    at c:\Users\Oling\Documents\courseconnect\node_modules\@google-cloud\firestore\build\src\telemetry\enabled-trace-util.js:110:30
+    at NoopContextManager.with (c:\Users\Oling\Documents\courseconnect\node_modules\@opentelemetry\api\src\context\NoopContextManager.ts:31:15)
+    at ContextAPI.with (c:\Users\Oling\Documents\courseconnect\node_modules\@opentelemetry\api\src\api\context.ts:77:42)
+    at NoopTracer.startActiveSpan (c:\Users\Oling\Documents\courseconnect\node_modules\@opentelemetry\api\src\trace\NoopTracer.ts:98:27)
+    at ProxyTracer.startActiveSpan (c:\Users\Oling\Documents\courseconnect\node_modules\@opentelemetry\api\src\trace\ProxyTracer.ts:51:20)
+    at EnabledTraceUtil.startActiveSpan (c:\Users\Oling\Documents\courseconnect\node_modules\@google-cloud\firestore\build\src\telemetry\enabled-trace-util.js:102:28) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'lstat',
+  path: 'C:\\Program Files\\Git\\serviceAccountKey.json'
+}

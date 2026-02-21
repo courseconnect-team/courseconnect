@@ -14,6 +14,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { CircularProgress } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { callFunction } from '@/firebase/functions/callFunction';
 interface CreateCourseDialogProps {
   open: boolean;
   setOpen: (value: boolean) => void;
@@ -116,18 +117,8 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     // use fetch to send the user data to the server
     // this goes to a cloud function which creates a document based on
     // the data from the form, identified by the user's firebase auth uid
-    const response = await fetch(
-      'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processCreateCourseForm',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(courseData),
-      }
-    );
-
-    if (response.ok) {
+    try {
+      await callFunction('processCreateCourseForm', courseData);
       console.log('SUCCESS: Course data sent to server successfully');
       // Update the course data with the new row
       setCourseData((oldRows) => [...oldRows, courseData]);
@@ -135,7 +126,8 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       // close the dialog
       handleClose();
       setLoading(false);
-    } else {
+    } catch (error) {
+      console.error(error);
       console.log('ERROR: Course data failed to send to server');
       toast.error('Course data failed to send to server!');
       setLoading(false);

@@ -25,6 +25,7 @@ import { toast } from 'react-hot-toast';
 import { LinearProgress } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { callFunction } from '@/firebase/functions/callFunction';
 
 import { useState } from 'react';
 // note that the application needs to be able to be connected to a specific faculty member
@@ -200,25 +201,16 @@ export default function Application() {
       // use fetch to send the application data to the server
       // this goes to a cloud function which creates a document based on
       // the data from the form, identified by the user's firebase auth uid
-      const response = await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(applicationData),
-        }
-      );
-
-      if (response.ok) {
+      try {
+        await callFunction('processApplicationForm', applicationData);
         console.log('SUCCESS: Application data sent to server successfully');
         // now, update the role of the user to student_applied
         await UpdateRole(userId, 'student_applied');
         // then, refresh the page somehow to reflect the state changing
         // so the form goes away and the user can see the status of their application
         location.reload();
-      } else {
+      } catch (error) {
+        console.error(error);
         toast.error('Application data failed to send to server!');
         console.log('ERROR: Application data failed to send to server');
       }

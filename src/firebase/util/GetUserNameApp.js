@@ -8,7 +8,12 @@ const GetUserNameApp = (userId) => {
   const [name, setName] = useState('');
 
   const [snapshot, loading, error] = useDocument(
-    firebase.firestore().collection('applications').doc(userId)
+    firebase
+      .firestore()
+      .collection('applications')
+      .doc('course_assistant')
+      .collection('uid')
+      .doc(userId)
   );
 
   useEffect(() => {

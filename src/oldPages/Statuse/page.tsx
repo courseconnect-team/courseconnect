@@ -17,7 +17,8 @@ import { ApplicationStatusCardAccepted } from '@/components/ApplicationStatusCar
 import './style.css';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { getDoc } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
 
 // note that the application needs to be able to be connected to a specific faculty member
 // so that the faculty member can view the application and accept/reject it
@@ -59,6 +60,8 @@ export default function Status() {
     mode?: 'edit' | 'view' | undefined;
   }
   const db = firebase.firestore();
+  const modularDb = getFirestore();
+  const repo = new ApplicationRepository(modularDb);
   const { user } = useAuth();
   const userId = user.uid;
   const [role, loading, error] = GetUserRole(user?.uid);
@@ -97,13 +100,12 @@ export default function Status() {
 
       setAssignment(assignmentArray);
 
-      const statusRef = db.collection('applications').doc(userId);
-      await getDoc(statusRef).then((doc) => {
-        if (doc.data() != null && doc.data() != undefined) {
-          setAdminDenied(doc.data()?.status == 'Admin_denied');
-          setCourses(doc.data()?.courses);
-        }
-      });
+      // Fetch latest course_assistant application
+      const latestApp = await repo.getLatestApplication(userId, 'course_assistant');
+      if (latestApp) {
+        setAdminDenied(latestApp.status == 'Admin_denied');
+        setCourses(latestApp.courses);
+      }
 
       return;
     }

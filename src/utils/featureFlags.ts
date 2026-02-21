@@ -1,5 +1,6 @@
 export const isE2EMode = (): boolean => {
   if (process.env.NEXT_PUBLIC_E2E_MODE === '1') return true;
+  if (process.env.NEXT_PUBLIC_E2E === '1') return true;
   if (typeof window === 'undefined') return false;
   return Boolean(
     window.localStorage.getItem('e2e_role') ||

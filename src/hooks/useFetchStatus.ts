@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
+import { getFirestore } from 'firebase/firestore';
+
 /**
- * Custom hook that aggregates a student/faculty member’s dashboard‑relevant data.
+ * Custom hook that aggregates a student/faculty member's dashboard‑relevant data.
  * ────────────────────────────────────────────────────────────────────────────
  * • Crawls the `assignments` collection, collecting *all* `class_codes` that
  *   live under sequential docs:   userId,  userId-1, userId-2 …
- * • Reads their application record (`applications/{userId}`) to pull courses
+ * • Reads their latest course_assistant application to pull courses
  *   and admin‑status flags.
  *
  * Returned shape keeps consumers simple:
@@ -14,9 +17,11 @@ import 'firebase/firestore';
  */
 export function useFetchStatus(userId: string | undefined) {
   const db = firebase.firestore();
+  const modularDb = getFirestore();
+  const repo = new ApplicationRepository(modularDb);
 
   const [assignments, setAssignments] = useState<string[]>([]);
-  const [courses, setCourses] = useState<string[] | null>(null);
+  const [courses, setCourses] = useState<Record<string, string> | null>(null);
   const [adminDenied, setAdminDenied] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<unknown>(null);
@@ -49,15 +54,11 @@ export function useFetchStatus(userId: string | undefined) {
 
         if (isMounted) setAssignments(collected);
 
-        /* ── 2. Fetch application status doc  ─────────────────────────────── */
-        const statusSnap = await db
-          .collection('applications')
-          .doc(userId)
-          .get();
-        if (statusSnap.exists && isMounted) {
-          const data = statusSnap.data();
-          setAdminDenied(data?.status === 'Admin_denied');
-          setCourses(data?.courses ?? null);
+        /* ── 2. Fetch latest course_assistant application  ────────────────── */
+        const latestApp = await repo.getLatestApplication(userId!, 'course_assistant');
+        if (latestApp && isMounted) {
+          setAdminDenied(latestApp.status === 'Admin_denied');
+          setCourses(latestApp.courses ?? null);
         }
       } catch (err) {
         if (isMounted) setError(err);

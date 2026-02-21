@@ -1,6 +1,7 @@
 // api/applications.ts
-import { doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore';
-import firebase from '@/firebase/firebase_config';
+import { getFirestore } from 'firebase/firestore';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
+import { callFunction } from '@/firebase/functions/callFunction';
 
 type ApproveParams = { documentId: string; classCode: string };
 type DenyParams = ApproveParams & {
@@ -9,25 +10,17 @@ type DenyParams = ApproveParams & {
   position: string;
 };
 
-const db = firebase.firestore();
-// Optional: tiny helper to atomically set courses.<classCode> = status
+const db = getFirestore();
+const repo = new ApplicationRepository(db);
+
+// Atomically set courses.<classCode> = status on user's canonical course_assistant application
 async function setCourseStatusAtomic(
   documentId: string,
   classCode: string,
   status: 'approved' | 'denied'
 ) {
-  const ref = doc(db, 'applications', documentId);
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error('Application not found');
-
-    // Optionally validate existing map:
-    // const data = snap.data() as any;
-    // const courses = data.courses ?? {};
-    // if (courses[classCode] === status) return; // already set
-
-    tx.update(ref, { [`courses.${classCode}`]: status });
-  });
+  // documentId is userId in the applications/{type}/uid/{uid} schema
+  await repo.updateCourseStatusLatest(documentId, classCode, status);
 }
 
 /** Approve: only sets the flag atomically */
@@ -36,7 +29,6 @@ export async function approveApplication({
   classCode,
 }: ApproveParams) {
   await setCourseStatusAtomic(documentId, classCode, 'approved');
-
   return { ok: true as const };
 }
 
@@ -50,26 +42,16 @@ export async function denyApplication({
 }: DenyParams) {
   await setCourseStatusAtomic(documentId, classCode, 'denied');
 
-  // best-effort email (don’t block the user even if email fails)
+  // best-effort email (do not block the user even if email fails)
   try {
-    const res = await fetch(
-      'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'applicationStatusDenied',
-          data: {
-            user: { name, email: uf_email },
-            position,
-            classCode,
-          },
-        }),
-      }
-    );
-    window.location.reload();
-
-    if (!res.ok) throw new Error(`Email failed: ${res.status}`);
+    await callFunction('sendEmail', {
+      type: 'applicationStatusDenied',
+      data: {
+        user: { name, email: uf_email },
+        position,
+        classCode,
+      },
+    });
   } catch (err) {
     // log and carry on
     console.error('Failed to send deny email:', err);

@@ -24,6 +24,11 @@
       
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/component/ClassCard/ClassCard.jsx", "functions/sendEmail/nodemailer.ts", "src/component/LinearProgress/LinearProgress.jsx"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

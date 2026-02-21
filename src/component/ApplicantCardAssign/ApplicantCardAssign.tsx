@@ -1,7 +1,5 @@
 import { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import './style.css';
-import firebase from '@/firebase/firebase_config';
-import 'firebase/firestore';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -20,7 +18,9 @@ import {
   Typography,
 } from '@mui/material';
 import FocusTrap from '@mui/material/Unstable_TrapFocus';
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
+import { callFunction } from '@/firebase/functions/callFunction';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
 interface ApplicantCardProps {
   id: string;
   uf_email: string;
@@ -47,6 +47,8 @@ interface ApplicantCardProps {
   setCurrentStu: (value: string) => void;
   className: string;
 }
+const repo = new ApplicationRepository(getFirestore());
+
 const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
   id,
   uf_email,
@@ -74,7 +76,6 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
 
   className,
 }) => {
-  const db = firebase.firestore();
   const [viewMessage, setViewMessage] = useState(false);
   const [subject, setSubject] = useState(
     () => localStorage.getItem('renewalSubject') || ''
@@ -90,12 +91,7 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
     event.preventDefault();
 
     try {
-      const statusRef = db.collection('applications').doc(currentStu);
-      let doc = await getDoc(statusRef);
-      let coursesMap = doc.data()?.courses;
-
-      coursesMap[className] = 'applied';
-      await statusRef.update({ courses: coursesMap });
+      await repo.updateCourseStatusLatest(currentStu, className, 'applied');
       window.location.reload();
     } catch (error) {
       console.error('Error approving application:', error);
@@ -121,43 +117,19 @@ const ApplicantCardAssign: FunctionComponent<ApplicantCardProps> = ({
       return;
     }
     try {
-      const response = await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'renewTA',
-            data: {
-              userEmail: uf_email,
-              message: content,
-              subject: subject,
-            },
-          }),
-        }
-      );
-      if (response.ok) {
-        toast.success('Email sent successfully');
-        handleCloseDialog();
-      } else {
-        let err;
-        try {
-          const json = await response.json();
-          err = JSON.stringify(json);
-        } catch {
-          // fallback to plain text
-          err = await response.text();
-        }
-        console.error('Cloud Function returned 400:', err);
-        throw new Error('Failed to send email');
-      }
+      await callFunction('sendEmail', {
+        type: 'renewTA',
+        data: {
+          userEmail: uf_email,
+          message: content,
+          subject: subject,
+        },
+      });
+      toast.success('Email sent successfully');
+      handleCloseDialog();
     } catch (error) {
       console.error('Error sending email:', error);
     }
-    handleCloseDialog();
-    toast.success('Email sent successfully');
   };
 
   const handleCloseDialog = () => {

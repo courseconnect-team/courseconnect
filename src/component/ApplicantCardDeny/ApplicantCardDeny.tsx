@@ -1,16 +1,15 @@
 import { FunctionComponent, useCallback } from 'react';
 import './style.css';
-
-import firebase from '@/firebase/firebase_config';
-import 'firebase/firestore';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
+import { getFirestore } from 'firebase/firestore';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
 
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
+const repo = new ApplicationRepository(getFirestore());
 interface ApplicantCardProps {
   id: string;
   uf_email: string;
@@ -60,17 +59,12 @@ const ApplicantCardDeny: FunctionComponent<ApplicantCardProps> = ({
   setCurrentStu,
   className,
 }) => {
-  const db = firebase.firestore();
   const handleMoveReview = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
-      const statusRef = db.collection('applications').doc(currentStu);
-      let doc = await getDoc(statusRef);
-      let coursesMap = doc.data().courses;
-
-      coursesMap[className] = 'applied';
-      await statusRef.update({ courses: coursesMap });
+      // currentStu is userId - update their latest course_assistant application
+      await repo.updateCourseStatusLatest(currentStu, className, 'applied');
       console.log('Application moved successfully');
       window.location.reload();
     } catch (error) {

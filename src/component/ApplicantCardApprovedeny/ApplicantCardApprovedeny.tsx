@@ -9,11 +9,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
-import { wrap } from 'module';
-import firebase from '@/firebase/firebase_config';
-import 'firebase/firestore';
+import { callFunction } from '@/firebase/functions/callFunction';
+import { getFirestore } from 'firebase/firestore';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
 
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 interface ApplicantCardProps {
   id: string;
   uf_email: string;
@@ -68,41 +67,25 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   setCurrentStu,
   className,
 }) => {
+  const repo = new ApplicationRepository(getFirestore());
+
   const handleDenyEmail = async () => {
     try {
-      const response = await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+      await callFunction('sendEmail', {
+        type: 'applicationStatusDenied',
+        data: {
+          user: {
+            name: `${firstname ?? ''} ${lastname ?? ''}`.trim(),
+            email: uf_email,
           },
-          body: JSON.stringify({
-            type: 'applicationStatusDenied',
-            data: {
-              user: {
-                name: `${firstname ?? ''} ${lastname ?? ''}`.trim(),
-                email: uf_email,
-              },
-              position: position,
-              classCode: className,
-            },
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Email sent successfully:', data);
-      } else {
-        throw new Error('Failed to send email');
-      }
+          position: position,
+          classCode: className,
+        },
+      });
     } catch (error) {
       console.error('Error sending email:', error);
     }
   };
-
-  const db = firebase.firestore();
 
   const handleApproveSubmit = async (
     event: React.FormEvent<HTMLFormElement>
@@ -110,12 +93,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
     event.preventDefault();
 
     try {
-      const statusRef = db.collection('applications').doc(currentStu);
-      let doc = await getDoc(statusRef);
-      let coursesMap = doc.data().courses;
-
-      coursesMap[className] = 'accepted';
-      await statusRef.update({ courses: coursesMap });
+      await repo.updateCourseStatusLatest(currentStu, className, 'accepted');
       console.log('Application approved successfully');
       window.location.reload();
     } catch (error) {
@@ -126,12 +104,7 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
   const handleDenySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const statusRef = db.collection('applications').doc(currentStu);
-      let doc = await getDoc(statusRef);
-      let coursesMap = doc.data().courses;
-
-      coursesMap[className] = 'denied';
-      await statusRef.update({ courses: coursesMap });
+      await repo.updateCourseStatusLatest(currentStu, className, 'denied');
       console.log('Application denied successfully');
       handleDenyEmail();
       window.location.reload();

@@ -1,33 +1,45 @@
 /**
- * Migration script to move applications from flat structure to sub-collection structure
+ * Migration script for applications schema.
  *
- * Old structure: applications/{userId} - all fields in one document
- * New structure: applications/{userId}/types/{applicationType} - parent + sub-collections
+ * Target schema:
+ * applications/{applicationType}/uid/{uid}
+ *
+ * Supported sources:
+ * 1) Legacy: applications/{uid}
+ * 2) Flat: course_assistant/{docId} with uid field
+ * 3) Flat: supervised_teaching/{docId} with uid field
  *
  * Usage:
- *   npm run migrate:applications           // Dry run (shows what would be migrated)
- *   npm run migrate:applications --execute // Actually perform migration
- *   npm run migrate:applications --execute --delete-old // Migrate and delete old data
- *   npm run migrate:applications --execute --overwrite  // Overwrite existing sub-collection docs
+ *   npm run migrate:applications:dry
+ *   npm run migrate:applications -- --execute
+ *   npm run migrate:applications -- --execute --delete-old
+ *   npm run migrate:applications -- --execute --overwrite
  */
 
-import * as admin from 'firebase-admin';
+const admin = require('firebase-admin');
 
 const DRY = !process.argv.includes('--execute');
 const DELETE_OLD = process.argv.includes('--delete-old');
 const OVERWRITE = process.argv.includes('--overwrite');
-const BATCH_SIZE = 400;
 
 type AnyMap = Record<string, any>;
 type ApplicationType = 'course_assistant' | 'supervised_teaching';
+type SourceType = 'legacy' | 'course_assistant' | 'supervised_teaching';
 
 interface MigrationStats {
-  total: number;
+  scanned: number;
   migrated: number;
   skipped: number;
   existed: number;
   deleted: number;
   errors: number;
+}
+
+interface SourceRecord {
+  source: SourceType;
+  docPath: string;
+  docId: string;
+  data: AnyMap;
 }
 
 function init() {
@@ -37,126 +49,168 @@ function init() {
   return admin.firestore();
 }
 
-/**
- * Infer application type from document data
- */
 function inferApplicationType(data: AnyMap): ApplicationType {
-  // If application_type field exists, use it
-  if (data.application_type) {
-    return data.application_type as ApplicationType;
-  }
-
-  // Infer based on schema:
-  // - course_assistant has 'courses' object field
-  // - supervised_teaching has 'phdAdvisor' field
-  if (data.courses && typeof data.courses === 'object') {
-    return 'course_assistant';
-  }
-
-  if (data.phdAdvisor) {
+  if (data.application_type === 'supervised_teaching') {
     return 'supervised_teaching';
   }
-
-  // Default to course_assistant if can't determine
-  console.warn(
-    `Could not infer type for document, defaulting to course_assistant`
-  );
+  if (data.application_type === 'course_assistant') {
+    return 'course_assistant';
+  }
+  if (data.phdAdvisor || data.registerTerm || data.coursesComfortable) {
+    return 'supervised_teaching';
+  }
   return 'course_assistant';
 }
 
-// No longer need parent document fields - each application is independent
+function isLikelyApplicationDoc(data: AnyMap): boolean {
+  return Boolean(
+    data &&
+      (data.email ||
+        data.uid ||
+        data.firstname ||
+        data.lastname ||
+        data.date ||
+        data.status ||
+        data.courses)
+  );
+}
 
-/**
- * Migrate a single application document
- */
-async function migrateApplication(
-  db: admin.firestore.Firestore,
-  userId: string,
-  data: AnyMap,
+function resolveUserId(record: SourceRecord): string | null {
+  if (typeof record.data.uid === 'string' && record.data.uid.trim()) {
+    return record.data.uid.trim();
+  }
+  if (record.source === 'legacy') {
+    return record.docId;
+  }
+  return null;
+}
+
+async function migrateRecord(
+  db: any,
+  record: SourceRecord,
   stats: MigrationStats
 ): Promise<void> {
   try {
-    const applicationType = inferApplicationType(data);
+    const userId = resolveUserId(record);
+    if (!userId) {
+      stats.skipped++;
+      console.warn(`[SKIP] ${record.docPath} - missing uid`);
+      return;
+    }
 
-    // Check if already migrated by querying the sub-collection
-    if (!OVERWRITE && !DRY) {
-      const existingApps = await db
-        .collection('applications')
-        .doc(userId)
-        .collection(applicationType)
-        .where('date', '==', data.date) // Check if same application date exists
-        .limit(1)
-        .get();
+    const appType =
+      record.source === 'course_assistant'
+        ? 'course_assistant'
+        : record.source === 'supervised_teaching'
+        ? 'supervised_teaching'
+        : inferApplicationType(record.data);
 
-      if (!existingApps.empty) {
+    const targetRef = db
+      .collection('applications')
+      .doc(appType)
+      .collection('uid')
+      .doc(userId);
+
+    if (!DRY) {
+      const existing = await targetRef.get();
+      if (existing.exists && !OVERWRITE) {
         stats.existed++;
-        console.log(
-          `  [EXISTS] ${userId} - ${applicationType} (date: ${data.date}) already migrated`
-        );
+        console.log(`[EXISTS] applications/${appType}/uid/${userId}`);
         return;
       }
     }
 
-    // Prepare application data with timestamps
-    const applicationData = {
-      ...data,
-      application_type: applicationType,
-      created_at:
-        data.created_at || admin.firestore.FieldValue.serverTimestamp(),
+    const payload = {
+      ...record.data,
+      uid: userId,
+      application_type: appType,
       updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      created_at:
+        record.data.created_at || admin.firestore.FieldValue.serverTimestamp(),
     };
 
     if (DRY) {
-      console.log(`  [DRY] Would migrate: ${userId} as ${applicationType}`);
-      console.log(
-        `    - Path: applications/${userId}/${applicationType}/{auto-id}`
-      );
-      console.log(`    - Date: ${data.date}`);
+      console.log(`[DRY] ${record.docPath} -> applications/${appType}/uid/${userId}`);
       stats.migrated++;
-    } else {
-      // Write to new sub-collection structure with auto-generated ID
-      const newAppRef = await db
-        .collection('applications')
-        .doc(userId)
-        .collection(applicationType)
-        .add(applicationData);
+      return;
+    }
 
-      stats.migrated++;
-      console.log(
-        `  [MIGRATED] ${userId} - ${applicationType} (ID: ${newAppRef.id})`
-      );
+    await targetRef.set(payload, { merge: true });
+    stats.migrated++;
+    console.log(`[MIGRATED] ${record.docPath} -> applications/${appType}/uid/${userId}`);
 
-      // Optionally delete old flat document if requested
-      if (DELETE_OLD) {
-        await db.collection('applications').doc(userId).delete();
-        stats.deleted++;
-      }
+    if (DELETE_OLD) {
+      await db.doc(record.docPath).delete();
+      stats.deleted++;
     }
   } catch (error: any) {
     stats.errors++;
-    console.error(`  [ERROR] Failed to migrate ${userId}:`, error.message);
+    console.error(`[ERROR] ${record.docPath}:`, error.message);
   }
 }
 
-/**
- * Main migration function
- */
+async function collectSourceRecords(db: any): Promise<SourceRecord[]> {
+  const records: SourceRecord[] = [];
+
+  const legacySnap = await db.collection('applications').get();
+  legacySnap.docs.forEach((doc: any) => {
+    const data = doc.data() as AnyMap;
+    // Skip container docs in already-migrated schema
+    if (doc.id === 'course_assistant' || doc.id === 'supervised_teaching') {
+      return;
+    }
+    if (!isLikelyApplicationDoc(data)) return;
+    records.push({
+      source: 'legacy',
+      docPath: `applications/${doc.id}`,
+      docId: doc.id,
+      data,
+    });
+  });
+
+  const courseAssistantSnap = await db.collection('course_assistant').get();
+  courseAssistantSnap.docs.forEach((doc: any) => {
+    const data = doc.data() as AnyMap;
+    if (!isLikelyApplicationDoc(data)) return;
+    records.push({
+      source: 'course_assistant',
+      docPath: `course_assistant/${doc.id}`,
+      docId: doc.id,
+      data,
+    });
+  });
+
+  const supervisedSnap = await db.collection('supervised_teaching').get();
+  supervisedSnap.docs.forEach((doc: any) => {
+    const data = doc.data() as AnyMap;
+    if (!isLikelyApplicationDoc(data)) return;
+    records.push({
+      source: 'supervised_teaching',
+      docPath: `supervised_teaching/${doc.id}`,
+      docId: doc.id,
+      data,
+    });
+  });
+
+  return records;
+}
+
 async function migrate() {
-  console.log('='.repeat(60));
+  console.log('='.repeat(70));
   console.log('Application Migration Script');
-  console.log('='.repeat(60));
-  console.log(`Mode: ${DRY ? 'DRY RUN (no changes will be made)' : 'EXECUTE'}`);
+  console.log('='.repeat(70));
+  console.log(`Mode: ${DRY ? 'DRY RUN' : 'EXECUTE'}`);
   console.log(`Delete old data: ${DELETE_OLD ? 'YES' : 'NO'}`);
   console.log(`Overwrite existing: ${OVERWRITE ? 'YES' : 'NO'}`);
-  console.log(`Batch size: ${BATCH_SIZE}`);
-  console.log('='.repeat(60));
+  console.log('Target: applications/{applicationType}/uid/{uid}');
+  console.log('='.repeat(70));
   console.log('');
 
   const db = init();
-  const srcCol = db.collection('applications');
+  const records = await collectSourceRecords(db);
 
   const stats: MigrationStats = {
-    total: 0,
+    scanned: records.length,
     migrated: 0,
     skipped: 0,
     existed: 0,
@@ -164,88 +218,25 @@ async function migrate() {
     errors: 0,
   };
 
-  let lastId: string | null = null;
-  let done = false;
-
-  while (!done) {
-    let q = srcCol
-      .orderBy(admin.firestore.FieldPath.documentId())
-      .limit(BATCH_SIZE);
-
-    if (lastId) {
-      q = q.startAfter(lastId);
-    }
-
-    const snap = await q.get();
-
-    if (snap.empty) {
-      break;
-    }
-
-    console.log(`Processing batch of ${snap.size} documents...`);
-
-    for (const doc of snap.docs) {
-      stats.total++;
-      const data = doc.data() as AnyMap;
-      const userId = doc.id;
-
-      // Skip if document is missing essential fields
-      if (!data.firstname || !data.email || !data.ufid) {
-        stats.skipped++;
-        console.warn(`  [SKIP] ${userId} - missing essential fields`);
-        continue;
-      }
-
-      // Skip if document appears to be a new structure marker (no actual application data)
-      if (!data.date && !data.status) {
-        stats.skipped++;
-        console.warn(
-          `  [SKIP] ${userId} - appears to be metadata doc, not an application`
-        );
-        continue;
-      }
-
-      await migrateApplication(db, userId, data, stats);
-    }
-
-    lastId = snap.docs[snap.docs.length - 1].id;
-    if (snap.size < BATCH_SIZE) {
-      done = true;
-    }
-
-    console.log(''); // Empty line between batches
+  for (const record of records) {
+    await migrateRecord(db, record, stats);
   }
 
-  // Print summary
-  console.log('='.repeat(60));
+  console.log('');
+  console.log('='.repeat(70));
   console.log('Migration Summary');
-  console.log('='.repeat(60));
-  console.log(`Total documents processed: ${stats.total}`);
-  console.log(`Successfully migrated: ${stats.migrated}`);
+  console.log('='.repeat(70));
+  console.log(`Scanned: ${stats.scanned}`);
+  console.log(`Migrated: ${stats.migrated}`);
   console.log(`Already existed: ${stats.existed}`);
   console.log(`Skipped: ${stats.skipped}`);
   console.log(`Errors: ${stats.errors}`);
   if (DELETE_OLD) {
-    console.log(`Deleted old documents: ${stats.deleted}`);
+    console.log(`Deleted old docs: ${stats.deleted}`);
   }
-  console.log('='.repeat(60));
-
-  if (DRY) {
-    console.log('');
-    console.log('This was a DRY RUN - no changes were made.');
-    console.log('Run with --execute flag to perform actual migration.');
-  } else {
-    console.log('');
-    console.log('Migration complete!');
-    if (!DELETE_OLD) {
-      console.log(
-        'Old data has been preserved. Run with --delete-old to remove it.'
-      );
-    }
-  }
+  console.log('='.repeat(70));
 }
 
-// Run migration
 migrate().catch((error) => {
   console.error('Migration failed:', error);
   process.exit(1);

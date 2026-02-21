@@ -21,6 +21,7 @@ import handleSignIn from '@/firebase/auth/auth_signin_password';
 import styles from './style.module.css';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { toast } from 'react-hot-toast';
+import { callFunction } from '@/firebase/functions/callFunction';
 export const SignUpCard = ({
   className,
   setSignup,
@@ -49,31 +50,19 @@ export const SignUpCard = ({
   const handleNotificationEmail = async () => {
     if (role == 'unapproved') {
       try {
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+        await callFunction(
+          'sendEmail',
           {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              type: 'unapprovedUser',
-              data: {
-                user: {
-                  name: `${firstName ?? ''} ${lastName ?? ''}`.trim(),
-                  email: email,
-                },
+            type: 'unapprovedUser',
+            data: {
+              user: {
+                name: `${firstName ?? ''} ${lastName ?? ''}`.trim(),
+                email: email,
               },
-            }),
-          }
+            },
+          },
+          { requireAuth: false }
         );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Email sent successfully:', data);
-        } else {
-          throw new Error('Failed to send email');
-        }
       } catch (error) {
         console.error('Error sending email:', error);
       }
@@ -178,23 +167,26 @@ export const SignUpCard = ({
         // this goes to a cloud function which creates a document based on
         // the data from the form, identified by the user's firebase auth uid
 
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-          }
-        );
+        const userProfilePayload = {
+          firstname: userData.firstname,
+          lastname: userData.lastname,
+          email: userData.email,
+          department: userData.department,
+          role: userData.role,
+          ufid: userData.ufid,
+          uid: userData.uid,
+        };
 
-        if (response.ok) {
+        try {
+          await callFunction('processSignUpForm', userProfilePayload, {
+            requireAuth: false,
+          });
           setSuccess(true);
           console.log('SUCCESS: User data sent to server successfully');
           // then, sign in the user
           handleSignIn(userData.email, userData.password);
-        } else {
+        } catch (err) {
+          console.error(err);
           console.log('ERROR: User data failed to send to server');
           // display some kind of snackbar or toast saying data failed to send to server
         }

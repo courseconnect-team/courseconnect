@@ -1,19 +1,18 @@
-import * as React from 'react';
 import {
   collection,
   query,
   where,
   getDocs,
-  FieldPath,
+  getFirestore,
 } from 'firebase/firestore';
 import {
   useQuery,
-  useQueryClient,
   keepPreviousData,
   type UseQueryResult,
 } from '@tanstack/react-query';
-import firebase from '@/firebase/firebase_config';
 import { ApplicationData, AppRow } from '@/types/query';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
+
 export type ByStatus = Record<string, AppRow[]>;
 
 export const ALL_APP_STATUSES = [
@@ -28,7 +27,9 @@ const ASSIGNED = 'assigned';
 const appsKey = (courseKey: string, statuses: string[]) =>
   ['courseAppsByCourse', courseKey, ...[...statuses].sort()] as const;
 
-const db = firebase.firestore();
+const db = getFirestore();
+const repo = new ApplicationRepository(db);
+
 // ---------- Low-level fetchers ----------
 /** Applications: courses[courseKey] IN statuses */
 async function fetchApplicationsForCourse(
@@ -36,41 +37,15 @@ async function fetchApplicationsForCourse(
   statuses: string[]
 ): Promise<AppRow[]> {
   if (!statuses.length) return [];
-  const field = new FieldPath('courses', courseKey);
 
-  // Firestore 'in' supports up to 10 values; chunk if needed
-  const chunks: string[][] = [];
-  for (let i = 0; i < statuses.length; i += 10)
-    chunks.push(statuses.slice(i, i + 10));
+  const applications = await repo.getApplicationsForCourse(courseKey, statuses);
+  const appRows: AppRow[] = applications.map((app) => ({
+    id: app.id!,
+    status: app.courses?.[courseKey] || 'applied',
+    data: app,
+  }));
 
-  const batches = await Promise.all(
-    chunks.map(async (stk) => {
-      const q = query(collection(db, 'applications'), where(field, 'in', stk));
-      const snap = await getDocs(q);
-      const out: AppRow[] = [];
-      snap.forEach((doc) => {
-        const data = doc.data() as ApplicationData;
-        out.push({
-          id: doc.id,
-          status: doc.data()?.courses?.[courseKey],
-          data,
-        });
-      });
-      return out;
-    })
-  );
-
-  const seen = new Set<string>();
-  const merged: AppRow[] = [];
-  for (const arr of batches) {
-    for (const r of arr) {
-      if (!seen.has(r.id)) {
-        seen.add(r.id);
-        merged.push(r);
-      }
-    }
-  }
-  return merged;
+  return appRows;
 }
 
 async function fetchAssignedForCourse(courseKey: string): Promise<AppRow[]> {
@@ -95,8 +70,6 @@ export function useCourseApplications(
   { all: AppRow[]; byStatus: ByStatus; counts: Record<string, number> },
   Error
 > {
-  const qc = useQueryClient();
-
   // normalize the requested statuses
   const wantAssigned = statuses.includes(ASSIGNED);
   const appStatuses = statuses.filter((s) => s !== ASSIGNED);
@@ -141,16 +114,6 @@ export function useCourseApplications(
         by[s].sort((a, b) => a.id.localeCompare(b.id));
 
       return { all: rows, byStatus: by, counts };
-    },
-
-    // seed per-status caches so single-status reads are hot
-    onSuccess: (res) => {
-      for (const s of statuses) {
-        qc.setQueryData<AppRow[]>(
-          appsKey(courseKey, [s]),
-          res.byStatus[s] ?? []
-        );
-      }
     },
   });
 }
