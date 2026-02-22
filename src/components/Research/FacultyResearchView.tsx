@@ -28,6 +28,7 @@ interface FacultyResearchViewProps {
   uid: string;
   getResearchListings: () => void;
   postNewResearchPosition: (formData: any) => Promise<void>;
+  isAdmin?: boolean;
 }
 
 const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
@@ -36,6 +37,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   uid,
   getResearchListings,
   postNewResearchPosition,
+  isAdmin = false,
 }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -74,10 +76,10 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
     }
   };
 
-  // Get my positions by filtering
-  const myPositions = researchListings.filter((item) =>
-    item.faculty_members?.includes(uid)
-  );
+  // Admin sees all positions; faculty sees only their own
+  const myPositions = isAdmin
+    ? researchListings
+    : researchListings.filter((item) => item.faculty_members?.includes(uid));
 
   const displayedPositions = showAll ? myPositions : myPositions.slice(0, 6);
 

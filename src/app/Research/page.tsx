@@ -93,6 +93,16 @@ const ResearchPage: React.FC = () => {
             postNewResearchPosition={postNewResearchPosition}
           />
         )}
+        {role === 'admin' && (
+          <FacultyResearchView
+            researchListings={researchListings}
+            role={role}
+            uid={user.uid}
+            getResearchListings={getResearchListings}
+            postNewResearchPosition={postNewResearchPosition}
+            isAdmin
+          />
+        )}
       </PageLayout>
     </>
   );

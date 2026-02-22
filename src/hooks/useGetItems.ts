@@ -69,6 +69,7 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           to: '/faculty-stats',
           icon: BarChartOutlinedIcon,
         },
+        { label: 'Research', to: '/Research', icon: ScienceOutlinedIcon },
         {
           label: 'Announcements',
           to: '/announcements',
