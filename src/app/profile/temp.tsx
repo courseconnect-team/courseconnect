@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import './style.css';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
-import DeleteUserButton from './DeleteUserButton';
+import DeleteUserButton from '@/component/Dashboard/Profile/DeleteUserButton';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import { updateProfile } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
@@ -283,7 +283,7 @@ export default function Profile(props: ProfileProps) {
 
   return (
     <>
-      <HeaderCard text="Profile" />
+      <HeaderCard title="Profile">
 
       <div className="layout">
         <div className="left-section">
@@ -472,6 +472,7 @@ export default function Profile(props: ProfileProps) {
           </form>
         </div>
       </div>
+      </HeaderCard>
     </>
   );
 }
