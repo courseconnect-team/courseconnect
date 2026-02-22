@@ -305,9 +305,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     return (
       <GridToolbarContainer>
-        <GridToolbarExport style={{ color: '#562EBA' }} />
-        <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-        <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+        <GridToolbarExport />
+        <GridToolbarFilterButton />
+        <GridToolbarColumnsButton />
       </GridToolbarContainer>
     );
   }
@@ -1041,10 +1041,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         processRowUpdate={processRowUpdate}
         checkboxSelection
         slots={{
-          toolbar: EditToolbar,
+          toolbar: EditToolbar as any,
         }}
         slotProps={{
-          toolbar: { setApplicationData, setRowModesModel },
+          toolbar: { setApplicationData, setRowModesModel } as any,
         }}
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel} // Keep pagination state in sync

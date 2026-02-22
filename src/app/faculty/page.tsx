@@ -82,27 +82,12 @@ const FacultyStatistics: FC = () => {
   return (
     <>
       <Toaster />
-      <HeaderCard text="Faculty Statistics" />
-
-      {/* <FacultyDetails
-              firstname={facultyData.firstname}
-              lastname={facultyData.lastname}
-              email={facultyData.email}
-              ufid={facultyData.ufid}
-              accumulatedUnits={facultyData.accumulatedUnits}
-              assignedUnits={facultyData.assignedUnits}
-              averageUnits={facultyData.averageUnits}
-              creditDeficit={facultyData.creditDeficit}
-              creditExcess={facultyData.creditExcess}
-              classesTaught={facultyData.classesTaught}
-              researchActivity={facultyData.researchActivity}
-              labCourse={facultyData.labCourse}
-              id={''}
-            > */}
-      <FacultyDetails
-        instructor="Abdollahi Biron,Zoleikha"
-        research_level="Low"
-      />
+      <HeaderCard title="Faculty Statistics">
+        <FacultyDetails
+          instructor="Abdollahi Biron,Zoleikha"
+          research_level="Low"
+        />
+      </HeaderCard>
     </>
   );
 };

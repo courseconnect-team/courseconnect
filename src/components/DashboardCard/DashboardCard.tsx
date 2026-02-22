@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Skeleton from '@mui/material/Skeleton';
 import type { NavbarItem } from '@/types/navigation';
-import Dashboard from '@/oldPages/dashboard/page';
 
 type SkeletonProps = { width?: number | string; height?: number | string };
 

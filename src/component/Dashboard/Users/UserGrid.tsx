@@ -84,7 +84,7 @@ export default function UserGrid(props: UserGridProps) {
   const [userData, setUserData] = React.useState<User[]>([]);
   const [open, setOpen] = React.useState(false);
   const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState();
+  const [delId, setDelId] = React.useState<GridRowId>();
 
   React.useEffect(() => {
     if (e2e) {
@@ -173,10 +173,11 @@ export default function UserGrid(props: UserGridProps) {
       });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(delId.toString());
-    handleDeleteClick(delId);
+    if (delId != null) {
+      handleDeleteClick(delId);
+    }
     setDelDia(false);
   };
   function CustomToolbar() {

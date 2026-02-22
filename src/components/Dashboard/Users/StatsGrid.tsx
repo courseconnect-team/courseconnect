@@ -7,6 +7,7 @@ import ZoomIn from '@mui/icons-material/ZoomIn';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import {
   GridRowModesModel,
+  GridRowModes,
   GridToolbarContainer,
   GridToolbarExport,
   GridToolbarFilterButton,
@@ -50,9 +51,9 @@ function EditToolbar(props: EditToolbarProps) {
 
   return (
     <GridToolbarContainer>
-      <GridToolbarExport style={{ color: '#562EBA' }} />
-      <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-      <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
     </GridToolbarContainer>
   );
 }
@@ -131,7 +132,7 @@ export default function StatsGrid(props: UserGridProps) {
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = data?.find((row) => row.id === id);
     if (editedRow && editedRow.isNew) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate(id.toString());
     } else {
       setRowModesModel({
         ...rowModesModel,
@@ -143,7 +144,7 @@ export default function StatsGrid(props: UserGridProps) {
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...(newRow as User), isNew: false };
     try {
-      await updateMutation.mutateAsync(updatedRow);
+      await updateMutation.mutateAsync(updatedRow as any);
       return updatedRow;
     } catch (error) {
       console.error('Error updating row:', error);
@@ -378,12 +379,11 @@ export default function StatsGrid(props: UserGridProps) {
       <StripedDataGrid
         rows={data || []}
         columns={columns}
-        components={{
-          Toolbar: EditToolbar,
-          LoadingOverlay: LinearProgress,
+        slots={{
+          toolbar: EditToolbar as any,
         }}
-        componentsProps={{
-          toolbar: { setRowModesModel },
+        slotProps={{
+          toolbar: { setRowModesModel } as any,
         }}
         editMode="row"
         getRowId={(row) => row.instructor}

@@ -46,7 +46,7 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
 
   useEffect(() => {
     const normalized = normalizeResearchListing(listingData);
-    setFormData(normalized);
+    setFormData(normalized as any);
     if (normalized.image_url) {
       setImageFileName('Current image');
     }

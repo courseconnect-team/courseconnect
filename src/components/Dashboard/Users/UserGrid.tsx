@@ -383,10 +383,10 @@ export default function UserGrid(props: UserGridProps) {
             console.error('Error processing row update: ', error)
           }
           slots={{
-            toolbar: EditToolbar,
+            toolbar: EditToolbar as any,
           }}
           slotProps={{
-            toolbar: { setUserData, setRowModesModel },
+            toolbar: { setUserData, setRowModesModel } as any,
           }}
           initialState={{
             pagination: { paginationModel: { pageSize: 25 } },
