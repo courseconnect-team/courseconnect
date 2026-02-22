@@ -37,6 +37,9 @@ import {
   parseCoursesMinimal,
 } from '@/hooks/useSemesterOptions';
 import { CourseOption } from '@/hooks/useSemesterOptions';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
+import { getFirestore } from 'firebase/firestore';
+import { callFunction } from '@/firebase/functions/callFunction';
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -98,33 +101,17 @@ export default function Application() {
         });
         let resultString = courseNamesWithSemester.join(', ');
 
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+        await callFunction('sendEmail', {
+          type: 'applicationConfirmation',
+          data: {
+            user: {
+              name: user.displayName,
+              email: applicationData.email,
             },
-            body: JSON.stringify({
-              type: 'applicationConfirmation',
-              data: {
-                user: {
-                  name: user.displayName,
-                  email: applicationData.email,
-                },
-                position: applicationData.position,
-                classCode: resultString,
-              },
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Email sent successfully:', data);
-        } else {
-          throw new Error('Failed to send email');
-        }
+            position: applicationData.position,
+            classCode: resultString,
+          },
+        });
       } catch (error) {
         console.error('Error sending email:', error);
       }
@@ -161,13 +148,14 @@ export default function Application() {
     // get courses as array
     const coursesArray = selectedCourses;
 
-    let coursesMap: { [key: string]: string } = {};
+    let coursesMap: { [key: string]: 'applied' | 'approved' | 'denied' | 'accepted' } = {};
     for (let i = 0; i < coursesArray.length; i++) {
       coursesMap[coursesArray[i]] = 'applied';
     }
 
     // extract the specific user data from the form data into a parsable object
     const applicationData = {
+      application_type: 'course_assistant' as const,
       firstname: formData.get('firstName') as string,
       lastname: formData.get('lastName') as string,
       email: formData.get('email') as string,
@@ -263,37 +251,35 @@ export default function Application() {
         duration: 30000,
       });
       await firebase.firestore().collection('assignments').doc(userId).delete();
-      // console.log(applicationData); // FOR DEBUGGING ONLY!
 
-      // use fetch to send the application data to the server
-      // this goes to a cloud function which creates a document based on
-      // the data from the form, identified by the user's firebase auth uid
-      const response = await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(applicationData),
-        }
-      );
+      try {
+        // Save application directly to Firestore using repository
+        const db = getFirestore();
+        const repo = new ApplicationRepository(db);
+        const applicationId = await repo.saveApplication(
+          userId,
+          'course_assistant',
+          applicationData
+        );
 
-      if (response.ok) {
+        console.log('Application saved with ID:', applicationId);
+
+        // Send confirmation email
         await handleSendEmail();
+
         toast.dismiss(toastId);
         toast.success('Application submitted!');
-        console.log('SUCCESS: Application data sent to server successfully');
-        // now, update the role of the user to student_applied
-        await UpdateRole(userId, 'student_applied');
-        // then, refresh the page somehow to reflect the state changing
-        // so the form goes away and the user can see the status of their application
+        console.log('SUCCESS: Application data saved successfully');
 
+        // Update the role of the user to student_applied
+        await UpdateRole(userId, 'student_applied');
+
+        // Redirect to home
         router.push('/');
-      } else {
+      } catch (error) {
         toast.dismiss(toastId);
-        toast.error('Application data failed to send to server!');
-        console.log('ERROR: Application data failed to send to server');
+        toast.error('Application submission failed!');
+        console.error('ERROR: Failed to save application:', error);
       }
       setLoading(false);
     }

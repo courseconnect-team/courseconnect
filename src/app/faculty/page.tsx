@@ -10,11 +10,7 @@ import { FacultyStats } from '@/types/User';
 import { Toaster } from 'react-hot-toast';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { isE2EMode } from '@/utils/featureFlags';
-interface pageProps {
-  params: { name: string };
-}
-
-const FacultyStatistics: FC<pageProps> = ({ params }) => {
+const FacultyStatistics: FC = () => {
   const [user, role, loading, error] = useUserInfo();
   const searchParams = useSearchParams();
   const FacultyId = searchParams.get('name');

@@ -66,9 +66,9 @@ function EditToolbar(props: EditToolbarProps) {
   return (
     <GridToolbarContainer>
       {/* Include your Dialog component here and pass the open state and setOpen function as props */}
-      <GridToolbarExport style={{ color: '#562EBA' }} />
-      <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-      <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
     </GridToolbarContainer>
   );
 }
@@ -82,7 +82,7 @@ export default function UserGrid(props: UserGridProps) {
   const [userData, setUserData] = React.useState<User[]>([]);
   const [open, setOpen] = React.useState(false);
   const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState();
+  const [delId, setDelId] = React.useState<GridRowId>();
 
   React.useEffect(() => {
     const usersRef = firebase.firestore().collection('users');
@@ -157,9 +157,9 @@ export default function UserGrid(props: UserGridProps) {
       });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleDeleteClick(delId);
+    if (delId != null) handleDeleteClick(delId);
     setDelDia(false);
   };
   function CustomToolbar() {
@@ -458,11 +458,11 @@ export default function UserGrid(props: UserGridProps) {
         rows={userData}
         columns={columns}
         slots={{
-          toolbar: EditToolbar,
-          loadingOverlay: LinearProgress,
+          toolbar: EditToolbar as any,
+          loadingOverlay: LinearProgress as any,
         }}
         slotProps={{
-          toolbar: { setUserData, setRowModesModel },
+          toolbar: { setUserData, setRowModesModel } as any,
         }}
         editMode="row"
         rowModesModel={rowModesModel}

@@ -166,7 +166,7 @@ export function AnnouncementsProvider({
     return announcements.reduce(
       (acc, a) => {
         const tMs = a.scheduledAt ?? a.createdAt ?? new Date(Date.now());
-        const isUnread = timestamp === null ? true : tMs > timestamp;
+        const isUnread = timestamp == null || typeof timestamp !== 'object' ? true : tMs > (timestamp as unknown as Date);
 
         (isUnread ? acc.unread : acc.read).push(a);
         return acc;

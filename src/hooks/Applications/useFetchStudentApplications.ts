@@ -1,7 +1,8 @@
 // hooks/fetchers/fetchAssignments.ts
-import firebase from '@/firebase/firebase_config';
 import { isE2EMode } from '@/utils/featureFlags';
 import { useQuery } from '@tanstack/react-query';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
+import { getFirestore } from 'firebase/firestore';
 
 export type AssignmentsPayload = {
   assignments: string[];
@@ -12,33 +13,34 @@ export type AssignmentsPayload = {
   dateApplied: string;
 };
 
+const db = getFirestore();
+const repo = new ApplicationRepository(db);
+
 async function fetchAssignments(userId: string): Promise<AssignmentsPayload> {
-  const db = firebase.firestore();
+  const latestApp = await repo.getLatestApplication(userId, 'course_assistant');
 
-  const appSnap = await db.collection('applications').doc(userId).get();
+  if (latestApp) {
+    const adminDenied = latestApp.status === 'Admin_denied';
+    const adminApproved = latestApp.status === 'Admin_approved';
 
-  const adminDenied = appSnap.exists
-    ? appSnap.data()?.status === 'Admin_denied'
-    : false;
-  const adminApproved = appSnap.exists
-    ? appSnap.data()?.status === 'Admin_approved'
-    : false;
+    return {
+      assignments: [],
+      courses: latestApp.courses ?? null,
+      adminApproved,
+      adminDenied,
+      position: latestApp.position ?? 'not listed',
+      dateApplied: latestApp.date ?? 'not listed',
+    };
+  }
 
-  const positionFromApp = appSnap.exists ? appSnap.data()?.position : undefined;
-  const dateFromApp = appSnap.exists ? appSnap.data()?.date : undefined;
-  const courses = appSnap.exists ? appSnap.data()?.courses ?? null : null;
-
-  const assignments: string[] = [];
-  const position = positionFromApp ?? 'not listed';
-  const dateApplied = dateFromApp ?? 'not listed';
-
+  // No application found
   return {
-    assignments,
-    courses,
-    adminApproved,
-    adminDenied,
-    position,
-    dateApplied,
+    assignments: [],
+    courses: null,
+    adminApproved: false,
+    adminDenied: false,
+    position: 'not listed',
+    dateApplied: 'not listed',
   };
 }
 

@@ -17,6 +17,7 @@ import RoleSelect from '../FormUtil/RoleSelect';
 import LinearProgress from '@mui/material/LinearProgress';
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
+import { callFunction } from '@/firebase/functions/callFunction';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
@@ -128,23 +129,26 @@ export default function SignUpForm() {
         // this goes to a cloud function which creates a document based on
         // the data from the form, identified by the user's firebase auth uid
 
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-          }
-        );
+        const userProfilePayload = {
+          firstname: userData.firstname,
+          lastname: userData.lastname,
+          email: userData.email,
+          department: userData.department,
+          role: userData.role,
+          ufid: userData.ufid,
+          uid: userData.uid,
+        };
 
-        if (response.ok) {
+        try {
+          await callFunction('processSignUpForm', userProfilePayload, {
+            requireAuth: false,
+          });
           setSuccess(true);
           console.log('SUCCESS: User data sent to server successfully');
           // then, sign in the user
           handleSignIn(userData.email, userData.password);
-        } else {
+        } catch (err) {
+          console.error(err);
           console.log('ERROR: User data failed to send to server');
           // display some kind of snackbar or toast saying data failed to send to server
         }

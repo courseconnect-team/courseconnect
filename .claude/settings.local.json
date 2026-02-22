@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(firebase login:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(npm run cleanup:nested-apps:*)",
+      "Bash($env:GOOGLE_APPLICATION_CREDENTIALS=\"c:/Users/Oling/Documents/courseconnect/serviceAccountKey.json\")",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}

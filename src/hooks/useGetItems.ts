@@ -98,6 +98,12 @@ export const getApplications = (userRole: Role): NavbarItem[] => {
           icon: FolderOutlinedIcon,
           type: 'ta',
         },
+        {
+          label: 'Supervised Teaching',
+          to: '/applications/supervisedTeaching',
+          icon: FolderOutlinedIcon,
+          type: 'supervised-teaching',
+        },
       ];
 
     /* ────────────────────────────────── Faculty ────────────────────────────────── */

@@ -67,9 +67,9 @@ function EditToolbar(props: EditToolbarProps) {
   return (
     <GridToolbarContainer>
       {/* Include your Dialog component here and pass the open state and setOpen function as props */}
-      <GridToolbarExport style={{ color: '#562EBA' }} />
-      <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-      <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
     </GridToolbarContainer>
   );
 }
@@ -371,19 +371,50 @@ export default function UserGrid(props: UserGridProps) {
       },
     },
   }));
+  const [loading] = React.useState(false);
+
   return (
-    <Box
-      sx={{
-        height: 600,
-        width: '100%',
-        '& .actions': {
-          color: 'text.secondary',
-        },
-        '& .textPrimary': {
-          color: 'text.primary',
-        },
-      }}
-    >
+    <>
+      <Box
+        sx={{
+          marginLeft: 10,
+          height: 600,
+          width: '90%',
+          backgroundColor: '#FDFBFF',
+          borderRadius: '16px',
+          boxShadow: '0 2px 8px rgba(128, 90, 213, 0.1)',
+          '& .actions': { color: 'text.secondary' },
+          '& .textPrimary': { color: 'text.primary' },
+        }}
+      >
+        {loading ? <LinearProgress color="warning" /> : null}
+
+        <StripedDataGrid
+          rows={userData}
+          columns={columns}
+          editMode="row"
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={(m) => setRowModesModel(m)}
+          onRowEditStop={handleRowEditStop}
+          processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={(error) =>
+            console.error('Error processing row update: ', error)
+          }
+          slots={{
+            toolbar: EditToolbar as any,
+          }}
+          slotProps={{
+            toolbar: { setUserData, setRowModesModel } as any,
+          }}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 25 } },
+          }}
+          getRowClassName={(params) =>
+            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+          }
+        />
+      </Box>
+
       <Dialog
         style={{
           borderImage:
@@ -470,29 +501,6 @@ export default function UserGrid(props: UserGridProps) {
           </DialogActions>
         </form>
       </Dialog>
-      <StripedDataGrid
-        rows={userData}
-        columns={columns}
-        slots={{
-          toolbar: EditToolbar,
-          loadingOverlay: LinearProgress,
-        }}
-        slotProps={{
-          toolbar: { setUserData, setRowModesModel },
-        }}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        processRowUpdate={processRowUpdate}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 25 } },
-        }}
-        getRowClassName={(params) =>
-          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-        }
-        sx={{ borderRadius: '16px' }}
-      />
-    </Box>
+    </>
   );
 }

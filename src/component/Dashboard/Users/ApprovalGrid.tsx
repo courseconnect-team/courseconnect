@@ -62,9 +62,9 @@ function EditToolbar(props: EditToolbarProps) {
 
   return (
     <GridToolbarContainer>
-      <GridToolbarExport style={{ color: '#562EBA' }} />
-      <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-      <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+      <GridToolbarExport />
+      <GridToolbarFilterButton />
+      <GridToolbarColumnsButton />
     </GridToolbarContainer>
   );
 }
@@ -418,18 +418,16 @@ export default function ApprovalGrid(props: ApprovalGridProps) {
       <StripedDataGrid
         rows={userData}
         columns={columns}
-        slots={{
-          toolbar: EditToolbar,
-          loadingOverlay: LinearProgress,
-        }}
-        slotProps={{
-          toolbar: { setUserData, setRowModesModel },
-        }}
         editMode="row"
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
+        onProcessRowUpdateError={(error) =>
+          console.error('Error processing row update: ', error)
+        }
+        slots={{ toolbar: EditToolbar as any }}
+        slotProps={{ toolbar: { setApplicationData: setUserData, setRowModesModel } as any }}
         initialState={{
           pagination: { paginationModel: { pageSize: 25 } },
         }}

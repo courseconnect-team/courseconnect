@@ -14,6 +14,7 @@ export interface FacultyStats {
   id: string; // Firestore document ID
   instructor: string;
   research_level: string;
+  isNew?: boolean;
 }
 export interface CourseType {
   id: string;

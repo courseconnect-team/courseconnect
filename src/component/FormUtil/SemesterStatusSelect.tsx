@@ -41,7 +41,7 @@ export default function SemesterStatusSelect(props: SemesterStatusSelectProps) {
           label="Graduate"
         />
       </RadioGroup>
-      <props.component semester={value} onValueChange={props.onValueChange} />
+      {React.createElement(props.component, { semester: value, onValueChange: props.onValueChange })}
     </FormControl>
   );
 }

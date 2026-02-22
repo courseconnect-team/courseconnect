@@ -1,14 +1,6 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { DocumentSnapshot } from 'firebase-functions/v2/firestore';
-// import * as cors from 'cors';
+import type { Request, Response } from 'express';
 import {
   sendForgotPasswordEmail,
   sendApplicationConfirmationEmail,
@@ -22,304 +14,576 @@ import {
   sendStatusUpdateToApplicant,
 } from './nodemailer';
 
-const admin = require('firebase-admin');
-admin.initializeApp();
-export const db = admin.firestore();
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+
+const db = admin.firestore();
 const auth = admin.auth();
 db.settings({ ignoreUndefinedProperties: true });
 
-exports.sendEmail = functions.https.onRequest((req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET, POST');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
+const ALLOWED_ORIGINS = new Set(
+  [
+    'https://courseconnect.eng.ufl.edu',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    ...(process.env.ALLOWED_ORIGINS ?? '')
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean),
+  ].filter(Boolean)
+);
+
+const STAFF_ROLES = new Set(['admin', 'faculty']);
+
+type EmailType =
+  | 'sendApplicantToFaculty'
+  | 'sendStatusUpdateToApplicant'
+  | 'forgotPassword'
+  | 'applicationConfirmation'
+  | 'applicationStatusApproved'
+  | 'applicationStatusDenied'
+  | 'facultyNotification'
+  | 'facultyAssignment'
+  | 'unapprovedUser'
+  | 'renewTA';
+
+type ApplicationType = 'course_assistant' | 'supervised_teaching';
+
+function setCors(req: Request, res: Response): void {
+  const origin = req.get('origin');
+  res.set('Vary', 'Origin');
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.set('Access-Control-Allow-Origin', origin);
+  }
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
+function handleMethod(req: Request, res: Response): boolean {
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
-  } else {
-    const { type, data } = req.body;
-    switch (type) {
-      case 'sendApplicantToFaculty':
-        sendApplicantToFaculty(data.project_title);
-        break;
-      case 'sendStatusUpdateToApplicant':
-        sendStatusUpdateToApplicant(data.project_title, data.status);
-        break;
-      case 'forgotPassword':
-        sendForgotPasswordEmail(data.user, data.resetLink);
-        break;
-      case 'applicationConfirmation':
-        sendApplicationConfirmationEmail(
-          data.user,
-          data.position,
-          data.classCode
-        );
-        break;
-      case 'applicationStatusApproved':
-        sendApplicationStatusApprovedEmail(
-          data.user,
-          data.position,
-          data.classCode
-        );
+    return false;
+  }
+  if (req.method !== 'POST') {
+    res.status(405).json({ message: 'Method not allowed' });
+    return false;
+  }
+  return true;
+}
 
-        break;
-      case 'applicationStatusDenied':
-        sendApplicationStatusDeniedEmail(
-          data.user,
-          data.position,
-          data.classCode
+function getBearerToken(req: Request): string | null {
+  const authHeader = req.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  return authHeader.substring('Bearer '.length).trim();
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object'
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function readString(
+  source: Record<string, unknown>,
+  key: string
+): string | undefined {
+  const value = source[key];
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : undefined;
+}
+
+function readEmailType(value: unknown): EmailType | null {
+  if (typeof value !== 'string') return null;
+  const allowed: EmailType[] = [
+    'sendApplicantToFaculty',
+    'sendStatusUpdateToApplicant',
+    'forgotPassword',
+    'applicationConfirmation',
+    'applicationStatusApproved',
+    'applicationStatusDenied',
+    'facultyNotification',
+    'facultyAssignment',
+    'unapprovedUser',
+    'renewTA',
+  ];
+  return allowed.includes(value as EmailType) ? (value as EmailType) : null;
+}
+
+function readApplicationType(value: unknown): ApplicationType | null {
+  if (value === 'course_assistant' || value === 'supervised_teaching') {
+    return value;
+  }
+  return null;
+}
+
+async function verifyAuth(
+  req: Request,
+  res: Response
+): Promise<admin.auth.DecodedIdToken | null> {
+  const token = getBearerToken(req);
+  if (!token) {
+    res.status(401).json({ message: 'Missing bearer token' });
+    return null;
+  }
+
+  try {
+    return await auth.verifyIdToken(token);
+  } catch (error) {
+    console.error('Token verification failed:', error);
+    res.status(401).json({ message: 'Invalid auth token' });
+    return null;
+  }
+}
+
+async function getRole(uid: string): Promise<string> {
+  const snap = await db.collection('users').doc(uid).get();
+  const data = snap.data() as Record<string, unknown> | undefined;
+  return typeof data?.role === 'string' ? data.role : '';
+}
+
+async function ensureStaffRole(
+  uid: string,
+  res: Response
+): Promise<boolean> {
+  const role = await getRole(uid);
+  if (!STAFF_ROLES.has(role)) {
+    res.status(403).json({ message: 'Forbidden' });
+    return false;
+  }
+  return true;
+}
+
+function fail(res: Response, message: string, code = 400): void {
+  res.status(code).json({ message });
+}
+
+export const sendEmail = functions.https.onRequest(async (req, res) => {
+  setCors(req, res);
+  if (!handleMethod(req, res)) return;
+
+  try {
+    const body = asRecord(req.body);
+    const type = readEmailType(body.type);
+    const data = asRecord(body.data);
+
+    if (!type) {
+      fail(res, 'Invalid email type');
+      return;
+    }
+
+    const isPublicType = type === 'forgotPassword' || type === 'unapprovedUser';
+    let caller: admin.auth.DecodedIdToken | null = null;
+
+    if (!isPublicType) {
+      caller = await verifyAuth(req, res);
+      if (!caller) return;
+    }
+
+    const staffOnlyTypes = new Set<EmailType>([
+      'sendApplicantToFaculty',
+      'sendStatusUpdateToApplicant',
+      'applicationStatusApproved',
+      'applicationStatusDenied',
+      'facultyNotification',
+      'facultyAssignment',
+      'renewTA',
+    ]);
+
+    if (caller && staffOnlyTypes.has(type)) {
+      const ok = await ensureStaffRole(caller.uid, res);
+      if (!ok) return;
+    }
+
+    switch (type) {
+      case 'sendApplicantToFaculty': {
+        const user = asRecord(data.user);
+        const userEmail = readString(user, 'email');
+        const projectTitle = readString(data, 'project_title');
+        if (!userEmail || !projectTitle) {
+          fail(res, 'Missing required fields for sendApplicantToFaculty');
+          return;
+        }
+        await sendApplicantToFaculty(
+          { email: userEmail, name: readString(user, 'name') },
+          projectTitle
         );
         break;
-      case 'facultyNotification':
-        sendFacultyNotificationEmail(data.user, data.position, data.classCode);
-        break;
-      case 'facultyAssignment':
-        sendFacultyAssignedNotificationEmail(
-          data.userEmail,
-          data.position,
-          data.classCode,
-          data.semester
+      }
+      case 'sendStatusUpdateToApplicant': {
+        const user = asRecord(data.user);
+        const userEmail = readString(user, 'email');
+        const projectTitle = readString(data, 'project_title');
+        const status = readString(data, 'status');
+        if (!userEmail || !projectTitle || !status) {
+          fail(res, 'Missing required fields for sendStatusUpdateToApplicant');
+          return;
+        }
+        await sendStatusUpdateToApplicant(
+          { email: userEmail, name: readString(user, 'name') },
+          projectTitle,
+          status
         );
         break;
-      case 'unapprovedUser':
-        sendUnapprovedUserNotificationEmail(data.user);
+      }
+      case 'forgotPassword': {
+        const user = asRecord(data.user);
+        const userEmail = readString(user, 'email');
+        const resetLink = readString(data, 'resetLink');
+        if (!userEmail || !resetLink) {
+          fail(res, 'Missing required fields for forgotPassword');
+          return;
+        }
+        await sendForgotPasswordEmail(
+          { email: userEmail, name: readString(user, 'name') },
+          resetLink
+        );
         break;
-      case 'renewTA':
-        sendRenewTAEmail(data.userEmail, data.message, data.subject);
+      }
+      case 'applicationConfirmation': {
+        const user = asRecord(data.user);
+        const userEmail = readString(user, 'email');
+        const position = readString(data, 'position');
+        const classCode = readString(data, 'classCode');
+        if (!userEmail || !position || !classCode) {
+          fail(res, 'Missing required fields for applicationConfirmation');
+          return;
+        }
+        await sendApplicationConfirmationEmail(
+          { email: userEmail, name: readString(user, 'name') },
+          position,
+          classCode
+        );
         break;
+      }
+      case 'applicationStatusApproved': {
+        const user = asRecord(data.user);
+        const userEmail = readString(user, 'email');
+        const position = readString(data, 'position');
+        const classCode = readString(data, 'classCode');
+        if (!userEmail || !position || !classCode) {
+          fail(res, 'Missing required fields for applicationStatusApproved');
+          return;
+        }
+        await sendApplicationStatusApprovedEmail(
+          { email: userEmail, name: readString(user, 'name') },
+          position,
+          classCode
+        );
+        break;
+      }
+      case 'applicationStatusDenied': {
+        const user = asRecord(data.user);
+        const userEmail = readString(user, 'email');
+        const position = readString(data, 'position');
+        const classCode = readString(data, 'classCode');
+        if (!userEmail || !position || !classCode) {
+          fail(res, 'Missing required fields for applicationStatusDenied');
+          return;
+        }
+        await sendApplicationStatusDeniedEmail(
+          { email: userEmail, name: readString(user, 'name') },
+          position,
+          classCode
+        );
+        break;
+      }
+      case 'facultyNotification': {
+        const user = asRecord(data.user);
+        const userEmail = readString(user, 'email');
+        const position = readString(data, 'position');
+        const classCode = readString(data, 'classCode');
+        if (!userEmail || !position || !classCode) {
+          fail(res, 'Missing required fields for facultyNotification');
+          return;
+        }
+        await sendFacultyNotificationEmail(
+          { email: userEmail, name: readString(user, 'name') },
+          position,
+          classCode
+        );
+        break;
+      }
+      case 'facultyAssignment': {
+        const userEmail = readString(data, 'userEmail');
+        const position = readString(data, 'position');
+        const classCode = readString(data, 'classCode');
+        const semester = readString(data, 'semester');
+        if (!userEmail || !position || !classCode || !semester) {
+          fail(res, 'Missing required fields for facultyAssignment');
+          return;
+        }
+        await sendFacultyAssignedNotificationEmail(
+          userEmail,
+          position,
+          classCode,
+          semester
+        );
+        break;
+      }
+      case 'unapprovedUser': {
+        const user = asRecord(data.user);
+        const userEmail = readString(user, 'email');
+        if (!userEmail) {
+          fail(res, 'Missing required fields for unapprovedUser');
+          return;
+        }
+        await sendUnapprovedUserNotificationEmail({
+          email: userEmail,
+          name: readString(user, 'name'),
+        });
+        break;
+      }
+      case 'renewTA': {
+        const userEmail = readString(data, 'userEmail');
+        const message = readString(data, 'message');
+        const subject = readString(data, 'subject');
+        if (!userEmail || !message || !subject) {
+          fail(res, 'Missing required fields for renewTA');
+          return;
+        }
+        await sendRenewTAEmail(userEmail, message, subject);
+        break;
+      }
       default:
-        res.status(400).json({ message: 'Invalid email type' });
+        fail(res, 'Invalid email type');
         return;
     }
 
     res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('sendEmail failed:', error);
+    fail(res, 'Failed to send email', 500);
   }
 });
 
-// const corsHandler = cors({ origin: true });
-
 export const processSignUpForm = functions.https.onRequest(
-  (request, response) => {
-    response.set('Access-Control-Allow-Origin', '*');
-    response.set('Access-Control-Allow-Methods', 'GET, POST');
-    response.set('Access-Control-Allow-Headers', 'Content-Type');
+  async (request, response) => {
+    setCors(request, response);
+    if (!handleMethod(request, response)) return;
 
-    if (request.method === 'OPTIONS') {
-      // Handle preflight request
-      response.status(204).send('');
-    } else {
-      // Handle other requests
+    try {
+      const body = asRecord(request.body);
+      const firstname = readString(body, 'firstname');
+      const lastname = readString(body, 'lastname');
+      const email = readString(body, 'email');
+      const department = readString(body, 'department');
+      const role = readString(body, 'role');
+      const ufid = readString(body, 'ufid');
+      const uid = readString(body, 'uid');
 
-      // Extract user object data from post request
-      const userObject = {
-        firstname: request.body.firstname,
-        lastname: request.body.lastname,
-        email: request.body.email,
-        password: request.body.password,
-        department: request.body.department,
-        role: request.body.role,
-        ufid: request.body.ufid,
-        uid: request.body.uid,
-      };
+      if (
+        !firstname ||
+        !lastname ||
+        !email ||
+        !department ||
+        !role ||
+        !ufid ||
+        !uid
+      ) {
+        fail(response, 'Missing required signup fields');
+        return;
+      }
 
-      // Create the document within the "users" collection
-      db.collection('users')
-        .doc(userObject.uid)
-        .set(userObject)
-        .then(() => {
-          response.status(200).send('User created successfully');
-        })
-        .catch((error: any) => {
-          response.status(500).send('Error creating user: ' + error.message);
-        });
+      await auth.getUser(uid);
+
+      const userRef = db.collection('users').doc(uid);
+      await db.runTransaction(async (tx) => {
+        const existing = await tx.get(userRef);
+        const payload: Record<string, unknown> = {
+          firstname,
+          lastname,
+          email,
+          department,
+          role,
+          ufid,
+          uid,
+          updated_at: admin.firestore.FieldValue.serverTimestamp(),
+        };
+
+        if (!existing.exists) {
+          payload.created_at = admin.firestore.FieldValue.serverTimestamp();
+        }
+
+        tx.set(userRef, payload, { merge: true });
+      });
+
+      response.status(200).send('User created successfully');
+    } catch (error) {
+      console.error('processSignUpForm failed:', error);
+      fail(response, 'Error creating user', 500);
     }
   }
 );
 
 export const processApplicationForm = functions.https.onRequest(
-  (request, response) => {
-    response.set('Access-Control-Allow-Origin', '*');
-    response.set('Access-Control-Allow-Methods', 'GET, POST');
-    response.set('Access-Control-Allow-Headers', 'Content-Type');
+  async (request, response) => {
+    setCors(request, response);
+    if (!handleMethod(request, response)) return;
 
-    if (request.method === 'OPTIONS') {
-      // Handle preflight request
-      response.status(204).send('');
-    } else {
-      // Handle other requests
+    const caller = await verifyAuth(request, response);
+    if (!caller) return;
 
-      // Extract user object data from post request
-      const applicationObject = {
-        firstname: request.body.firstname,
-        lastname: request.body.lastname,
-        email: request.body.email,
-        ufid: request.body.ufid,
-        phonenumber: request.body.phonenumber,
-        gpa: request.body.gpa,
-        department: request.body.department,
-        degree: request.body.degree,
-        semesterstatus: request.body.semesterstatus,
-        additionalprompt: request.body.additionalprompt,
-        nationality: request.body.nationality,
-        englishproficiency: 'NA',
-        position: request.body.position,
-        available_hours: request.body.available_hours,
-        available_semesters: request.body.available_semesters,
-        courses: request.body.courses,
-        qualifications: request.body.qualifications,
-        uid: request.body.uid,
-        date: request.body.date,
-        status: request.body.status,
-        resume_link: request.body.resume_link,
-        classnumbers: 'NA',
-      };
+    try {
+      const body = asRecord(request.body);
+      const type = readApplicationType(body.application_type);
+      const uidFromBody = readString(body, 'uid');
+      const uid = uidFromBody || caller.uid;
 
-      // Create the document within the "applications" collection
-      db.collection('applications')
-        .doc(applicationObject.uid)
-        .set(applicationObject)
-        .then(() => {
-          response.status(200).send('Application created successfully');
-        })
-        .catch((error: any) => {
-          response.send('Error creating application: ' + error.message);
-        });
+      if (!type) {
+        fail(response, 'Invalid application type');
+        return;
+      }
+
+      if (uid !== caller.uid) {
+        const ok = await ensureStaffRole(caller.uid, response);
+        if (!ok) return;
+      }
+
+      const applicationRef = db
+        .collection('applications')
+        .doc(type)
+        .collection('uid')
+        .doc(uid);
+
+      await db.runTransaction(async (tx) => {
+        const existing = await tx.get(applicationRef);
+        const payload: Record<string, unknown> = {
+          ...body,
+          application_type: type,
+          uid,
+          updated_at: admin.firestore.FieldValue.serverTimestamp(),
+        };
+
+        delete payload.created_at;
+        delete payload.updated_at;
+
+        if (!existing.exists) {
+          payload.created_at = admin.firestore.FieldValue.serverTimestamp();
+        }
+
+        tx.set(applicationRef, payload, { merge: true });
+      });
+
+      response.status(200).send('Application created successfully');
+    } catch (error) {
+      console.error('processApplicationForm failed:', error);
+      fail(response, 'Error creating application', 500);
     }
   }
 );
 
 export const processCreateCourseForm = functions.https.onRequest(
-  (request, response) => {
-    response.set('Access-Control-Allow-Origin', '*');
-    response.set('Access-Control-Allow-Methods', 'GET, POST');
-    response.set('Access-Control-Allow-Headers', 'Content-Type');
+  async (request, response) => {
+    setCors(request, response);
+    if (!handleMethod(request, response)) return;
 
-    if (request.method === 'OPTIONS') {
-      // Handle preflight request
-      response.status(204).send('');
-    } else {
-      // Handle other requests
+    const caller = await verifyAuth(request, response);
+    if (!caller) return;
 
-      // Extract user object data from post request
+    const staffOk = await ensureStaffRole(caller.uid, response);
+    if (!staffOk) return;
+
+    try {
+      const body = asRecord(request.body);
+      const id = readString(body, 'id');
+      const code = readString(body, 'code');
+      const title = readString(body, 'title');
+
+      if (!id || !code || !title) {
+        fail(response, 'Missing required course fields');
+        return;
+      }
+
       const courseObject = {
-        code: request.body.code,
-        title: request.body.title,
-        id: request.body.id,
-        professor_names: request.body.professor_names,
-        professor_emails: request.body.professor_emails,
-        helper_names: request.body.helper_names,
-        helper_emails: request.body.helper_emails,
-        credits: request.body.credits,
-        enrollment_cap: request.body.enrollment_cap,
-        num_enrolled: request.body.num_enrolled,
+        code,
+        title,
+        id,
+        professor_names: body.professor_names ?? [],
+        professor_emails: body.professor_emails ?? [],
+        helper_names: body.helper_names ?? [],
+        helper_emails: body.helper_emails ?? [],
+        credits: body.credits ?? '',
+        enrollment_cap: body.enrollment_cap ?? '',
+        num_enrolled: body.num_enrolled ?? '',
+        updated_at: admin.firestore.FieldValue.serverTimestamp(),
       };
 
-      // Create the document within the "courses" collection
-      db.collection('courses')
-        .doc(courseObject.id)
-        .set(courseObject)
-        .then(() => {
-          response.status(200).send('Course created successfully');
-        })
-        .catch((error: any) => {
-          response.status(500).send('Error creating course: ' + error.message);
-        });
+      await db.collection('courses').doc(id).set(courseObject, { merge: true });
+      response.status(200).send('Course created successfully');
+    } catch (error) {
+      console.error('processCreateCourseForm failed:', error);
+      fail(response, 'Error creating course', 500);
     }
   }
 );
 
 export const deleteUserFromID = functions.https.onRequest(
-  (request, response) => {
-    response.set('Access-Control-Allow-Origin', '*');
-    response.set('Access-Control-Allow-Methods', 'GET, POST');
-    response.set('Access-Control-Allow-Headers', 'Content-Type');
+  async (request, response) => {
+    setCors(request, response);
+    if (!handleMethod(request, response)) return;
 
-    if (request.method === 'OPTIONS') {
-      // Handle preflight request
-      response.status(204).send('');
-    } else {
-      // Extract user object data from post request
-      const userObject = {
-        auth_id: request.body.auth_id,
-      };
+    const caller = await verifyAuth(request, response);
+    if (!caller) return;
 
-      // If there is any data associated with the user in the database, delete it
-      // This must be done for the users, applications, and assignments collections
-      const userDocRef = db.collection('users').doc(userObject.auth_id);
-      const applicationDocRef = db
-        .collection('applications')
-        .doc(userObject.auth_id);
-      const assignmentDocRef = db
-        .collection('assignments')
-        .doc(userObject.auth_id);
+    try {
+      const body = asRecord(request.body);
+      const targetUid = readString(body, 'auth_id');
 
-      userDocRef
-        .get()
-        .then((doc: DocumentSnapshot) => {
-          if (doc.exists) {
-            userDocRef
-              .delete()
-              .then(() => {
-                console.log('Document successfully deleted.');
-              })
-              .catch((error: any) => {
-                console.error('Error deleting document: ', error);
-              });
-          } else {
-            console.log('Document does not exist.');
-          }
-        })
-        .catch((error: any) => {
-          console.error('Error getting document: ', error);
-        });
+      if (!targetUid) {
+        fail(response, 'Missing auth_id');
+        return;
+      }
 
-      applicationDocRef
-        .get()
-        .then((doc: DocumentSnapshot) => {
-          if (doc.exists) {
-            applicationDocRef
-              .delete()
-              .then(() => {
-                console.log('Document successfully deleted.');
-              })
-              .catch((error: any) => {
-                console.error('Error deleting document: ', error);
-              });
-          } else {
-            console.log('Document does not exist.');
-          }
-        })
-        .catch((error: any) => {
-          console.error('Error getting document: ', error);
-        });
+      if (targetUid !== caller.uid) {
+        const roleOk = await ensureStaffRole(caller.uid, response);
+        if (!roleOk) return;
+      }
 
-      assignmentDocRef
-        .get()
-        .then((doc: DocumentSnapshot) => {
-          if (doc.exists) {
-            assignmentDocRef
-              .delete()
-              .then(() => {
-                console.log('Document successfully deleted.');
-              })
-              .catch((error: any) => {
-                console.error('Error deleting document: ', error);
-              });
-          } else {
-            console.log('Document does not exist.');
-          }
-        })
-        .catch((error: any) => {
-          console.error('Error getting document: ', error);
-        });
+      const deletes: Array<Promise<unknown>> = [
+        db.collection('users').doc(targetUid).delete(),
+        db.collection('assignments').doc(targetUid).delete(),
+        db.collection('applications').doc(targetUid).delete(), // legacy doc path
+        db
+          .collection('applications')
+          .doc('course_assistant')
+          .collection('uid')
+          .doc(targetUid)
+          .delete(),
+        db
+          .collection('applications')
+          .doc('supervised_teaching')
+          .collection('uid')
+          .doc(targetUid)
+          .delete(),
+      ];
 
-      // Delete the user from firebase auth
-      auth
-        .deleteUser(userObject.auth_id)
-        .then(() => {
-          response.status(200).send('User deleted successfully');
-        })
-        .catch((error: any) => {
-          response.status(500).send('Error deleting user: ' + error.message);
-        });
+      const deleteResults = await Promise.allSettled(deletes);
+      const failedDeletes = deleteResults.filter((r) => r.status === 'rejected');
+      if (failedDeletes.length > 0) {
+        console.error('Failed document deletes:', failedDeletes);
+        fail(response, 'Failed to delete all user documents', 500);
+        return;
+      }
+
+      try {
+        await auth.deleteUser(targetUid);
+      } catch (error) {
+        const err = error as { code?: string };
+        if (err.code !== 'auth/user-not-found') {
+          throw error;
+        }
+      }
+
+      response.status(200).send('User deleted successfully');
+    } catch (error) {
+      console.error('deleteUserFromID failed:', error);
+      fail(response, 'Error deleting user', 500);
     }
   }
 );

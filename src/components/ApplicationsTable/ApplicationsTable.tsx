@@ -109,11 +109,11 @@ function mapToUI(
   const d = r.data ?? {};
   const first = d.firstname ?? '';
   const last = d.lastname ?? '';
-  const applicantName = d.name ?? `${first} ${last}`.trim();
+  const applicantName = `${first} ${last}`.trim();
   const submitted = d.date ?? 'MM/DD/YYYY';
   const uf_email = d.email;
   const employmentAction = d.employmentAction ?? 'NEW HIRE';
-  const position = d.position;
+  const position = d.position ?? '';
   // appStatus mapping for UI
   let appStatus: UIRow['appStatus'];
   switch (r.status) {

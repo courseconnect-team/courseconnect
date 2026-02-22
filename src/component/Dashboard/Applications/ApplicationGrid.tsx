@@ -35,7 +35,11 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
+import { query, where, collection, getDocs, getDoc, getFirestore } from 'firebase/firestore';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
+import { callFunction } from '@/firebase/functions/callFunction';
+
+const repo = new ApplicationRepository(getFirestore());
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserName from '@/firebase/util/GetUserName';
 import { alpha, styled } from '@mui/material/styles';
@@ -114,36 +118,29 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const [openDenyDialog, setOpenDenyDialog] = React.useState(false);
 
   const handleOpenAssignmentDialog = async (id: GridRowId) => {
-    const statusRef = firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString());
-
-    const doc = await getDoc(statusRef);
-    setCodes(
-      Object.entries(doc.data().courses)
-        .filter(([key, value]) => value == 'approved')
-        .map(([key, value]) => key)
-    );
+    // id is the auto-generated document ID in the course_assistant collection
+    const app = await repo.getApplicationById('course_assistant', id.toString());
+    if (app?.courses) {
+      setCodes(
+        Object.entries(app.courses)
+          .filter(([key, value]) => value == 'approved')
+          .map(([key, value]) => key)
+      );
+    }
     setSelectedUserGrid(id);
-
     setOpenAssignmentDialog(true);
   };
 
   const handleDenyAssignmentDialog = async (id: GridRowId) => {
-    const statusRef = firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString());
-
-    const doc = await getDoc(statusRef);
-
-    setCodes(
-      Object.entries(doc.data().courses)
-        .filter(([key, value]) => value == 'denied') // Change 'accepted' to 'denied'
-        .map(([key, value]) => key)
-    );
-
+    // id is the auto-generated document ID in the course_assistant collection
+    const app = await repo.getApplicationById('course_assistant', id.toString());
+    if (app?.courses) {
+      setCodes(
+        Object.entries(app.courses)
+          .filter(([key, value]) => value == 'denied')
+          .map(([key, value]) => key)
+      );
+    }
     setSelectedUserGrid(id);
     setOpenDenyDialog(true);
   };
@@ -162,12 +159,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setLoading(true);
 
     try {
-      const student_uid = selectedUserGrid as string;
-      const statusRef = firebase
-        .firestore()
-        .collection('applications')
-        .doc(student_uid.toString());
-      let doc = await getDoc(statusRef);
+      const applicationDocId = selectedUserGrid as string;
+      // Get the application by its auto-generated doc ID
+      const appData = await repo.getApplicationById('course_assistant', applicationDocId);
+      const student_uid = appData?.uid || applicationDocId;
 
       const courseDetails = firebase
         .firestore()
@@ -175,15 +170,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .doc(valueRadio);
       const courseDoc = await getDoc(courseDetails);
 
-      // Update student's application to approved
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(student_uid.toString())
-        .update({
-          status: 'Admin_approved',
-          [`courses.${valueRadio}`]: 'approved',
-        });
+      // Update application status and course status using repository
+      await repo.updateApplicationStatus('course_assistant', applicationDocId, 'Admin_approved');
+      await repo.updateCourseStatus(applicationDocId, valueRadio, 'approved');
 
       // Get the current date in month/day/year format
       const current = new Date();
@@ -195,14 +184,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         date: current_date as string,
         student_uid: student_uid as string,
         class_codes: valueRadio,
-        email: doc.data()?.email,
-        name: doc.data()?.firstname + ' ' + doc.data()?.lastname,
-        semesters: doc.data()?.available_semesters,
-        department: doc.data()?.department,
+        email: appData?.email,
+        name: (appData?.firstname || '') + ' ' + (appData?.lastname || ''),
+        semesters: appData?.available_semesters,
+        department: appData?.department,
         hours: [hours],
-        position: doc.data()?.position,
-        degree: doc.data()?.degree,
-        ufid: doc.data()?.ufid,
+        position: appData?.position,
+        degree: appData?.degree,
+        ufid: appData?.ufid,
       };
 
       // Create the document within the "assignments" collection
@@ -247,31 +236,15 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       if (emailArray) {
         for (const email of emailArray) {
           try {
-            const response = await fetch(
-              'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  type: 'facultyAssignment',
-                  data: {
-                    userEmail: email,
-                    position: doc.data()?.position,
-                    classCode: courseDoc.data()?.code,
-                    semester: courseDoc.data()?.semester,
-                  },
-                }),
-              }
-            );
-
-            if (response.ok) {
-              const data = await response.json();
-              console.log('Email sent successfully:', data);
-            } else {
-              throw new Error('Failed to send email');
-            }
+            await callFunction('sendEmail', {
+              type: 'facultyAssignment',
+              data: {
+                userEmail: email,
+                position: appData?.position,
+                classCode: courseDoc.data()?.code,
+                semester: courseDoc.data()?.semester,
+              },
+            });
           } catch (error) {
             console.error('Error sending email:', error);
           }
@@ -305,9 +278,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     return (
       <GridToolbarContainer>
-        <GridToolbarExport style={{ color: '#562EBA' }} />
-        <GridToolbarFilterButton style={{ color: '#562EBA' }} />
-        <GridToolbarColumnsButton style={{ color: '#562EBA' }} />
+        <GridToolbarExport />
+        <GridToolbarFilterButton />
+        <GridToolbarColumnsButton />
       </GridToolbarContainer>
     );
   }
@@ -337,15 +310,20 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   // fetching application data from firestore
   const [loading, setLoading] = useState(false);
   React.useEffect(() => {
-    const applicationsRef = firebase.firestore().collection('applications');
+    const courseAssistantRef = firebase
+      .firestore()
+      .collection('applications')
+      .doc('course_assistant')
+      .collection('uid');
 
     if (userRole === 'admin') {
-      const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
+      const unsubscribe = courseAssistantRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
           .filter(function (doc) {
             if (doc.data().status != 'Admin_denied') {
               if (
                 doc.data().status == 'Admin_approved' &&
+                doc.data().courses &&
                 Object.values(doc.data().courses).length < 2
               ) {
                 return false;
@@ -357,27 +335,24 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           })
           .map(
             (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-                courses: Object.entries(doc.data().courses)
-                  .filter(([key, value]) => value == 'approved')
-                  .map(([key, value]) => key),
-                allcourses: Object.entries(doc.data().courses).map(
-                  ([key, value]) => key
-                ),
-              } as Application)
+            ({
+              id: doc.id,
+              ...doc.data(),
+              courses: doc.data().courses
+                ? Object.entries(doc.data().courses)
+                    .filter(([key, value]) => value == 'approved')
+                    .map(([key, value]) => key)
+                : [],
+              allcourses: doc.data().courses
+                ? Object.entries(doc.data().courses).map(([key, value]) => key)
+                : [],
+            } as Application)
           );
         setApplicationData(data);
       });
       // Clean up the subscription on unmount
       return () => unsubscribe();
     } else if (userRole === 'faculty') {
-      // the faculty member can only see applications that specify the same class as they have
-      // get the courses that the application specifies
-      // find the courses that the faculty member teaches
-      // if there is an intersection, then the faculty member can see the application
-
       // find courses that the faculty member teaches
       const facultyCourses = collection(firebase.firestore(), 'courses');
       const q = query(
@@ -386,12 +361,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       );
       const facultyCoursesSnapshot = getDocs(q);
 
-      // now we have every course that the faculty member teaches
-      // we need the course code from each of them
-      // then we can compare them to the courses that the application specifies
-      // if there is an intersection, then the faculty member can see the application
-
-      applicationsRef.get().then((querySnapshot) => {
+      courseAssistantRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
             ({
@@ -419,44 +389,23 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleDenyEmail = async (id: GridRowId) => {
     try {
-      const snapshot = await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .get();
+      // id is the auto-generated doc ID in course_assistant collection
+      const applicationData = await repo.getApplicationById('course_assistant', id.toString());
 
-      if (snapshot.exists) {
-        const applicationData = snapshot.data() as Application;
+      if (applicationData) {
 
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+        await callFunction('sendEmail', {
+          type: 'applicationStatusDenied',
+          data: {
+            user: {
+              name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
+                }`.trim(),
+              email: applicationData.email,
             },
-            body: JSON.stringify({
-              type: 'applicationStatusDenied',
-              data: {
-                user: {
-                  name: `${applicationData.firstname ?? ''} ${
-                    applicationData.lastname ?? ''
-                  }`.trim(),
-                  email: applicationData.email,
-                },
-                position: applicationData.position,
-                classCode: applicationData.courses,
-              },
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Email sent successfully:', data);
-        } else {
-          throw new Error('Failed to send email');
-        }
+            position: applicationData.position,
+            classCode: applicationData.courses,
+          },
+        });
       } else {
         throw new Error('Application data not found');
       }
@@ -467,51 +416,29 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleSendEmail = async (id: GridRowId) => {
     try {
-      // Retrieve application data from Firestore
-      const snapshot = await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.student_uid.toString())
-        .get();
+      // id has student_uid which is the user ID
+      const applicationData = await repo.getLatestApplication(id.student_uid.toString(), 'course_assistant');
       const snapshot2 = await firebase
         .firestore()
         .collection('assignments')
         .doc(id.student_uid.toString())
         .get();
 
-      if (snapshot.exists) {
-        const applicationData = snapshot.data() as Application;
+      if (applicationData) {
         const assignmentData = snapshot2.data();
         // Send email using fetched application data
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+        await callFunction('sendEmail', {
+          type: 'applicationStatusApproved',
+          data: {
+            user: {
+              name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
+                }`.trim(),
+              email: applicationData.email,
             },
-            body: JSON.stringify({
-              type: 'applicationStatusApproved',
-              data: {
-                user: {
-                  name: `${applicationData.firstname ?? ''} ${
-                    applicationData.lastname ?? ''
-                  }`.trim(),
-                  email: applicationData.email,
-                },
-                position: assignmentData.position,
-                classCode: assignmentData.class_codes,
-              },
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Email sent successfully:', data);
-        } else {
-          throw new Error('Failed to send email');
-        }
+            position: assignmentData.position,
+            classCode: assignmentData.class_codes,
+          },
+        });
       } else {
         throw new Error('Application data not found');
       }
@@ -526,12 +453,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setLoading(true);
 
     try {
-      // Update the 'applications' collection in Firestore
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .update({ status: 'Admin_denied' });
+      // id is auto-generated doc ID in course_assistant collection
+      await repo.updateApplicationStatus('course_assistant', id.toString(), 'Admin_denied');
 
       // Remove the denied row from the local state
       setApplicationData((prevData) => {
@@ -552,12 +475,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleApproveClick = async (id: GridRowId) => {
     setLoading(true);
     try {
-      // Update the 'applications' collection
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .update({ status: 'Approved' });
+      // id is auto-generated doc ID in course_assistant collection
+      await repo.updateApplicationStatus('course_assistant', id.toString(), 'Approved');
 
       // Update the state locally to avoid reloading the entire data
       setApplicationData((prevData) =>
@@ -583,11 +502,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setLoading(true);
     const updatedRow = applicationData.find((row) => row.id === id);
     if (updatedRow) {
-      firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .update(updatedRow)
+      repo.updateApplication('course_assistant', id.toString(), updatedRow)
         .then(() => {
           setRowModesModel({
             ...rowModesModel,
@@ -1026,10 +941,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         processRowUpdate={processRowUpdate}
         checkboxSelection
         slots={{
-          toolbar: EditToolbar,
+          toolbar: EditToolbar as any,
         }}
         slotProps={{
-          toolbar: { setApplicationData, setRowModesModel },
+          toolbar: { setApplicationData, setRowModesModel } as any,
         }}
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel} // Keep pagination state in sync

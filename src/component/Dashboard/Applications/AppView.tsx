@@ -6,9 +6,9 @@ import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import firebase from '@/firebase/firebase_config';
-import 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { GridRowId } from '@mui/x-data-grid';
+import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
 
 export interface AppViewProps {
   uid: string;
@@ -24,10 +24,7 @@ export default function AppView({
   handleOpenAssignmentDialog,
 }: AppViewProps) {
   const [docData, setDocData] = React.useState<any>(null);
-
-  // get application object from uid
-  const applicationsRef = firebase.firestore().collection('applications');
-  const docRef = applicationsRef.doc(uid);
+  const repo = new ApplicationRepository(getFirestore());
 
   const onThumbUpClick = useCallback(
     (event: any) => {
@@ -46,19 +43,18 @@ export default function AppView({
   );
 
   React.useEffect(() => {
-    docRef
-      .get()
-      .then((doc) => {
-        if (doc.exists) {
-          setDocData(doc.data());
+    repo.getLatestApplication(uid, 'course_assistant')
+      .then((app) => {
+        if (app) {
+          setDocData(app);
         } else {
-          console.log('No such document!');
+          console.log('No application found for user!');
         }
       })
       .catch((error) => {
         console.log('Error getting document:', error);
       });
-  }, [uid, docRef]); // Only re-run the effect if uid changes
+  }, [uid]); // Only re-run the effect if uid changes
   return (
     <Box sx={{}}>
       {docData && (

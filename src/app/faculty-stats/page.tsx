@@ -29,7 +29,7 @@ export default function User() {
     handleClear();
   };
 
-  const readExcelFile = async (e) => {
+  const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     // https://docs.sheetjs.com/docs/demos/local/file/
     setProcessing(true);
     const toastId = toast.loading(
@@ -38,17 +38,18 @@ export default function User() {
     );
 
     try {
-      const val = e.target.files[0];
+      const val = e.target.files?.[0];
+      if (!val) return;
       console.log(val);
       const ab = await val.arrayBuffer();
-      let data = [];
+      let data: Record<string, unknown>[] = [];
       var file = read(ab);
 
       const sheets = file.SheetNames;
       console.log(sheets);
 
       for (let i = 0; i < sheets.length; i++) {
-        const temp = utils.sheet_to_json(file.Sheets[file.SheetNames[i]]);
+        const temp = utils.sheet_to_json<Record<string, unknown>>(file.Sheets[file.SheetNames[i]]);
         console.log(temp);
 
         temp.forEach((res) => {
@@ -59,22 +60,18 @@ export default function User() {
       console.log(data.length);
 
       for (let i = 0; i < data.length; i++) {
-        if (data[i]['__EMPTY_1'] == undefined) {
+        const instructor = data[i]['__EMPTY_1'] as string | undefined;
+        const researchLevel = data[i]['__EMPTY_28'] as string | undefined;
+        if (instructor == undefined) {
           continue;
         }
         await firebase
           .firestore()
           .collection('faculty')
-          .doc(data[i]['__EMPTY_1'])
+          .doc(instructor)
           .set({
-            instructor:
-              data[i]['__EMPTY_1'] == undefined
-                ? 'undef'
-                : data[i]['__EMPTY_1'],
-            research_level:
-              data[i]['__EMPTY_28'] == undefined
-                ? 'None'
-                : data[i]['__EMPTY_28'],
+            instructor,
+            research_level: researchLevel ?? 'None',
           });
       }
       setProcessing(false);
