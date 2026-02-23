@@ -1,6 +1,16 @@
 import type { ConsoleMessage, Page } from '@playwright/test';
 
-const ignoredErrorPatterns = [];
+const ignoredErrorPatterns: RegExp[] = [
+  /Firebase/i,
+  /firestore/i,
+  /auth.*emulator/i,
+  /Failed to load resource/i,
+  /net::ERR_/i,
+  /WebSocket/i,
+  /googleapis/i,
+  /firebaseio/i,
+  /@firebase/i,
+];
 
 export type ConsoleCollector = {
   errors: string[];

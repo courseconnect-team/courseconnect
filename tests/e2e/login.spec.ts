@@ -16,7 +16,7 @@ test.describe('login screen (stubbed role)', () => {
     expect(response, 'No response for home').toBeTruthy();
     expect(response!.status(), 'Bad status for home').toBeLessThan(400);
 
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     await expect(page.getByLabel(/email/i).first()).toBeVisible();
     await expect(page.getByLabel(/password/i).first()).toBeVisible();
@@ -48,7 +48,7 @@ test.describe('login screen (stubbed role)', () => {
 //     localStorage.setItem('e2e_name', 'Test Student');
 //   });
 //   await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
-//   await page.waitForLoadState('networkidle');
+//   await page.waitForLoadState('load');
 //   await expect(page.locator('body')).toBeVisible();
 //   expect(errors, 'Console errors on login').toEqual([]);
 //   dispose();

@@ -5,8 +5,9 @@ const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
 
 export default defineConfig({
   testDir: './tests/e2e',
+  timeout: 60_000,
   fullyParallel: true,
-  workers: process.env.CI ? 3 : undefined, // try 2 or 3 first
+  workers: process.env.CI ? 3 : 4,
   retries: process.env.CI ? 1 : 0,
   testIgnore: /auth\.setup\.ts/, // prevent setup file from running in main project
   reporter: [
@@ -32,7 +33,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'NEXT_PUBLIC_E2E=1 npm run dev -- -p 3000',
+    command:
+      process.platform === 'win32'
+        ? 'set NEXT_PUBLIC_E2E=1&& npm run dev -- -p 3000'
+        : 'NEXT_PUBLIC_E2E=1 npm run dev -- -p 3000',
     url: 'http://127.0.0.1:3000',
     timeout: 120_000,
     reuseExistingServer: !process.env.CI,

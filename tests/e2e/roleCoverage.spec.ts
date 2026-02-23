@@ -8,29 +8,30 @@ const routesByRole: Record<Role, RouteCheck[]> = {
   student: [
     { path: '/dashboard' },
     { path: '/applications' },
-    { path: '/profile' },
+    { path: '/Profile' },
   ],
   faculty: [
     { path: '/dashboard' },
     { path: '/applications' },
-    { path: '/profile' },
+    { path: '/Profile' },
   ],
   admin: [
     { path: '/dashboard' },
     { path: '/applications' },
-    { path: '/profile' },
+    { path: '/Profile' },
   ],
 };
 
 const navLabels: Partial<Record<Role, string[]>> = {
-  student: ['Applications', 'Status'],
-  faculty: ['Applications', 'Courses'],
+  student: ['Applications', 'Research', 'Status', 'Announcements'],
+  faculty: ['Applications', 'Research', 'Courses', 'Announcements'],
   admin: [
     'Users',
     'Applications',
     'Courses',
     'Scheduling',
     'Faculty Stats',
+    'Research',
     'Announcements',
   ],
 };
@@ -54,10 +55,12 @@ const expectNotLoading = async (page) => {
     if (labels) {
       test('sidebar shows expected links', async ({ page }) => {
         await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('load');
         await expectNotLoading(page);
         for (const label of labels) {
-          await expect(page.getByTestId(`nav-${label}`)).toBeVisible();
+          await expect(
+            page.getByTestId(`nav-${label}`).first()
+          ).toBeVisible();
         }
       });
     }
@@ -76,7 +79,7 @@ const expectNotLoading = async (page) => {
             `Bad status for ${route.path}`
           ).toBeLessThan(400);
 
-          await page.waitForLoadState('networkidle');
+          await page.waitForLoadState('load');
           await expectNotLoading(page);
           await expect(page.locator('body')).toBeVisible();
 

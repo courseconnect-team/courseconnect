@@ -40,6 +40,7 @@ export default function SideNav({ navItems }: SideNavProps) {
             <Link
               key={to}
               href={to}
+              data-testid={`nav-${label}`}
               className={`
               group relative flex flex-col items-center text-5xl px-2 py-1 duration-200
               ${isActive ? 'bg-white text-primary' : 'text-white '}

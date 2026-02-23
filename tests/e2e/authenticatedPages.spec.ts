@@ -7,7 +7,7 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
     allowed: [
       '/dashboard',
       '/applications',
-      '/profile',
+      '/Profile',
       '/status',
       '/features',
       '/underDevelopment',
@@ -27,7 +27,7 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
     allowed: [
       '/dashboard',
       '/applications',
-      '/profile',
+      '/Profile',
       '/features',
       '/announcements',
       '/courses',
@@ -48,7 +48,7 @@ const routesByRole: Record<Role, { allowed: string[]; forbidden: string[] }> = {
       '/courses',
       '/applications',
       '/announcements',
-      '/profile',
+      '/Profile',
       '/faculty-stats',
       '/admincourses',
       '/admin-applications',
@@ -83,7 +83,7 @@ const expectNotLoading = async (page) => {
         expect(response, `No response for ${route}`).toBeTruthy();
         expect(response!.status(), `Bad status for ${route}`).toBeLessThan(400);
 
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('load');
         await expectNotLoading(page);
         await expect(page.getByText(/Forbidden/i)).toHaveCount(0);
 
@@ -102,7 +102,7 @@ const expectNotLoading = async (page) => {
         expect(response, `No response for ${route}`).toBeTruthy();
         expect(response!.status(), `Bad status for ${route}`).toBeLessThan(400);
 
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('load');
         await expectNotLoading(page);
 
         const unauthorizedMessage = page.getByText(/Forbidden/i);
