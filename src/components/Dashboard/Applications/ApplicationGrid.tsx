@@ -31,7 +31,6 @@ import {
   GridToolbarExport,
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
-  GridValueGetterParams,
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -85,8 +84,8 @@ interface ApplicationGridProps {
   userRole: string;
 }
 
-function getFullName(params: GridValueGetterParams) {
-  return `${params?.row.firstname || ''} ${params?.row.lastname || ''}`;
+function getFullName(_value: any, row: any) {
+  return `${row?.firstname || ''} ${row?.lastname || ''}`;
 }
 
 export default function ApplicationGrid(props: ApplicationGridProps) {
