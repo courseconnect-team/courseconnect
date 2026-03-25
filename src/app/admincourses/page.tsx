@@ -29,12 +29,15 @@ import {
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { getNavItems } from '@/hooks/useGetItems';
 import { isE2EMode } from '@/utils/featureFlags';
+import { useSemesters } from '@/hooks/useSemesterOptions';
 
 export default function AdminCoursesPage() {
+
+  const { currentSemester, options } = useSemesters();
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
   const isE2E = isE2EMode();
-  const [semester, setSemester] = useState<string>('Spring 2026');
+  const [semester, setSemester] = useState<string>(currentSemester);
   const [menu, setMenu] = useState<string[]>([]);
   const [semesterHidden, setSemesterHidden] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -239,19 +242,20 @@ export default function AdminCoursesPage() {
 
       for (const row of data) {
         const mappedRow: any = {};
-        mappedRow['Course'] = row['__EMPTY_5'];
-        mappedRow['Course Title'] = row['__EMPTY_24'];
-        mappedRow['Instructor'] = row['__EMPTY_25'];
-        mappedRow['Instructor Emails'] = row['__EMPTY_26'];
-        mappedRow['Class Nbr'] = row['__EMPTY_10'];
-        mappedRow['Min - Max Cred'] = row['__EMPTY_12'];
-        mappedRow['Day/s'] = row['__EMPTY_13'];
-        mappedRow['Time'] = row['__EMPTY_14'];
-        mappedRow['Facility'] = row['__EMPTY_16'];
-        mappedRow['Enr Cap'] = row['__EMPTY_27'];
-        mappedRow['Enrolled'] = row['__EMPTY_29'];
 
+        mappedRow['Course'] = row['__EMPTY_1'];
+        mappedRow['Course Title'] = row['__EMPTY_23'];
+        mappedRow['Instructor'] = row['__EMPTY_24'];
+        mappedRow['Instructor Emails'] = row['__EMPTY_25'];
+        mappedRow['Class Nbr'] = row['__EMPTY_6'];
+        mappedRow['Min - Max Cred'] = row['__EMPTY_11'];
+        mappedRow['Day/s'] = row['__EMPTY_12'];
+        mappedRow['Time'] = row['__EMPTY_13'];
+        mappedRow['Facility'] = row['__EMPTY_15'];
+        mappedRow['Enr Cap'] = row['__EMPTY_26'];
+        mappedRow['Enrolled'] = row['__EMPTY_28'];
         if (
+
           !course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)
         ) {
           course.add(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`);

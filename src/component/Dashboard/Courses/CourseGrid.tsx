@@ -46,10 +46,12 @@ interface Course {
   credits: string;
   num_enrolled: string;
   enrollment_cap: string;
+  enrolled: string;
   professor_names: string[];
   professor_emails: string[];
   helper_names: string[];
   helper_emails: string[];
+  semester: string;
   isNew?: boolean;
   mode?: 'edit' | 'view' | undefined;
 }
@@ -70,24 +72,37 @@ export default function CourseGrid(props: CourseGridProps) {
   const [courseData, setCourseData] = React.useState<Course[]>([]);
   const userEmail = user?.email;
 
+  const getCoursesCollectionRef = React.useCallback(() => {
+    return firebase
+      .firestore()
+      .collection('semesters')
+      .doc(semester)
+      .collection('courses');
+  }, [semester]);
+
   React.useEffect(() => {
     console.log('SEM ' + semester);
+
     if (e2e) {
       setCourseData([]);
       return;
     }
-    const coursesRef = firebase
-      .firestore()
-      .collection('courses')
-      .where('semester', '==', semester);
+
+    if (!semester) {
+      setCourseData([]);
+      return;
+    }
+
+    const coursesRef = getCoursesCollectionRef();
+
     if (userRole === 'admin') {
       coursesRef.get().then((querySnapshot) => {
         const data = querySnapshot.docs.map(
           (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Course)
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Course)
         );
         setCourseData(data);
       });
@@ -98,10 +113,10 @@ export default function CourseGrid(props: CourseGridProps) {
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
             (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-              } as Course)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Course)
           );
           setCourseData(data);
         });
@@ -112,15 +127,17 @@ export default function CourseGrid(props: CourseGridProps) {
         .then((querySnapshot) => {
           const data = querySnapshot.docs.map(
             (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-              } as Course)
+            ({
+              id: doc.id,
+              ...doc.data(),
+            } as Course)
           );
           setCourseData(data);
         });
+    } else {
+      setCourseData([]);
     }
-  }, [userRole, userEmail, semester, processing, e2e]);
+  }, [userRole, userEmail, semester, processing, e2e, getCoursesCollectionRef]);
 
   const [open, setOpen] = React.useState(false);
   const [selectedCourseGrid, setSelectedCourseGrid] =
@@ -130,6 +147,7 @@ export default function CourseGrid(props: CourseGridProps) {
     setSelectedCourseGrid(id);
     setOpen(true);
   };
+
   const handleClose = () => setOpen(false);
 
   interface EditToolbarProps {
@@ -141,16 +159,9 @@ export default function CourseGrid(props: CourseGridProps) {
 
   function EditToolbar(props: EditToolbarProps) {
     const { setCourseData, setRowModesModel } = props;
-    const [open, setOpen] = React.useState(false);
-    if (userRole === 'faculty' || userRole === 'student_assigned') {
-      return (
-        <GridToolbarContainer>
-          <GridToolbarExport />
-          <GridToolbarFilterButton />
-          <GridToolbarColumnsButton />
-        </GridToolbarContainer>
-      );
-    }
+    void setCourseData;
+    void setRowModesModel;
+
     return (
       <GridToolbarContainer>
         <GridToolbarExport />
@@ -168,8 +179,9 @@ export default function CourseGrid(props: CourseGridProps) {
     params,
     event
   ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut)
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true;
+    }
   };
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -177,13 +189,13 @@ export default function CourseGrid(props: CourseGridProps) {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
     setLoading(false);
   };
+
   const handleSaveClick = (id: GridRowId) => () => {
     setLoading(true);
     const updatedRow = courseData.find((row) => row.id === id);
+
     if (updatedRow) {
-      firebase
-        .firestore()
-        .collection('courses')
+      getCoursesCollectionRef()
         .doc(id.toString())
         .update(updatedRow)
         .then(() => {
@@ -202,11 +214,10 @@ export default function CourseGrid(props: CourseGridProps) {
       console.error('No matching course data found for id: ', id);
     }
   };
+
   const handleDeleteClick = (id: GridRowId) => () => {
     setLoading(true);
-    firebase
-      .firestore()
-      .collection('courses')
+    getCoursesCollectionRef()
       .doc(id.toString())
       .delete()
       .then(() => {
@@ -218,13 +229,13 @@ export default function CourseGrid(props: CourseGridProps) {
         console.error('Error removing document: ', error);
       });
   };
+
   const handleCancelClick = (id: GridRowId) => () => {
     setLoading(true);
     const editedRow = courseData.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      firebase
-        .firestore()
-        .collection('courses')
+
+    if (editedRow?.isNew) {
+      getCoursesCollectionRef()
         .doc(id.toString())
         .delete()
         .then(() => {
@@ -246,42 +257,48 @@ export default function CourseGrid(props: CourseGridProps) {
 
   const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
     setLoading(true);
+
     const professorEmailsArray =
       typeof newRow.professor_emails === 'string' && newRow.professor_emails
         ? newRow.professor_emails.split(',').map((p_email) => p_email.trim())
         : oldRow.professor_emails;
+
     const professorNamesArray =
       typeof newRow.professor_names === 'string' && newRow.professor_names
         ? newRow.professor_names.split(',').map((p_name) => p_name.trim())
         : oldRow.professor_names;
+
     const helperEmailsArray =
       typeof newRow.helper_emails === 'string' && newRow.helper_emails
         ? newRow.helper_emails.split(',').map((h_email) => h_email.trim())
         : oldRow.helper_emails;
+
     const helperNamesArray =
       typeof newRow.helper_names === 'string' && newRow.helper_names
         ? newRow.helper_names.split(',').map((h_name) => h_name.trim())
         : oldRow.helper_names;
+
     const updatedRow = {
       ...(newRow as Course),
       professor_emails: professorEmailsArray,
       professor_names: professorNamesArray,
       helper_emails: helperEmailsArray,
       helper_names: helperNamesArray,
+      semester,
       isNew: false,
     };
+
     if (updatedRow) {
       if (updatedRow.isNew) {
-        return firebase
-          .firestore()
-          .collection('courses')
+        return getCoursesCollectionRef()
           .add(updatedRow)
-          .then(() => {
+          .then((docRef) => {
+            const rowWithId = { ...updatedRow, id: docRef.id };
             setCourseData(
-              courseData.map((row) => (row.id === newRow.id ? updatedRow : row))
+              courseData.map((row) => (row.id === newRow.id ? rowWithId : row))
             );
             setLoading(false);
-            return updatedRow;
+            return rowWithId;
           })
           .catch((error) => {
             setLoading(false);
@@ -289,9 +306,7 @@ export default function CourseGrid(props: CourseGridProps) {
             throw error;
           });
       } else {
-        return firebase
-          .firestore()
-          .collection('courses')
+        return getCoursesCollectionRef()
           .doc(updatedRow.id)
           .update(updatedRow)
           .then(() => {
@@ -314,10 +329,11 @@ export default function CourseGrid(props: CourseGridProps) {
       );
     }
   };
+
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) =>
     setRowModesModel(newRowModesModel);
 
-  let columns: GridColDef[] = [
+  const columns: GridColDef[] = [
     { field: 'code', headerName: 'Course Code', width: 130, editable: true },
     { field: 'title', headerName: 'Course Title', width: 200, editable: true },
     { field: 'credits', headerName: 'Credits', width: 100, editable: true },
@@ -349,6 +365,7 @@ export default function CourseGrid(props: CourseGridProps) {
       cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+
         if (isInEditMode) {
           return [
             <GridActionsCellItem
@@ -368,12 +385,13 @@ export default function CourseGrid(props: CourseGridProps) {
             />,
           ];
         }
+
         return [
           <GridActionsCellItem
             key="3"
             icon={<ZoomInIcon />}
             label="View"
-            onClick={(event) => handleClickOpenGrid(id)}
+            onClick={() => handleClickOpenGrid(id)}
             color="primary"
           />,
           <GridActionsCellItem
@@ -396,7 +414,6 @@ export default function CourseGrid(props: CourseGridProps) {
     },
   ];
 
-  // ✅ UI-Only Styling Changes
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     border: 'none',
     borderRadius: '16px',
@@ -414,10 +431,10 @@ export default function CourseGrid(props: CourseGridProps) {
       fontWeight: 700,
     },
     '& .MuiDataGrid-columnHeader:first-of-type': {
-      paddingLeft: '20px', // ✅ adds spacing before first column header
+      paddingLeft: '20px',
     },
     '& .MuiDataGrid-cell:first-of-type': {
-      paddingLeft: '25px', // ✅ adds spacing before first column cell
+      paddingLeft: '25px',
     },
 
     [`& .${gridClasses.row}.even`]: {
