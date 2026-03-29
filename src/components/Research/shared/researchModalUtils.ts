@@ -1,7 +1,7 @@
 /**
  * Shared utilities and constants for Research modal components
  */
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/services/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { NATURE_OF_JOB_OPTIONS } from '@/constants/research';
 
@@ -50,10 +50,9 @@ export const INITIAL_FORM_DATA: ResearchFormData = {
  * @returns The download URL of the uploaded image
  */
 export async function uploadResearchImage(file: File): Promise<string> {
-  const storage = getStorage();
-  const storageRef = ref(storage, `research-images/${uuidv4()}_${file.name}`);
-  await uploadBytes(storageRef, file);
-  const downloadURL = await getDownloadURL(storageRef);
+  const storageRef = storage.ref(`research-images/${uuidv4()}_${file.name}`);
+  await storageRef.put(file);
+  const downloadURL = await storageRef.getDownloadURL();
   return downloadURL;
 }
 

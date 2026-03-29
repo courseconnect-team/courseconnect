@@ -188,6 +188,9 @@ const ResearchModal: React.FC<ResearchModalProps> = ({
               onImageUpload={handleImageUpload}
               onUploadStart={() => setUploading(true)}
               onUploadEnd={() => setUploading(false)}
+              onError={() =>
+                toast.error('Failed to upload image. Please try again.')
+              }
             />
           </Grid>
 

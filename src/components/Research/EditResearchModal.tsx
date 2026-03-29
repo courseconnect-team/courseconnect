@@ -156,6 +156,9 @@ const EditResearchModal: React.FC<EditResearchModalProps> = ({
               onImageUpload={handleImageUpload}
               onUploadStart={() => setUploading(true)}
               onUploadEnd={() => setUploading(false)}
+              onError={() =>
+                toast.error('Failed to upload image. Please try again.')
+              }
             />
           </Grid>
 
