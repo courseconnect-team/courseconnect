@@ -66,6 +66,55 @@ interface AssignmentGridProps {
   userRole: string;
 }
 
+const StripedDataGrid = styled(DataGrid)(() => ({
+  border: 'none',
+  borderRadius: '16px',
+  fontFamily: 'Inter, sans-serif',
+  fontSize: '0.95rem',
+
+  '& .MuiDataGrid-columnHeaders': {
+    backgroundColor: '#D8C6F8',
+    color: '#1C003D',
+    fontWeight: 700,
+    borderBottom: 'none',
+  },
+
+  '& .MuiDataGrid-columnHeaderTitle': {
+    fontWeight: 700,
+  },
+
+  '& .MuiDataGrid-columnHeader:first-of-type': {
+    paddingLeft: '20px',
+  },
+  '& .MuiDataGrid-cell:first-of-type': {
+    paddingLeft: '25px',
+  },
+
+  [`& .${gridClasses.row}.even`]: {
+    backgroundColor: '#FFFFFF',
+  },
+  [`& .${gridClasses.row}.odd`]: {
+    backgroundColor: '#EEEEEE',
+  },
+
+  '& .MuiDataGrid-row:hover': {
+    backgroundColor: '#EFE6FF',
+  },
+
+  '& .MuiDataGrid-cell': {
+    borderBottom: '1px solid #ECE4FA',
+  },
+
+  '& .MuiDataGrid-footerContainer': {
+    borderTop: 'none',
+  },
+
+  '& .MuiTablePagination-root': {
+    color: '#5D3FC4',
+    fontWeight: 500,
+  },
+}));
+
 export default function AssignmentGrid(props: AssignmentGridProps) {
   const [loading, setLoading] = useState(false);
   const { userRole } = props;
@@ -761,56 +810,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     },
   ];
   const ODD_OPACITY = 0.2;
-
-  // ✅ Copy CourseGrid UI styling
-  const StripedDataGrid = styled(DataGrid)(() => ({
-    border: 'none',
-    borderRadius: '16px',
-    fontFamily: 'Inter, sans-serif',
-    fontSize: '0.95rem',
-
-    '& .MuiDataGrid-columnHeaders': {
-      backgroundColor: '#D8C6F8',
-      color: '#1C003D',
-      fontWeight: 700,
-      borderBottom: 'none',
-    },
-
-    '& .MuiDataGrid-columnHeaderTitle': {
-      fontWeight: 700,
-    },
-
-    '& .MuiDataGrid-columnHeader:first-of-type': {
-      paddingLeft: '20px',
-    },
-    '& .MuiDataGrid-cell:first-of-type': {
-      paddingLeft: '25px',
-    },
-
-    [`& .${gridClasses.row}.even`]: {
-      backgroundColor: '#FFFFFF',
-    },
-    [`& .${gridClasses.row}.odd`]: {
-      backgroundColor: '#EEEEEE',
-    },
-
-    '& .MuiDataGrid-row:hover': {
-      backgroundColor: '#EFE6FF',
-    },
-
-    '& .MuiDataGrid-cell': {
-      borderBottom: '1px solid #ECE4FA',
-    },
-
-    '& .MuiDataGrid-footerContainer': {
-      borderTop: 'none',
-    },
-
-    '& .MuiTablePagination-root': {
-      color: '#5D3FC4',
-      fontWeight: 500,
-    },
-  }));
 
   return (
     <Box
