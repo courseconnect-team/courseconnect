@@ -38,26 +38,34 @@ export async function fetchResearchListings(
     const listingIds = snapshot.docs.map((doc) => doc.id);
 
     // Fetch all applications in a single query using collectionGroup
+    // This is done separately so a failure here doesn't prevent listings from loading
     const applicationsMap = new Map<string, any[]>();
 
     if (listingIds.length > 0) {
-      const allApplicationsSnap = await db
-        .collectionGroup('applications')
-        .get();
+      try {
+        const allApplicationsSnap = await db
+          .collectionGroup('applications')
+          .get();
 
-      // Group applications by their parent listing ID
-      allApplicationsSnap.docs.forEach((appDoc) => {
-        const parentId = appDoc.ref.parent.parent?.id;
-        if (parentId && listingIds.includes(parentId)) {
-          if (!applicationsMap.has(parentId)) {
-            applicationsMap.set(parentId, []);
+        // Group applications by their parent listing ID
+        allApplicationsSnap.docs.forEach((appDoc) => {
+          const parentId = appDoc.ref.parent.parent?.id;
+          if (parentId && listingIds.includes(parentId)) {
+            if (!applicationsMap.has(parentId)) {
+              applicationsMap.set(parentId, []);
+            }
+            applicationsMap.get(parentId)!.push({
+              id: appDoc.id,
+              ...appDoc.data(),
+            });
           }
-          applicationsMap.get(parentId)!.push({
-            id: appDoc.id,
-            ...appDoc.data(),
-          });
-        }
-      });
+        });
+      } catch (appError) {
+        console.warn(
+          'Failed to fetch applications, listings will load without them:',
+          appError
+        );
+      }
     }
 
     // Map listings with their applications

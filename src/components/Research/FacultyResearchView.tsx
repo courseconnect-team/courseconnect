@@ -18,8 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import ResearchModal from '@/components/Research/Modal';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
-import { deleteDoc, doc } from 'firebase/firestore';
-import firebase from '@/firebase/firebase_config';
+import { deleteResearchListing } from '@/services/researchService';
 import EditResearchModal from './EditResearchModal';
 
 interface FacultyResearchViewProps {
@@ -65,9 +64,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   const handleDelete = async () => {
     if (!deleteDocID) return;
     try {
-      const db = firebase.firestore();
-      const docRef = doc(db, 'research-listings', deleteDocID);
-      await deleteDoc(docRef);
+      await deleteResearchListing(deleteDocID);
       getResearchListings();
     } catch (error) {
       console.error('Error deleting listing:', error);

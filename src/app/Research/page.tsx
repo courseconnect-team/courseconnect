@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { getNavItems } from '@/hooks/useGetItems';
 import PageLayout from '@/components/PageLayout/PageLayout';
@@ -31,17 +31,14 @@ const ResearchPage: React.FC = () => {
       setResearchListings(listings);
     } catch (error) {
       console.error('Error fetching research listings:', error);
+      toast.error('Failed to load research listings.');
       setResearchListings([]);
     }
   }, [department, studentLevel]);
 
   const postNewResearchPosition = useCallback(async (formData: any) => {
-    try {
-      const docId = await createResearchListing(formData);
-      console.log('Document written with ID: ', docId);
-    } catch (e) {
-      console.error('Error adding document: ', e);
-    }
+    const docId = await createResearchListing(formData);
+    console.log('Document written with ID: ', docId);
   }, []);
 
   useEffect(() => {

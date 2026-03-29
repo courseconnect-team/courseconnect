@@ -21,6 +21,7 @@ import {
 } from './shared/researchModalUtils';
 import ImageUploadField from './shared/ImageUploadField';
 import { COLORS } from '@/constants/theme';
+import toast from 'react-hot-toast';
 
 interface ResearchModalProps {
   open: boolean;
@@ -87,12 +88,18 @@ const ResearchModal: React.FC<ResearchModalProps> = ({
       creator_id: uid,
       faculty_members: [uid],
     };
-    await firebaseQuery(finalFormData);
-    onSubmitSuccess();
-    setFormData({ ...INITIAL_FORM_DATA });
-    setErrors({});
-    setImageFileName('');
-    onClose();
+    try {
+      await firebaseQuery(finalFormData);
+      toast.success('Research position created successfully!');
+      onSubmitSuccess();
+      setFormData({ ...INITIAL_FORM_DATA });
+      setErrors({});
+      setImageFileName('');
+      onClose();
+    } catch (error) {
+      console.error('Error creating position:', error);
+      toast.error('Failed to create research position. Please try again.');
+    }
   };
 
   return (
