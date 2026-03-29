@@ -142,13 +142,22 @@ export default function AnnouncementDialog({
       onClose={resetAndClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{ sx: { borderRadius: 3, overflow: 'hidden' } }}
+      PaperProps={{ sx: { borderRadius: 3 } }}
     >
       <DialogTitle sx={{ textAlign: 'center', fontWeight: 600, fontSize: 28 }}>
         Send Announcement
       </DialogTitle>
 
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          overflow: 'hidden',
+          flex: 1,
+        }}
+      >
         <DialogContent dividers sx={{ display: 'grid', gap: 2 }}>
           {/* Subject & body */}
           <TextField
