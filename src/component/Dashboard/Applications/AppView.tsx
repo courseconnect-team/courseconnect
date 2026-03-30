@@ -24,7 +24,6 @@ export default function AppView({
   handleOpenAssignmentDialog,
 }: AppViewProps) {
   const [docData, setDocData] = React.useState<any>(null);
-  const repo = new ApplicationRepository(getFirestore());
 
   const onThumbUpClick = useCallback(
     (event: any) => {
@@ -43,7 +42,9 @@ export default function AppView({
   );
 
   React.useEffect(() => {
-    repo.getLatestApplication(uid, 'course_assistant')
+    const repo = new ApplicationRepository(getFirestore());
+    repo
+      .getLatestApplication(uid, 'course_assistant')
       .then((app) => {
         if (app) {
           setDocData(app);
@@ -139,7 +140,7 @@ export default function AppView({
                 <div className="label50">Faculty Approved Course(s):</div>
                 <div className="availability2">
                   {Object.entries(docData.courses)
-                    .filter(([key, value]) => value == 'accepted')
+                    .filter(([key, value]) => value === 'accepted')
                     .map(([key, value]) => key)
                     .join(', ')}
                 </div>

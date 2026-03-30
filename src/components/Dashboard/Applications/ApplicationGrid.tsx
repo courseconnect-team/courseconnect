@@ -171,7 +171,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     const doc = await getDoc(statusRef);
     setCodes(
       Object.entries(doc.data().courses)
-        .filter(([key, value]) => value == 'approved')
+        .filter(([key, value]) => value === 'approved')
         .map(([key, value]) => key)
     );
     setSelectedUserGrid(id);
@@ -189,7 +189,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     setCodes(
       Object.entries(doc.data().courses)
-        .filter(([key, value]) => value == 'denied') // Change 'accepted' to 'denied'
+        .filter(([key, value]) => value === 'denied')
         .map(([key, value]) => key)
     );
 
@@ -392,9 +392,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
           .filter(function (doc) {
-            if (doc.data().status != 'Admin_denied') {
+            if (doc.data().status !== 'Admin_denied') {
               if (
-                doc.data().status == 'Admin_approved' &&
+                doc.data().status === 'Admin_approved' &&
                 Object.values(doc.data().courses).length < 2
               ) {
                 return false;
@@ -410,7 +410,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 id: doc.id,
                 ...doc.data(),
                 courses: Object.entries(doc.data().courses)
-                  .filter(([key, value]) => value == 'approved')
+                  .filter(([key, value]) => value === 'approved')
                   .map(([key, value]) => key),
                 allcourses: Object.entries(doc.data().courses).map(
                   ([key, value]) => key

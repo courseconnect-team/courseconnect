@@ -82,9 +82,10 @@ export function useFacultyCoursesMany(
   uemail?: string,
   enabled = true
 ): UseQueryResult<CourseRow[], Error> {
+  const semesterKey = semesters?.join('|');
   const sorted = React.useMemo(
     () => (semesters ? [...semesters].sort() : []),
-    [semesters?.join('|')]
+    [semesterKey]
   );
   return useQuery<CourseRow[], Error>({
     queryKey: ['facultyCoursesMany', uemail, ...sorted],

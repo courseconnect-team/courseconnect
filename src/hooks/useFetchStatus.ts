@@ -16,10 +16,6 @@ import { getFirestore } from 'firebase/firestore';
  *   { assignments, courses, adminDenied, loading, error }
  */
 export function useFetchStatus(userId: string | undefined) {
-  const db = firebase.firestore();
-  const modularDb = getFirestore();
-  const repo = new ApplicationRepository(modularDb);
-
   const [assignments, setAssignments] = useState<string[]>([]);
   const [courses, setCourses] = useState<Record<string, string> | null>(null);
   const [adminDenied, setAdminDenied] = useState<boolean>(false);
@@ -32,6 +28,8 @@ export function useFetchStatus(userId: string | undefined) {
       return;
     }
 
+    const db = firebase.firestore();
+    const repo = new ApplicationRepository(getFirestore());
     let isMounted = true; // cancellation flag for unmounting
 
     async function fetchAll() {
@@ -55,7 +53,10 @@ export function useFetchStatus(userId: string | undefined) {
         if (isMounted) setAssignments(collected);
 
         /* ── 2. Fetch latest course_assistant application  ────────────────── */
-        const latestApp = await repo.getLatestApplication(userId!, 'course_assistant');
+        const latestApp = await repo.getLatestApplication(
+          userId!,
+          'course_assistant'
+        );
         if (latestApp && isMounted) {
           setAdminDenied(latestApp.status === 'Admin_denied');
           setCourses(latestApp.courses ?? null);

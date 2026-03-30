@@ -217,16 +217,19 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
     });
 
     const courseRef = firebase.firestore().collection('courses');
-    const map = new Map(courseEmailMap);
-    courseRef.onSnapshot((querySnapshot) => {
-      const data = querySnapshot.docs.map((doc) => {
+    const unsubscribeCourses = courseRef.onSnapshot((querySnapshot) => {
+      const map = new Map<string, string[]>();
+      querySnapshot.docs.forEach((doc) => {
         map.set(doc.id, doc.data().professor_emails);
       });
+      setCourseEmailMap(map);
     });
-    setCourseEmailMap(map);
 
-    // Clean up the subscription on unmount
-    return () => unsubscribe();
+    // Clean up the subscriptions on unmount
+    return () => {
+      unsubscribe();
+      unsubscribeCourses();
+    };
   }, []);
 
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(

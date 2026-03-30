@@ -118,7 +118,9 @@ export function useFetchAnnouncementsForAccount(
   });
   const userRole = convertRole(roleKey);
 
-  const applyCommon = (q: firebase.firestore.Query) => {
+  const buildQuery = React.useCallback(() => {
+    const col = firebase.firestore().collection('announcements');
+    let q: firebase.firestore.Query = col;
     q = q.where(`channels.${channel}`, '==', true);
 
     if (!includePending) {
@@ -126,18 +128,10 @@ export function useFetchAnnouncementsForAccount(
     }
 
     if (onlyPinned) {
-      // pinned == true -> ordering by pinned is unnecessary
       q = q.where('pinned', '==', true).orderBy('createdAt', 'desc');
     } else {
       q = q.orderBy('pinned', 'desc').orderBy('createdAt', 'desc');
     }
-
-    return q;
-  };
-
-  const buildQuery = React.useCallback(() => {
-    const col = firebase.firestore().collection('announcements');
-    let q = applyCommon(col);
 
     if (userRole === 'admin') {
       return q;

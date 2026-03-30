@@ -7,7 +7,7 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { Button, Grid, Input } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { table } from 'console';
+
 import { setDoc } from 'firebase/firestore';
 
 export interface AppViewProps {

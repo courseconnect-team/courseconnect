@@ -143,7 +143,7 @@ export default function AppView({
                 <div className="label50">Faculty Approved Course(s):</div>
                 <div className="availability2">
                   {Object.entries(docData.courses)
-                    .filter(([key, value]) => value == 'accepted')
+                    .filter(([key, value]) => value === 'accepted')
                     .map(([key, value]) => key)
                     .join(', ')}
                 </div>
