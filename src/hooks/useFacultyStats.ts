@@ -77,11 +77,11 @@ export const useFacultyStats = () => {
     const unsubscribe = statsRef.onSnapshot(
       (querySnapshot) => {
         const data = querySnapshot.docs.map((doc) => {
-          const { id, instructor, research_level } = doc.data() as any;
+          const { id, instructor, teaching_load } = doc.data() as any;
           return {
             id,
             instructor,
-            research_level,
+            teaching_load,
             // teaching_load: computeLoad(research_level),
           } satisfies FacultyStats;
         });

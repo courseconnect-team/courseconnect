@@ -82,8 +82,8 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
         backgroundColor: alpha(
           theme.palette.primary.main,
           ODD_OPACITY +
-            theme.palette.action.selectedOpacity +
-            theme.palette.action.hoverOpacity
+          theme.palette.action.selectedOpacity +
+          theme.palette.action.hoverOpacity
         ),
         '@media (hover: none)': {
           backgroundColor: alpha(

@@ -42,36 +42,32 @@ export default function User() {
       if (!val) return;
       console.log(val);
       const ab = await val.arrayBuffer();
-      let data: Record<string, unknown>[] = [];
       var file = read(ab);
-
-      const sheets = file.SheetNames;
-      console.log(sheets);
-
-      for (let i = 0; i < sheets.length; i++) {
-        const temp = utils.sheet_to_json<Record<string, unknown>>(file.Sheets[file.SheetNames[i]]);
-        console.log(temp);
-
-        temp.forEach((res) => {
-          data.push(res);
-        });
-      }
+      const sheet = file.Sheets["Teaching Load History"];
+      const data = utils.sheet_to_json<Record<string, any>>(sheet);
       console.log(data);
-      console.log(data.length);
 
-      for (let i = 0; i < data.length; i++) {
-        const instructor = data[i]['__EMPTY_1'] as string | undefined;
-        const researchLevel = data[i]['__EMPTY_28'] as string | undefined;
-        if (instructor == undefined) {
-          continue;
-        }
+
+      const facultyMap: Record<string, string> = {};
+
+      for (const row of data) {
+        const instructor = String(row["Instructor"]).trim();
+        const load = String(row["Current Teaching Category"]);
+
+        if (!instructor) continue;
+        facultyMap[instructor] = load;
+      }
+      console.log(facultyMap);
+
+
+      for (const instructor in facultyMap) {
         await firebase
           .firestore()
-          .collection('faculty')
+          .collection("faculty")
           .doc(instructor)
           .set({
             instructor,
-            research_level: researchLevel ?? 'None',
+            teaching_load: facultyMap[instructor],
           });
       }
       setProcessing(false);

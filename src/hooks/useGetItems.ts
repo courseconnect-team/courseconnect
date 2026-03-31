@@ -59,11 +59,11 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           icon: DescriptionOutlinedIcon,
         },
         { label: 'Courses', to: '/admincourses', icon: BookOutlinedIcon },
-        {
-          label: 'Scheduling',
-          to: '/scheduling',
-          icon: CalendarTodayOutlinedIcon,
-        },
+        // {
+        //   label: 'Scheduling',
+        //   to: '/scheduling',
+        //   icon: CalendarTodayOutlinedIcon,
+        // },
         {
           label: 'Faculty Stats',
           to: '/faculty-stats',
