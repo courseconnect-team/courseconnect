@@ -7,9 +7,10 @@ import { FC } from 'react';
 import ApplicationSections from './applicationSections';
 
 ApplicationSections;
-interface pageProps {}
+interface pageProps { }
 const ApplicationPage: FC<pageProps> = () => {
-  const [user, role, loading, error] = useUserInfo();
+  const { user, role, firstName, lastName, loading, error } = useUserInfo();
+
   const uemail = user?.email;
   // ② handle loading / error
   if (loading) return <div>Loading…</div>;
@@ -20,6 +21,8 @@ const ApplicationPage: FC<pageProps> = () => {
       <ApplicationSections
         role={role}
         uemail={uemail}
+        uFirstName={firstName}
+        uLastName={lastName}
         navItems={getApplications(role)}
       />
     </PageLayout>

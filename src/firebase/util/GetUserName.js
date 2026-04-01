@@ -19,7 +19,6 @@ const GetUserName = (userId) => {
       }
     }
   }, [snapshot]);
-
   return name;
 };
 

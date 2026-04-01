@@ -25,55 +25,71 @@ interface CourseDoc {
 /** ----- Per-term (new schema) ----- */
 export async function getFacultyCourses(
   semester: SemesterName,
-  uemail: string
+  uFirstName: string,
+  uLastName: string
 ): Promise<CourseTuple[]> {
-  // semesters/{termId}/courses
   const db = firebase.firestore();
   const col = collection(db, 'semesters', semester, 'courses');
-  const q = query(col, where('professor_emails', 'array-contains', uemail));
+  const formattedName = `${uLastName},${uFirstName}`;
+
+  const q = query(
+    col,
+    where('professor_names', '==', formattedName)
+  );
 
   const snap = await getDocs(q);
   const rows: CourseTuple[] = [];
+
   snap.forEach((doc) => {
     const d = doc.data() as CourseDoc;
-    if (d.code && d.title) rows.push([doc.id, d.code, d.title, semester]);
+    if (d.code && d.title) {
+      rows.push([doc.id, d.code, d.title, semester]);
+    }
   });
+
   return rows;
 }
 
-/** ----- (Optional) Across all terms using collectionGroup ----- */
+
 export async function getFacultyCoursesAllTerms(
-  uemail: string
+  uFirstName: string,
+  uLastName: string
 ): Promise<CourseTuple[]> {
   const db = firebase.firestore();
 
-  // requires a composite index if you also filter/order by other fields
+  const formattedName = `${uLastName},${uFirstName}`;
+
   const q = query(
     collectionGroup(db, 'courses'),
-    where('professor_emails', 'array-contains', uemail)
+    where('professor_names', '==', formattedName)
   );
+
   const snap = await getDocs(q);
 
   const rows: CourseTuple[] = [];
   snap.forEach((doc) => {
     const d = doc.data() as CourseDoc;
-    // recover the termId from the parent doc id (semesters/{termId}/courses/{offeringId})
-    const termId = doc.ref.parent.parent?.id as SemesterName;
-    if (d.code && d.title && termId)
-      rows.push([doc.id, d.code, d.title, termId]);
-  });
-  return rows;
-}
 
-/** Cached hook (per-term) */
+    const termId = doc.ref.parent.parent?.id as SemesterName;
+
+    if (d.code && d.title && termId) {
+      rows.push([doc.id, d.code, d.title, termId]);
+    }
+  });
+
+  return rows;
+}/** Cached hook (per-term) */
+
 export function useFacultyCourses(
   semester?: SemesterName,
   uemail?: string,
+  uFirstName?: string,
+  uLastName?: string,
   enabled = true
 ): UseQueryResult<CourseTuple[], Error> {
   return useQuery<CourseTuple[], Error>({
     queryKey: ['facultyCourses', uemail, semester], // include semester in the key
-    queryFn: () => getFacultyCourses(semester!, uemail!),
+    queryFn: () => getFacultyCourses(semester!, uFirstName!, uLastName!),
     enabled: enabled && !!semester && !!uemail,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
@@ -84,11 +100,11 @@ export function useFacultyCourses(
 }
 
 /** (Optional) Cached hook across all terms */
-export function useFacultyCoursesAllTerms(uemail?: string, enabled = true) {
+export function useFacultyCoursesAllTerms(uFirstName?: string, uLastName?: string, enabled = true) {
   return useQuery<CourseTuple[], Error>({
-    queryKey: ['facultyCoursesAllTerms', uemail],
-    queryFn: () => getFacultyCoursesAllTerms(uemail!),
-    enabled: enabled && !!uemail,
+    queryKey: ['facultyCoursesAllTerms', uFirstName, uLastName],
+    queryFn: () => getFacultyCoursesAllTerms(uFirstName!, uLastName!),
+    enabled: enabled && !!uFirstName,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,

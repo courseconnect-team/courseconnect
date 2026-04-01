@@ -10,10 +10,13 @@ import { isE2EMode } from '@/utils/featureFlags';
 export function useSemesterData(
   role: Role,
   uemail?: string,
-  semesters?: SemesterName[]
+  semesters?: SemesterName[],
+  uFirstName?: string,
+  uLastName?: string
 ) {
   const { currentSemester, options } = useSemesters();
   const e2e = isE2EMode();
+
 
   const names: SemesterName[] = e2e ? [] : semesters?.length ? semesters : [];
   const enabled =
@@ -25,7 +28,7 @@ export function useSemesterData(
   const result = useQueries({
     queries: names.map((sem: SemesterName) => ({
       queryKey: ['facultyCourses', uemail, sem],
-      queryFn: () => getFacultyCourses(sem, uemail!),
+      queryFn: () => getFacultyCourses(sem, uFirstName!, uLastName!),
       enabled,
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,

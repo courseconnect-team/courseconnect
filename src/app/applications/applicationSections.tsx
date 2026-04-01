@@ -107,13 +107,18 @@ export default function ApplicationSections({
   role,
   navItems,
   uemail,
+  uFirstName,
+  uLastName,
 }: {
   role: Role;
   navItems: NavbarItem[];
   uemail: string;
+  uFirstName: string;
+  uLastName: string;
 }) {
   const [semester, setSemester] = useState<SemesterName | undefined>();
   const semesterArray = semester ? [semester] : undefined;
+
   const {
     currentSemester,
     options,
@@ -123,7 +128,7 @@ export default function ApplicationSections({
     error,
     showSkeletons,
     skeletonCount,
-  } = useSemesterData(role, uemail, semesterArray);
+  } = useSemesterData(role, uemail, semesterArray, uFirstName, uLastName);
 
   switch (role) {
     case 'Student':
