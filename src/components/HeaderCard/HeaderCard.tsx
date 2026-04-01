@@ -12,7 +12,7 @@ interface HeaderCardProps {
 }
 
 export default function HeaderCard({ title, children }: HeaderCardProps) {
-  const [user, role, loading, error] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
 
   if (loading) return <div>Loading…</div>;
   if (error) return <div>Error loading user info</div>;

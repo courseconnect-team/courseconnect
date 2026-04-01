@@ -8,7 +8,7 @@ import ProfileSection from './profileSections';
 interface pageProps {}
 
 const ProfilePage: FC<pageProps> = () => {
-  const [user, role, loading, error] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
   //   const nameSplit = user.displayName.split(' ');
   //   const firstName = nameSplit[0] || '';
   //   const lastName = nameSplit.slice(1).join(' ');

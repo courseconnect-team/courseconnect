@@ -8,7 +8,7 @@ import CourseSections from './courseSections';
 
 interface pageProps {}
 const CoursesPage: FC<pageProps> = () => {
-  const [user, role, loading, error] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
   const uemail = user?.email;
 
   // ② handle loading / error

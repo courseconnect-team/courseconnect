@@ -5,9 +5,9 @@ import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import DashboardSections from './DashboardSections';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';
-interface pageProps {}
+interface pageProps { }
 const NewDashboard: FC<pageProps> = () => {
-  const [user, role, loading, error] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
 
   // ② handle loading / error
   if (loading) return <div>Loading…</div>;

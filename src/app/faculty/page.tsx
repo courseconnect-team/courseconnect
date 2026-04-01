@@ -11,7 +11,7 @@ import { Toaster } from 'react-hot-toast';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { isE2EMode } from '@/utils/featureFlags';
 const FacultyStatistics: FC = () => {
-  const [user, role, loading, error] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
   const searchParams = useSearchParams();
   const FacultyId = searchParams.get('name');
   const db = firebase.firestore();

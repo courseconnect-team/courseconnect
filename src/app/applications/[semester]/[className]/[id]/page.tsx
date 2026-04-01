@@ -8,12 +8,12 @@ import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicatio
 import { getNavItems } from '@/hooks/useGetItems';
 import { useParams } from 'next/navigation';
 
-export default function ApplicationPage({}: {}) {
+export default function ApplicationPage({ }: {}) {
   const params = useParams<{ id: string; className: string }>();
-  const [user, role, loading, roleError] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
 
   const canView = role === 'faculty' || role === 'admin';
-  const canQuery = Boolean(params.id) && canView && !loading && !roleError;
+  const canQuery = Boolean(params.id) && canView && !loading && !error;
   const cleanClassName = decodeURIComponent(params.className).trim();
   // Always call the hook; let `enabled` control execution
   const {
@@ -42,7 +42,7 @@ export default function ApplicationPage({}: {}) {
     );
   }
   if (!canView) return <p>Not authorized.</p>;
-  if (roleError) return <p>Error loading role</p>;
+  if (error) return <p>Error loading role</p>;
   if (!user) return <p>Please sign in.</p>;
   return (
     <PageLayout mainTitle={cleanClassName} navItems={getNavItems(role)}>

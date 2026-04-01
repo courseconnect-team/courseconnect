@@ -8,7 +8,7 @@ import { Announcement } from '@/types/announcement';
 export const ANNOUNCEMENTS_QUERY_KEY = ['announcements'];
 
 export function usePostAnnouncement() {
-  const [user, role, loadingUser] = useUserInfo();
+  const { user, role, loading } = useUserInfo();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

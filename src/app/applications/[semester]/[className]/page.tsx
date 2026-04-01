@@ -20,7 +20,7 @@ import { SemesterName } from '@/hooks/useSemesterOptions';
 import { addSemesterToCourseDoc } from '@/hooks/Applications/ApplicationFunctions';
 
 const ApplicationsPage: FC = () => {
-  const [user, role, loading, roleError] = useUserInfo();
+  const { user, role, loading } = useUserInfo();
   const params = useParams<{ semester: SemesterName; className: string }>();
   const rawId = params.className;
   const semester = params.semester;
@@ -75,11 +75,10 @@ const ApplicationsPage: FC = () => {
     });
   };
 
-  if (roleError) return <p>Error loading role</p>;
   if (!user) return <p>Please sign in.</p>;
 
   if (isLoading || loading || isFetching) return <LinearProgress />;
-  if (error || roleError)
+  if (error)
     return <PageLayout mainTitle="Error" navItems={getNavItems(role)} />;
 
   if (!data)

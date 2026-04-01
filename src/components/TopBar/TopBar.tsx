@@ -11,7 +11,7 @@ import { Role, roleMapping } from '@/types/User';
 import { useAnnouncements } from '@/contexts/AnnouncementsContext';
 
 export default function TopNav() {
-  const { user, role, uFirstName, uLastName, loading, error } = useUserInfo();
+  const { user, role, firstName, lastName, loading, error } = useUserInfo();
   const { unread } = useAnnouncements();
   const onNotifications = () => { };
   const display = (v: unknown, fallback = 'Not listed'): string => {

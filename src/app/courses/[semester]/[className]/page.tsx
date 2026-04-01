@@ -15,7 +15,7 @@ const StatisticsPage: FC = () => {
   const searchParams = useSearchParams();
   const onGoing = searchParams.get('onGoing') === 'true';
 
-  const [user, role, loading, roleError] = useUserInfo();
+  const { user, role, loading } = useUserInfo();
 
   const rawId = params.className;
   const courseId = decodeURIComponent(rawId);
@@ -28,14 +28,14 @@ const StatisticsPage: FC = () => {
     onGoing
   );
   if (loading) return <LinearProgress />;
-  if (roleError) return <p>Error loading role</p>;
+  if (error) return <p>Error loading role</p>;
   if (!user) return <p>Please sign in.</p>;
 
   // FIXED: AND, not OR
   if (role !== 'faculty' && role !== 'admin') return <p>Not authorized.</p>;
 
   if (isLoading || loading) return <LinearProgress />;
-  if (error || roleError)
+  if (error || error)
     return <PageLayout mainTitle="Error" navItems={getNavItems(role)} />;
   if (!course)
     return (

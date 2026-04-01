@@ -8,7 +8,7 @@ import AnnouncementSections from './AnnouncementSections';
 import { markAnnouncementsSeen } from '@/hooks/Announcements/markAnnouncementAsSeen';
 
 const AnnouncementsPage: FC = () => {
-  const [user, role, loading, error] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
 
   // prevent double-call in dev Strict Mode
   const didMarkRef = useRef(false);

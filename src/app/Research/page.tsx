@@ -13,7 +13,7 @@ import {
 } from '@/services/researchService';
 
 const ResearchPage: React.FC = () => {
-  const [user, role, loading, error] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
 
   const [department, setDepartment] = React.useState('');
   const [studentLevel, setStudentLevel] = React.useState('');

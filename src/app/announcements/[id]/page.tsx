@@ -7,9 +7,9 @@ import { LinearProgress } from '@mui/material';
 import AnnouncementView from '@/components/AnnouncementView/AnnouncementView';
 import { useFetchAnnouncementById } from '@/hooks/Announcements/useFetchAnnouncementById';
 
-export default function AnnouncementPage({}: {}) {
+export default function AnnouncementPage({ }: {}) {
   const params = useParams<{ id: string }>();
-  const [user, role, loading, roleError] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
   const {
     data,
     isLoading: appLoading,

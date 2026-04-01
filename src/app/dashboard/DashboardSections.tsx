@@ -11,7 +11,7 @@ export default function DashboardSections({
   role: Role;
   navItems: NavbarItem[];
 }) {
-  const [user] = useUserInfo();
+  const { user } = useUserInfo();
   console.log(role);
   switch (role) {
     case 'Student':

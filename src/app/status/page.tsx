@@ -8,7 +8,7 @@ import { useFetchAssignments } from '@/hooks/Applications/useFetchStudentApplica
 import { getNavItems } from '@/hooks/useGetItems';
 
 const StatusPage: FC = () => {
-  const [user, role, userLoading, userError] = useUserInfo();
+  const { user, role, loading, error } = useUserInfo();
   const {
     assignments,
     courses,
