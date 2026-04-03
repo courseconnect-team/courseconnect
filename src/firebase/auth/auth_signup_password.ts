@@ -49,6 +49,7 @@ export default async function handleSignUp(
     );
     if (errorTag === '') {
       console.log('User created successfully!!!');
+      console.log(auth.currentUser);
       return auth.currentUser?.uid as string;
     } else {
       return errorTag;

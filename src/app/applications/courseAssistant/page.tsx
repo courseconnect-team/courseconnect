@@ -16,90 +16,92 @@ import AdditionalSemesterPrompt from '@/component/FormUtil/AddtlSemesterPrompt';
 import UpdateRole from '@/firebase/util/UpdateUserRole';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { Toaster, toast } from 'react-hot-toast';
-import { FilledInput } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
 import { useState } from 'react';
-import Chip from '@mui/material/Chip';
 import { useRouter } from 'next/navigation';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import ListItemText from '@mui/material/ListItemText';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Checkbox from '@mui/material/Checkbox';
-import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
+import Autocomplete from '@mui/material/Autocomplete';
 import HeaderCard from '@/components/HeaderCard/HeaderCard';
 import {
   fetchClosestSemesters,
   parseCoursesMinimal,
+  CourseOption,
 } from '@/hooks/useSemesterOptions';
-import { CourseOption } from '@/hooks/useSemesterOptions';
 import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
 import { getFirestore } from 'firebase/firestore';
 import { callFunction } from '@/firebase/functions/callFunction';
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-import { styled, lighten, darken } from '@mui/system';
 
-const GroupHeader = styled('div')(({ theme }) => ({
-  position: 'sticky',
-  top: '-8px',
-  padding: '4px 10px',
-  color: theme.palette.primary.main,
-  backgroundColor: lighten(theme.palette.primary.light, 0.85),
-}));
-
-const GroupItems = styled('ul')({
-  padding: 0,
-});
-// note that the application needs to be able to be connected to a specific faculty member
-// so that the faculty member can view the application and accept/reject it
-// the user can indicate whether or not it is unspecified I suppose?
-// but that would leave a little bit of a mess.
-// best to parse the existing courses and then have the user select
-// from a list of existing courses
-// ...yeah that's probably the best way to do it
 export default function Application() {
-  // get the current user's uid
   const router = useRouter();
   const { user } = useAuth();
   const userId = user.uid;
 
-  // get the current date in month/day/year format
   const current = new Date();
-  const current_date = `${
-    current.getMonth() + 1
-  }-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${current.getMonth() + 1}-${current.getDate()}-${current.getFullYear()}`;
 
-  // extract the nationality
   const [nationality, setNationality] = React.useState<string | null>(null);
-
   const [additionalPromptValue, setAdditionalPromptValue] = React.useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = React.useState(false);
+
+  const [selectedCourses, setSelectedCourses] = React.useState<string[]>([]);
+  const [names, setNames] = useState<{ raw: string; semester: string }[]>([]);
+
   const handleAdditionalPromptChange = (newValue: string) => {
     setAdditionalPromptValue(newValue);
   };
-  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const visibleSems = await fetchClosestSemesters(3);
+        console.log('Visible semesters:', visibleSems);
+
+        const allCourses: { raw: string; semester: string }[] = [];
+
+        await Promise.all(
+          visibleSems.map(async (semesterId) => {
+            const snapshot = await firebase
+              .firestore()
+              .collection('semesters')
+              .doc(semesterId)
+              .collection('courses')
+              .get();
+
+            snapshot.docs.forEach((doc) => {
+              allCourses.push({
+                raw: doc.id,
+                semester: semesterId,
+              });
+            });
+          })
+        );
+
+        setNames(allCourses);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    const handleSendEmail = async () => {
+    const handleSendEmail = async (applicationData: {
+      email: string;
+      position: string;
+    }) => {
       try {
-        let courseNamesWithSemester = coursesArray.map((course) => {
-          let parts = course.split(' :');
-          let courseNameWithSemester = parts[0].trim();
-          return courseNameWithSemester; // Get the first part and trim any extra spaces
+        const courseNamesWithSemester = selectedCourses.map((course) => {
+          const [semester, raw] = course.split('|||');
+          const [courseCode] = raw.split(':');
+          return `${courseCode.trim()} (${semester})`;
         });
-        let resultString = courseNamesWithSemester.join(', ');
+
+        const resultString = courseNamesWithSemester.join(', ');
 
         await callFunction('sendEmail', {
           type: 'applicationConfirmation',
@@ -119,10 +121,9 @@ export default function Application() {
 
     setLoading(true);
     event.preventDefault();
-    // extract the form data from the current event
+
     const formData = new FormData(event.currentTarget);
 
-    // extract availability checkbox's values
     const availabilityCheckbox_seven =
       formData.get('availabilityCheckbox_seven') === 'on';
     const availabilityCheckbox_fourteen =
@@ -131,29 +132,23 @@ export default function Application() {
       formData.get('availabilityCheckbox_twenty') === 'on';
 
     const availabilityArray: string[] = [];
-    if (availabilityCheckbox_seven) {
-      availabilityArray.push('7');
-    }
-    if (availabilityCheckbox_fourteen) {
-      availabilityArray.push('14');
-    }
-    if (availabilityCheckbox_twenty) {
-      availabilityArray.push('20');
-    }
+    if (availabilityCheckbox_seven) availabilityArray.push('7');
+    if (availabilityCheckbox_fourteen) availabilityArray.push('14');
+    if (availabilityCheckbox_twenty) availabilityArray.push('20');
 
     const semesterArray: string[] = [];
+    semesterArray.push(...(await fetchClosestSemesters(3)));
 
-    semesterArray.push(...(await fetchClosestSemesters(1)));
-
-    // get courses as array
     const coursesArray = selectedCourses;
 
-    let coursesMap: { [key: string]: 'applied' | 'approved' | 'denied' | 'accepted' } = {};
+    const coursesMap: {
+      [key: string]: 'applied' | 'approved' | 'denied' | 'accepted';
+    } = {};
+
     for (let i = 0; i < coursesArray.length; i++) {
       coursesMap[coursesArray[i]] = 'applied';
     }
 
-    // extract the specific user data from the form data into a parsable object
     const applicationData = {
       application_type: 'course_assistant' as const,
       firstname: formData.get('firstName') as string,
@@ -191,7 +186,7 @@ export default function Application() {
       toast.error('Please enter a valid last name!');
       setLoading(false);
       return;
-    } else if (applicationData.ufid == '') {
+    } else if (applicationData.ufid === '') {
       toast.error('Please enter a valid ufid!');
       setLoading(false);
       return;
@@ -234,15 +229,15 @@ export default function Application() {
       toast.error('Please enter a position!');
       setLoading(false);
       return;
-    } else if (applicationData.available_hours.length == 0) {
+    } else if (applicationData.available_hours.length === 0) {
       toast.error('Please enter your available hours!');
       setLoading(false);
       return;
-    } else if (applicationData.available_semesters.length == 0) {
+    } else if (applicationData.available_semesters.length === 0) {
       toast.error('Please enter your available semesters!');
       setLoading(false);
       return;
-    } else if (coursesArray.length == 0) {
+    } else if (coursesArray.length === 0) {
       toast.error('Please enter your courses!');
       setLoading(false);
       return;
@@ -250,12 +245,17 @@ export default function Application() {
       const toastId = toast.loading('Processing application', {
         duration: 30000,
       });
-      await firebase.firestore().collection('assignments').doc(userId).delete();
 
       try {
-        // Save application directly to Firestore using repository
+        await firebase.firestore().collection('assignments').doc(userId).delete();
+      } catch (err) {
+        console.log('No prior assignment doc to delete or delete failed:', err);
+      }
+
+      try {
         const db = getFirestore();
         const repo = new ApplicationRepository(db);
+
         const applicationId = await repo.saveApplication(
           userId,
           'course_assistant',
@@ -264,27 +264,27 @@ export default function Application() {
 
         console.log('Application saved with ID:', applicationId);
 
-        // Send confirmation email
-        await handleSendEmail();
+        await handleSendEmail({
+          email: applicationData.email,
+          position: applicationData.position,
+        });
 
         toast.dismiss(toastId);
         toast.success('Application submitted!');
         console.log('SUCCESS: Application data saved successfully');
 
-        // Update the role of the user to student_applied
         await UpdateRole(userId, 'student_applied');
-
-        // Redirect to home
         router.push('/');
       } catch (error) {
         toast.dismiss(toastId);
         toast.error('Application submission failed!');
         console.error('ERROR: Failed to save application:', error);
       }
+
       setLoading(false);
     }
   };
-  const [success, setSuccess] = React.useState(false);
+
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
     ref
@@ -296,52 +296,9 @@ export default function Application() {
     event?: React.SyntheticEvent | Event,
     reason?: string
   ) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
+    if (reason === 'clickaway') return;
     setSuccess(false);
   };
-
-  const [selectedCourses, setSelectedCourses] = React.useState<string[]>([]);
-
-  const handleChange = (event: SelectChangeEvent<typeof selectedCourses>) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedCourses(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value
-    );
-  };
-  const [names, setNames] = useState<string[]>([]);
-
-  React.useEffect(() => {
-    async function fetchData() {
-      try {
-        let data: string[] = [];
-        let visibleSems: string[] = await fetchClosestSemesters(1);
-        await firebase
-          .firestore()
-          .collection('semesters')
-          .doc(visibleSems[0])
-          .collection('courses')
-          .get()
-          .then((snapshot) =>
-            snapshot.docs.map((doc) => {
-              if (visibleSems.includes(doc.data().semester)) {
-                data.push(doc.id);
-              }
-            })
-          );
-
-        setNames(data);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    fetchData();
-  }, []);
 
   const courseOptions = parseCoursesMinimal(names);
 
@@ -359,7 +316,9 @@ export default function Application() {
             Application submitted successfully!
           </Alert>
         </Snackbar>
+
         <CssBaseline />
+
         <Box
           sx={{
             display: 'flex',
@@ -368,12 +327,14 @@ export default function Application() {
           }}
         >
           <Box component="form" noValidate onSubmit={handleSubmit}>
-            <Grid item xs={12} sm={6} sx={{}}>
+            <Grid item xs={12} sm={6}>
               <Typography align="center" component="h2" variant="h6">
                 Personal Information
               </Typography>
             </Grid>
+
             <br />
+
             <Grid container spacing={2} sx={{ marginTop: 0 }}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -387,6 +348,7 @@ export default function Application() {
                   autoFocus
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   required
@@ -398,6 +360,7 @@ export default function Application() {
                   autoComplete="family-name"
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   required
@@ -410,6 +373,7 @@ export default function Application() {
                   helperText="Enter your UF email address. Example: gator@ufl.edu"
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   required
@@ -421,6 +385,7 @@ export default function Application() {
                   helperText="Enter your UFID. Example: 12345678"
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <TextField
                   required
@@ -434,6 +399,7 @@ export default function Application() {
                   helperText="Enter your phone number. Example: 123-456-7890"
                 />
               </Grid>
+
               <Grid
                 item
                 xs={22}
@@ -443,18 +409,21 @@ export default function Application() {
               >
                 <DepartmentSelect />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <SemesterStatusSelect
                   component={AdditionalSemesterPrompt}
                   onValueChange={handleAdditionalPromptChange}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6}>
                 <DegreeSelect />
               </Grid>
             </Grid>
 
             <br />
+
             <Typography
               align="center"
               component="h2"
@@ -463,7 +432,9 @@ export default function Application() {
             >
               Position Information
             </Typography>
+
             <br />
+
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Typography>
@@ -472,6 +443,7 @@ export default function Application() {
                 </Typography>
                 <PositionSelect />
               </Grid>
+
               <Grid item xs={12}>
                 <Typography>
                   Please select one or more options describing the number of
@@ -479,6 +451,7 @@ export default function Application() {
                 </Typography>
                 <AvailabilityCheckbox name="availabilityCheckbox" />
               </Grid>
+
               <Grid item xs={12}>
                 <Typography>
                   Please list the course(s) for which you are applying. Ensure
@@ -490,8 +463,8 @@ export default function Application() {
                   <Autocomplete<CourseOption, true, false, false>
                     multiple
                     disableCloseOnSelect
-                    options={courseOptions.sort(
-                      (a, b) => -b.code.localeCompare(a.code)
+                    options={[...courseOptions].sort((a, b) =>
+                      a.code.localeCompare(b.code)
                     )}
                     groupBy={(o) => o.department}
                     getOptionLabel={(o) => o.name}
@@ -508,6 +481,7 @@ export default function Application() {
                   />
                 </FormControl>
               </Grid>
+
               <Grid item xs={12}>
                 <Typography>
                   Please provide your most recently calculated cumulative UF
@@ -516,6 +490,7 @@ export default function Application() {
                 <br />
                 <GPA_Select />
               </Grid>
+
               <Grid item xs={12}>
                 <Typography sx={{ paddingBottom: 2 }}>
                   Please upload a google drive link to your resume.
@@ -529,6 +504,7 @@ export default function Application() {
                   name="resumeLink"
                 />
               </Grid>
+
               <Grid item xs={12}>
                 <Typography>
                   Please describe your qualifications for the position and
@@ -537,7 +513,8 @@ export default function Application() {
                     If you have been a TA, UPI, or grader before, please mention
                     the course(s) and teacher(s) for which you worked.
                   </em>{' '}
-                  <br /> <br />
+                  <br />
+                  <br />
                   Write about any relevant experience, such as teaching,
                   tutoring, grading, or coursework. <br />
                 </Typography>
@@ -552,6 +529,7 @@ export default function Application() {
                   variant="filled"
                 />
               </Grid>
+
               <Grid item xs={12}></Grid>
             </Grid>
 
@@ -560,12 +538,13 @@ export default function Application() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
-              Submit
+              {loading ? 'Submitting...' : 'Submit'}
             </Button>
           </Box>
         </Box>
-      </HeaderCard>{' '}
+      </HeaderCard>
     </>
   );
 }

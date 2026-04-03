@@ -1,0 +1,239 @@
+[debug] [2026-04-03T19:30:08.559Z] ----------------------------------------------------------------------
+[debug] [2026-04-03T19:30:08.561Z] Command:       /usr/bin/node /usr/bin/firebase deploy --only functions:processSignUpForm
+[debug] [2026-04-03T19:30:08.561Z] CLI Version:   15.13.0
+[debug] [2026-04-03T19:30:08.561Z] Platform:      linux
+[debug] [2026-04-03T19:30:08.561Z] Node Version:  v20.20.0
+[debug] [2026-04-03T19:30:08.561Z] Time:          Fri Apr 03 2026 15:30:08 GMT-0400 (Eastern Daylight Time)
+[debug] [2026-04-03T19:30:08.561Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-03T19:30:09.179Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-03T19:30:09.179Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2026-04-03T19:30:09.179Z] [iam] checking project courseconnect-c6a7b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2026-04-03T19:30:09.180Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:09.180Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:09.181Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2026-04-03T19:30:09.181Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions  x-goog-user-project=courseconnect-c6a7b
+[debug] [2026-04-03T19:30:09.181Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2026-04-03T19:30:09.381Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2026-04-03T19:30:09.382Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2026-04-03T19:30:09.382Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:09.382Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:09.382Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2026-04-03T19:30:09.382Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2026-04-03T19:30:09.579Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2026-04-03T19:30:09.579Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/courseconnect-c6a7b/serviceAccounts/courseconnect-c6a7b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'courseconnect-c6a7b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] ✔  functions: Finished running predeploy script. 
+[debug] [2026-04-03T19:30:10.918Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:10.918Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:10.918Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b [none]
+[debug] [2026-04-03T19:30:10.987Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b 200
+[debug] [2026-04-03T19:30:10.987Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b {"projectNumber":"1095880459709","projectId":"courseconnect-c6a7b","lifecycleState":"ACTIVE","name":"courseconnect","labels":{"firebase":"enabled"},"createTime":"2023-05-26T18:15:07.259008Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2026-04-03T19:30:10.988Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:10.988Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:10.988Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig [none]
+[debug] [2026-04-03T19:30:11.371Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig 200
+[debug] [2026-04-03T19:30:11.371Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/courseconnect-c6a7b/adminSdkConfig {"projectId":"courseconnect-c6a7b","storageBucket":"courseconnect-c6a7b.firebasestorage.app"}
+[debug] [2026-04-03T19:30:11.371Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:11.371Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:11.371Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs [none]
+[debug] [2026-04-03T19:30:11.675Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs 200
+[debug] [2026-04-03T19:30:11.676Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/courseconnect-c6a7b/configs {}
+[debug] [2026-04-03T19:30:11.677Z] Validating nodejs source
+[warn] ⚠  functions: Runtime Node.js 20 will be deprecated on 2026-04-30 and will be decommissioned on 2026-10-30, after which you will not be able to deploy without upgrading. Consider upgrading now to avoid disruption. See https://cloud.google.com/functions/docs/runtime-support for full details on the lifecycle policy 
+[warn] ⚠  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] ⚠  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-04-03T19:30:12.021Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "firebase-admin": "^11.8.0",
+    "firebase-functions": "^5.1.1",
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.5"
+  },
+  "private": true
+}
+[debug] [2026-04-03T19:30:12.022Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2026-04-03T19:30:12.022Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-04-03T19:30:12.025Z] Found firebase-functions binary at '/home/mrinall/courseconnect/functions/node_modules/.bin/firebase-functions'
+[info] Serving at port 8901
+
+[debug] [2026-04-03T19:30:12.225Z] Got response from /__/functions.yaml {"endpoints":{"sendEmail":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"sendEmail"},"processSignUpForm":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"processSignUpForm"},"processApplicationForm":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"processApplicationForm"},"processCreateCourseForm":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"processCreateCourseForm"},"deleteUserFromID":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"deleteUserFromID"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled... 
+[debug] [2026-04-03T19:30:16.248Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-03T19:30:16.248Z] > authorizing via signed-in user (courseconnect.team@gmail.com)
+[debug] [2026-04-03T19:30:16.248Z] [iam] checking project courseconnect-c6a7b for permissions ["firebase.projects.get","firebaseextensions.instances.list"]
+[debug] [2026-04-03T19:30:16.248Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:16.248Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:16.248Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions [none]
+[debug] [2026-04-03T19:30:16.248Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions  x-goog-user-project=courseconnect-c6a7b
+[debug] [2026-04-03T19:30:16.249Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2026-04-03T19:30:16.476Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions 200
+[debug] [2026-04-03T19:30:16.476Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2026-04-03T19:30:16.476Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:16.476Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:16.477Z] >>> [apiv2][query] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances pageSize=100&pageToken=
+[debug] [2026-04-03T19:30:16.874Z] <<< [apiv2][status] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances 200
+[debug] [2026-04-03T19:30:16.874Z] <<< [apiv2][body] GET https://firebaseextensions.googleapis.com/v1beta/projects/courseconnect-c6a7b/instances {}
+[info] i  functions: preparing functions directory for uploading... 
+[info] i  functions: packaged /home/mrinall/courseconnect/functions (84.43 KB) for uploading 
+[debug] [2026-04-03T19:30:16.911Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:16.911Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:16.911Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions [none]
+[debug] [2026-04-03T19:30:17.616Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions 200
+[debug] [2026-04-03T19:30:17.616Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v1/projects/courseconnect-c6a7b/locations/-/functions {"functions":[{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processCreateCourseForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processCreateCourseForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processCreateCourseForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2026-02-15T17:24:54.450489529Z","versionId":"46","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"5ac07024b4321ce6f9d3c4c4b4704ff5caf2c08e"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/32ea5eae-ce5e-47d9-a5cb-67e9e14145fe.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.firebasestorage.app\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processCreateCourseForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"f9fbe509-6b05-416c-b41f-fda4c9967de0","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/f9fbe509-6b05-416c-b41f-fda4c9967de0","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/sendEmail","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"sendEmail","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2026-02-15T17:24:54.490350282Z","versionId":"29","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"5ac07024b4321ce6f9d3c4c4b4704ff5caf2c08e"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/32ea5eae-ce5e-47d9-a5cb-67e9e14145fe.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.firebasestorage.app\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/sendEmail"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"f9fbe509-6b05-416c-b41f-fda4c9967de0","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/f9fbe509-6b05-416c-b41f-fda4c9967de0","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processSignUpForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processSignUpForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processSignUpForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2026-02-15T17:24:54.516396633Z","versionId":"58","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"5ac07024b4321ce6f9d3c4c4b4704ff5caf2c08e"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/32ea5eae-ce5e-47d9-a5cb-67e9e14145fe.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.firebasestorage.app\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processSignUpForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"f9fbe509-6b05-416c-b41f-fda4c9967de0","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/f9fbe509-6b05-416c-b41f-fda4c9967de0","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/processApplicationForm","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/processApplicationForm","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"processApplicationForm","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2026-02-15T17:24:54.565740713Z","versionId":"50","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"5ac07024b4321ce6f9d3c4c4b4704ff5caf2c08e"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/32ea5eae-ce5e-47d9-a5cb-67e9e14145fe.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.firebasestorage.app\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/processApplicationForm"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"f9fbe509-6b05-416c-b41f-fda4c9967de0","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/f9fbe509-6b05-416c-b41f-fda4c9967de0","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}},{"name":"projects/courseconnect-c6a7b/locations/us-central1/functions/deleteUserFromID","httpsTrigger":{"url":"https://us-central1-courseconnect-c6a7b.cloudfunctions.net/deleteUserFromID","securityLevel":"SECURE_ALWAYS"},"status":"ACTIVE","entryPoint":"deleteUserFromID","timeout":"60s","availableMemoryMb":256,"serviceAccountEmail":"courseconnect-c6a7b@appspot.gserviceaccount.com","updateTime":"2026-02-15T17:24:54.601190492Z","versionId":"44","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"5ac07024b4321ce6f9d3c4c4b4704ff5caf2c08e"},"sourceUploadUrl":"https://storage.googleapis.com/uploads-733394390744.us-central1.cloudfunctions.appspot.com/32ea5eae-ce5e-47d9-a5cb-67e9e14145fe.zip","environmentVariables":{"EMAIL":"courseconnect.team@gmail.com","EMAIL_PASS":"rmwd skjz cibp mutj","ADMINEMAIL":"cbobda@ece.ufl.edu","FIREBASE_CONFIG":"{\"projectId\":\"courseconnect-c6a7b\",\"storageBucket\":\"courseconnect-c6a7b.firebasestorage.app\"}","GCLOUD_PROJECT":"courseconnect-c6a7b","EVENTARC_CLOUD_EVENT_SOURCE":"projects/courseconnect-c6a7b/locations/us-central1/functions/deleteUserFromID"},"runtime":"nodejs18","ingressSettings":"ALLOW_ALL","buildId":"f9fbe509-6b05-416c-b41f-fda4c9967de0","buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"buildName":"projects/1095880459709/locations/us-central1/builds/f9fbe509-6b05-416c-b41f-fda4c9967de0","dockerRegistry":"ARTIFACT_REGISTRY","automaticUpdatePolicy":{}}]}
+[debug] [2026-04-03T19:30:17.617Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:17.617Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:17.617Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions filter=environment%3D%22GEN_2%22
+[debug] [2026-04-03T19:30:18.153Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions 200
+[debug] [2026-04-03T19:30:18.153Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/courseconnect-c6a7b/locations/-/functions {}
+[debug] [2026-04-03T19:30:18.156Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:18.157Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:18.157Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b [none]
+[debug] [2026-04-03T19:30:18.245Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b 200
+[debug] [2026-04-03T19:30:18.245Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/courseconnect-c6a7b {"projectNumber":"1095880459709","projectId":"courseconnect-c6a7b","lifecycleState":"ACTIVE","name":"courseconnect","labels":{"firebase":"enabled"},"createTime":"2023-05-26T18:15:07.259008Z"}
+[debug] [2026-04-03T19:30:18.246Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:18.246Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:18.247Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo [none]
+[debug] [2026-04-03T19:30:18.664Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo 200
+[debug] [2026-04-03T19:30:18.665Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/courseconnect-c6a7b/billingInfo {"name":"projects/courseconnect-c6a7b/billingInfo","projectId":"courseconnect-c6a7b","billingAccountName":"billingAccounts/0119FF-CF2CE6-9CA7E4","billingEnabled":false}
+[debug] [2026-04-03T19:30:18.665Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:18.665Z] Checked if tokens are valid: true, expires at: 1775247450985
+[debug] [2026-04-03T19:30:18.665Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/billingAccounts [none]
+[debug] [2026-04-03T19:30:18.816Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/billingAccounts 200
+[debug] [2026-04-03T19:30:18.816Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/billingAccounts {"billingAccounts":[{"name":"billingAccounts/0119FF-CF2CE6-9CA7E4","open":false,"displayName":"Firebase Payment","masterBillingAccount":"","parent":"","currencyCode":"USD"}],"nextPageToken":""}
+[info] 
+[info] Extension require your project to be upgraded to the Blaze plan. Please visit the following link to add a billing account:
+[info] 
+[info] https://console.cloud.google.com/billing/linkedaccount?project=courseconnect-c6a7b
+[info] 
+[debug] [2026-04-03T19:41:31.991Z] Error: setRawMode EIO
+    at ReadStream.setRawMode (node:tty:76:24)
+    at [_setRawMode] [as _setRawMode] (node:internal/readline/interface:377:18)
+    at Interface.close (node:internal/readline/interface:527:24)
+    at ReadStream.ontermend (node:internal/readline/interface:263:10)
+    at ReadStream.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-04-03T19:41:31.993Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:161:15)
+    at writeGeneric (node:internal/stream_base_commons:152:3)
+    at Socket._writeGeneric (node:net:958:11)
+    at Socket._write (node:net:970:8)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at Console.log (/usr/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-04-03T19:41:31.993Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:161:15)
+    at writeGeneric (node:internal/stream_base_commons:152:3)
+    at Socket._writeGeneric (node:net:958:11)
+    at Socket._write (node:net:970:8)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at Console.log (/usr/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-04-03T19:41:31.993Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:161:15)
+    at writeGeneric (node:internal/stream_base_commons:152:3)
+    at Socket._writeGeneric (node:net:958:11)
+    at Socket._write (node:net:970:8)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at Console.log (/usr/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-04-03T19:41:31.994Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:161:15)
+    at writeGeneric (node:internal/stream_base_commons:152:3)
+    at Socket._writeGeneric (node:net:958:11)
+    at Socket._write (node:net:970:8)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at Console.log (/usr/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-04-03T19:41:31.994Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:161:15)
+    at writeGeneric (node:internal/stream_base_commons:152:3)
+    at Socket._writeGeneric (node:net:958:11)
+    at Socket._write (node:net:970:8)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at Console.log (/usr/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-04-03T19:41:31.994Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:161:15)
+    at writeGeneric (node:internal/stream_base_commons:152:3)
+    at Socket._writeGeneric (node:net:958:11)
+    at Socket._write (node:net:970:8)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at Console.log (/usr/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2026-04-03T19:41:31.995Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:161:15)
+    at writeGeneric (node:internal/stream_base_commons:152:3)
+    at Socket._writeGeneric (node:net:958:11)
+    at Socket._write (node:net:970:8)
+    at writeOrBuffer (node:internal/streams/writable:572:12)
+    at _write (node:internal/streams/writable:501:10)
+    at Writable.write (node:internal/streams/writable:510:10)
+    at Console.log (/usr/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
+    at Console._write (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
+    at doWrite (/usr/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.

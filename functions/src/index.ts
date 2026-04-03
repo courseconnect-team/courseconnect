@@ -377,18 +377,12 @@ export const processSignUpForm = functions.https.onRequest(
       const ufid = readString(body, 'ufid');
       const uid = readString(body, 'uid');
 
-      if (
-        !firstname ||
-        !lastname ||
-        !email ||
-        !department ||
-        !role ||
-        !ufid ||
-        !uid
-      ) {
+      if (!firstname || !lastname || !email || !department || !role || !uid) {
         fail(response, 'Missing required signup fields');
         return;
       }
+
+      const safeUfid = ufid || '';
 
       await auth.getUser(uid);
 
@@ -401,7 +395,7 @@ export const processSignUpForm = functions.https.onRequest(
           email,
           department,
           role,
-          ufid,
+          ufid: safeUfid,
           uid,
           updated_at: admin.firestore.FieldValue.serverTimestamp(),
         };
@@ -420,7 +414,6 @@ export const processSignUpForm = functions.https.onRequest(
     }
   }
 );
-
 export const processApplicationForm = functions.https.onRequest(
   async (request, response) => {
     setCors(request, response);

@@ -1,44 +1,70 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import firebase from '@/firebase/firebase_config';
 
-export type SemesterName = `${'Spring' | 'Summer' | 'Fall'} ${number}`;
+export type SemesterTerm = 'Spring' | 'Summer' | 'Fall';
+export type SemesterName = `${SemesterTerm} ${number}`;
+
+export const TERM_CODE: Record<SemesterTerm, number> = {
+  Spring: 1,
+  Summer: 2,
+  Fall: 3,
+};
 
 export const getCurrentSemester = (): SemesterName => {
   const now = new Date();
   const year = now.getFullYear();
-  const month = now.getMonth() + 1; // 0 = Jan
-  const day = now.getDate();
+  const month = now.getMonth() + 1;
 
-  const term = month < 5 ? 'Spring' : month < 8 ? 'Summer' : 'Fall';
+  const term: SemesterTerm =
+    month < 5 ? 'Spring' : month < 8 ? 'Summer' : 'Fall';
 
   return `${term} ${year}` as SemesterName;
 };
 
 export function generateSemesters(startYear = 2023): SemesterName[] {
-  const currentYear = new Date().getFullYear();
-  const out: string[] = [];
+  const current = getCurrentSemester();
+  const [currentTerm, currentYearStr] = current.split(' ') as [
+    SemesterTerm,
+    string
+  ];
+  const currentYear = Number(currentYearStr);
+
+  const out: SemesterName[] = [];
+
   for (let y = startYear; y <= currentYear; y++) {
     out.push(`Spring ${y}`, `Summer ${y}`, `Fall ${y}`);
   }
 
-  return out.reverse() as SemesterName[];
+  const currentIndex = out.findIndex(
+    (s) => s === `${currentTerm} ${currentYear}` as SemesterName
+  );
+
+  if (currentIndex === -1) return out.reverse();
+
+  return out.slice(0, currentIndex + 1).reverse();
 }
+
+const nextSemester = (semester: SemesterName): SemesterName => {
+  const [term, yearStr] = semester.split(' ') as [SemesterTerm, string];
+  const year = Number(yearStr);
+
+  if (term === 'Spring') return `Summer ${year}` as SemesterName;
+  if (term === 'Summer') return `Fall ${year}` as SemesterName;
+  return `Spring ${year + 1}` as SemesterName;
+};
 
 const generateSemesterNames = (
   start: SemesterName,
   count: number
 ): SemesterName[] => {
-  const result: SemesterName[] = [start];
-  let [term, year] = start.split(' ') as ['Spring' | 'Summer' | 'Fall', string];
-  for (let i = 0; i < count - 1; i++) {
-    if (term === 'Spring') term = 'Summer';
-    else if (term === 'Summer') term = 'Fall';
-    else {
-      term = 'Spring';
-      year = String(Number(year) + 1);
-    }
-    result.push(`${term} ${year}` as SemesterName);
+  const result: SemesterName[] = [];
+  let curr = start;
+
+  for (let i = 0; i < count; i++) {
+    result.push(curr);
+    curr = nextSemester(curr);
   }
+
   return result;
 };
 
@@ -50,7 +76,7 @@ export function useSemesters(listLength = 3) {
   );
 
   return {
-    options, // ['Spring 2025', 'Summer 2025', 'Fall 2025', ...]
+    options,
     currentSemester: current,
   };
 }
@@ -60,47 +86,45 @@ export async function fetchSemesterIds(): Promise<string[]> {
   return snap.docs.map((doc) => doc.id);
 }
 
-export async function fetchClosestSemesters(n: number): Promise<string[]> {
-  const snap = await firebase
-    .firestore()
-    .collection('semesters')
-    .orderBy('sortKey', 'desc')
-    .limit(n)
-    .get();
-  return snap.docs.map((doc) => doc.id);
+export async function fetchClosestSemesters(
+  n: number
+): Promise<SemesterName[]> {
+  const current = getCurrentSemester();
+  return generateSemesterNames(current, n);
 }
-
-export const TERM_CODE: Record<string, number> = {
-  Spring: 1,
-  Summer: 2,
-  Fall: 3,
-};
 
 export type CourseOption = {
   code: string;
   instructor: string;
   department: string;
-  value: string; // stable id (e.g., original raw)
-  name: string; // display label
+  semester: string;
+  value: string;
+  name: string;
 };
 
-export function parseCoursesMinimal(names: string[]): CourseOption[] {
-  return names.map((name) => {
-    const safe = String(name ?? '').trim();
+export function parseCoursesMinimal(
+  courses: { raw: string; semester: string }[]
+): CourseOption[] {
+  return courses.map(({ raw, semester }) => {
+    const safe = String(raw ?? '').trim();
     const [left, right = ''] = safe.split(':', 2);
     const code = (left ?? '').trim();
     const instrRaw = right.trim();
+
     const instructor =
       instrRaw && instrRaw.toLowerCase() !== 'undefined'
         ? instrRaw
         : 'Instructor Unknown';
+
     const department = code.slice(0, 3).toUpperCase();
+
     return {
       code,
       instructor,
       department,
-      value: name,
-      name: `${code} : ${instructor}`,
+      semester,
+      value: `${semester}|||${safe}`,
+      name: `${code} : ${instructor} (${semester})`,
     };
   });
 }
