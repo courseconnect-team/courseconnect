@@ -6,7 +6,6 @@ import {
   sendEmailVerification,
   updateProfile,
 } from 'firebase/auth';
-isE2EMode;
 
 export default async function handleSignUp(
   name: string,
@@ -18,14 +17,13 @@ export default async function handleSignUp(
   // the data from the form, identified by the user's firebase auth uid
   if (isE2EMode()) return '';
 
-  var errorTag: string = '';
+  let errorTag: string = '';
 
   const auth = firebase.auth();
 
   try {
     await createUserWithEmailAndPassword(auth, email, password).catch(
       (error) => {
-        console.log(error);
         if (error.message.includes('already in use')) {
           errorTag = '-5';
         } else {
@@ -33,30 +31,24 @@ export default async function handleSignUp(
         }
       }
     );
-    if (errorTag != '') {
+    if (errorTag !== '') {
       return errorTag;
     }
-    await sendEmailVerification(auth.currentUser as User).catch((error) => {
-      console.log(error);
+    await sendEmailVerification(auth.currentUser as User).catch(() => {
       errorTag = '-3';
     });
     await updateProfile(auth.currentUser as User, { displayName: name }).catch(
-      (error) => {
-        console.log(error);
-
+      () => {
         errorTag = '-4';
       }
     );
     if (errorTag === '') {
-      console.log('User created successfully!!!');
-      console.log(auth.currentUser);
       return auth.currentUser?.uid as string;
     } else {
       return errorTag;
     }
-  } catch (error) {
-    console.log(errorTag);
-    console.log('Error creating user: ', error);
+  } catch {
+    // signup failed – errorTag already set by inner .catch handlers
   }
 
   return errorTag;

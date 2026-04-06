@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
         !user &&
         pathname !== '/' &&
         pathname !== '/signup' &&
-        pathname != '/signin' &&
+        pathname !== '/signin' &&
         pathname !== '/about' &&
         pathname !== '/features'
       ) {

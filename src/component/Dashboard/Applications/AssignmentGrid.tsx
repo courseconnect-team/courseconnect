@@ -147,15 +147,15 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             id: doc.id,
             ...doc.data(),
             firstName:
-              doc.data().name != undefined
+              doc.data().name !== undefined
                 ? doc.data().name.split(' ')[0]
                 : ' ',
             lastName:
-              doc.data().name != undefined
+              doc.data().name !== undefined
                 ? doc.data().name.split(' ')[1]
                 : ' ',
             year:
-              doc.data().semesters != undefined
+              doc.data().semesters !== undefined
                 ? doc.data().semesters[0].split(' ')[1]
                 : ' ',
             fte: 15,
@@ -336,7 +336,6 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
   };
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(delId!.toString());
     handleDeleteClick(delId!);
     setDelDia(false);
   };
@@ -446,7 +445,7 @@ export default function AssignmentGrid(props: AssignmentGridProps) {
             View
           </Button>,
           <Button
-            key="3"
+            key="4"
             variant="outlined"
             color="inherit"
             size="small"

@@ -44,9 +44,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
-
-    console.log(loading);
-
     event.preventDefault();
     // extract the form data from the current event
     const formData = new FormData(event.currentTarget);
@@ -75,8 +72,8 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       num_enrolled: formData.get('num-enrolled') as string,
     };
 
-    var testRegex = /^[a-zA-Z0-9]+$/;
-    var numberRegex = /^[0-9]+$/;
+    const testRegex = /^[a-zA-Z0-9]+$/;
+    const numberRegex = /^[0-9]+$/;
     if (!testRegex.test(courseData.code)) {
       toast.error(
         'Course code should only consist of number or letters (no spaces)!'
@@ -85,16 +82,16 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     } else if (courseData.code === '') {
       toast.error('Please enter a course code!');
       return;
-    } else if (courseData.title == '') {
+    } else if (courseData.title === '') {
       toast.error('Please enter a course title!');
       return;
-    } else if (courseData.id.length != 5 || !numberRegex.test(courseData.id)) {
+    } else if (courseData.id.length !== 5 || !numberRegex.test(courseData.id)) {
       toast.error('Please enter a valid class number!');
       return;
-    } else if (courseData.professor_names.length == 0) {
+    } else if (courseData.professor_names.length === 0) {
       toast.error('Please enter professor names!');
       return;
-    } else if (courseData.professor_emails.length == 0) {
+    } else if (courseData.professor_emails.length === 0) {
       toast.error('Please enter professor emails!');
       return;
     } else if (courseData.credits === '') {
@@ -119,7 +116,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
     // the data from the form, identified by the user's firebase auth uid
     try {
       await callFunction('processCreateCourseForm', courseData);
-      console.log('SUCCESS: Course data sent to server successfully');
       // Update the course data with the new row
       setCourseData((oldRows) => [...oldRows, courseData]);
       setSuccess(true);
@@ -127,8 +123,6 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       handleClose();
       setLoading(false);
     } catch (error) {
-      console.error(error);
-      console.log('ERROR: Course data failed to send to server');
       toast.error('Course data failed to send to server!');
       setLoading(false);
     }

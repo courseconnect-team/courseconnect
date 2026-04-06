@@ -94,7 +94,6 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
     try {
       await repo.updateCourseStatusLatest(currentStu, className, 'accepted');
-      console.log('Application approved successfully');
       window.location.reload();
     } catch (error) {
       console.error('Error approving application:', error);
@@ -105,7 +104,6 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
     event.preventDefault();
     try {
       await repo.updateCourseStatusLatest(currentStu, className, 'denied');
-      console.log('Application denied successfully');
       handleDenyEmail();
       window.location.reload();
     } catch (error) {
@@ -121,19 +119,25 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
     setOpenDenyDialog(false);
   };
 
-  const onThumbUpClick = useCallback((event: any) => {
-    event?.stopPropagation();
+  const onThumbUpClick = useCallback(
+    (event: any) => {
+      event?.stopPropagation();
 
-    setOpenApproveDialog(true);
-    setCurrentStu(id);
-  }, []);
+      setOpenApproveDialog(true);
+      setCurrentStu(id);
+    },
+    [id, setOpenApproveDialog, setCurrentStu]
+  );
 
-  const onThumbDownIconClick = useCallback((event: any) => {
-    event?.stopPropagation();
+  const onThumbDownIconClick = useCallback(
+    (event: any) => {
+      event?.stopPropagation();
 
-    setOpenDenyDialog(true);
-    setCurrentStu(id);
-  }, []);
+      setOpenDenyDialog(true);
+      setCurrentStu(id);
+    },
+    [id, setOpenDenyDialog, setCurrentStu]
+  );
 
   const renderApproveDialog = () => (
     <Dialog
@@ -416,7 +420,11 @@ const ApplicantCardApprovedeny: FunctionComponent<ApplicantCardProps> = ({
 
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50">Available Hours Per Week:</div>
-                <div className="availability1">{Array.isArray(availability) ? availability.join(', ') : availability}</div>
+                <div className="availability1">
+                  {Array.isArray(availability)
+                    ? availability.join(', ')
+                    : availability}
+                </div>
               </div>
 
               <br></br>

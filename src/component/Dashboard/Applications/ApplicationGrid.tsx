@@ -34,7 +34,14 @@ import {
 } from '@mui/x-data-grid';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { query, where, collection, getDocs, getDoc, getFirestore } from 'firebase/firestore';
+import {
+  query,
+  where,
+  collection,
+  getDocs,
+  getDoc,
+  getFirestore,
+} from 'firebase/firestore';
 import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
 import { callFunction } from '@/firebase/functions/callFunction';
 
@@ -118,11 +125,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleOpenAssignmentDialog = async (id: GridRowId) => {
     // id is the auto-generated document ID in the course_assistant collection
-    const app = await repo.getApplicationById('course_assistant', id.toString());
+    const app = await repo.getApplicationById(
+      'course_assistant',
+      id.toString()
+    );
     if (app?.courses) {
       setCodes(
         Object.entries(app.courses)
-          .filter(([key, value]) => value == 'approved')
+          .filter(([key, value]) => value === 'approved')
           .map(([key, value]) => key)
       );
     }
@@ -132,11 +142,14 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleDenyAssignmentDialog = async (id: GridRowId) => {
     // id is the auto-generated document ID in the course_assistant collection
-    const app = await repo.getApplicationById('course_assistant', id.toString());
+    const app = await repo.getApplicationById(
+      'course_assistant',
+      id.toString()
+    );
     if (app?.courses) {
       setCodes(
         Object.entries(app.courses)
-          .filter(([key, value]) => value == 'denied')
+          .filter(([key, value]) => value === 'denied')
           .map(([key, value]) => key)
       );
     }
@@ -160,7 +173,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     try {
       const applicationDocId = selectedUserGrid as string;
       // Get the application by its auto-generated doc ID
-      const appData = await repo.getApplicationById('course_assistant', applicationDocId);
+      const appData = await repo.getApplicationById(
+        'course_assistant',
+        applicationDocId
+      );
       const student_uid = appData?.uid || applicationDocId;
 
       const courseDetails = firebase
@@ -170,7 +186,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const courseDoc = await getDoc(courseDetails);
 
       // Update application status and course status using repository
-      await repo.updateApplicationStatus('course_assistant', applicationDocId, 'Admin_approved');
+      await repo.updateApplicationStatus(
+        'course_assistant',
+        applicationDocId,
+        'Admin_approved'
+      );
       await repo.updateCourseStatus(applicationDocId, valueRadio, 'approved');
 
       // Get the current date in month/day/year format
@@ -319,9 +339,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const unsubscribe = courseAssistantRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
           .filter(function (doc) {
-            if (doc.data().status != 'Admin_denied') {
+            if (doc.data().status !== 'Admin_denied') {
               if (
-                doc.data().status == 'Admin_approved' &&
+                doc.data().status === 'Admin_approved' &&
                 doc.data().courses &&
                 Object.values(doc.data().courses).length < 2
               ) {
@@ -334,18 +354,20 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           })
           .map(
             (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-              courses: doc.data().courses
-                ? Object.entries(doc.data().courses)
-                    .filter(([key, value]) => value == 'approved')
-                    .map(([key, value]) => key)
-                : [],
-              allcourses: doc.data().courses
-                ? Object.entries(doc.data().courses).map(([key, value]) => key)
-                : [],
-            } as Application)
+              ({
+                id: doc.id,
+                ...doc.data(),
+                courses: doc.data().courses
+                  ? Object.entries(doc.data().courses)
+                      .filter(([key, value]) => value === 'approved')
+                      .map(([key, value]) => key)
+                  : [],
+                allcourses: doc.data().courses
+                  ? Object.entries(doc.data().courses).map(
+                      ([key, value]) => key
+                    )
+                  : [],
+              } as Application)
           );
         setApplicationData(data);
       });
@@ -389,16 +411,19 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleDenyEmail = async (id: GridRowId) => {
     try {
       // id is the auto-generated doc ID in course_assistant collection
-      const applicationData = await repo.getApplicationById('course_assistant', id.toString());
+      const applicationData = await repo.getApplicationById(
+        'course_assistant',
+        id.toString()
+      );
 
       if (applicationData) {
-
         await callFunction('sendEmail', {
           type: 'applicationStatusDenied',
           data: {
             user: {
-              name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
-                }`.trim(),
+              name: `${applicationData.firstname ?? ''} ${
+                applicationData.lastname ?? ''
+              }`.trim(),
               email: applicationData.email,
             },
             position: applicationData.position,
@@ -416,7 +441,10 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleSendEmail = async (id: GridRowId) => {
     try {
       // id has student_uid which is the user ID
-      const applicationData = await repo.getLatestApplication(id.student_uid.toString(), 'course_assistant');
+      const applicationData = await repo.getLatestApplication(
+        id.student_uid.toString(),
+        'course_assistant'
+      );
       const snapshot2 = await firebase
         .firestore()
         .collection('assignments')
@@ -430,8 +458,9 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
           type: 'applicationStatusApproved',
           data: {
             user: {
-              name: `${applicationData.firstname ?? ''} ${applicationData.lastname ?? ''
-                }`.trim(),
+              name: `${applicationData.firstname ?? ''} ${
+                applicationData.lastname ?? ''
+              }`.trim(),
               email: applicationData.email,
             },
             position: assignmentData.position,
@@ -448,12 +477,15 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   // approve/deny click handlers
   const handleDenyClick = async (id: GridRowId) => {
-    event.preventDefault();
     setLoading(true);
 
     try {
       // id is auto-generated doc ID in course_assistant collection
-      await repo.updateApplicationStatus('course_assistant', id.toString(), 'Admin_denied');
+      await repo.updateApplicationStatus(
+        'course_assistant',
+        id.toString(),
+        'Admin_denied'
+      );
 
       // Remove the denied row from the local state
       setApplicationData((prevData) => {
@@ -475,7 +507,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setLoading(true);
     try {
       // id is auto-generated doc ID in course_assistant collection
-      await repo.updateApplicationStatus('course_assistant', id.toString(), 'Approved');
+      await repo.updateApplicationStatus(
+        'course_assistant',
+        id.toString(),
+        'Approved'
+      );
 
       // Update the state locally to avoid reloading the entire data
       setApplicationData((prevData) =>
@@ -501,7 +537,8 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setLoading(true);
     const updatedRow = applicationData.find((row) => row.id === id);
     if (updatedRow) {
-      repo.updateApplication('course_assistant', id.toString(), updatedRow)
+      repo
+        .updateApplication('course_assistant', id.toString(), updatedRow)
         .then(() => {
           setRowModesModel({
             ...rowModesModel,
@@ -801,7 +838,6 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         );
       },
     },
-    ,
   ];
 
   if (userRole === 'faculty') {
@@ -1079,7 +1115,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         <DialogTitle>Course Assignment</DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
-            {codes != [] ? (
+            {codes.length > 0 ? (
               <>
                 <DialogContentText>
                   Please select the course code to which the student shall be

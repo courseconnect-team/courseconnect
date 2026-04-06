@@ -20,7 +20,7 @@ export default function DashboardWelcome(props: DashboardProps) {
       <Toaster />
       <div className={styles.studentlandingpage}>
         <div className={styles.overlapwrapper}>
-          {!emailVerified && userRole != 'admin' && (
+          {!emailVerified && userRole !== 'admin' && (
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>
@@ -55,7 +55,7 @@ export default function DashboardWelcome(props: DashboardProps) {
             </div>
           )}
 
-          {(userRole == 'student_applying' || userRole == 'Student') &&
+          {(userRole === 'student_applying' || userRole === 'Student') &&
             emailVerified && (
               <div className={styles.overlap}>
                 <div className={styles.overlap2}>
@@ -93,7 +93,7 @@ export default function DashboardWelcome(props: DashboardProps) {
                 </div>
               </div>
             )}
-          {userRole == 'unapproved' && emailVerified && (
+          {userRole === 'unapproved' && emailVerified && (
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>
@@ -177,9 +177,9 @@ export default function DashboardWelcome(props: DashboardProps) {
             //  <div style = {{display: "flex", justifyContent: "center", marginTop:"606px"}}>
           )}
 
-          {(userRole == 'student_applied' ||
-            userRole == 'student_accepted' ||
-            userRole == 'student_denied') &&
+          {(userRole === 'student_applied' ||
+            userRole === 'student_accepted' ||
+            userRole === 'student_denied') &&
             emailVerified && (
               <div className={styles.overlap}>
                 <div className={styles.overlap2}>
@@ -225,7 +225,7 @@ export default function DashboardWelcome(props: DashboardProps) {
               </div>
             )}
 
-          {userRole == 'faculty' && emailVerified && (
+          {userRole === 'faculty' && emailVerified && (
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>
@@ -281,7 +281,7 @@ export default function DashboardWelcome(props: DashboardProps) {
             </div>
           )}
 
-          {userRole == 'admin' && (
+          {userRole === 'admin' && (
             <div className={styles.overlap}>
               <div className={styles.overlap2}>
                 <div className={styles.colorblockframe}>
