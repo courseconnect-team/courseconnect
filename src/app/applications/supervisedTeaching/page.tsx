@@ -19,8 +19,7 @@ import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
-import { getFirestore } from 'firebase/firestore';
+import { callFunction } from '@/firebase/functions/callFunction';
 
 export default function SupervisedTeachingApplication() {
   const { user } = useAuth();
@@ -139,16 +138,8 @@ export default function SupervisedTeachingApplication() {
     try {
       const toastId = toast.loading('Submitting application...');
 
-      // Save application directly to Firestore using repository
-      const db = getFirestore();
-      const repo = new ApplicationRepository(db);
-      const applicationId = await repo.saveApplication(
-        userId,
-        'supervised_teaching',
-        applicationData
-      );
-
-      console.log('Application saved with ID:', applicationId);
+      // Submit application via cloud function
+      await callFunction('processApplicationForm', applicationData);
 
       toast.dismiss(toastId);
       toast.success('Application submitted!');

@@ -30,8 +30,6 @@ import {
   parseCoursesMinimal,
   CourseOption,
 } from '@/hooks/useSemesterOptions';
-import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
-import { getFirestore } from 'firebase/firestore';
 import { callFunction } from '@/firebase/functions/callFunction';
 
 export default function Application() {
@@ -144,7 +142,6 @@ export default function Application() {
     const coursesMap: {
       [key: string]: 'applied' | 'approved' | 'denied' | 'accepted';
     } = {};
-
     for (let i = 0; i < coursesArray.length; i++) {
       coursesMap[coursesArray[i]] = 'applied';
     }
@@ -253,16 +250,8 @@ export default function Application() {
       }
 
       try {
-        const db = getFirestore();
-        const repo = new ApplicationRepository(db);
-
-        const applicationId = await repo.saveApplication(
-          userId,
-          'course_assistant',
-          applicationData
-        );
-
-        console.log('Application saved with ID:', applicationId);
+        // Submit application via cloud function
+        await callFunction('processApplicationForm', applicationData);
 
         await handleSendEmail({
           email: applicationData.email,
