@@ -7,8 +7,10 @@ import {
   MenuItem,
   Grid,
   InputBase,
+  Button,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ProjectCard from '@/components/Research/ProjectCard';
 
 interface StudentResearchViewProps {
@@ -39,7 +41,10 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   setResearchListings,
 }) => {
   const [originalListings, setOriginalListings] = useState<any[]>([]);
+  const [myPostingsOnly, setMyPostingsOnly] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const isFacultyOrAdmin = role === 'faculty' || role === 'admin';
 
   useEffect(() => {
     if (researchListings.length > 0 && originalListings.length === 0) {
@@ -47,8 +52,15 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
     }
   }, [researchListings, originalListings.length]);
 
-  const handleSearch = (searchText: string) => {
-    if (!searchText && department === '' && termsAvailable === '') {
+  const handleSearch = (searchText: string, myPostingsOverride?: boolean) => {
+    const showMine = myPostingsOverride ?? myPostingsOnly;
+
+    if (
+      !searchText &&
+      department === '' &&
+      termsAvailable === '' &&
+      !showMine
+    ) {
       setResearchListings([...originalListings]);
       return;
     }
@@ -59,6 +71,13 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
         : [...researchListings];
 
     let filteredListings = listingsToFilter;
+
+    // My postings filter
+    if (showMine && isFacultyOrAdmin) {
+      filteredListings = filteredListings.filter(
+        (item) => item.faculty_members?.includes(uid) || item.creator_id === uid
+      );
+    }
 
     // Text search
     if (searchText) {
@@ -243,6 +262,42 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
             <MenuItem value="Summer">Summer</MenuItem>
           </Select>
         </FormControl>
+
+        {/* My Postings toggle (faculty/admin only) */}
+        {isFacultyOrAdmin && (
+          <Button
+            variant={myPostingsOnly ? 'contained' : 'outlined'}
+            startIcon={<PersonOutlineIcon />}
+            onClick={() => {
+              const next = !myPostingsOnly;
+              setMyPostingsOnly(next);
+              const searchText = searchInputRef.current?.value || '';
+              handleSearch(searchText, next);
+            }}
+            sx={{
+              borderRadius: '20px',
+              textTransform: 'none',
+              fontWeight: 500,
+              height: 40,
+              ...(myPostingsOnly
+                ? {
+                    backgroundColor: '#5A41D8',
+                    color: '#fff',
+                    '&:hover': { backgroundColor: '#4A35B8' },
+                  }
+                : {
+                    borderColor: '#5A41D8',
+                    color: '#5A41D8',
+                    '&:hover': {
+                      borderColor: '#4A35B8',
+                      backgroundColor: 'rgba(90, 65, 216, 0.04)',
+                    },
+                  }),
+            }}
+          >
+            My Postings
+          </Button>
+        )}
       </Box>
 
       {/* Research Listings */}
