@@ -1,8 +1,6 @@
 /**
  * Shared utilities and constants for Research modal components
  */
-import { storage } from '@/services/firebase';
-import { v4 as uuidv4 } from 'uuid';
 import { NATURE_OF_JOB_OPTIONS } from '@/constants/research';
 
 // Re-export constants for backward compatibility
@@ -45,15 +43,27 @@ export const INITIAL_FORM_DATA: ResearchFormData = {
 };
 
 /**
- * Upload an image file to Firebase Storage
- * @param file - The image file to upload
- * @returns The download URL of the uploaded image
+ * Convert an image file to a base64 data URL.
+ * The returned string can be stored directly in Firestore and used as an img src.
+ * Images are resized to a max of 800px wide to stay within Firestore's 1 MB document limit.
  */
 export async function uploadResearchImage(file: File): Promise<string> {
-  const storageRef = storage.ref(`research-images/${uuidv4()}_${file.name}`);
-  await storageRef.put(file);
-  const downloadURL = await storageRef.getDownloadURL();
-  return downloadURL;
+  const MAX_WIDTH = 800;
+  const QUALITY = 0.7;
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_WIDTH / bitmap.width);
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  return canvas.toDataURL('image/jpeg', QUALITY);
 }
 
 /**
