@@ -1,6 +1,44 @@
 import React, { useState } from 'react';
-import { Card, CardContent, Typography, Button, Box } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+  Chip,
+} from '@mui/material';
+import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import ModalApplicationForm from './ModalApplicationForm';
+
+const DEPARTMENT_GRADIENTS: Record<string, string> = {
+  'computer and information science and engineering':
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'computer and information sciences and engineering':
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  'electrical and computer engineering':
+    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'engineering education': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'biomedical engineering': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+  'chemical engineering': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  'civil and coastal engineering':
+    'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+  'environmental engineering sciences':
+    'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+  'industrial and systems engineering':
+    'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+  'materials science and engineering':
+    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+  'mechanical and aerospace engineering':
+    'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+};
+
+function getDepartmentGradient(department: string): string {
+  const key = department?.toLowerCase().trim();
+  return (
+    DEPARTMENT_GRADIENTS[key] ||
+    'linear-gradient(135deg, #5A41D8 0%, #8B5CF6 100%)'
+  );
+}
 
 interface ProjectCardProps {
   userRole: string;
@@ -110,28 +148,65 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         }}
       >
         <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-          {/* Listing image */}
-          {image_url && (
-            <Box
-              component="img"
-              src={image_url}
-              alt={project_title}
+          {/* Listing image / placeholder banner */}
+          <Box
+            sx={{
+              position: 'relative',
+              width: '100%',
+              height: 180,
+              borderRadius: '12px',
+              mb: 2,
+              overflow: 'hidden',
+              ...(image_url
+                ? {}
+                : { background: getDepartmentGradient(department) }),
+            }}
+          >
+            {image_url ? (
+              <Box
+                component="img"
+                src={image_url}
+                alt={project_title}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                }}
+              >
+                <ScienceOutlinedIcon
+                  sx={{ fontSize: 64, color: 'rgba(255,255,255,0.35)' }}
+                />
+              </Box>
+            )}
+            {/* Overlay with department chip */}
+            <Chip
+              label={department}
+              size="small"
               sx={{
-                width: '100%',
-                height: 160,
-                objectFit: 'cover',
-                borderRadius: '12px',
-                mb: 1.5,
+                position: 'absolute',
+                bottom: 10,
+                left: 10,
+                backgroundColor: 'rgba(0,0,0,0.55)',
+                color: '#fff',
+                fontWeight: 500,
+                fontSize: '0.75rem',
+                backdropFilter: 'blur(4px)',
               }}
             />
-          )}
+          </Box>
 
-          {/* Always visible: Title + Department */}
+          {/* Always visible: Title */}
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             {project_title}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            {department}
           </Typography>
 
           {/* Research Description (always visible) */}

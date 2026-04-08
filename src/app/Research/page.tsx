@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import { Box, Tabs, Tab } from '@mui/material';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { getNavItems } from '@/hooks/useGetItems';
 import PageLayout from '@/components/PageLayout/PageLayout';
@@ -14,6 +15,7 @@ import {
 
 const ResearchPage: React.FC = () => {
   const [user, role, loading, error] = useUserInfo();
+  const [activeTab, setActiveTab] = useState(0);
 
   const [department, setDepartment] = React.useState('');
   const [studentLevel, setStudentLevel] = React.useState('');
@@ -59,6 +61,8 @@ const ResearchPage: React.FC = () => {
     return <p>Please sign in.</p>;
   }
 
+  const isFacultyOrAdmin = role === 'faculty' || role === 'admin';
+
   return (
     <>
       <Toaster />
@@ -81,24 +85,52 @@ const ResearchPage: React.FC = () => {
             setTermsAvailable={setTermsAvailable}
           />
         )}
-        {role === 'faculty' && (
-          <FacultyResearchView
-            researchListings={researchListings}
-            role={role}
-            uid={user.uid}
-            getResearchListings={getResearchListings}
-            postNewResearchPosition={postNewResearchPosition}
-          />
-        )}
-        {role === 'admin' && (
-          <FacultyResearchView
-            researchListings={researchListings}
-            role={role}
-            uid={user.uid}
-            getResearchListings={getResearchListings}
-            postNewResearchPosition={postNewResearchPosition}
-            isAdmin
-          />
+        {isFacultyOrAdmin && (
+          <>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs
+                value={activeTab}
+                onChange={(_, v) => setActiveTab(v)}
+                sx={{
+                  '& .MuiTab-root': {
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                  },
+                  '& .Mui-selected': { color: '#5A41D8' },
+                  '& .MuiTabs-indicator': { backgroundColor: '#5A41D8' },
+                }}
+              >
+                <Tab label="My Positions" />
+                <Tab label="Research Board" />
+              </Tabs>
+            </Box>
+            {activeTab === 0 && (
+              <FacultyResearchView
+                researchListings={researchListings}
+                role={role}
+                uid={user.uid}
+                getResearchListings={getResearchListings}
+                postNewResearchPosition={postNewResearchPosition}
+                isAdmin={role === 'admin'}
+              />
+            )}
+            {activeTab === 1 && (
+              <StudentResearchView
+                researchListings={researchListings}
+                role={role}
+                uid={user.uid}
+                department={department}
+                setDepartment={setDepartment}
+                studentLevel={studentLevel}
+                setStudentLevel={setStudentLevel}
+                getResearchListings={getResearchListings}
+                setResearchListings={setResearchListings}
+                termsAvailable={termsAvailable}
+                setTermsAvailable={setTermsAvailable}
+              />
+            )}
+          </>
         )}
       </PageLayout>
     </>
