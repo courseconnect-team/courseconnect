@@ -54,6 +54,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   faculty_contact,
   phd_student_contact,
   compensation,
+  image_url,
   onEdit,
   onShowApplications,
   onDelete,
@@ -109,6 +110,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         }}
       >
         <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+          {/* Listing image */}
+          {image_url && (
+            <Box
+              component="img"
+              src={image_url}
+              alt={project_title}
+              sx={{
+                width: '100%',
+                height: 160,
+                objectFit: 'cover',
+                borderRadius: '12px',
+                mb: 1.5,
+              }}
+            />
+          )}
+
           {/* Always visible: Title + Department */}
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             {project_title}
