@@ -1,5 +1,5 @@
 .box {
-  height: 800px;
+  height: 920px;
   width: 539px;
 }
 
@@ -7,7 +7,7 @@
   background-color: #ffffff;
   border-radius: 40px;
   box-shadow: 0px 4px 35px #00000014;
-  height: 750px;
+  height: 870px;
   position: relative;
   width: 539px;
 }
@@ -48,7 +48,7 @@
   height: 54px;
   left: 25px;
   position: absolute;
-  top: 695px;
+  top: 810px;
   width: 453px;
   display: flex;
   gap:3px;
@@ -156,13 +156,13 @@
   height: 89px;
   left: 25px;
   position: absolute;
-  top: 505px;
+  top: 615px;
   width: 193px;
 }
 .box .roleinput {
   left: 280px;
   position: absolute;
-  top: 505px;
+  top: 615px;
   width: 193px;
 }
 .box .departmentdropdown {
@@ -226,10 +226,10 @@
 
 .box .ufidinput {
   height: 89px;
-  left: 302px;
+  left: 25px;
   position: absolute;
-  top: 536px;
-  width: 195px;
+  top: 330px;
+  width: 453px;
 }
 
 .box .textwrapper9 {
@@ -327,7 +327,7 @@
   height: 187px;
   left: 25px;
   position: absolute;
-  top: 330px;
+  top: 420px;
   width: 455px;
 }
 
@@ -385,7 +385,7 @@
   height: 53px;
   left: 25px;
   position: absolute;
-  top: 600px;
+  top: 710px;
   width: 490px;
   display: flex;
   justify-content: center;
@@ -418,7 +418,7 @@
 }
 .box .facultytext{
   position:absolute;
-  top: 660px;
+  top: 770px;
   font-family: SF Pro Display;
   font-size: 12px;
   color: #4D4D4D;
@@ -436,7 +436,7 @@
   }
   .box .signinbutton{
     width: 350px;
-    top: 780px;
+    top: 890px;
     left: 50px;
   }
   

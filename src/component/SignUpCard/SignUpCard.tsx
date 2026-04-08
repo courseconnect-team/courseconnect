@@ -95,9 +95,7 @@ export const SignUpCard = ({
     return true;
   }
 
-  const handleSubmit = async (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     setLoading(true);
 
@@ -323,28 +321,6 @@ export const SignUpCard = ({
             </div>
           </div>
 
-          <div className={styles.ufidinput}>
-            <div className={styles.textwrapper11}>UFID</div>
-            <div className={styles.divwrapper}>
-              <div className={styles.overlapgroup3}>
-                <TextField
-                  variant="outlined"
-                  InputProps={{ disableUnderline: true }}
-                  className={styles.textwrapperlongbox}
-                  placeholder="12345678"
-                  required
-                  fullWidth
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setUFID(event.target.value);
-                  }}
-                  id="ufid"
-                  name="ufid"
-                  size="small"
-                />
-              </div>
-            </div>
-          </div>
-
           <div className={styles.emailaddressinput}>
             <div className={styles.textwrapper11}>Enter email address</div>
             <div className={styles.divwrapper}>
@@ -363,6 +339,28 @@ export const SignUpCard = ({
                   name="email"
                   size="small"
                   autoComplete="email"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.ufidinput}>
+            <div className={styles.textwrapper11}>UFID</div>
+            <div className={styles.divwrapper}>
+              <div className={styles.overlapgroup3}>
+                <TextField
+                  variant="outlined"
+                  InputProps={{ disableUnderline: true }}
+                  className={styles.textwrapperlongbox}
+                  placeholder="12345678"
+                  required
+                  fullWidth
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setUFID(event.target.value);
+                  }}
+                  id="ufid"
+                  name="ufid"
+                  size="small"
                 />
               </div>
             </div>
