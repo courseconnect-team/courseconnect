@@ -153,7 +153,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             sx={{
               position: 'relative',
               width: '100%',
-              height: 180,
+              aspectRatio: '16 / 9',
               borderRadius: '12px',
               mb: 2,
               overflow: 'hidden',
@@ -171,6 +171,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
+                  display: 'block',
                 }}
               />
             ) : (
@@ -187,6 +188,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 />
               </Box>
             )}
+            {/* Bottom gradient overlay for chip readability */}
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '50%',
+                background:
+                  'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 100%)',
+                pointerEvents: 'none',
+              }}
+            />
             {/* Overlay with department chip */}
             <Chip
               label={department}
