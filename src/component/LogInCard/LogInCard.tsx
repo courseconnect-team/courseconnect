@@ -1,276 +1,298 @@
 'use client';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
-
-import React from 'react';
-import Dialog from '@mui/material/Dialog';
-import Button from '@mui/material/Button';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import Divider from '@mui/material/Divider';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import handleSignIn from '../../firebase/auth/auth_signin_password';
-import { useState } from 'react';
-import './style.css';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-import { TextField } from '@mui/material';
-import Link from 'next/link';
-import FormControl from '@mui/material/FormControl';
 import { toast } from 'react-hot-toast';
 
-import 'firebase/firestore';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import TextField from '@mui/material/TextField';
+import CircularProgress from '@mui/material/CircularProgress';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+
+import { PrimaryButton, GhostButton } from '@/components/Buttons/PrimaryButton';
+import handleSignIn from '../../firebase/auth/auth_signin_password';
+
+type LoginValues = { email: string; password: string };
+type ResetValues = { resetEmail: string };
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const cardSx = {
+  width: { xs: '100%', sm: 480, md: 539 },
+  maxWidth: '100%',
+  bgcolor: '#fff',
+  borderRadius: 5,
+  boxShadow: '0px 4px 35px rgba(0,0,0,0.08)',
+  p: { xs: 3, sm: 4.5 },
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2.5,
+};
+
+const inputSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2.5,
+    bgcolor: '#fafafa',
+    '& fieldset': { borderColor: '#e3e3e3' },
+    '&:hover fieldset': { borderColor: '#bbb' },
+    '&.Mui-focused fieldset': { borderColor: '#6739B7', borderWidth: 2 },
+  },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#6739B7' },
+};
+
 export const LogInCard = ({
   className,
   setSignup,
 }: {
-  className: any;
+  className?: string;
   setSignup: (val: boolean) => void;
 }) => {
-  var res;
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [email, setEmail] = useState('');
-  const [emailVal, setEmailVal] = useState('');
-  const [password, setPassword] = useState('');
-  const [open, setOpen] = React.useState(false);
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [resetOpen, setResetOpen] = React.useState(false);
 
-  const handleForgotPassword = (e: any) => {
-    //handleSignOut();
-    e.preventDefault();
-    const auth = getAuth();
-    sendPasswordResetEmail(auth, emailVal)
-      .then(() => {
-        // Password reset email sent!
-        // ..
-        toast.success('Password reset email sent!');
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // ..
-        console.log(error);
-      });
-    setOpen(false);
-  };
-  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref
-  ) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-  });
-  const handleSubmit = async (event: any) => {
-    setLoading(true);
-    event.preventDefault();
-    res = await handleSignIn(email, password);
-    // Loading bar toggle
-    if (!res) {
-      setLoading(false);
-    } else {
-      setSuccess(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginValues>({ mode: 'onBlur' });
+
+  const {
+    register: registerReset,
+    handleSubmit: handleSubmitReset,
+    reset: resetResetForm,
+    formState: { errors: resetErrors, isSubmitting: resetSubmitting },
+  } = useForm<ResetValues>({ mode: 'onBlur' });
+
+  const onSubmit = async ({ email, password }: LoginValues) => {
+    const ok = await handleSignIn(email.trim(), password);
+    if (!ok) {
+      // handleSignIn already toasts on failure
+      return;
     }
   };
+
+  const onReset = async ({ resetEmail }: ResetValues) => {
+    try {
+      await sendPasswordResetEmail(getAuth(), resetEmail.trim());
+      toast.success('Password reset email sent!');
+      setResetOpen(false);
+      resetResetForm();
+    } catch (err: any) {
+      toast.error(
+        err?.code === 'auth/user-not-found'
+          ? 'No account found for that email.'
+          : 'Could not send reset email. Try again.'
+      );
+    }
+  };
+
   return (
-    <div className={`log-in-card ${className}`}>
+    <Box className={className} sx={cardSx}>
+      <Box>
+        <Box
+          component="h1"
+          sx={{
+            m: 0,
+            fontSize: { xs: 40, sm: 48 },
+            fontWeight: 600,
+            color: '#111',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Log In
+        </Box>
+        <Divider
+          sx={{ mt: 1.5, borderColor: '#6b46c1', borderBottomWidth: 2 }}
+        />
+      </Box>
+
+      <Box
+        component="form"
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2.25 }}
+      >
+        <TextField
+          label="Email"
+          placeholder="email@ufl.edu"
+          type="email"
+          fullWidth
+          autoFocus
+          autoComplete="email"
+          error={!!errors.email}
+          helperText={errors.email?.message ?? ' '}
+          sx={inputSx}
+          {...register('email', {
+            required: 'Email is required.',
+            pattern: {
+              value: EMAIL_RE,
+              message: 'Enter a valid email address.',
+            },
+          })}
+        />
+
+        <TextField
+          label="Password"
+          placeholder="Enter your password"
+          type={showPassword ? 'text' : 'password'}
+          fullWidth
+          autoComplete="current-password"
+          error={!!errors.password}
+          helperText={errors.password?.message ?? ' '}
+          sx={inputSx}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowPassword((v) => !v)}
+                  edge="end"
+                  size="small"
+                >
+                  {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          {...register('password', {
+            required: 'Password is required.',
+            minLength: { value: 6, message: 'At least 6 characters.' },
+          })}
+        />
+
+        <PrimaryButton
+          type="submit"
+          aria-label="Log in"
+          disabled={isSubmitting}
+          w="100%"
+          h={50}
+          radius={2.5}
+          sx={{
+            fontSize: 16,
+            fontWeight: 600,
+            mt: 0.5,
+            boxShadow: '0px 4px 19px rgba(119,147,65,0.3)',
+          }}
+        >
+          {isSubmitting ? (
+            <CircularProgress size={22} sx={{ color: '#fff' }} />
+          ) : (
+            'Log In'
+          )}
+        </PrimaryButton>
+
+        <Box sx={{ textAlign: 'center', mt: 0.5 }}>
+          <GhostButton
+            type="button"
+            w="auto"
+            h="auto"
+            onClick={() => setResetOpen(true)}
+            sx={{ textDecoration: 'underline', fontSize: 14, p: 0.5 }}
+          >
+            Forgot Password?
+          </GhostButton>
+        </Box>
+
+        <Box sx={{ textAlign: 'center', fontSize: 14, color: '#555' }}>
+          Don&apos;t have an account?{' '}
+          <GhostButton
+            type="button"
+            w="auto"
+            h="auto"
+            onClick={() => setSignup(true)}
+            sx={{
+              textDecoration: 'underline',
+              fontSize: 14,
+              p: 0.5,
+              minWidth: 0,
+            }}
+          >
+            Sign Up
+          </GhostButton>
+        </Box>
+      </Box>
+
       <Dialog
-        style={{
-          borderImage:
-            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-          boxShadow: '0px 2px 20px 4px #00000040',
-          borderRadius: '20px',
-          border: '2px solid',
-        }}
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
         PaperProps={{
-          style: { borderRadius: 20 },
+          sx: {
+            borderRadius: 3,
+            p: { xs: 1, sm: 2 },
+            maxWidth: 480,
+          },
         }}
-        open={open}
-        onClose={handleClose}
       >
         <DialogTitle
-          style={{
-            fontFamily: 'SF Pro Display-Medium, Helvetica',
-            textAlign: 'center',
-            fontSize: '40px',
-            fontWeight: '540',
-          }}
+          sx={{ textAlign: 'center', fontSize: 28, fontWeight: 600, pb: 1 }}
         >
           Reset Password
         </DialogTitle>
-        <form onSubmit={(e) => handleForgotPassword(e)}>
+        <Box component="form" onSubmit={handleSubmitReset(onReset)} noValidate>
           <DialogContent>
             <DialogContentText
-              style={{
-                marginTop: '35px',
-                fontFamily: 'SF Pro Display-Medium, Helvetica',
-                textAlign: 'center',
-                fontSize: '20px',
-                color: 'black',
-              }}
+              sx={{ textAlign: 'center', fontSize: 15, color: '#333', mb: 3 }}
             >
-              Please enter the email associated with your account. This allows
-              us to send you a link where you can reset the account password.
+              Enter the email associated with your account and we&apos;ll send
+              you a link to reset your password.
             </DialogContentText>
-            <br />
-            <br />
-
-            <FormControl required>
-              <TextField
-                style={{ left: '160px' }}
-                name="email"
-                variant="filled"
-                onChange={(val) => setEmailVal(val.target.value)}
-                required
-                fullWidth
-                id="email"
-                label="Email"
-                autoFocus
-              />
-            </FormControl>
+            <TextField
+              label="Email"
+              type="email"
+              fullWidth
+              autoFocus
+              error={!!resetErrors.resetEmail}
+              helperText={resetErrors.resetEmail?.message ?? ' '}
+              sx={inputSx}
+              {...registerReset('resetEmail', {
+                required: 'Email is required.',
+                pattern: {
+                  value: EMAIL_RE,
+                  message: 'Enter a valid email address.',
+                },
+              })}
+            />
           </DialogContent>
-          <DialogActions
-            style={{
-              marginTop: '30px',
-              marginBottom: '42px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: '93px',
-            }}
-          >
-            <Button
-              variant="outlined"
-              style={{
-                fontSize: '17px',
-                marginLeft: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                borderColor: '#5736ac',
-                color: '#5736ac',
-                borderWidth: '3px',
+          <DialogActions sx={{ px: 3, pb: 3, gap: 2 }}>
+            <GhostButton
+              type="button"
+              onClick={() => setResetOpen(false)}
+              w={120}
+              h={44}
+              radius={2.5}
+              sx={{
+                border: '2px solid #6739B7',
+                fontWeight: 600,
               }}
-              onClick={handleClose}
             >
               Cancel
-            </Button>
-
-            <Button
-              variant="contained"
-              style={{
-                fontSize: '17px',
-                marginRight: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                backgroundColor: '#5736ac',
-                color: '#ffffff',
-              }}
+            </GhostButton>
+            <PrimaryButton
               type="submit"
+              disabled={resetSubmitting}
+              w={120}
+              h={44}
+              radius={2.5}
+              sx={{ fontWeight: 600 }}
             >
-              Reset
-            </Button>
+              {resetSubmitting ? (
+                <CircularProgress size={20} sx={{ color: '#fff' }} />
+              ) : (
+                'Reset'
+              )}
+            </PrimaryButton>
           </DialogActions>
-        </form>
+        </Box>
       </Dialog>
-      <form
-        onSubmit={(e) => {
-          void handleSubmit(e);
-        }}
-      >
-        <div className="div">Log In</div>
-        <Divider
-          sx={{
-            position: 'absolute',
-            top: '115px',
-            left: '30px',
-            width: '475px',
-            borderBottomWidth: 2,
-            borderColor: '#6b46c1',
-          }}
-        />
-
-        <div className="email-address-input">
-          <div className="text-wrapper-2">Email</div>
-          <div className="overlap-group-wrapper">
-            <div className="overlap-group">
-              <TextField
-                label="Email"
-                variant="outlined"
-                placeholder="email@ufl.edu"
-                required
-                fullWidth
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setEmail(event.target.value);
-                }}
-                id="email"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </div>
-          </div>
-        </div>
-        <div className="password-input">
-          <div className="text-wrapper-2">Password</div>
-          <div className="overlap-group-wrapper">
-            <div className="overlap-group">
-              <TextField
-                label="Password"
-                variant="outlined"
-                placeholder="1234567890"
-                required
-                fullWidth
-                name="password"
-                type="password"
-                id="password"
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setPassword(event.target.value);
-                }}
-                autoComplete="current-password"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="sign-in-button">
-          <button
-            type="submit"
-            aria-label="Log in"
-            onClick={(e) => handleSubmit(e)}
-            className="overlap"
-          >
-            <div className="text-wrapper-5">Log In</div>
-          </button>
-        </div>
-        <div className="password-forgot-text">
-          <button
-            type="button"
-            aria-label="Forgot Password"
-            className="cursor-pointer underline hover:no-underline"
-            onClick={(e) => setOpen(true)}
-          >
-            Forgot Password?
-          </button>
-        </div>
-
-        <div className="sign-up-text">
-          <span className="text-gray-300">Don&apos;t have an account? </span>
-          <br />
-          <button
-            type="button"
-            aria-label="Sign up"
-            className="cursor-pointer underline hover:no-underline"
-            onClick={() => setSignup(true)}
-          >
-            {'Sign Up'}
-          </button>
-        </div>
-      </form>
-    </div>
+    </Box>
   );
 };

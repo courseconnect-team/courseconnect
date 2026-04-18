@@ -19,7 +19,39 @@ import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import FormHelperText from '@mui/material/FormHelperText';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import Checkbox from '@mui/material/Checkbox';
 import { callFunction } from '@/firebase/functions/callFunction';
+import { modernInputSx } from '@/components/FormStyles';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const UFID_RE = /^\d{8}$/;
+
+type FieldErrors = Partial<
+  Record<
+    | 'firstName'
+    | 'lastName'
+    | 'ufid'
+    | 'email'
+    | 'confirmEmail'
+    | 'registerTerm'
+    | 'coursesComfortable'
+    | 'captcha',
+    string
+  >
+>;
+
+const TEACHING_AREAS = [
+  'Devices',
+  'Electromagnetics & Energy Systems',
+  'Electronics',
+  'Computer Systems',
+  'Digital Design',
+  'Signals & Systems',
+] as const;
 
 export default function SupervisedTeachingApplication() {
   const { user } = useAuth();
@@ -33,6 +65,15 @@ export default function SupervisedTeachingApplication() {
   const [teachingFirstChoice, setTeachingFirstChoice] = React.useState('');
   const [teachingSecondChoice, setTeachingSecondChoice] = React.useState('');
   const [teachingThirdChoice, setTeachingThirdChoice] = React.useState('');
+
+  const [fieldErrors, setFieldErrors] = React.useState<FieldErrors>({});
+  const clearFieldError = (key: keyof FieldErrors) =>
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
 
   const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
@@ -76,37 +117,33 @@ export default function SupervisedTeachingApplication() {
     const teachingThird = teachingThirdChoice || '';
     const captcha = formData.get('captcha') === 'on';
 
-    // basic validations
-    if (!email.includes('ufl.edu')) {
-      toast.error('Please enter a valid GatorLink (ufl.edu) email');
+    const nextErrors: FieldErrors = {};
+    if (!firstName.trim()) nextErrors.firstName = 'First name is required.';
+    if (!lastName.trim()) nextErrors.lastName = 'Last name is required.';
+    if (!ufid.trim()) nextErrors.ufid = 'UFID is required.';
+    else if (!UFID_RE.test(ufid)) nextErrors.ufid = 'UFID must be 8 digits.';
+    if (!email.trim()) nextErrors.email = 'Email is required.';
+    else if (!EMAIL_RE.test(email))
+      nextErrors.email = 'Enter a valid email address.';
+    else if (!email.toLowerCase().endsWith('ufl.edu'))
+      nextErrors.email = 'Must be a ufl.edu email.';
+    if (!confirmEmail.trim())
+      nextErrors.confirmEmail = 'Please confirm your email.';
+    else if (email !== confirmEmail)
+      nextErrors.confirmEmail = 'Emails do not match.';
+    if (!registerTerm) nextErrors.registerTerm = 'Please select a term.';
+    if (!coursesComfortable.trim())
+      nextErrors.coursesComfortable =
+        'List at least one course you could teach.';
+    if (!captcha) nextErrors.captcha = 'Please confirm you are not a robot.';
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      toast.error('Please fix the highlighted fields.');
       setLoading(false);
       return;
     }
-    if (email !== confirmEmail) {
-      toast.error('Email and Confirm Email must match');
-      setLoading(false);
-      return;
-    }
-    if (!firstName || !lastName || !ufid) {
-      toast.error('Please complete all required personal fields');
-      setLoading(false);
-      return;
-    }
-    if (!registerTerm) {
-      toast.error('Please select the term you want to register for EEL 6940');
-      setLoading(false);
-      return;
-    }
-    if (!coursesComfortable) {
-      toast.error('Please list at least one course you could teach');
-      setLoading(false);
-      return;
-    }
-    if (!captcha) {
-      toast.error('Please complete the CAPTCHA confirmation');
-      setLoading(false);
-      return;
-    }
+    setFieldErrors({});
 
     // date
     const current = new Date();
@@ -191,6 +228,11 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="firstName"
                   label="First Name"
+                  autoComplete="given-name"
+                  error={!!fieldErrors.firstName}
+                  helperText={fieldErrors.firstName ?? ' '}
+                  onChange={() => clearFieldError('firstName')}
+                  sx={modernInputSx}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -201,6 +243,11 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="lastName"
                   label="Last Name"
+                  autoComplete="family-name"
+                  error={!!fieldErrors.lastName}
+                  helperText={fieldErrors.lastName ?? ' '}
+                  onChange={() => clearFieldError('lastName')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -212,6 +259,11 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="ufid"
                   label="UFID"
+                  inputMode="numeric"
+                  error={!!fieldErrors.ufid}
+                  helperText={fieldErrors.ufid ?? '8-digit UF ID'}
+                  onChange={() => clearFieldError('ufid')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -223,6 +275,12 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="email"
                   label="UF Email Address"
+                  type="email"
+                  autoComplete="email"
+                  error={!!fieldErrors.email}
+                  helperText={fieldErrors.email ?? 'Example: gator@ufl.edu'}
+                  onChange={() => clearFieldError('email')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -234,6 +292,11 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="confirmEmail"
                   label="Confirm Email"
+                  type="email"
+                  error={!!fieldErrors.confirmEmail}
+                  helperText={fieldErrors.confirmEmail ?? ' '}
+                  onChange={() => clearFieldError('confirmEmail')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -244,6 +307,8 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="phdAdmissionTerm"
                   label="PhD Admission Term"
+                  helperText="e.g. Fall 2023"
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -254,28 +319,27 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="phdAdvisor"
                   label="PhD Faculty Advisor"
+                  helperText=" "
+                  sx={modernInputSx}
                 />
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle2">
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Admitted to candidacy? (registered for EEL 7980 hours)
                 </Typography>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      name="admittedToCandidacy"
-                      value="Yes"
-                    />{' '}
-                    Yes
-                  </label>
-                  <span style={{ marginLeft: 12 }} />
-                  <label>
-                    <input type="radio" name="admittedToCandidacy" value="No" />{' '}
-                    No
-                  </label>
-                </div>
+                <RadioGroup row name="admittedToCandidacy">
+                  <FormControlLabel
+                    value="Yes"
+                    control={<Radio size="small" />}
+                    label="Yes"
+                  />
+                  <FormControlLabel
+                    value="No"
+                    control={<Radio size="small" />}
+                    label="No"
+                  />
+                </RadioGroup>
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -288,6 +352,10 @@ export default function SupervisedTeachingApplication() {
                   label="Which term to register for EEL 6940"
                   defaultValue=""
                   SelectProps={{ displayEmpty: true }}
+                  error={!!fieldErrors.registerTerm}
+                  helperText={fieldErrors.registerTerm ?? ' '}
+                  onChange={() => clearFieldError('registerTerm')}
+                  sx={modernInputSx}
                 >
                   <MenuItem value="">Select term</MenuItem>
                   {visibleSems.map((s) => (
@@ -299,28 +367,21 @@ export default function SupervisedTeachingApplication() {
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle2">
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Previously registered for EEL 6940?
                 </Typography>
-                <div>
-                  <label>
-                    <input
-                      type="radio"
-                      name="previouslyRegistered"
-                      value="Yes"
-                    />{' '}
-                    Yes
-                  </label>
-                  <span style={{ marginLeft: 12 }} />
-                  <label>
-                    <input
-                      type="radio"
-                      name="previouslyRegistered"
-                      value="No"
-                    />{' '}
-                    No
-                  </label>
-                </div>
+                <RadioGroup row name="previouslyRegistered">
+                  <FormControlLabel
+                    value="Yes"
+                    control={<Radio size="small" />}
+                    label="Yes"
+                  />
+                  <FormControlLabel
+                    value="No"
+                    control={<Radio size="small" />}
+                    label="No"
+                  />
+                </RadioGroup>
               </Grid>
 
               <Grid item xs={12}>
@@ -330,6 +391,8 @@ export default function SupervisedTeachingApplication() {
                   fullWidth
                   id="previousDetails"
                   label="If so, which semester/course/who did you help?"
+                  helperText=" "
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -343,111 +406,80 @@ export default function SupervisedTeachingApplication() {
                   minRows={2}
                   id="coursesComfortable"
                   label="Course(s) you would be comfortable teaching"
+                  error={!!fieldErrors.coursesComfortable}
+                  helperText={fieldErrors.coursesComfortable ?? ' '}
+                  onChange={() => clearFieldError('coursesComfortable')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth variant="filled">
-                  <InputLabel id="teaching-first-label">
-                    Teaching First Choice
-                  </InputLabel>
-                  <Select
-                    labelId="teaching-first-label"
-                    id="teachingFirst"
-                    value={teachingFirstChoice}
-                    label="Teaching First Choice"
-                    onChange={(e: SelectChangeEvent) =>
-                      setTeachingFirstChoice(e.target.value as string)
-                    }
-                  >
-                    <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="Devices">Devices</MenuItem>
-                    <MenuItem value="Electromagnetics & Energy Systems">
-                      Electromagnetics & Energy Systems
-                    </MenuItem>
-                    <MenuItem value="Electronics">Electronics</MenuItem>
-                    <MenuItem value="Computer Systems">
-                      Computer Systems
-                    </MenuItem>
-                    <MenuItem value="Digital Design">Digital Design</MenuItem>
-                    <MenuItem value="Signals & Systems">
-                      Signals & Systems
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth variant="filled">
-                  <InputLabel id="teaching-second-label">
-                    Teaching Second Choice
-                  </InputLabel>
-                  <Select
-                    labelId="teaching-second-label"
-                    id="teachingSecond"
-                    value={teachingSecondChoice}
-                    label="Teaching Second Choice"
-                    onChange={(e: SelectChangeEvent) =>
-                      setTeachingSecondChoice(e.target.value as string)
-                    }
-                  >
-                    <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="Devices">Devices</MenuItem>
-                    <MenuItem value="Electromagnetics & Energy Systems">
-                      Electromagnetics & Energy Systems
-                    </MenuItem>
-                    <MenuItem value="Electronics">Electronics</MenuItem>
-                    <MenuItem value="Computer Systems">
-                      Computer Systems
-                    </MenuItem>
-                    <MenuItem value="Digital Design">Digital Design</MenuItem>
-                    <MenuItem value="Signals & Systems">
-                      Signals & Systems
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth variant="filled">
-                  <InputLabel id="teaching-third-label">
-                    Teaching Third Choice
-                  </InputLabel>
-                  <Select
-                    labelId="teaching-third-label"
-                    id="teachingThird"
-                    value={teachingThirdChoice}
-                    label="Teaching Third Choice"
-                    onChange={(e: SelectChangeEvent) =>
-                      setTeachingThirdChoice(e.target.value as string)
-                    }
-                  >
-                    <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="Devices">Devices</MenuItem>
-                    <MenuItem value="Electromagnetics & Energy Systems">
-                      Electromagnetics & Energy Systems
-                    </MenuItem>
-                    <MenuItem value="Electronics">Electronics</MenuItem>
-                    <MenuItem value="Computer Systems">
-                      Computer Systems
-                    </MenuItem>
-                    <MenuItem value="Digital Design">Digital Design</MenuItem>
-                    <MenuItem value="Signals & Systems">
-                      Signals & Systems
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+              {(
+                [
+                  ['first', teachingFirstChoice, setTeachingFirstChoice],
+                  ['second', teachingSecondChoice, setTeachingSecondChoice],
+                  ['third', teachingThirdChoice, setTeachingThirdChoice],
+                ] as const
+              ).map(([key, value, setValue]) => (
+                <Grid item xs={12} sm={4} key={key}>
+                  <FormControl fullWidth variant="filled" sx={modernInputSx}>
+                    <InputLabel id={`teaching-${key}-label`}>
+                      Teaching {key[0].toUpperCase() + key.slice(1)} Choice
+                    </InputLabel>
+                    <Select
+                      labelId={`teaching-${key}-label`}
+                      id={`teaching${key[0].toUpperCase() + key.slice(1)}`}
+                      value={value}
+                      label={`Teaching ${
+                        key[0].toUpperCase() + key.slice(1)
+                      } Choice`}
+                      onChange={(e: SelectChangeEvent) =>
+                        setValue(e.target.value as string)
+                      }
+                    >
+                      <MenuItem value="">Select</MenuItem>
+                      {TEACHING_AREAS.map((area) => (
+                        <MenuItem key={area} value={area}>
+                          {area}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              ))}
 
               <Grid item xs={12}>
-                <label>
-                  <input type="checkbox" name="captcha" /> I am not a robot
-                </label>
+                <FormControl error={!!fieldErrors.captcha}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="captcha"
+                        onChange={() => clearFieldError('captcha')}
+                      />
+                    }
+                    label="I am not a robot"
+                  />
+                  {fieldErrors.captcha && (
+                    <FormHelperText>{fieldErrors.captcha}</FormHelperText>
+                  )}
+                </FormControl>
               </Grid>
 
               <Grid item xs={12} sx={{ mt: 2 }}>
-                <Button type="submit" variant="contained" disabled={loading}>
-                  Submit Request
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={loading}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    bgcolor: '#6739B7',
+                    px: 3,
+                    py: 1.25,
+                    borderRadius: 2,
+                    '&:hover': { bgcolor: '#522DA8' },
+                  }}
+                >
+                  {loading ? 'Submitting...' : 'Submit Request'}
                 </Button>
               </Grid>
             </Grid>

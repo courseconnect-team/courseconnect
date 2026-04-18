@@ -1,163 +1,142 @@
 'use client';
-import React, { useState } from 'react';
-import { MenuItem, Snackbar, TextField, Divider } from '@mui/material';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 
+import Box from '@mui/material/Box';
+import Divider from '@mui/material/Divider';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+
+import { PrimaryButton, GhostButton } from '@/components/Buttons/PrimaryButton';
 import handleSignUp from '../../firebase/auth/auth_signup_password';
 import handleSignIn from '@/firebase/auth/auth_signin_password';
 import { callFunction } from '@/firebase/functions/callFunction';
 import firebase from '@/firebase/firebase_config';
 
-import styles from './style.module.css';
+type SignUpValues = {
+  firstName: string;
+  lastName: string;
+  role: '' | 'student_applying' | 'unapproved';
+  department: string;
+  email: string;
+  ufid: string;
+  password: string;
+  confirmPassword: string;
+};
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_RE = /^[A-Za-z][A-Za-z\s'-]*$/;
+
+const DEPARTMENTS = ['ECE', 'CS', 'MSE', 'ISE', 'MAE', 'BME', 'NRE'] as const;
+
+const cardSx = {
+  width: { xs: '100%', sm: 480, md: 539 },
+  maxWidth: '100%',
+  bgcolor: '#fff',
+  borderRadius: 5,
+  boxShadow: '0px 4px 35px rgba(0,0,0,0.08)',
+  p: { xs: 3, sm: 4.5 },
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2.25,
+};
+
+const inputSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: 2.5,
+    bgcolor: '#fafafa',
+    '& fieldset': { borderColor: '#e3e3e3' },
+    '&:hover fieldset': { borderColor: '#bbb' },
+    '&.Mui-focused fieldset': { borderColor: '#6739B7', borderWidth: 2 },
+  },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#6739B7' },
+};
+
+function scorePassword(pw: string): { score: number; label: string } {
+  if (!pw) return { score: 0, label: '' };
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[a-z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(pw)) score++;
+  const label =
+    score <= 2
+      ? 'Weak'
+      : score === 3
+      ? 'Fair'
+      : score === 4
+      ? 'Good'
+      : 'Strong';
+  return { score, label };
+}
 
 export const SignUpCard = ({
   className,
   setSignup,
 }: {
-  className: any;
+  className?: string;
   setSignup?: (val: boolean) => void;
 }) => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [password, setPassword] = useState('');
-  const [ufid, setUFID] = useState('');
-  const [department, setDepartment] = useState('');
-  const [role, setRole] = useState('');
-  const [confirmedPassword, setConfirmedPassword] = useState('');
-  const [email, setEmail] = useState('');
-  const [label, setLabel] = useState('ECE');
-  const [roleLabel, setRoleLabel] = useState('Student');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirm, setShowConfirm] = React.useState(false);
 
-  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref
-  ) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<SignUpValues>({
+    mode: 'onBlur',
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      role: '',
+      department: '',
+      email: '',
+      ufid: '',
+      password: '',
+      confirmPassword: '',
+    },
   });
 
-  const handleNotificationEmail = async (
-    safeFirstName: string,
-    safeLastName: string,
-    safeEmail: string
-  ) => {
-    if (role === 'unapproved') {
-      try {
-        await callFunction(
-          'sendEmail',
-          {
-            type: 'unapprovedUser',
-            data: {
-              user: {
-                name: `${safeFirstName} ${safeLastName}`.trim(),
-                email: safeEmail,
-              },
-            },
-          },
-          { requireAuth: false }
-        );
-      } catch (error) {
-        console.error('Error sending unapproved user email:', error);
-      }
-    }
-  };
+  const password = watch('password');
+  const { score, label: strengthLabel } = scorePassword(password);
+  const strengthColor =
+    score <= 2
+      ? '#d32f2f'
+      : score === 3
+      ? '#ed6c02'
+      : score >= 4
+      ? '#2e7d32'
+      : '#bbb';
 
-  function isStrongPassword(password: string): boolean {
-    if (password.length < 8) {
-      toast.error('Password should contain at least 8 characters!');
-      return false;
-    }
-
-    const uppercaseRegex = /[A-Z]/;
-    const lowercaseRegex = /[a-z]/;
-    const numberRegex = /[0-9]/;
-    const specialCharacterRegex = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/;
-
-    if (!uppercaseRegex.test(password)) {
-      toast.error('Password should contain at least one uppercase letter!');
-      return false;
-    }
-    if (!lowercaseRegex.test(password)) {
-      toast.error('Password should contain at least one lowercase letter!');
-      return false;
-    }
-    if (!numberRegex.test(password)) {
-      toast.error('Password should contain at least one number!');
-      return false;
-    }
-    if (!specialCharacterRegex.test(password)) {
-      toast.error('Password should contain at least one special character!');
-      return false;
-    }
-
-    return true;
-  }
-
-  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    setLoading(true);
-
+  const onSubmit = async (values: SignUpValues) => {
     try {
-      const safeFirstName = firstName.trim();
-      const safeLastName = lastName.trim();
-      const safeEmail = email.trim();
-      const safeDepartment = department.trim();
-      const safeRole = role.trim();
-      const safeUFID = ufid.trim() || '00000000';
-
-      if (safeFirstName === '') {
-        toast.error('Please enter a first name!');
-        return;
-      }
-      if (/[0-9]/.test(safeFirstName)) {
-        toast.error('First name should only contain letters!');
-        return;
-      }
-      if (safeLastName === '') {
-        toast.error('Please enter a last name!');
-        return;
-      }
-      if (safeRole === '') {
-        toast.error('Please select a role!');
-        return;
-      }
-      if (safeDepartment === '') {
-        toast.error('Please select a department!');
-        return;
-      }
-      if (safeEmail === '') {
-        toast.error('Please enter an email!');
-        return;
-      }
-      if (password === '') {
-        toast.error('Please enter a password!');
-        return;
-      }
-      if (confirmedPassword !== password) {
-        toast.error('Passwords should match!');
-        return;
-      }
-      if (!isStrongPassword(password)) {
-        return;
-      }
-
+      const safeFirstName = values.firstName.trim();
+      const safeLastName = values.lastName.trim();
+      const safeEmail = values.email.trim();
+      const safeUFID = values.ufid.trim() || '00000000';
       const fullName = `${safeFirstName} ${safeLastName}`.trim();
 
-      const uidFromSignup = await handleSignUp(fullName, safeEmail, password);
-
-      console.log('signup returned uid/code:', uidFromSignup);
+      const uidFromSignup = await handleSignUp(
+        fullName,
+        safeEmail,
+        values.password
+      );
 
       if (uidFromSignup === '-1' || uidFromSignup === '') {
         toast.error('This UFID is already in use!');
         return;
       }
-      if (
-        uidFromSignup === '-2' ||
-        uidFromSignup === '-3' ||
-        uidFromSignup === '-4'
-      ) {
+      if (['-2', '-3', '-4'].includes(uidFromSignup)) {
         toast.error('Please enter a valid email address!');
         return;
       }
@@ -166,286 +145,327 @@ export const SignUpCard = ({
         return;
       }
 
-      const userProfilePayload = {
-        firstname: safeFirstName,
-        lastname: safeLastName,
-        email: safeEmail,
-        department: safeDepartment,
-        role: safeRole,
-        ufid: safeUFID,
-        uid: uidFromSignup,
-        created_at: firebase.firestore.FieldValue.serverTimestamp(),
-        updated_at: firebase.firestore.FieldValue.serverTimestamp(),
-      };
+      await firebase.firestore().collection('users').doc(uidFromSignup).set(
+        {
+          firstname: safeFirstName,
+          lastname: safeLastName,
+          email: safeEmail,
+          department: values.department,
+          role: values.role,
+          ufid: safeUFID,
+          uid: uidFromSignup,
+          created_at: firebase.firestore.FieldValue.serverTimestamp(),
+          updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
 
-      console.log('about to write users doc');
-      console.log('payload:', userProfilePayload);
+      if (values.role === 'unapproved') {
+        try {
+          await callFunction(
+            'sendEmail',
+            {
+              type: 'unapprovedUser',
+              data: {
+                user: { name: fullName, email: safeEmail },
+              },
+            },
+            { requireAuth: false }
+          );
+        } catch (err) {
+          console.error('Error sending unapproved user email:', err);
+        }
+      }
 
-      await firebase
-        .firestore()
-        .collection('users')
-        .doc(uidFromSignup)
-        .set(userProfilePayload, { merge: true });
-
-      setSuccess(true);
-      console.log('SUCCESS: User data written to users collection');
-
-      await handleNotificationEmail(safeFirstName, safeLastName, safeEmail);
-      await handleSignIn(safeEmail, password);
+      toast.success('Signup successful!');
+      await handleSignIn(safeEmail, values.password);
     } catch (err: any) {
       console.error('user doc write failed:', err);
       toast.error(err?.message || 'Failed to create user profile');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className={styles.box}>
-      <Snackbar open={success} autoHideDuration={3000}>
-        <Alert severity="info" sx={{ width: '100%' }}>
-          Signup successful!
-        </Alert>
-      </Snackbar>
+    <Box className={className} sx={cardSx}>
+      <Box>
+        <Box
+          component="h1"
+          sx={{
+            m: 0,
+            fontSize: { xs: 40, sm: 48 },
+            fontWeight: 600,
+            color: '#111',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Sign Up
+        </Box>
+        <Divider
+          sx={{ mt: 1.5, borderColor: '#6b46c1', borderBottomWidth: 2 }}
+        />
+      </Box>
 
-      <div className={className}>
-        <div className={styles.overlap}>
-          <div className={styles.div}>Sign Up</div>
-
-          <Divider
-            sx={{
-              position: 'absolute',
-              top: '115px',
-              left: '30px',
-              width: '475px',
-              borderBottomWidth: 2,
-              borderColor: '#6b46c1',
-            }}
+      <Box
+        component="form"
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+      >
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+            gap: 2,
+          }}
+        >
+          <TextField
+            label="First Name"
+            placeholder="Albert"
+            fullWidth
+            autoFocus
+            autoComplete="given-name"
+            error={!!errors.firstName}
+            helperText={errors.firstName?.message ?? ' '}
+            sx={inputSx}
+            {...register('firstName', {
+              required: 'First name is required.',
+              pattern: {
+                value: NAME_RE,
+                message: 'Letters, spaces, hyphens only.',
+              },
+            })}
           />
+          <TextField
+            label="Last Name"
+            placeholder="Einstein"
+            fullWidth
+            autoComplete="family-name"
+            error={!!errors.lastName}
+            helperText={errors.lastName?.message ?? ' '}
+            sx={inputSx}
+            {...register('lastName', {
+              required: 'Last name is required.',
+              pattern: {
+                value: NAME_RE,
+                message: 'Letters, spaces, hyphens only.',
+              },
+            })}
+          />
+        </Box>
 
-          <div className={styles.firstnameinput}>
-            <div className={styles.textwrapper2}>First Name</div>
-            <div className={styles.overlapgroupwrapper}>
-              <div className={styles.overlapgroup}>
-                <TextField
-                  variant="outlined"
-                  InputProps={{ disableUnderline: true }}
-                  className={styles.textwrapper3}
-                  placeholder="Albert"
-                  required
-                  fullWidth
+        <TextField
+          label="Email"
+          placeholder="email@ufl.edu"
+          type="email"
+          fullWidth
+          autoComplete="email"
+          error={!!errors.email}
+          helperText={errors.email?.message ?? ' '}
+          sx={inputSx}
+          {...register('email', {
+            required: 'Email is required.',
+            pattern: { value: EMAIL_RE, message: 'Enter a valid email.' },
+            validate: (v) =>
+              v.toLowerCase().endsWith('ufl.edu') || 'Must be a ufl.edu email.',
+          })}
+        />
+
+        <TextField
+          label="UFID"
+          placeholder="12345678"
+          fullWidth
+          inputMode="numeric"
+          error={!!errors.ufid}
+          helperText={errors.ufid?.message ?? ' '}
+          sx={inputSx}
+          {...register('ufid', {
+            required: 'UFID is required.',
+            pattern: { value: /^\d{8}$/, message: 'UFID must be 8 digits.' },
+          })}
+        />
+
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+            gap: 2,
+          }}
+        >
+          <TextField
+            label="Department"
+            select
+            fullWidth
+            defaultValue=""
+            error={!!errors.department}
+            helperText={errors.department?.message ?? ' '}
+            sx={inputSx}
+            {...register('department', {
+              required: 'Please select a department.',
+            })}
+          >
+            {DEPARTMENTS.map((d) => (
+              <MenuItem key={d} value={d}>
+                {d}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            label="Role"
+            select
+            fullWidth
+            defaultValue=""
+            error={!!errors.role}
+            helperText={errors.role?.message ?? ' '}
+            sx={inputSx}
+            {...register('role', { required: 'Please select a role.' })}
+          >
+            <MenuItem value="student_applying">Student</MenuItem>
+            <MenuItem value="unapproved">Faculty</MenuItem>
+          </TextField>
+        </Box>
+
+        <TextField
+          label="Password"
+          placeholder="At least 8 characters"
+          type={showPassword ? 'text' : 'password'}
+          fullWidth
+          autoComplete="new-password"
+          error={!!errors.password}
+          helperText={errors.password?.message ?? ' '}
+          sx={inputSx}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowPassword((v) => !v)}
+                  edge="end"
                   size="small"
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setFirstName(event.target.value);
-                  }}
-                  id="first-name"
-                  name="first-name"
-                  autoComplete="given-name"
-                  autoFocus
-                />
-              </div>
-            </div>
-          </div>
+                >
+                  {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          {...register('password', {
+            required: 'Password is required.',
+            minLength: { value: 8, message: 'At least 8 characters.' },
+            validate: {
+              upper: (v) => /[A-Z]/.test(v) || 'Include an uppercase letter.',
+              lower: (v) => /[a-z]/.test(v) || 'Include a lowercase letter.',
+              number: (v) => /[0-9]/.test(v) || 'Include a number.',
+              special: (v) =>
+                /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(v) ||
+                'Include a special character.',
+            },
+          })}
+        />
 
-          <div className={styles.roleinput}>
-            <div className={styles.textwrapper4}>Role</div>
-            <div className={styles.overlapgroup2}>
-              <TextField
-                sx={{ borderRadius: '30px' }}
-                value={role}
-                placeholder="Set Role"
-                InputLabelProps={{ shrink: false }}
-                label={roleLabel}
-                size="small"
-                select
-                onChange={(event) => {
-                  setRole(event.target.value);
-                  setRoleLabel('');
-                }}
-                className={styles.textwrapper9}
-              >
-                <MenuItem value={'student_applying'}>Student</MenuItem>
-                <MenuItem value={'unapproved'}>Faculty</MenuItem>
-              </TextField>
-            </div>
-          </div>
-
-          <div className={styles.lastnameinput}>
-            <div className={styles.textwrapper10}>Last Name</div>
-            <div className={styles.overlapgroupwrapper}>
-              <div className={styles.overlapgroup}>
-                <TextField
-                  variant="outlined"
-                  InputProps={{ disableUnderline: true }}
-                  className={styles.textwrapper3}
-                  placeholder="Einstein"
-                  required
-                  fullWidth
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setLastName(event.target.value);
-                  }}
-                  id="last-name"
-                  name="last-name"
-                  size="small"
-                  autoComplete="family-name"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.departmentinput}>
-            <div className={styles.textwrapper4}>Department</div>
-            <div className={styles.overlapgroup2}>
-              <TextField
-                sx={{ borderRadius: '30px' }}
-                value={department}
-                placeholder="Set Department"
-                InputLabelProps={{ shrink: false }}
-                label={label}
-                size="small"
-                select
-                onChange={(event) => {
-                  setDepartment(event.target.value);
-                  setLabel('');
-                }}
-                className={styles.textwrapper9}
-              >
-                <MenuItem value={'ECE'}>ECE</MenuItem>
-                <MenuItem value={'CS'}>CS</MenuItem>
-                <MenuItem value={'MSE'}>MSE</MenuItem>
-                <MenuItem value={'ISE'}>ISE</MenuItem>
-                <MenuItem value={'MAE'}>MAE</MenuItem>
-                <MenuItem value={'BME'}>BME</MenuItem>
-                <MenuItem value={'NRE'}>NRE</MenuItem>
-              </TextField>
-            </div>
-          </div>
-
-          <div className={styles.emailaddressinput}>
-            <div className={styles.textwrapper11}>Enter email address</div>
-            <div className={styles.divwrapper}>
-              <div className={styles.overlapgroup3}>
-                <TextField
-                  variant="outlined"
-                  InputProps={{ disableUnderline: true }}
-                  className={styles.textwrapperlongbox}
-                  placeholder="email@ufl.edu"
-                  required
-                  fullWidth
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setEmail(event.target.value);
-                  }}
-                  id="email"
-                  name="email"
-                  size="small"
-                  autoComplete="email"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.ufidinput}>
-            <div className={styles.textwrapper11}>UFID</div>
-            <div className={styles.divwrapper}>
-              <div className={styles.overlapgroup3}>
-                <TextField
-                  variant="outlined"
-                  InputProps={{ disableUnderline: true }}
-                  className={styles.textwrapperlongbox}
-                  placeholder="12345678"
-                  required
-                  fullWidth
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setUFID(event.target.value);
-                  }}
-                  id="ufid"
-                  name="ufid"
-                  size="small"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.passwordinput}>
-            <div className={styles.textwrapper13}>Enter password</div>
-            <div className={styles.textwrapper14}>Confirm password</div>
-
-            <div className={styles.divwrapper}>
-              <div className={styles.overlapgroup3}>
-                <TextField
-                  variant="outlined"
-                  InputProps={{ disableUnderline: true }}
-                  className={styles.textwrapperlongbox}
-                  placeholder="1234567890"
-                  required
-                  size="small"
-                  fullWidth
-                  name="password"
-                  type="password"
-                  id="password"
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setPassword(event.target.value);
-                  }}
-                  autoComplete="new-password"
-                />
-              </div>
-            </div>
-
-            <div className={styles.confirmpassword}>
-              <div className={styles.overlapgroup3}>
-                <TextField
-                  variant="outlined"
-                  InputProps={{ disableUnderline: true }}
-                  className={styles.textwrapperlongbox}
-                  placeholder="1234567890"
-                  required
-                  size="small"
-                  fullWidth
-                  name="confirm-password"
-                  type="password"
-                  id="confirm-password"
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setConfirmedPassword(event.target.value);
-                  }}
-                  autoComplete="new-password"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.facultytext}>
-            *If you are going to create a <strong>Faculty</strong> account,
-            please make sure to sign up using the same email that you use for
-            Onbase/Course Registration.
-          </div>
-
-          <div className={styles.signintext}>
-            <span className="text-gray-300">Already have an account? </span>
-            <br />
-            <button
-              type="button"
-              className="cursor-pointer underline hover:no-underline"
-              onClick={() => setSignup?.(false)}
+        {password && (
+          <Box sx={{ mt: -1 }}>
+            <LinearProgress
+              variant="determinate"
+              value={(score / 5) * 100}
+              sx={{
+                height: 6,
+                borderRadius: 3,
+                bgcolor: '#eee',
+                '& .MuiLinearProgress-bar': { bgcolor: strengthColor },
+              }}
+            />
+            <Box
+              sx={{
+                fontSize: 12,
+                color: strengthColor,
+                mt: 0.5,
+                fontWeight: 500,
+              }}
             >
-              Log In
-            </button>
-          </div>
+              Strength: {strengthLabel}
+            </Box>
+          </Box>
+        )}
 
-          <div className={styles.signinbutton}>
-            <br />
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className={styles.overlap2}
-              disabled={loading}
-            >
-              <div className={styles.textwrapper16}>
-                {loading ? 'Signing up...' : 'Sign up'}
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        <TextField
+          label="Confirm Password"
+          placeholder="Re-enter password"
+          type={showConfirm ? 'text' : 'password'}
+          fullWidth
+          autoComplete="new-password"
+          error={!!errors.confirmPassword}
+          helperText={errors.confirmPassword?.message ?? ' '}
+          sx={inputSx}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowConfirm((v) => !v)}
+                  edge="end"
+                  size="small"
+                >
+                  {showConfirm ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          {...register('confirmPassword', {
+            required: 'Please confirm your password.',
+            validate: (v) => v === password || 'Passwords do not match.',
+          })}
+        />
+
+        <Box
+          sx={{
+            fontSize: 12,
+            color: '#4D4D4D',
+            fontWeight: 300,
+            lineHeight: 1.5,
+          }}
+        >
+          *If you are creating a <strong>Faculty</strong> account, please sign
+          up using the same email you use for Onbase/Course Registration.
+        </Box>
+
+        <PrimaryButton
+          type="submit"
+          disabled={isSubmitting}
+          w="100%"
+          h={50}
+          radius={2.5}
+          sx={{
+            fontSize: 16,
+            fontWeight: 600,
+            mt: 0.5,
+            boxShadow: '0px 4px 19px rgba(119,147,65,0.3)',
+          }}
+        >
+          {isSubmitting ? (
+            <CircularProgress size={22} sx={{ color: '#fff' }} />
+          ) : (
+            'Sign Up'
+          )}
+        </PrimaryButton>
+
+        <Box sx={{ textAlign: 'center', fontSize: 14, color: '#555' }}>
+          Already have an account?{' '}
+          <GhostButton
+            type="button"
+            w="auto"
+            h="auto"
+            onClick={() => setSignup?.(false)}
+            sx={{
+              textDecoration: 'underline',
+              fontSize: 14,
+              p: 0.5,
+              minWidth: 0,
+            }}
+          >
+            Log In
+          </GhostButton>
+        </Box>
+      </Box>
+    </Box>
   );
 };
