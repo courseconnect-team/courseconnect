@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { useTour } from '@/contexts/TourContext';
@@ -17,15 +18,31 @@ const TourOverlay: React.FC = () => {
   const { isRunning, stepIndex, steps, next, prev, stop } = useTour();
   const [rect, setRect] = useState<Rect | null>(null);
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => setMounted(true), []);
 
   const step = steps[stepIndex];
 
+  // Navigate to the step's route (if provided) before targeting its element.
+  useEffect(() => {
+    if (!isRunning || !step?.route) return;
+    if (step.route === pathname) return;
+    router.push(step.route);
+  }, [isRunning, step, pathname, router]);
+
   useEffect(() => {
     if (!isRunning || !step) return;
 
     if (!step.target) {
+      setRect(null);
+      return;
+    }
+
+    // If this step needs a route change and we haven't arrived yet, wait.
+    const awaitingRoute = !!step.route && step.route !== pathname;
+    if (awaitingRoute) {
       setRect(null);
       return;
     }
@@ -52,8 +69,9 @@ const TourOverlay: React.FC = () => {
 
     if (!update()) {
       const started = Date.now();
+      const timeoutMs = step.route ? 8000 : 3000;
       poll = setInterval(() => {
-        if (update() || Date.now() - started > 3000) {
+        if (update() || Date.now() - started > timeoutMs) {
           if (poll) clearInterval(poll);
         }
       }, 100);
@@ -72,7 +90,7 @@ const TourOverlay: React.FC = () => {
       if (poll) clearInterval(poll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isRunning, step]);
+  }, [isRunning, step, pathname]);
 
   useEffect(() => {
     if (!isRunning) return;

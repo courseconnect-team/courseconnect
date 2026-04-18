@@ -142,8 +142,7 @@ const HelpView: React.FC<HelpViewProps> = ({ role }) => {
           </h3>
           <p className="text-sm text-[#4A3F6B] mt-1.5 leading-relaxed max-w-2xl">
             Run into a glitch, confusing flow, or something broken? Send the
-            details straight to the CourseConnect team on Slack — we&apos;ll
-            jump on it.
+            details straight to the CourseConnect team — we&apos;ll jump on it.
           </p>
         </div>
         <button

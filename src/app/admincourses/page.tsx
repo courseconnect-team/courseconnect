@@ -32,7 +32,6 @@ import { isE2EMode } from '@/utils/featureFlags';
 import { useSemesters } from '@/hooks/useSemesterOptions';
 
 export default function AdminCoursesPage() {
-
   const { currentSemester, options } = useSemesters();
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
@@ -255,7 +254,6 @@ export default function AdminCoursesPage() {
         mappedRow['Enr Cap'] = row['__EMPTY_26'];
         mappedRow['Enrolled'] = row['__EMPTY_28'];
         if (
-
           !course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)
         ) {
           course.add(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`);
@@ -400,6 +398,7 @@ export default function AdminCoursesPage() {
             <Button
               component="span"
               variant="contained"
+              data-tour="upload-semester-data"
               startIcon={<FileUploadOutlined />}
               sx={{ textTransform: 'none' }}
             >
@@ -419,6 +418,7 @@ export default function AdminCoursesPage() {
           <Button
             variant="contained"
             onClick={handleSemesterHiddenToggle}
+            data-tour="hide-semester-data"
             startIcon={semesterHidden ? <Visibility /> : <VisibilityOff />}
             sx={{ textTransform: 'none' }}
           >

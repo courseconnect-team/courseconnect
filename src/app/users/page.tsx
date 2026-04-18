@@ -41,6 +41,7 @@ const User: FC<PageProps> = () => {
       <Box sx={{ marginLeft: 10, mb: 3 }}>
         <Paper
           variant="outlined"
+          data-tour="users-tabs"
           sx={{
             display: 'inline-block',
             borderRadius: 2,

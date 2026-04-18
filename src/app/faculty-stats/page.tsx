@@ -43,32 +43,26 @@ export default function User() {
       console.log(val);
       const ab = await val.arrayBuffer();
       var file = read(ab);
-      const sheet = file.Sheets["Teaching Load History"];
+      const sheet = file.Sheets['Teaching Load History'];
       const data = utils.sheet_to_json<Record<string, any>>(sheet);
       console.log(data);
-
 
       const facultyMap: Record<string, string> = {};
 
       for (const row of data) {
-        const instructor = String(row["Instructor"]).trim();
-        const load = String(row["Current Teaching Category"]);
+        const instructor = String(row['Instructor']).trim();
+        const load = String(row['Current Teaching Category']);
 
         if (!instructor) continue;
         facultyMap[instructor] = load;
       }
       console.log(facultyMap);
 
-
       for (const instructor in facultyMap) {
-        await firebase
-          .firestore()
-          .collection("faculty")
-          .doc(instructor)
-          .set({
-            instructor,
-            teaching_load: facultyMap[instructor],
-          });
+        await firebase.firestore().collection('faculty').doc(instructor).set({
+          instructor,
+          teaching_load: facultyMap[instructor],
+        });
       }
       setProcessing(false);
       toast.dismiss(toastId);
@@ -126,6 +120,7 @@ export default function User() {
                 style={{ textTransform: 'none' }}
                 variant="contained"
                 component="span"
+                data-tour="upload-faculty-stats"
                 startIcon={<FileUploadOutlined />}
               >
                 Upload Semester Data

@@ -9,6 +9,8 @@ export type TourStep = {
   /** CSS selector for the element to spotlight. Omit for a centered modal step. */
   target?: string;
   placement?: Placement;
+  /** Route to navigate to before searching for `target`. Persists across steps. */
+  route?: string;
 };
 
 const TOPBAR_STEPS: TourStep[] = [
@@ -154,7 +156,7 @@ export const TOUR_STEPS: Record<HelpRoleKey, TourStep[]> = {
     {
       id: 'welcome',
       title: 'Welcome, admin',
-      body: 'This tour covers the full toolkit you use to run the department semester end-to-end.',
+      body: 'This tour covers the full toolkit you use to run the department semester end-to-end. We will drill into the key controls on each page as we go.',
     },
     {
       id: 'sidebar',
@@ -163,55 +165,65 @@ export const TOUR_STEPS: Record<HelpRoleKey, TourStep[]> = {
       title: 'Your sidebar',
       body: 'All admin tools live here. Order is optimized for the way the semester flows.',
     },
+
+    // Users page — drill-in
     {
-      id: 'nav-users',
-      target: '[data-testid="nav-Users"]',
-      placement: 'right',
-      title: 'Users',
-      body: 'The directory of every account. Use the "Unapproved Faculty" tab to promote new faculty accounts.',
+      id: 'users-tabs',
+      route: '/users',
+      target: '[data-tour="users-tabs"]',
+      placement: 'bottom',
+      title: 'Users · approvals',
+      body: 'The directory of every account. Switch to the "Unapproved Faculty" tab to promote newly registered faculty accounts.',
+    },
+
+    // Applications page — drill-in
+    {
+      id: 'applications-tabs',
+      route: '/admin-applications',
+      target: '[data-tour="applications-tabs"]',
+      placement: 'bottom',
+      title: 'Applications & Assignments',
+      body: 'Toggle between incoming applications and current assignments. Approve, deny, or edit any row in place — individually or in bulk.',
+    },
+
+    // Admin courses page — drill-in (two steps on the same page)
+    {
+      id: 'courses-upload',
+      route: '/admincourses',
+      target: '[data-tour="upload-semester-data"]',
+      placement: 'bottom',
+      title: 'Upload a semester',
+      body: 'Import the semester spreadsheet to populate courses and assignments for the term. Employment-actions uploads slot in right alongside it.',
     },
     {
-      id: 'nav-applications',
-      target: '[data-testid="nav-Applications"]',
-      placement: 'right',
-      title: 'Applications',
-      body: 'Review, approve, or deny every submitted TA and Supervised Teaching application — individually or in bulk.',
+      id: 'courses-hide',
+      route: '/admincourses',
+      target: '[data-tour="hide-semester-data"]',
+      placement: 'bottom',
+      title: 'Hide until ready',
+      body: 'Keep a semester invisible to students while you finalize the roster. Unhide to publish — or clear the semester entirely when retiring it.',
     },
+
+    // Faculty stats — drill-in
     {
-      id: 'nav-courses',
-      target: '[data-testid="nav-Courses"]',
-      placement: 'right',
-      title: 'Courses',
-      body: 'Upload semester data and employment actions, hide semesters until ready, or clear a semester when retiring it.',
+      id: 'faculty-stats-upload',
+      route: '/faculty-stats',
+      target: '[data-tour="upload-faculty-stats"]',
+      placement: 'bottom',
+      title: 'Faculty stats',
+      body: 'Upload the Excel sheet of teaching load and research level per instructor. This informs assignment decisions elsewhere in the app.',
     },
+
+    // Announcements — drill-in
     {
-      id: 'nav-faculty-stats',
-      target: '[data-testid="nav-Faculty Stats"]',
-      placement: 'right',
-      title: 'Faculty Stats',
-      body: 'Teaching load and research level per instructor, driven by an uploaded Excel sheet. Informs assignment decisions.',
+      id: 'announcements-create',
+      route: '/announcements',
+      target: '[data-tour="add-announcement"]',
+      placement: 'bottom',
+      title: 'Publish announcements',
+      body: 'Send to everyone, by role, by department, or to a specific user list. Schedule, pin, or require acknowledgment — all from this dialog.',
     },
-    {
-      id: 'nav-research',
-      target: '[data-testid="nav-Research"]',
-      placement: 'right',
-      title: 'Research',
-      body: 'Post and manage research listings with the same tools faculty use.',
-    },
-    {
-      id: 'nav-announcements',
-      target: '[data-testid="nav-Announcements"]',
-      placement: 'right',
-      title: 'Announcements',
-      body: 'Publish to any audience: everyone, by role, by department, or a specific user list. Schedule, pin, or require acknowledgment.',
-    },
-    {
-      id: 'nav-help',
-      target: '[data-testid="nav-Help"]',
-      placement: 'right',
-      title: 'Help Center',
-      body: 'Role-aware guides plus this walkthrough are always one click away.',
-    },
+
     ...TOPBAR_STEPS,
     END_STEP(
       'A natural starting point: upload course data in Courses, then approve any pending faculty in Users.'
