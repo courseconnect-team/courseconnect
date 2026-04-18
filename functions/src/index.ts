@@ -457,11 +457,49 @@ export const processApplicationForm = functions.https.onRequest(
           payload.created_at = admin.firestore.FieldValue.serverTimestamp();
         }
 
-        // `set({merge:true})` deep-merges nested maps, which would leave
-        // old `courses` keys (e.g. legacy `"Summer 2026|||EEL3834..."`
-        // flat keys) alive alongside the new nested shape. `mergeFields`
-        // writes only the listed top-level fields and REPLACES each one
-        // wholesale, so `courses` gets fully overwritten on every submit.
+        // Union the new submission's courses with whatever was on the
+        // existing doc so a resubmission doesn't wipe out admin-set
+        // statuses (approved/denied/accepted) or prior applications
+        // the student didn't re-select. On a (semester, courseId)
+        // collision we keep the existing status. Only the canonical
+        // nested shape (courses[semester][courseId]) is carried over;
+        // legacy flat keys are dropped.
+        if (payload.courses && typeof payload.courses === 'object') {
+          const existingCourses = asRecord(
+            existing.exists ? existing.data()?.courses : undefined
+          );
+          const merged: Record<string, Record<string, unknown>> = {};
+
+          for (const [sem, bucket] of Object.entries(existingCourses)) {
+            if (
+              bucket &&
+              typeof bucket === 'object' &&
+              !Array.isArray(bucket)
+            ) {
+              merged[sem] = { ...(bucket as Record<string, unknown>) };
+            }
+          }
+
+          const incoming = payload.courses as Record<string, unknown>;
+          for (const [sem, bucket] of Object.entries(incoming)) {
+            if (!bucket || typeof bucket !== 'object') continue;
+            if (!merged[sem]) merged[sem] = {};
+            for (const [courseId, status] of Object.entries(
+              bucket as Record<string, unknown>
+            )) {
+              if (!(courseId in merged[sem])) {
+                merged[sem][courseId] = status;
+              }
+            }
+          }
+
+          payload.courses = merged;
+        }
+
+        // `mergeFields` writes only the listed top-level fields and
+        // REPLACES each one wholesale. `courses` was already merged
+        // in-memory above; all other fields legitimately get the new
+        // submission's values so students can update their info.
         tx.set(applicationRef, payload, {
           mergeFields: Object.keys(payload),
         });
