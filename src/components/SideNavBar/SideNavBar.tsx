@@ -31,7 +31,10 @@ export default function SideNav({ navItems }: SideNavProps) {
   };
 
   return (
-    <aside className="relative w-20 md:w-24 h-screen bg-[#6C37D8] flex flex-col justify-between pt-20 pb-4 shadow-[4px_0_16px_-6px_rgba(45,15,131,0.35)]">
+    <aside
+      data-tour="sidebar"
+      className="relative w-20 md:w-24 h-screen bg-[#6C37D8] flex flex-col justify-between pt-20 pb-4 shadow-[4px_0_16px_-6px_rgba(45,15,131,0.35)]"
+    >
       {/* top + middle items */}
       <nav className="flex flex-col gap-1.5 px-2">
         {navItems.map(({ label, to, icon: Icon }: NavbarItem) => {

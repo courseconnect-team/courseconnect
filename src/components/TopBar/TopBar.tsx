@@ -28,6 +28,7 @@ export default function TopNav() {
     <AppBar
       position="fixed"
       elevation={0}
+      data-tour="topbar"
       className="!bg-[#2d0f83] !h-14 top-0 left-0 right-0 !z-20"
     >
       <Toolbar className="!min-h-0 !px-2 md:!px-5 flex justify-between items-center">
@@ -41,7 +42,7 @@ export default function TopNav() {
 
         <div className="!text-[#FFFFFF] flex items-center gap-3">
           {/* Notifications */}
-          <Link href="/announcements">
+          <Link href="/announcements" data-tour="notifications">
             <IconButton
               aria-label={`Announcements (${unreadCount} unread)`}
               className="!text-[#FFFFFF]"
@@ -59,7 +60,11 @@ export default function TopNav() {
           </Link>
 
           {/* User avatar + meta */}
-          <Link href="/profile" className="flex items-center gap-2">
+          <Link
+            href="/profile"
+            data-tour="profile"
+            className="flex items-center gap-2"
+          >
             {/* Circle avatar placeholder (letter) */}
             <div className="w-9 h-9 rounded-full bg-opacity-20 flex items-center justify-center">
               <AccountCircleTwoToneIcon className="text-white" />
