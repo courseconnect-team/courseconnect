@@ -159,6 +159,13 @@ export function usePostAnnouncement() {
 
       const ts = firebase.firestore.FieldValue.serverTimestamp();
 
+      // No backend dispatcher exists to promote `pending` → `completed`,
+      // so treat any schedule at-or-before "now" as an immediate send.
+      // Only genuinely-future schedules stay pending.
+      const scheduledDate = scheduledAt instanceof Date ? scheduledAt : null;
+      const isFutureSchedule =
+        !!scheduledDate && scheduledDate.getTime() > Date.now();
+
       const payload: Record<string, any> = {
         title,
         bodyMd: bodyMd,
@@ -173,7 +180,7 @@ export function usePostAnnouncement() {
         audience: audience,
         audienceTokens: audienceTokens,
         requireAck: requireAck,
-        dispatchStatus: scheduledAt ? 'pending' : 'completed',
+        dispatchStatus: isFutureSchedule ? 'pending' : 'completed',
         recipientCount: recipientSnapshot.recipientCount,
       };
 
