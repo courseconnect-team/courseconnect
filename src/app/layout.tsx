@@ -1,6 +1,8 @@
 'use client';
 import { AuthProvider } from '@/firebase/auth/auth_context';
 import { AnnouncementsProvider } from '@/contexts/AnnouncementsContext';
+import { TourProvider } from '@/contexts/TourContext';
+import TourOverlay from '@/components/Tour/TourOverlay';
 import React, { useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -69,9 +71,12 @@ export default function RootLayout({
             >
               <AuthProvider>
                 <AnnouncementsProvider>
-                  <CssBaseline />
-                  {/*<Header ColorModeContext={ColorModeContext} />*/}
-                  {children}
+                  <TourProvider>
+                    <CssBaseline />
+                    {/*<Header ColorModeContext={ColorModeContext} />*/}
+                    {children}
+                    <TourOverlay />
+                  </TourProvider>
                 </AnnouncementsProvider>
               </AuthProvider>
             </ThemeProvider>

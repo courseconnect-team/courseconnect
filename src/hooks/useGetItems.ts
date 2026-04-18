@@ -7,6 +7,7 @@ import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { NavbarItem } from '@/types/navigation';
 import { SemesterName } from './useSemesterOptions';
 import { useMemo } from 'react';
@@ -30,6 +31,7 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           to: '/announcements',
           icon: CampaignOutlinedIcon,
         },
+        { label: 'Help', to: '/help', icon: HelpOutlineOutlinedIcon },
       ];
 
     /* ────────────────────────────────── Faculty ────────────────────────────────── */
@@ -47,6 +49,7 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           to: '/announcements',
           icon: CampaignOutlinedIcon,
         },
+        { label: 'Help', to: '/help', icon: HelpOutlineOutlinedIcon },
       ];
 
     /* ─────────────────────────────────── Admin ─────────────────────────────────── */
@@ -75,6 +78,7 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           to: '/announcements',
           icon: CampaignOutlinedIcon,
         },
+        { label: 'Help', to: '/help', icon: HelpOutlineOutlinedIcon },
       ];
 
     /* ───────────────────────────── Roles with no menu ──────────────────────────── */
