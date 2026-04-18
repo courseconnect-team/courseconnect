@@ -1,0 +1,149 @@
+rules_version = '2';
+
+// Course Connect baseline Firestore rules (Unit 1 of multi-department support).
+//
+// Intent: replicate today's de-facto access posture with server-side enforcement.
+// Before this file, every production write was guarded by client-side role
+// checks only. This baseline establishes a minimum server-side floor so the
+// Unit 7 department-scoping rules have something to layer on top.
+//
+// What this baseline enforces:
+//   - Authenticated access for all reads.
+//   - Self-write on users/{uid} (admins may also write other user docs to
+//     support the existing admin grids).
+//   - The `superAdmin` boolean field is NEVER client-writable under any
+//     condition. Bootstrapping is exclusively via a one-time admin SDK script.
+//   - Admin-only writes on course catalogs, assignments, and faculty-stats.
+//   - Staff (admin or faculty) create/update on announcements.
+//   - Self-write on the user's announcementStates subcollection.
+//   - Owner-or-staff writes on research listings.
+//
+// Scope intentionally deferred to Unit 7:
+//   - Scoping admin/faculty authority by department.
+//   - Enforcing announcement audience filters at the rules layer.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --------- helpers ---------
+
+    function isAuthed() {
+      return request.auth != null;
+    }
+    function isSelf(uid) {
+      return isAuthed() && request.auth.uid == uid;
+    }
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function userRole() {
+      return userDoc().data.role;
+    }
+    function isAdmin() {
+      return isAuthed() && userRole() == 'admin';
+    }
+    function isFaculty() {
+      return isAuthed() && userRole() == 'faculty';
+    }
+    function isStaff() {
+      return isAdmin() || isFaculty();
+    }
+    // `superAdmin` must not be client-writable even by admins. This closes the
+    // privilege-escalation window in the Unit 1..7 period where admin grids
+    // may write other user docs. Allowed if the incoming doc either lacks the
+    // field entirely or leaves it equal to the existing value.
+    function notTouchingSuperAdmin() {
+      return !('superAdmin' in request.resource.data)
+          || (resource != null
+              && request.resource.data.superAdmin == resource.data.superAdmin);
+    }
+
+    // --------- users ---------
+    match /users/{uid} {
+      allow read: if isAuthed();
+      allow create: if (isSelf(uid) || isAdmin())
+                    && !('superAdmin' in request.resource.data);
+      allow update: if (isSelf(uid) || isAdmin())
+                    && notTouchingSuperAdmin();
+      allow delete: if isAdmin();
+
+      // A user's own announcement read/ack state.
+      match /announcementStates/{announcementId} {
+        allow read, write: if isSelf(uid);
+      }
+    }
+
+    // --------- semesters + courses ---------
+    match /semesters/{semesterId} {
+      allow read: if isAuthed();
+      allow write: if isAdmin();
+
+      match /courses/{courseId} {
+        allow read: if isAuthed();
+        allow write: if isAdmin();
+      }
+    }
+
+    // Legacy flat `courses` collection (likely dead; confirmed/removed in Unit 6).
+    match /courses/{courseId} {
+      allow read: if isAuthed();
+      allow write: if isAdmin();
+    }
+
+    // --------- applications ---------
+    // Path: applications/{type}/uid/{uid} where `type` is a fixed set
+    // (course_assistant, supervised_teaching) and `courses` is a map field
+    // on the uid doc (not a subcollection). Applicant creates their own doc;
+    // staff can read/update any.
+    match /applications/{type}/uid/{uid} {
+      allow read: if isSelf(uid) || isStaff();
+      allow create: if isSelf(uid);
+      allow update: if isSelf(uid) || isStaff();
+      allow delete: if isSelf(uid) || isAdmin();
+    }
+
+    // --------- announcements ---------
+    // Baseline: audience filtering stays in the client query. Unit 7 enforces
+    // audience at the rule layer using the users.roles array.
+    match /announcements/{announcementId} {
+      allow read: if isAuthed();
+      allow create, update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // --------- research listings ---------
+    match /research-listings/{listingId} {
+      allow read: if isAuthed();
+      allow create: if isAuthed();
+      allow update: if isStaff()
+                    || (resource.data.keys().hasAny(['createdBy', 'uid'])
+                        && (resource.data.get('createdBy', '') == request.auth.uid
+                            || resource.data.get('uid', '') == request.auth.uid));
+      allow delete: if isAdmin()
+                    || (resource.data.keys().hasAny(['createdBy', 'uid'])
+                        && (resource.data.get('createdBy', '') == request.auth.uid
+                            || resource.data.get('uid', '') == request.auth.uid));
+
+      // Student applications to a research listing.
+      match /applications/{appId} {
+        allow read: if isAuthed();
+        allow create: if isAuthed();
+        allow update: if isAuthed();
+        allow delete: if isAuthed();
+      }
+    }
+
+    // --------- faculty-stats (collection is named 'faculty') ---------
+    match /faculty/{facultyId} {
+      allow read: if isAuthed();
+      allow write: if isAdmin();
+    }
+
+    // --------- assignments ---------
+    match /assignments/{uid} {
+      allow read: if isSelf(uid) || isStaff();
+      allow create, update: if isAdmin();
+      allow delete: if isSelf(uid) || isAdmin();
+    }
+  }
+}
