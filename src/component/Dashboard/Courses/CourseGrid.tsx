@@ -1,59 +1,51 @@
 'use client';
+
 import * as React from 'react';
-import { useState } from 'react';
-import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import {
-  GridRowModesModel,
-  GridRowsProp,
-  GridRowModes,
-  GridToolbarContainer,
-  GridToolbarExport,
-  GridToolbarFilterButton,
-  GridToolbarColumnsButton,
-  DataGrid,
-  GridColDef,
-  GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
-  GridRowModel,
-  GridRowEditStopReasons,
-  gridClasses,
-} from '@mui/x-data-grid';
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Snackbar,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import type { ColumnDef } from '@tanstack/react-table';
+
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  LinearProgress,
-} from '@mui/material';
-import UnderDevelopment from '@/component/UnderDevelopment';
-import { styled } from '@mui/material/styles';
 import { isE2EMode } from '@/utils/featureFlags';
+
+import UnderDevelopment from '@/component/UnderDevelopment';
+import {
+  AdminDataTable,
+  ConfirmDialog,
+  RowActionButton,
+  StatusPill,
+  type StatusTone,
+} from '@/components/common/AdminDataTable';
 
 interface Course {
   id: string;
-  code: string;
-  title: string;
-  credits: string;
-  num_enrolled: string;
-  enrollment_cap: string;
-  enrolled: string;
-  professor_names: string[];
-  professor_emails: string[];
-  helper_names: string[];
-  helper_emails: string[];
-  semester: string;
-  isNew?: boolean;
-  mode?: 'edit' | 'view' | undefined;
+  code?: string;
+  title?: string;
+  credits?: string | number;
+  num_enrolled?: string | number;
+  enrollment_cap?: string | number;
+  enrolled?: string | number;
+  professor_names?: string | string[];
+  professor_emails?: string | string[];
+  helper_names?: string | string[];
+  helper_emails?: string | string[];
+  semester?: string;
 }
 
 interface CourseGridProps {
@@ -62,15 +54,45 @@ interface CourseGridProps {
   processing?: boolean;
 }
 
-export default function CourseGrid(props: CourseGridProps) {
-  const { userRole, semester, processing } = props;
+function asList(v: string | string[] | undefined): string[] {
+  if (!v) return [];
+  if (Array.isArray(v)) return v;
+  return v
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function asText(v: string | string[] | undefined): string {
+  return asList(v).join(', ');
+}
+
+function enrollmentTone(enrolled?: number, cap?: number): StatusTone {
+  if (cap == null || isNaN(cap)) return 'neutral';
+  if (enrolled == null) return 'neutral';
+  const ratio = enrolled / cap;
+  if (ratio >= 1) return 'danger';
+  if (ratio >= 0.85) return 'warning';
+  return 'success';
+}
+
+export default function CourseGrid({
+  userRole,
+  semester,
+  processing,
+}: CourseGridProps) {
   const { user } = useAuth();
   const e2e = isE2EMode();
-  const [success, setSuccess] = React.useState(false);
-
-  const [loading, setLoading] = useState(false);
-  const [courseData, setCourseData] = React.useState<Course[]>([]);
   const userEmail = user?.email;
+
+  const [loading, setLoading] = React.useState(false);
+  const [listLoading, setListLoading] = React.useState(true);
+  const [courseData, setCourseData] = React.useState<Course[]>([]);
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+  const [viewId, setViewId] = React.useState<string | null>(null);
+  const [editing, setEditing] = React.useState<Course | null>(null);
+  const [editForm, setEditForm] = React.useState<Record<string, string>>({});
+  const [success, setSuccess] = React.useState(false);
 
   const getCoursesCollectionRef = React.useCallback(() => {
     return firebase
@@ -81,457 +103,430 @@ export default function CourseGrid(props: CourseGridProps) {
   }, [semester]);
 
   React.useEffect(() => {
-    console.log('SEM ' + semester);
+    setListLoading(true);
 
-    if (e2e) {
+    if (e2e || !semester) {
       setCourseData([]);
-      return;
-    }
-
-    if (!semester) {
-      setCourseData([]);
+      setListLoading(false);
       return;
     }
 
     const coursesRef = getCoursesCollectionRef();
+    const onData = (snap: firebase.firestore.QuerySnapshot) => {
+      const data = snap.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() } as Course)
+      );
+      setCourseData(data);
+      setListLoading(false);
+    };
+    const onErr = (err: any) => {
+      console.error('Error loading courses:', err);
+      setListLoading(false);
+    };
 
     if (userRole === 'admin') {
-      coursesRef.get().then((querySnapshot) => {
-        const data = querySnapshot.docs.map(
-          (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-          } as Course)
-        );
-        setCourseData(data);
-      });
+      coursesRef.get().then(onData).catch(onErr);
     } else if (userRole === 'faculty') {
       coursesRef
         .where('professor_emails', 'array-contains', userEmail)
         .get()
-        .then((querySnapshot) => {
-          const data = querySnapshot.docs.map(
-            (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Course)
-          );
-          setCourseData(data);
-        });
+        .then(onData)
+        .catch(onErr);
     } else if (userRole === 'student_assigned') {
       coursesRef
         .where('helper_emails', 'array-contains', userEmail)
         .get()
-        .then((querySnapshot) => {
-          const data = querySnapshot.docs.map(
-            (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Course)
-          );
-          setCourseData(data);
-        });
+        .then(onData)
+        .catch(onErr);
     } else {
       setCourseData([]);
+      setListLoading(false);
     }
   }, [userRole, userEmail, semester, processing, e2e, getCoursesCollectionRef]);
 
-  const [open, setOpen] = React.useState(false);
-  const [selectedCourseGrid, setSelectedCourseGrid] =
-    React.useState<GridRowId | null>(null);
-
-  const handleClickOpenGrid = (id: GridRowId) => {
-    setSelectedCourseGrid(id);
-    setOpen(true);
+  const openEdit = (course: Course) => {
+    setEditing(course);
+    setEditForm({
+      code: String(course.code ?? ''),
+      title: String(course.title ?? ''),
+      credits: String(course.credits ?? ''),
+      enrolled: String(course.enrolled ?? ''),
+      enrollment_cap: String(course.enrollment_cap ?? ''),
+      professor_names: asText(course.professor_names),
+      professor_emails: asText(course.professor_emails),
+      helper_names: asText(course.helper_names),
+      helper_emails: asText(course.helper_emails),
+      semester: String(course.semester ?? semester),
+    });
   };
 
-  const handleClose = () => setOpen(false);
+  const closeEdit = () => {
+    setEditing(null);
+    setEditForm({});
+  };
 
-  interface EditToolbarProps {
-    setCourseData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-    setRowModesModel: (
-      newModel: (oldModel: GridRowModesModel) => GridRowModesModel
-    ) => void;
-  }
+  const handleSaveEdit = async () => {
+    if (!editing) return;
+    setLoading(true);
+    try {
+      const patch = {
+        code: editForm.code,
+        title: editForm.title,
+        credits: editForm.credits,
+        enrolled: editForm.enrolled,
+        enrollment_cap: editForm.enrollment_cap,
+        professor_names: asList(editForm.professor_names),
+        professor_emails: asList(editForm.professor_emails),
+        helper_names: asList(editForm.helper_names),
+        helper_emails: asList(editForm.helper_emails),
+        semester: editForm.semester || semester,
+      };
+      await getCoursesCollectionRef().doc(editing.id).update(patch);
+      setCourseData((prev) =>
+        prev.map((c) => (c.id === editing.id ? { ...c, ...patch } : c))
+      );
+      setSuccess(true);
+      closeEdit();
+    } catch (error) {
+      console.error('Error updating course:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  function EditToolbar(props: EditToolbarProps) {
-    const { setCourseData, setRowModesModel } = props;
-    void setCourseData;
-    void setRowModesModel;
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    setLoading(true);
+    try {
+      await getCoursesCollectionRef().doc(deleteId).delete();
+      setCourseData((prev) => prev.filter((c) => c.id !== deleteId));
+    } catch (error) {
+      console.error('Error deleting course:', error);
+    } finally {
+      setLoading(false);
+      setDeleteId(null);
+    }
+  };
 
-    return (
-      <GridToolbarContainer>
-        <GridToolbarExport />
-        <GridToolbarFilterButton />
-        <GridToolbarColumnsButton />
-      </GridToolbarContainer>
-    );
-  }
-
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
+  const columns = React.useMemo<ColumnDef<Course, any>[]>(
+    () => [
+      {
+        id: 'code',
+        header: 'Code',
+        accessorKey: 'code',
+        cell: ({ getValue }) => (
+          <Box
+            sx={{
+              fontFamily: 'monospace',
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#111827',
+            }}
+          >
+            {(getValue() as string) || '—'}
+          </Box>
+        ),
+        size: 110,
+      },
+      {
+        id: 'title',
+        header: 'Title',
+        accessorKey: 'title',
+        cell: ({ getValue }) => (
+          <Box sx={{ fontWeight: 500, color: '#111827' }}>
+            {(getValue() as string) || '—'}
+          </Box>
+        ),
+        size: 260,
+        meta: { maxWidth: 260 },
+      },
+      {
+        id: 'credits',
+        header: 'Credits',
+        accessorKey: 'credits',
+        cell: ({ getValue }) => (getValue() as string) || '—',
+        size: 80,
+      },
+      {
+        id: 'enrollment',
+        header: 'Enrollment',
+        accessorFn: (r) => {
+          const e = Number(r.enrolled ?? r.num_enrolled ?? 0);
+          const c = Number(r.enrollment_cap ?? 0);
+          return `${e}/${c}`;
+        },
+        cell: ({ row }) => {
+          const enrolled = Number(
+            row.original.enrolled ?? row.original.num_enrolled ?? 0
+          );
+          const cap = Number(row.original.enrollment_cap ?? 0);
+          return (
+            <StatusPill
+              label={`${enrolled}/${cap || '—'}`}
+              tone={enrollmentTone(enrolled, cap || undefined)}
+            />
+          );
+        },
+        size: 130,
+      },
+      {
+        id: 'professor_names',
+        header: 'Professor',
+        accessorFn: (r) => asText(r.professor_names),
+        cell: ({ getValue }) => (getValue() as string) || '—',
+        size: 200,
+        meta: { maxWidth: 200 },
+      },
+      {
+        id: 'professor_emails',
+        header: 'Professor Email',
+        accessorFn: (r) => asText(r.professor_emails),
+        cell: ({ getValue }) => (getValue() as string) || '—',
+        size: 220,
+        meta: { maxWidth: 220 },
+      },
+      {
+        id: 'semester',
+        header: 'Semester',
+        accessorKey: 'semester',
+        cell: ({ getValue }) => (getValue() as string) || '—',
+        size: 130,
+      },
+    ],
+    []
   );
 
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
-  const handleEditClick = (id: GridRowId) => () => {
-    setLoading(true);
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-    setLoading(false);
-  };
-
-  const handleSaveClick = (id: GridRowId) => () => {
-    setLoading(true);
-    const updatedRow = courseData.find((row) => row.id === id);
-
-    if (updatedRow) {
-      getCoursesCollectionRef()
-        .doc(id.toString())
-        .update(updatedRow)
-        .then(() => {
-          setRowModesModel({
-            ...rowModesModel,
-            [id]: { mode: GridRowModes.View },
-          });
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          console.error('Error updating document: ', error);
-        });
-    } else {
-      setLoading(false);
-      console.error('No matching course data found for id: ', id);
-    }
-  };
-
-  const handleDeleteClick = (id: GridRowId) => () => {
-    setLoading(true);
-    getCoursesCollectionRef()
-      .doc(id.toString())
-      .delete()
-      .then(() => {
-        setCourseData(courseData.filter((row) => row.id !== id));
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error removing document: ', error);
-      });
-  };
-
-  const handleCancelClick = (id: GridRowId) => () => {
-    setLoading(true);
-    const editedRow = courseData.find((row) => row.id === id);
-
-    if (editedRow?.isNew) {
-      getCoursesCollectionRef()
-        .doc(id.toString())
-        .delete()
-        .then(() => {
-          setCourseData(courseData.filter((row) => row.id !== id));
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          console.error('Error removing document: ', error);
-        });
-    } else {
-      setRowModesModel({
-        ...rowModesModel,
-        [id]: { mode: GridRowModes.View, ignoreModifications: true },
-      });
-      setLoading(false);
-    }
-  };
-
-  const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
-    setLoading(true);
-
-    const professorEmailsArray =
-      typeof newRow.professor_emails === 'string' && newRow.professor_emails
-        ? newRow.professor_emails.split(',').map((p_email) => p_email.trim())
-        : oldRow.professor_emails;
-
-    const professorNamesArray =
-      typeof newRow.professor_names === 'string' && newRow.professor_names
-        ? newRow.professor_names.split(',').map((p_name) => p_name.trim())
-        : oldRow.professor_names;
-
-    const helperEmailsArray =
-      typeof newRow.helper_emails === 'string' && newRow.helper_emails
-        ? newRow.helper_emails.split(',').map((h_email) => h_email.trim())
-        : oldRow.helper_emails;
-
-    const helperNamesArray =
-      typeof newRow.helper_names === 'string' && newRow.helper_names
-        ? newRow.helper_names.split(',').map((h_name) => h_name.trim())
-        : oldRow.helper_names;
-
-    const updatedRow = {
-      ...(newRow as Course),
-      professor_emails: professorEmailsArray,
-      professor_names: professorNamesArray,
-      helper_emails: helperEmailsArray,
-      helper_names: helperNamesArray,
-      semester,
-      isNew: false,
-    };
-
-    if (updatedRow) {
-      if (updatedRow.isNew) {
-        return getCoursesCollectionRef()
-          .add(updatedRow)
-          .then((docRef) => {
-            const rowWithId = { ...updatedRow, id: docRef.id };
-            setCourseData(
-              courseData.map((row) => (row.id === newRow.id ? rowWithId : row))
-            );
-            setLoading(false);
-            return rowWithId;
-          })
-          .catch((error) => {
-            setLoading(false);
-            console.error('Error adding document: ', error);
-            throw error;
-          });
-      } else {
-        return getCoursesCollectionRef()
-          .doc(updatedRow.id)
-          .update(updatedRow)
-          .then(() => {
-            setCourseData(
-              courseData.map((row) => (row.id === newRow.id ? updatedRow : row))
-            );
-            setLoading(false);
-            return updatedRow;
-          })
-          .catch((error) => {
-            setLoading(false);
-            console.error('Error updating document: ', error);
-            throw error;
-          });
-      }
-    } else {
-      setLoading(false);
-      return Promise.reject(
-        new Error('No matching course data found for id: ' + newRow.id)
-      );
-    }
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) =>
-    setRowModesModel(newRowModesModel);
-
-  const columns: GridColDef[] = [
-    { field: 'code', headerName: 'Course Code', width: 130, editable: true },
-    { field: 'title', headerName: 'Course Title', width: 200, editable: true },
-    { field: 'credits', headerName: 'Credits', width: 100, editable: true },
-    { field: 'enrolled', headerName: 'Enrolled', width: 100, editable: true },
-    {
-      field: 'enrollment_cap',
-      headerName: 'Capacity',
-      width: 100,
-      editable: true,
-    },
-    {
-      field: 'professor_names',
-      headerName: 'Professor Name',
-      width: 190,
-      editable: true,
-    },
-    {
-      field: 'professor_emails',
-      headerName: 'Professor Email',
-      width: 170,
-      editable: true,
-    },
-    { field: 'semester', headerName: 'Semester', width: 130, editable: true },
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Actions',
-      width: 130,
-      cellClassName: 'actions',
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              key="1"
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{ color: 'primary.main' }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              key="2"
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
-        return [
-          <GridActionsCellItem
-            key="3"
-            icon={<ZoomInIcon />}
-            label="View"
-            onClick={() => handleClickOpenGrid(id)}
-            color="primary"
-          />,
-          <GridActionsCellItem
-            key="4"
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="5"
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
-        ];
-      },
-    },
-  ];
-
-  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-    border: 'none',
-    borderRadius: '16px',
-    fontFamily: 'Inter, sans-serif',
-    fontSize: '0.95rem',
-
-    '& .MuiDataGrid-columnHeaders': {
-      backgroundColor: '#D8C6F8',
-      color: '#1C003D',
-      fontWeight: 700,
-      borderBottom: 'none',
-    },
-
-    '& .MuiDataGrid-columnHeaderTitle': {
-      fontWeight: 700,
-    },
-    '& .MuiDataGrid-columnHeader:first-of-type': {
-      paddingLeft: '20px',
-    },
-    '& .MuiDataGrid-cell:first-of-type': {
-      paddingLeft: '25px',
-    },
-
-    [`& .${gridClasses.row}.even`]: {
-      backgroundColor: '#FFFFFF',
-    },
-    [`& .${gridClasses.row}.odd`]: {
-      backgroundColor: '#EEEEEE',
-    },
-
-    '& .MuiDataGrid-row:hover': {
-      backgroundColor: '#EFE6FF',
-    },
-
-    '& .MuiDataGrid-cell': {
-      borderBottom: '1px solid #ECE4FA',
-    },
-
-    '& .MuiDataGrid-footerContainer': {
-      borderTop: 'none',
-    },
-
-    '& .MuiTablePagination-root': {
-      color: '#5D3FC4',
-      fontWeight: 500,
-    },
-  }));
-
-  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref
-  ) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-  });
-
-  const handleSuccess = (
-    event?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === 'clickaway') return;
-    setSuccess(false);
-  };
-
   return (
-    <>
-      <Snackbar open={success} autoHideDuration={3000} onClose={handleSuccess}>
-        <Alert severity="success" sx={{ width: '100%' }}>
-          Created course successfully!
-        </Alert>
-      </Snackbar>
+    <Box>
+      <AdminDataTable
+        data={courseData}
+        columns={columns}
+        loading={loading || listLoading}
+        getRowId={(r) => r.id}
+        searchPlaceholder="Search courses by code, title, professor…"
+        tableId={`courses-${userRole}`}
+        exportFilename={`courses-${semester || 'all'}.csv`}
+        rowActions={(row) =>
+          userRole === 'admin' ? (
+            <>
+              <RowActionButton
+                variant="icon"
+                icon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
+                label="View"
+                onClick={() => setViewId(row.id)}
+              />
+              <RowActionButton
+                variant="icon"
+                icon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
+                label="Edit"
+                onClick={() => openEdit(row)}
+              />
+              <RowActionButton
+                variant="icon"
+                icon={<DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />}
+                label="Delete"
+                onClick={() => setDeleteId(row.id)}
+              />
+            </>
+          ) : (
+            <RowActionButton
+              variant="icon"
+              icon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
+              label="View"
+              onClick={() => setViewId(row.id)}
+            />
+          )
+        }
+        emptyState={{
+          title: 'No courses in this semester',
+          description:
+            userRole === 'admin'
+              ? 'Add a course or upload a course spreadsheet to get started.'
+              : 'Courses you are assigned to will appear here once published.',
+        }}
+        minWidth={1100}
+      />
 
-      <Box
-        sx={{
-          marginLeft: 10,
-          height: 600,
-          width: '90%',
-          backgroundColor: '#FDFBFF',
-          borderRadius: '16px',
-          boxShadow: '0 2px 8px rgba(128, 90, 213, 0.1)',
-          '& .actions': { color: 'text.secondary' },
-          '& .textPrimary': { color: 'text.primary' },
+      {/* View dialog (placeholder — existing behavior) */}
+      <Dialog
+        open={Boolean(viewId)}
+        onClose={() => setViewId(null)}
+        PaperProps={{ sx: { borderRadius: '12px', minWidth: 480 } }}
+      >
+        <DialogTitle sx={{ fontSize: 17, fontWeight: 600 }}>
+          Course details
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2, fontSize: 13, color: '#6B7280' }}>
+            Class number: <code>{viewId}</code>
+          </Typography>
+          <UnderDevelopment />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setViewId(null)}
+            sx={{ textTransform: 'none' }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog
+        open={Boolean(editing)}
+        onClose={loading ? undefined : closeEdit}
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            minWidth: 560,
+            boxShadow: '0 20px 50px -12px rgba(0,0,0,0.2)',
+          },
         }}
       >
-        {loading ? <LinearProgress color="warning" /> : null}
+        <DialogTitle sx={{ fontSize: 17, fontWeight: 600 }}>
+          Edit course
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Code"
+                value={editForm.code ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, code: e.target.value })
+                }
+              />
+              <TextField
+                fullWidth
+                size="small"
+                label="Title"
+                value={editForm.title ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, title: e.target.value })
+                }
+              />
+            </Stack>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Credits"
+                value={editForm.credits ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, credits: e.target.value })
+                }
+              />
+              <TextField
+                fullWidth
+                size="small"
+                label="Enrolled"
+                value={editForm.enrolled ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, enrolled: e.target.value })
+                }
+              />
+              <TextField
+                fullWidth
+                size="small"
+                label="Capacity"
+                value={editForm.enrollment_cap ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, enrollment_cap: e.target.value })
+                }
+              />
+            </Stack>
+            <TextField
+              size="small"
+              label="Professor names (comma-separated)"
+              value={editForm.professor_names ?? ''}
+              onChange={(e) =>
+                setEditForm({ ...editForm, professor_names: e.target.value })
+              }
+            />
+            <TextField
+              size="small"
+              label="Professor emails (comma-separated)"
+              value={editForm.professor_emails ?? ''}
+              onChange={(e) =>
+                setEditForm({ ...editForm, professor_emails: e.target.value })
+              }
+            />
+            <TextField
+              size="small"
+              label="Helper names (comma-separated)"
+              value={editForm.helper_names ?? ''}
+              onChange={(e) =>
+                setEditForm({ ...editForm, helper_names: e.target.value })
+              }
+            />
+            <TextField
+              size="small"
+              label="Helper emails (comma-separated)"
+              value={editForm.helper_emails ?? ''}
+              onChange={(e) =>
+                setEditForm({ ...editForm, helper_emails: e.target.value })
+              }
+            />
+            <TextField
+              size="small"
+              label="Semester"
+              value={editForm.semester ?? ''}
+              onChange={(e) =>
+                setEditForm({ ...editForm, semester: e.target.value })
+              }
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={closeEdit}
+            disabled={loading}
+            sx={{ textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveEdit}
+            variant="contained"
+            disabled={loading}
+            sx={{
+              textTransform: 'none',
+              backgroundColor: '#0021A5',
+              '&:hover': { backgroundColor: '#001A85' },
+            }}
+          >
+            {loading ? 'Saving…' : 'Save changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <StripedDataGrid
-          rows={courseData}
-          columns={columns}
-          editMode="row"
-          rowModesModel={rowModesModel}
-          onRowModesModelChange={handleRowModesModelChange}
-          onRowEditStop={handleRowEditStop}
-          processRowUpdate={processRowUpdate}
-          onProcessRowUpdateError={(error) =>
-            console.error('Error processing row update: ', error)
-          }
-          slots={{ toolbar: EditToolbar as any }}
-          slotProps={{ toolbar: { setCourseData, setRowModesModel } as any }}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 25 } },
-          }}
-          getRowClassName={(params) =>
-            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-          }
-        />
+      <ConfirmDialog
+        open={Boolean(deleteId)}
+        title="Delete course"
+        description="This will remove the course from the current semester. Students assigned to it will lose the association."
+        confirmLabel="Delete course"
+        onCancel={() => setDeleteId(null)}
+        onConfirm={handleConfirmDelete}
+        loading={loading}
+      />
 
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>{'Course Data'}</DialogTitle>
-          <DialogContent>
-            {selectedCourseGrid && (
-              <div>
-                <p>Class Number: {selectedCourseGrid}</p>
-                <UnderDevelopment />
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      </Box>
-    </>
+      <Snackbar
+        open={success}
+        autoHideDuration={3000}
+        onClose={() => setSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          severity="success"
+          onClose={() => setSuccess(false)}
+          sx={{ borderRadius: '8px' }}
+        >
+          Course updated successfully
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
