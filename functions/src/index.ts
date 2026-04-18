@@ -147,10 +147,7 @@ async function getRole(uid: string): Promise<string> {
   return typeof data?.role === 'string' ? data.role : '';
 }
 
-async function ensureStaffRole(
-  uid: string,
-  res: Response
-): Promise<boolean> {
+async function ensureStaffRole(uid: string, res: Response): Promise<boolean> {
   const role = await getRole(uid);
   if (!STAFF_ROLES.has(role)) {
     res.status(403).json({ message: 'Forbidden' });
@@ -460,7 +457,14 @@ export const processApplicationForm = functions.https.onRequest(
           payload.created_at = admin.firestore.FieldValue.serverTimestamp();
         }
 
-        tx.set(applicationRef, payload, { merge: true });
+        // `set({merge:true})` deep-merges nested maps, which would leave
+        // old `courses` keys (e.g. legacy `"Summer 2026|||EEL3834..."`
+        // flat keys) alive alongside the new nested shape. `mergeFields`
+        // writes only the listed top-level fields and REPLACES each one
+        // wholesale, so `courses` gets fully overwritten on every submit.
+        tx.set(applicationRef, payload, {
+          mergeFields: Object.keys(payload),
+        });
       });
 
       response.status(200).send('Application created successfully');
@@ -557,7 +561,9 @@ export const deleteUserFromID = functions.https.onRequest(
       ];
 
       const deleteResults = await Promise.allSettled(deletes);
-      const failedDeletes = deleteResults.filter((r) => r.status === 'rejected');
+      const failedDeletes = deleteResults.filter(
+        (r) => r.status === 'rejected'
+      );
       if (failedDeletes.length > 0) {
         console.error('Failed document deletes:', failedDeletes);
         fail(response, 'Failed to delete all user documents', 500);

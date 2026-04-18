@@ -201,11 +201,13 @@ export const CourseApplicationsTable: React.FC<
         await approveApplication({
           documentId: confirm.row.id,
           classCode: courseId,
+          semester,
         });
       } else {
         await denyApplication({
           documentId: confirm.row.id,
           classCode: courseId,
+          semester,
           name: confirm.row.applicantName,
           uf_email: confirm.row.uf_email,
           position: confirm.row.position,

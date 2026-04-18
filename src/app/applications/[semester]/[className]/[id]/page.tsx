@@ -9,12 +9,17 @@ import { getNavItems } from '@/hooks/useGetItems';
 import { useParams } from 'next/navigation';
 
 export default function ApplicationPage({}: {}) {
-  const params = useParams<{ id: string; className: string }>();
+  const params = useParams<{
+    id: string;
+    className: string;
+    semester: string;
+  }>();
   const [user, role, loading, roleError] = useUserInfo();
 
   const canView = role === 'faculty' || role === 'admin';
   const canQuery = Boolean(params.id) && canView && !loading && !roleError;
   const cleanClassName = decodeURIComponent(params.className).trim();
+  const cleanSemester = decodeURIComponent(params.semester).trim();
   // Always call the hook; let `enabled` control execution
   const {
     data,
@@ -50,6 +55,7 @@ export default function ApplicationPage({}: {}) {
         documentId={params.id}
         data={data}
         courseId={cleanClassName}
+        semester={cleanSemester}
       />
     </PageLayout>
   );

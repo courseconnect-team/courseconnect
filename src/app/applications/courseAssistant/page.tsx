@@ -38,7 +38,9 @@ export default function Application() {
   const userId = user.uid;
 
   const current = new Date();
-  const current_date = `${current.getMonth() + 1}-${current.getDate()}-${current.getFullYear()}`;
+  const current_date = `${
+    current.getMonth() + 1
+  }-${current.getDate()}-${current.getFullYear()}`;
 
   const [nationality, setNationality] = React.useState<string | null>(null);
   const [additionalPromptValue, setAdditionalPromptValue] = React.useState('');
@@ -139,11 +141,20 @@ export default function Application() {
 
     const coursesArray = selectedCourses;
 
-    const coursesMap: {
-      [key: string]: 'applied' | 'approved' | 'denied' | 'accepted';
-    } = {};
-    for (let i = 0; i < coursesArray.length; i++) {
-      coursesMap[coursesArray[i]] = 'applied';
+    // Canonical nested shape: courses[semester][courseId] = status.
+    // selectedCourses entries are encoded as `${semester}|||${courseId}`
+    // (see useSemesterOptions.parseCoursesMinimal); split them back out
+    // here so they're stored cleanly.
+    const coursesMap: Record<
+      string,
+      Record<string, 'applied' | 'approved' | 'denied' | 'accepted'>
+    > = {};
+    for (const encoded of coursesArray) {
+      const sepIdx = encoded.indexOf('|||');
+      const sem = sepIdx === -1 ? '' : encoded.slice(0, sepIdx);
+      const courseId = sepIdx === -1 ? encoded : encoded.slice(sepIdx + 3);
+      if (!coursesMap[sem]) coursesMap[sem] = {};
+      coursesMap[sem][courseId] = 'applied';
     }
 
     const applicationData = {
@@ -244,7 +255,11 @@ export default function Application() {
       });
 
       try {
-        await firebase.firestore().collection('assignments').doc(userId).delete();
+        await firebase
+          .firestore()
+          .collection('assignments')
+          .doc(userId)
+          .delete();
       } catch (err) {
         console.log('No prior assignment doc to delete or delete failed:', err);
       }

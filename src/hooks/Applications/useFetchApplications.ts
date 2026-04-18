@@ -27,16 +27,22 @@ export const ALL_APP_STATUSES = [
 const ASSIGNED = 'assigned';
 
 // unified query key helper so single- vs multi-status share cache
-const appsKey = (courseKey: string, statuses: string[]) =>
-  ['courseAppsByCourse', courseKey, ...[...statuses].sort()] as const;
+const appsKey = (courseKey: string, semester: string, statuses: string[]) =>
+  [
+    'courseAppsByCourse',
+    courseKey,
+    semester ?? '',
+    ...[...statuses].sort(),
+  ] as const;
 
 const db = getFirestore();
 const repo = new ApplicationRepository(db);
 
 // ---------- Low-level fetchers ----------
-/** Applications: courses[courseKey] IN statuses */
+/** Applications: courses[semester][courseKey] IN statuses (with legacy fallback) */
 async function fetchApplicationsForCourse(
   courseKey: string,
+  semester: string,
   statuses: string[]
 ): Promise<AppRow[]> {
   if (!statuses.length) return [];
@@ -44,7 +50,7 @@ async function fetchApplicationsForCourse(
   const applications = await repo.getApplicationsForCourse(courseKey, statuses);
   const appRows: AppRow[] = applications.map((app) => ({
     id: app.id!,
-    status: resolveCourseStatus(app.courses, courseKey) || 'applied',
+    status: resolveCourseStatus(app.courses, courseKey, semester) || 'applied',
     data: app,
   }));
 
@@ -67,6 +73,7 @@ async function fetchAssignedForCourse(courseKey: string): Promise<AppRow[]> {
 
 export function useCourseApplications(
   courseKey: string,
+  semester: string,
   statuses: string[] = [...ALL_APP_STATUSES, ASSIGNED],
   enabled = true
 ): UseQueryResult<
@@ -76,7 +83,7 @@ export function useCourseApplications(
   // normalize the requested statuses
   const wantAssigned = statuses.includes(ASSIGNED);
   const appStatuses = statuses.filter((s) => s !== ASSIGNED);
-  const key = appsKey(courseKey, statuses);
+  const key = appsKey(courseKey, semester, statuses);
 
   return useQuery<
     AppRow[],
@@ -95,7 +102,7 @@ export function useCourseApplications(
     queryFn: async () => {
       const [apps, assigned] = await Promise.all([
         appStatuses.length
-          ? fetchApplicationsForCourse(courseKey, appStatuses)
+          ? fetchApplicationsForCourse(courseKey, semester, appStatuses)
           : Promise.resolve<AppRow[]>([]),
         wantAssigned
           ? fetchAssignedForCourse(courseKey)
@@ -123,11 +130,12 @@ export function useCourseApplications(
 
 export function useCourseApplicationsByStatus(
   courseKey: string,
+  semester: string,
   status: string,
   enabled = true
 ): UseQueryResult<AppRow[], Error> {
   return useQuery<AppRow[], Error>({
-    queryKey: appsKey(courseKey, [status]),
+    queryKey: appsKey(courseKey, semester, [status]),
     enabled: enabled && !!courseKey && !!status,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
@@ -137,6 +145,6 @@ export function useCourseApplicationsByStatus(
     queryFn: () =>
       status === ASSIGNED
         ? fetchAssignedForCourse(courseKey)
-        : fetchApplicationsForCourse(courseKey, [status]),
+        : fetchApplicationsForCourse(courseKey, semester, [status]),
   });
 }

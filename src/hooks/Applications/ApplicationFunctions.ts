@@ -3,7 +3,11 @@ import { getFirestore } from 'firebase/firestore';
 import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
 import { callFunction } from '@/firebase/functions/callFunction';
 
-type ApproveParams = { documentId: string; classCode: string };
+type ApproveParams = {
+  documentId: string;
+  classCode: string;
+  semester?: string;
+};
 type DenyParams = ApproveParams & {
   name: string;
   uf_email: string;
@@ -13,22 +17,26 @@ type DenyParams = ApproveParams & {
 const db = getFirestore();
 const repo = new ApplicationRepository(db);
 
-// Atomically set courses.<classCode> = status on user's canonical course_assistant application
+// Atomically set courses.<semester>.<classCode> = status on user's canonical
+// course_assistant application (falling back to legacy flat keys if that's
+// what the existing doc uses).
 async function setCourseStatusAtomic(
   documentId: string,
   classCode: string,
-  status: 'approved' | 'denied'
+  status: 'approved' | 'denied',
+  semester?: string
 ) {
   // documentId is userId in the applications/{type}/uid/{uid} schema
-  await repo.updateCourseStatusLatest(documentId, classCode, status);
+  await repo.updateCourseStatusLatest(documentId, classCode, status, semester);
 }
 
 /** Approve: only sets the flag atomically */
 export async function approveApplication({
   documentId,
   classCode,
+  semester,
 }: ApproveParams) {
-  await setCourseStatusAtomic(documentId, classCode, 'approved');
+  await setCourseStatusAtomic(documentId, classCode, 'approved', semester);
   return { ok: true as const };
 }
 
@@ -39,8 +47,9 @@ export async function denyApplication({
   name,
   uf_email,
   position,
+  semester,
 }: DenyParams) {
-  await setCourseStatusAtomic(documentId, classCode, 'denied');
+  await setCourseStatusAtomic(documentId, classCode, 'denied', semester);
 
   // best-effort email (do not block the user even if email fails)
   try {
