@@ -332,7 +332,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 5: Top-bar bell badge with count**
+- [x] **Unit 5: Top-bar bell badge with count**
 
 **Goal:** Replace the icon-swap with a real badge showing the unread count. Cap display at `9+`.
 

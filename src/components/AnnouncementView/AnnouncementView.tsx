@@ -9,6 +9,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import MDPreview from '@uiw/react-markdown-preview';
 import type { Announcement } from '@/types/announcement';
 import AckPanel from './AckPanel';
 
@@ -153,9 +154,27 @@ export default function AnnouncementView({
             {announcement.title}
           </div>
 
-          {/* Body */}
-          <div className="mt-4 whitespace-pre-wrap text-sm leading-6 text-gray-700">
-            {announcement.bodyMd}
+          {/* Body — rendered through `@uiw/react-markdown-preview` so
+              authored markdown surfaces as formatted content (headings,
+              bold/italic, lists, links, inline code, etc.). The
+              `data-color-mode="light"` wrapper matches the convention in
+              `MessageBody.tsx` (which uses the sibling editor) and keeps
+              styles from drifting into dark mode. The `bg-transparent`
+              style on MDPreview ensures the card's white background is
+              preserved; `maxWidth: '100%'` keeps the renderer from
+              breaking out of the parent column on long, unbroken tokens. */}
+          <div
+            data-color-mode="light"
+            className="mt-4 text-sm leading-6 text-gray-700"
+          >
+            <MDPreview
+              source={announcement.bodyMd ?? ''}
+              style={{
+                backgroundColor: 'transparent',
+                padding: 0,
+                maxWidth: '100%',
+              }}
+            />
           </div>
 
           {/* Sender-side ack panel — only rendered when the viewer

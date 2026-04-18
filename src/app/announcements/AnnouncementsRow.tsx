@@ -4,7 +4,9 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import MarkEmailReadOutlined from '@mui/icons-material/MarkEmailReadOutlined';
 import MarkEmailUnreadOutlined from '@mui/icons-material/MarkEmailUnreadOutlined';
+import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
 import { AnnouncementData } from '@/types/announcement';
+import { markdownToPreview } from '@/firebase/util/markdownToPreview';
 
 function getInitial(name: string) {
   const trimmed = name.trim();
@@ -22,6 +24,7 @@ type Props = AnnouncementData & {
   id: string;
   unread?: boolean;
   requireAck?: boolean;
+  pinned?: boolean;
   onMarkRead?: (id: string) => Promise<void>;
   onMarkUnread?: (id: string) => Promise<void>;
 };
@@ -34,6 +37,7 @@ export default function AnnouncementsRow({
   sendDate,
   unread = false,
   requireAck = false,
+  pinned = false,
   onMarkRead,
   onMarkUnread,
 }: Props) {
@@ -43,8 +47,14 @@ export default function AnnouncementsRow({
   const base =
     'group relative block w-full border-t border-gray-200 px-6 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400';
 
+  // Precedence for the row background tint:
+  //   pinned           → amber (wins over unread)
+  //   !pinned + unread → red-50
+  //   !pinned + read   → white
+  const pinnedStyle = 'bg-amber-50 hover:bg-amber-100';
   const unreadStyle = 'bg-red-50 hover:bg-red-100'; // subtle highlight
   const readStyle = 'bg-white hover:bg-gray-50';
+  const rowTint = pinned ? pinnedStyle : unread ? unreadStyle : readStyle;
 
   // Per-row affordance visibility:
   //   - unread + !requireAck  → show "Mark read" (MarkEmailReadOutlined)
@@ -80,8 +90,9 @@ export default function AnnouncementsRow({
   return (
     <Link
       href={`/announcements/${id}`}
-      className={`${base} ${unread ? unreadStyle : readStyle}`}
+      className={`${base} ${rowTint}`}
       aria-label={unread ? `${title} (unread)` : title}
+      data-pinned={pinned ? 'true' : undefined}
     >
       <div className="flex items-center justify-between gap-6">
         <div className="flex min-w-0 items-center gap-4">
@@ -96,18 +107,27 @@ export default function AnnouncementsRow({
 
           <div className="min-w-0">
             <div
-              className={`text-base ${
+              className={`flex items-center gap-1.5 text-base ${
                 unread ? 'font-bold' : 'font-semibold'
               } text-gray-900`}
             >
-              {title}
+              {pinned && (
+                <PushPinOutlined
+                  fontSize="small"
+                  aria-label="Pinned"
+                  className="flex-none text-amber-600"
+                  sx={{ transform: 'rotate(45deg)', fontSize: 18 }}
+                />
+              )}
+              <span className="truncate">{title}</span>
             </div>
             <div
+              data-testid="row-body-preview"
               className={`text-sm overflow-hidden text-ellipsis whitespace-nowrap ${
                 unread ? 'text-gray-800' : 'text-gray-600'
               }`}
             >
-              {body}
+              {markdownToPreview(body)}
             </div>
           </div>
         </div>

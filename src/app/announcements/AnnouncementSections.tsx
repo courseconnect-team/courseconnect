@@ -137,6 +137,7 @@ export default function AnnouncementSections({ role }: { role: Role }) {
                   sendDate={a.createdAt ?? new Date(0)}
                   unread
                   requireAck={!!a.requireAck}
+                  pinned={!!a.pinned}
                   onMarkRead={markRead}
                   onMarkUnread={markUnread}
                 />
@@ -167,6 +168,7 @@ export default function AnnouncementSections({ role }: { role: Role }) {
                   body={a.bodyMd}
                   sendDate={a.createdAt ?? new Date(0)}
                   requireAck={!!a.requireAck}
+                  pinned={!!a.pinned}
                   onMarkRead={markRead}
                   onMarkUnread={markUnread}
                 />
