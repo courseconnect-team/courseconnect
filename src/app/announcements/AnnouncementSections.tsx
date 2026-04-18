@@ -2,6 +2,7 @@
 import { PrimaryButton } from '@/components/Buttons/PrimaryButton';
 import { Role } from '@/types/User';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import AnnouncementDialog from './AnnouncementDialogue';
 import AnnouncementsRow from './AnnouncementsRow';
@@ -13,6 +14,7 @@ import { Announcement } from '@/types/announcement';
 
 export default function AnnouncementSections({ role }: { role: Role }) {
   const [open, setOpen] = useState(false);
+  const [markingAll, setMarkingAll] = useState(false);
   const { postAnnouncement, posting, error: postError } = usePostAnnouncement();
 
   const {
@@ -21,6 +23,9 @@ export default function AnnouncementSections({ role }: { role: Role }) {
     loading,
     error: fetchError,
     refresh,
+    markRead,
+    markUnread,
+    markAllRead,
   } = useAnnouncements();
 
   async function handleSubmit(draft: Announcement) {
@@ -39,6 +44,19 @@ export default function AnnouncementSections({ role }: { role: Role }) {
     refresh(); // optional: re-fetch after posting
   }
 
+  async function handleMarkAllRead() {
+    if (markingAll) return;
+    try {
+      setMarkingAll(true);
+      await markAllRead();
+    } catch (err) {
+      console.error('Failed to mark all announcements as read:', err);
+      toast.error('Could not mark all announcements as read.');
+    } finally {
+      setMarkingAll(false);
+    }
+  }
+
   // View permissions
   const canView =
     role === 'admin' ||
@@ -48,6 +66,10 @@ export default function AnnouncementSections({ role }: { role: Role }) {
     role === 'student_applying';
   const canCreate = role === 'admin' || role === 'faculty';
   if (!canView) return null;
+
+  const noneAtAll = read.length === 0 && unread.length === 0;
+  const allCaughtUp = unread.length === 0 && read.length > 0;
+
   return (
     <div className="flex flex-col gap-4">
       {canCreate ? (
@@ -83,10 +105,23 @@ export default function AnnouncementSections({ role }: { role: Role }) {
             Retry
           </button>
         </div>
-      ) : read.length === 0 && unread.length === 0 ? (
+      ) : noneAtAll ? (
         <div className="p-4 text-sm text-gray-600">No announcements yet.</div>
       ) : (
         <div>
+          {/* Toolbar above the list: "Mark all as read" */}
+          <div className="flex items-center justify-end px-4 py-2">
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              disabled={unread.length === 0 || markingAll}
+              data-testid="mark-all-as-read"
+              className="text-sm font-semibold text-blue-600 underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:text-gray-400 disabled:no-underline"
+            >
+              Mark all as read
+            </button>
+          </div>
+
           {unread.length > 0 && (
             <>
               <div className="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-50 border-b">
@@ -101,9 +136,21 @@ export default function AnnouncementSections({ role }: { role: Role }) {
                   body={a.bodyMd}
                   sendDate={a.createdAt ?? new Date(0)}
                   unread
+                  requireAck={!!a.requireAck}
+                  onMarkRead={markRead}
+                  onMarkUnread={markUnread}
                 />
               ))}
             </>
+          )}
+
+          {allCaughtUp && (
+            <div
+              data-testid="all-caught-up"
+              className="px-4 py-3 text-sm text-gray-600 bg-gray-50 border-b"
+            >
+              You&apos;re all caught up.
+            </div>
           )}
 
           {read.length > 0 && (
@@ -119,6 +166,9 @@ export default function AnnouncementSections({ role }: { role: Role }) {
                   title={a.title}
                   body={a.bodyMd}
                   sendDate={a.createdAt ?? new Date(0)}
+                  requireAck={!!a.requireAck}
+                  onMarkRead={markRead}
+                  onMarkUnread={markUnread}
                 />
               ))}
             </>

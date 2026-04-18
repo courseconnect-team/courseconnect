@@ -20,30 +20,86 @@ import { ApplicationData } from '@/types/query';
 
 export type ApplicationType = 'course_assistant' | 'supervised_teaching';
 
-// Applications store course keys as `${semester}|||${courseId}` (see
-// useSemesterOptions.parseCoursesMinimal). Faculty lookups use the bare
-// courseId from the URL, so we match defensively: exact, or any key whose
-// suffix is `|||${courseKey}`.
-function findMatchingCourseKey(
-  courses: Record<string, unknown> | undefined,
-  courseKey: string
+// Canonical shape is nested:
+//   courses: { [semester]: { [courseId]: status } }
+//
+// Legacy shapes still supported during transition:
+//   - Prefixed flat: `${semester}|||${courseId}` -> status
+//   - Bare flat:     `${courseId}`               -> status
+//
+// resolveCourseStatus looks up a (courseId, optional semester) against any
+// of these shapes. findCourseStatusPath returns the dotted Firestore field
+// path pointing at the existing status, so writers update the right slot
+// instead of creating a parallel key.
+type AnyCourses = Record<string, unknown> | undefined;
+
+export function resolveCourseStatus(
+  courses: AnyCourses,
+  courseKey: string,
+  semester?: string
+): string | undefined {
+  if (!courses) return undefined;
+
+  if (semester) {
+    const bucket = (courses as any)[semester];
+    if (bucket && typeof bucket === 'object' && courseKey in bucket) {
+      const v = bucket[courseKey];
+      if (typeof v === 'string') return v;
+    }
+  }
+
+  for (const [, val] of Object.entries(courses)) {
+    if (val && typeof val === 'object') {
+      const nested = val as Record<string, unknown>;
+      if (courseKey in nested && typeof nested[courseKey] === 'string') {
+        return nested[courseKey] as string;
+      }
+    }
+  }
+
+  const bare = (courses as any)[courseKey];
+  if (typeof bare === 'string') return bare;
+
+  const suffix = `|||${courseKey}`;
+  for (const key of Object.keys(courses)) {
+    if (key.endsWith(suffix)) {
+      const v = (courses as any)[key];
+      if (typeof v === 'string') return v;
+    }
+  }
+
+  return undefined;
+}
+
+function findCourseStatusPath(
+  courses: AnyCourses,
+  courseKey: string,
+  semester?: string
 ): string | null {
   if (!courses) return null;
-  if (Object.prototype.hasOwnProperty.call(courses, courseKey))
+
+  if (semester) {
+    const bucket = (courses as any)[semester];
+    if (bucket && typeof bucket === 'object' && courseKey in bucket) {
+      return `${semester}.${courseKey}`;
+    }
+  }
+
+  for (const [bucketKey, val] of Object.entries(courses)) {
+    if (val && typeof val === 'object') {
+      const nested = val as Record<string, unknown>;
+      if (courseKey in nested) return `${bucketKey}.${courseKey}`;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(courses, courseKey)) {
     return courseKey;
+  }
   const suffix = `|||${courseKey}`;
   for (const key of Object.keys(courses)) {
     if (key.endsWith(suffix)) return key;
   }
   return null;
-}
-
-export function resolveCourseStatus(
-  courses: Record<string, string> | undefined,
-  courseKey: string
-): string | undefined {
-  const key = findMatchingCourseKey(courses, courseKey);
-  return key ? courses?.[key] : undefined;
 }
 
 export class ApplicationRepository {
@@ -174,7 +230,8 @@ export class ApplicationRepository {
   async updateCourseStatus(
     applicationId: string,
     courseKey: string,
-    status: 'applied' | 'approved' | 'denied' | 'accepted'
+    status: 'applied' | 'approved' | 'denied' | 'accepted',
+    semester?: string
   ): Promise<void> {
     await runTransaction(this.db, async (tx) => {
       const appRef = this.applicationDoc('course_assistant', applicationId);
@@ -185,14 +242,18 @@ export class ApplicationRepository {
       }
 
       const data = appSnap.data() as ApplicationData;
-      const storedKey =
-        findMatchingCourseKey(
+      const path =
+        findCourseStatusPath(
           data.courses as Record<string, unknown>,
-          courseKey
-        ) || courseKey;
+          courseKey,
+          semester
+        ) ||
+        // No existing slot found: write to the canonical nested shape if we
+        // have a semester, otherwise fall back to a bare key.
+        (semester ? `${semester}.${courseKey}` : courseKey);
 
       tx.update(appRef, {
-        [`courses.${storedKey}`]: status,
+        [`courses.${path}`]: status,
         updated_at: serverTimestamp(),
       });
     });
@@ -201,9 +262,10 @@ export class ApplicationRepository {
   async updateCourseStatusLatest(
     userId: string,
     courseKey: string,
-    status: 'applied' | 'approved' | 'denied' | 'accepted'
+    status: 'applied' | 'approved' | 'denied' | 'accepted',
+    semester?: string
   ): Promise<void> {
-    await this.updateCourseStatus(userId, courseKey, status);
+    await this.updateCourseStatus(userId, courseKey, status, semester);
   }
 
   /**

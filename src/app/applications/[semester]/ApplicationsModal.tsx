@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 
 export interface ApplicationModalProps {
   courseId: string;
+  semester?: string;
   open: boolean;
   onClose: () => void;
   id: string;
@@ -23,6 +24,7 @@ export interface ApplicationModalProps {
 
 export function ApplicationModal({
   courseId,
+  semester,
   open,
   onClose,
   id,
@@ -86,6 +88,7 @@ export function ApplicationModal({
             <ApplicationPreview
               data={documentData}
               courseId={courseId}
+              semester={semester}
               documentId={id}
               status={documentStatus}
             />

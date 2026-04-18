@@ -12,6 +12,7 @@ type Props = {
   status?: ApplicationStatus;
   documentId: string;
   courseId: string;
+  semester?: string;
 };
 
 export function ApplicationPreview({
@@ -19,6 +20,7 @@ export function ApplicationPreview({
   documentId,
   courseId,
   status,
+  semester,
 }: Props) {
   const {
     firstname,
@@ -62,11 +64,13 @@ export function ApplicationPreview({
         await approveApplication({
           documentId: documentId,
           classCode: courseId,
+          semester,
         });
       } else {
         await denyApplication({
           documentId: documentId,
           classCode: courseId,
+          semester,
           name: name,
           uf_email: email,
           position: position ?? '',

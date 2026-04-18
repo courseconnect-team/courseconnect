@@ -40,6 +40,7 @@ const ApplicationsPage: FC = () => {
 
   const { data, isLoading, isFetching, error } = useCourseApplications(
     courseId,
+    semesterId,
     statuses
   );
 
@@ -64,10 +65,10 @@ const ApplicationsPage: FC = () => {
     const courses = (hydratedDoc as any)?.courses as
       | Record<string, ApplicationStatus>
       | undefined;
-    return resolveCourseStatus(courses, courseId) as
+    return resolveCourseStatus(courses, courseId, semesterId) as
       | ApplicationStatus
       | undefined;
-  }, [selectedRow, hydratedDoc, courseId]);
+  }, [selectedRow, hydratedDoc, courseId, semesterId]);
 
   const close = () => {
     const params = new URLSearchParams(search.toString());
@@ -114,6 +115,7 @@ const ApplicationsPage: FC = () => {
         <ApplicationModal
           open={Boolean(modal && id)}
           courseId={courseId}
+          semester={semesterId}
           id={id ?? ''}
           onClose={close}
           parentPath={pathname}
