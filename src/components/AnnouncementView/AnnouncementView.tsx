@@ -7,8 +7,10 @@ import 'firebase/firestore';
 import toast from 'react-hot-toast';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import type { Announcement } from '@/types/announcement';
+import AckPanel from './AckPanel';
 
 type TimestampLike =
   | Date
@@ -74,12 +76,25 @@ type Props = {
    * `useAnnouncements()` context.
    */
   onAcknowledge?: () => Promise<void>;
+  /**
+   * The current viewer's uid — used (with `viewerRole`) to decide
+   * whether to render the sender-side ack dashboard panel.
+   */
+  viewerUid?: string;
+  /**
+   * The current viewer's role. Admins always see the ack panel on
+   * requireAck items; other roles only see it when they match the
+   * announcement's `senderId`.
+   */
+  viewerRole?: string;
 };
 
 export default function AnnouncementView({
   announcement,
   ackedAt,
   onAcknowledge,
+  viewerUid,
+  viewerRole,
 }: Props) {
   const initial = getInitial(announcement.senderName);
   const postedLine = formatPostedAt(announcement.createdAt);
@@ -88,6 +103,19 @@ export default function AnnouncementView({
 
   const requireAck = announcement.requireAck === true;
   const isAcked = ackedAt != null;
+
+  // Sender-side ack panel is visible to the announcement's sender
+  // and to any admin — but only when the announcement actually
+  // requires acknowledgment. Faculty who are NOT the sender do not
+  // see another sender's ack status.
+  const canSeeAckPanel =
+    requireAck &&
+    typeof announcement.id === 'string' &&
+    announcement.id.length > 0 &&
+    (viewerRole === 'admin' ||
+      (typeof viewerUid === 'string' &&
+        viewerUid.length > 0 &&
+        viewerUid === announcement.senderId));
 
   const handleAcknowledge = async () => {
     if (!onAcknowledge || busy) return;
@@ -129,6 +157,19 @@ export default function AnnouncementView({
           <div className="mt-4 whitespace-pre-wrap text-sm leading-6 text-gray-700">
             {announcement.bodyMd}
           </div>
+
+          {/* Sender-side ack panel — only rendered when the viewer
+              is the sender or an admin AND the announcement is
+              requireAck. Sits above the ack footer, below the body. */}
+          {canSeeAckPanel && (
+            <>
+              <Divider className="my-6" />
+              <AckPanel
+                announcementId={announcement.id as string}
+                recipientUids={announcement.recipientUids}
+              />
+            </>
+          )}
         </div>
 
         {/* Ack footer — only rendered for requireAck items. */}

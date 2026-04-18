@@ -62,6 +62,8 @@ export default function AnnouncementPage({}: {}) {
         announcement={data}
         ackedAt={state?.ackedAt ?? null}
         onAcknowledge={onAcknowledge}
+        viewerUid={user?.uid}
+        viewerRole={typeof role === 'string' ? role : undefined}
       />
     </PageLayout>
   );
