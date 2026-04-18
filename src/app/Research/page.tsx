@@ -87,18 +87,38 @@ const ResearchPage: React.FC = () => {
         )}
         {isFacultyOrAdmin && (
           <>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Box
+              sx={{
+                display: 'inline-flex',
+                p: 0.5,
+                mb: 3,
+                backgroundColor: '#F4F1FC',
+                borderRadius: '999px',
+              }}
+            >
               <Tabs
                 value={activeTab}
                 onChange={(_, v) => setActiveTab(v)}
+                TabIndicatorProps={{ sx: { display: 'none' } }}
                 sx={{
+                  minHeight: 'auto',
+                  '& .MuiTabs-flexContainer': { gap: 0.5 },
                   '& .MuiTab-root': {
                     textTransform: 'none',
                     fontWeight: 600,
-                    fontSize: '0.95rem',
+                    fontSize: '0.88rem',
+                    minHeight: 36,
+                    py: 0.75,
+                    px: 2.5,
+                    borderRadius: '999px',
+                    color: '#6B5AA8',
+                    transition: 'all 0.15s ease',
                   },
-                  '& .Mui-selected': { color: '#5A41D8' },
-                  '& .MuiTabs-indicator': { backgroundColor: '#5A41D8' },
+                  '& .Mui-selected': {
+                    color: '#fff !important',
+                    backgroundColor: '#5A41D8',
+                    boxShadow: '0 4px 12px rgba(90, 65, 216, 0.24)',
+                  },
                 }}
               >
                 <Tab label="My Positions" />

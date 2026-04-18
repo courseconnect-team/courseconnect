@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
 import {
   Card,
+  CardActionArea,
   CardContent,
   Typography,
   Button,
   Box,
   Chip,
+  Stack,
 } from '@mui/material';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ModalApplicationForm from './ModalApplicationForm';
+import ProjectDetailsDialog from './ProjectDetailsDialog';
 
 const DEPARTMENT_GRADIENTS: Record<string, string> = {
   'computer and information science and engineering':
@@ -32,7 +40,7 @@ const DEPARTMENT_GRADIENTS: Record<string, string> = {
     'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
 };
 
-function getDepartmentGradient(department: string): string {
+export function getDepartmentGradient(department: string): string {
   const key = department?.toLowerCase().trim();
   return (
     DEPARTMENT_GRADIENTS[key] ||
@@ -58,105 +66,135 @@ interface ProjectCardProps {
   application_deadline?: string;
   website?: string;
   applications?: any[];
-  // New fields
   faculty_contact?: string;
   phd_student_contact?: string;
   compensation?: string;
   nature_of_job?: string;
   hours_per_week?: string;
   image_url?: string;
-  // Callbacks
   onEdit?: () => void;
   onShowApplications?: () => void;
   onDelete?: () => void;
   listingId: string;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
-  userRole,
-  uid,
-  project_title,
-  department,
-  faculty_mentor,
-  terms_available,
-  student_level,
-  project_description,
-  faculty_members = [],
-  listingId,
-  phd_student_mentor,
-  prerequisites,
-  credit,
-  stipend,
-  application_deadline,
-  applications = [],
-  faculty_contact,
-  phd_student_contact,
-  compensation,
-  image_url,
-  onEdit,
-  onShowApplications,
-  onDelete,
-}) => {
-  const [expanded, setExpanded] = useState(false);
+const MetaChip: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+}> = ({ icon, label }) => (
+  <Box
+    sx={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 0.5,
+      px: 1.25,
+      py: 0.5,
+      borderRadius: '999px',
+      backgroundColor: '#F4F1FC',
+      color: '#4A35B8',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+      maxWidth: '100%',
+      '& svg': { fontSize: 14 },
+    }}
+  >
+    {icon}
+    <Box
+      component="span"
+      sx={{
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </Box>
+  </Box>
+);
+
+const ProjectCard: React.FC<ProjectCardProps> = (props) => {
+  const {
+    userRole,
+    uid,
+    project_title,
+    department,
+    faculty_mentor,
+    terms_available,
+    student_level,
+    project_description,
+    faculty_members = [],
+    listingId,
+    phd_student_mentor,
+    prerequisites,
+    credit,
+    stipend,
+    application_deadline,
+    faculty_contact,
+    phd_student_contact,
+    compensation,
+    hours_per_week,
+    image_url,
+    onEdit,
+    onShowApplications,
+    onDelete,
+  } = props;
+
   const isFacultyInvolved =
     userRole === 'faculty' && faculty_members.includes(uid || '');
-  const [openModal, setOpenModal] = useState(false);
+  const [openApply, setOpenApply] = useState(false);
+  const [openDetails, setOpenDetails] = useState(false);
 
-  // Backward-compatible display helpers
   const facultyDisplay =
     faculty_contact ||
     (typeof faculty_mentor === 'object' && faculty_mentor
       ? Object.values(faculty_mentor).join(', ')
       : typeof faculty_mentor === 'string'
       ? faculty_mentor
-      : 'N/A');
-
-  const phdDisplay =
-    phd_student_contact ||
-    (typeof phd_student_mentor === 'string'
-      ? phd_student_mentor
-      : typeof phd_student_mentor === 'object' && phd_student_mentor
-      ? Object.values(phd_student_mentor as Record<string, string>).join(', ')
-      : 'N/A');
+      : '');
 
   const compensationDisplay =
-    compensation || [credit, stipend].filter(Boolean).join(', ') || 'N/A';
+    compensation || [credit, stipend].filter(Boolean).join(', ') || '';
 
-  const handleModalOpen = async () => {
-    setOpenModal(true);
-  };
-
-  const sectionHeaderSx = {
-    color: '#5A41D8',
-    fontWeight: 'bold',
-    fontSize: '0.95rem',
-    mt: 2,
-    mb: 0.5,
-  };
+  const isStudent =
+    userRole === 'student_applying' || userRole === 'student_applied';
 
   return (
     <>
       <Card
         sx={{
-          p: 2,
           borderRadius: '16px',
-          boxShadow: 3,
+          boxShadow: '0 1px 3px rgba(16, 24, 40, 0.06)',
+          border: '1px solid #EEE9F7',
           backgroundColor: '#fff',
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
+          overflow: 'hidden',
+          transition:
+            'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
+          '&:hover': {
+            transform: 'translateY(-3px)',
+            boxShadow: '0 12px 32px rgba(90, 65, 216, 0.14)',
+            borderColor: '#D7CCF4',
+          },
         }}
       >
-        <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-          {/* Listing image / placeholder banner */}
+        <CardActionArea
+          onClick={() => setOpenDetails(true)}
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            '&:hover .MuiCardActionArea-focusHighlight': { opacity: 0 },
+          }}
+        >
+          {/* Banner */}
           <Box
             sx={{
               position: 'relative',
               width: '100%',
               aspectRatio: '16 / 9',
-              borderRadius: '12px',
-              mb: 2,
-              overflow: 'hidden',
               ...(image_url
                 ? {}
                 : { background: getDepartmentGradient(department) }),
@@ -184,173 +222,232 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                 }}
               >
                 <ScienceOutlinedIcon
-                  sx={{ fontSize: 64, color: 'rgba(255,255,255,0.35)' }}
+                  sx={{ fontSize: 56, color: 'rgba(255,255,255,0.4)' }}
                 />
               </Box>
             )}
-            {/* Bottom gradient overlay for chip readability */}
             <Box
               sx={{
                 position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '50%',
+                inset: 0,
                 background:
-                  'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 100%)',
+                  'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 55%)',
                 pointerEvents: 'none',
               }}
             />
-            {/* Overlay with department chip */}
             <Chip
               label={department}
               size="small"
               sx={{
                 position: 'absolute',
-                bottom: 10,
-                left: 10,
-                backgroundColor: 'rgba(0,0,0,0.55)',
-                color: '#fff',
-                fontWeight: 500,
-                fontSize: '0.75rem',
-                backdropFilter: 'blur(4px)',
+                bottom: 12,
+                left: 12,
+                maxWidth: 'calc(100% - 24px)',
+                backgroundColor: 'rgba(255,255,255,0.92)',
+                color: '#3B2A9B',
+                fontWeight: 600,
+                fontSize: '0.7rem',
+                letterSpacing: 0.2,
+                backdropFilter: 'blur(6px)',
+                '& .MuiChip-label': {
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                },
               }}
             />
           </Box>
 
-          {/* Always visible: Title */}
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
-            {project_title}
-          </Typography>
-
-          {/* Research Description (always visible) */}
-          <Typography sx={sectionHeaderSx}>Research Description</Typography>
-          <Typography
-            variant="body2"
+          <CardContent
             sx={{
-              display: expanded ? 'block' : '-webkit-box',
-              WebkitBoxOrient: 'vertical',
-              WebkitLineClamp: expanded ? 'unset' : 3,
-              overflow: 'hidden',
+              flexGrow: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              p: 2.5,
+              pb: 1.5,
             }}
           >
-            {project_description}
-          </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                fontSize: '1.05rem',
+                lineHeight: 1.3,
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 2,
+                overflow: 'hidden',
+                minHeight: '2.6em',
+                mb: 0.75,
+              }}
+            >
+              {project_title}
+            </Typography>
 
-          {/* Application Details (always visible) */}
-          <Typography sx={sectionHeaderSx}>Application Details</Typography>
-          <Typography variant="body2">
-            <strong>Application Deadline:</strong>{' '}
-            {application_deadline || 'N/A'}
-          </Typography>
+            {facultyDisplay && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.75,
+                  color: '#6B5AA8',
+                  mb: 1.25,
+                }}
+              >
+                <PersonOutlineIcon sx={{ fontSize: 16 }} />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: '0.82rem',
+                    fontWeight: 500,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {facultyDisplay}
+                </Typography>
+              </Box>
+            )}
 
-          {/* Expanded content */}
-          {expanded && (
-            <>
-              {/* Mentor Information */}
-              <Typography sx={sectionHeaderSx}>Mentor Information</Typography>
-              <Typography variant="body2">
-                <strong>Faculty Mentor:</strong> {facultyDisplay}
-              </Typography>
-              <Typography variant="body2">
-                <strong>PhD Student Mentor:</strong> {phdDisplay}
-              </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#4B4B55',
+                display: '-webkit-box',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 3,
+                overflow: 'hidden',
+                lineHeight: 1.5,
+                minHeight: '4.5em',
+                mb: 1.5,
+              }}
+            >
+              {project_description}
+            </Typography>
 
-              {/* Academic Information */}
-              <Typography sx={sectionHeaderSx}>Academic Information</Typography>
-              <Typography variant="body2">
-                <strong>Student Level:</strong> {student_level || 'N/A'}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Terms Available:</strong> {terms_available || 'N/A'}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Prerequisites:</strong> {prerequisites || 'N/A'}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Compensation:</strong> {compensationDisplay}
-              </Typography>
-            </>
-          )}
-        </CardContent>
+            <Stack
+              direction="row"
+              spacing={0.75}
+              sx={{ flexWrap: 'wrap', rowGap: 0.75, mt: 'auto' }}
+            >
+              {terms_available && (
+                <MetaChip
+                  icon={<CalendarTodayOutlinedIcon />}
+                  label={terms_available}
+                />
+              )}
+              {student_level && (
+                <MetaChip icon={<SchoolOutlinedIcon />} label={student_level} />
+              )}
+              {hours_per_week && (
+                <MetaChip
+                  icon={<AccessTimeOutlinedIcon />}
+                  label={`${hours_per_week} hrs/wk`}
+                />
+              )}
+              {compensationDisplay && (
+                <MetaChip
+                  icon={<PaidOutlinedIcon />}
+                  label={compensationDisplay}
+                />
+              )}
+            </Stack>
+          </CardContent>
+        </CardActionArea>
 
-        {/* Action buttons */}
+        {/* Footer actions */}
         <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          px={2}
-          pb={1}
+          sx={{
+            px: 2.5,
+            py: 1.5,
+            borderTop: '1px solid #F1ECFA',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 1,
+            backgroundColor: '#FBFAFE',
+          }}
         >
-          <Button
-            variant="text"
-            onClick={() => setExpanded(!expanded)}
+          <Typography
+            variant="caption"
             sx={{
-              textTransform: 'none',
-              color: '#5A41D8',
+              color: application_deadline ? '#6B5AA8' : '#9A96A8',
               fontWeight: 500,
-              fontSize: '0.85rem',
+              fontSize: '0.75rem',
             }}
           >
-            {expanded ? 'View Less' : 'View More'}
-          </Button>
+            {application_deadline
+              ? `Apply by ${application_deadline}`
+              : 'Rolling applications'}
+          </Typography>
 
-          {(userRole === 'student_applying' ||
-            userRole === 'student_applied') && (
+          {isStudent && (
             <Button
               variant="contained"
+              size="small"
+              onClick={() => setOpenApply(true)}
               sx={{
                 backgroundColor: '#5A41D8',
-                color: '#FFFFFF',
+                color: '#fff',
                 textTransform: 'none',
-                borderRadius: '8px',
-                fontWeight: 500,
-                '&:hover': { backgroundColor: '#4A35B8' },
+                borderRadius: '999px',
+                fontWeight: 600,
+                px: 2.25,
+                boxShadow: 'none',
+                '&:hover': {
+                  backgroundColor: '#4A35B8',
+                  boxShadow: '0 6px 18px rgba(90, 65, 216, 0.28)',
+                },
               }}
-              onClick={() => handleModalOpen()}
             >
               Apply
             </Button>
           )}
 
           {isFacultyInvolved && (
-            <Box display="flex" gap={1}>
+            <Box display="flex" gap={0.5}>
               <Button
-                variant="contained"
                 size="small"
-                sx={{
-                  backgroundColor: '#4CAF50',
-                  color: '#FFFFFF',
-                  textTransform: 'none',
-                  fontSize: '0.8rem',
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.();
                 }}
-                onClick={onEdit}
+                sx={{
+                  textTransform: 'none',
+                  color: '#4CAF50',
+                  fontSize: '0.78rem',
+                  minWidth: 'auto',
+                }}
               >
                 Edit
               </Button>
               <Button
-                variant="contained"
                 size="small"
-                sx={{
-                  backgroundColor: '#2196F3',
-                  color: '#FFFFFF',
-                  textTransform: 'none',
-                  fontSize: '0.8rem',
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShowApplications?.();
                 }}
-                onClick={onShowApplications}
+                sx={{
+                  textTransform: 'none',
+                  color: '#2196F3',
+                  fontSize: '0.78rem',
+                  minWidth: 'auto',
+                }}
               >
                 Applications
               </Button>
               <Button
-                variant="contained"
                 size="small"
-                sx={{
-                  backgroundColor: '#F44336',
-                  color: '#FFFFFF',
-                  textTransform: 'none',
-                  fontSize: '0.8rem',
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.();
                 }}
-                onClick={onDelete}
+                sx={{
+                  textTransform: 'none',
+                  color: '#F44336',
+                  fontSize: '0.78rem',
+                  minWidth: 'auto',
+                }}
               >
                 Delete
               </Button>
@@ -358,9 +455,37 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           )}
         </Box>
       </Card>
+
+      <ProjectDetailsDialog
+        open={openDetails}
+        onClose={() => setOpenDetails(false)}
+        onApply={isStudent ? () => setOpenApply(true) : undefined}
+        project_title={project_title}
+        department={department}
+        project_description={project_description}
+        faculty_contact={facultyDisplay}
+        phd_student_contact={
+          phd_student_contact ||
+          (typeof phd_student_mentor === 'string'
+            ? phd_student_mentor
+            : typeof phd_student_mentor === 'object' && phd_student_mentor
+            ? Object.values(phd_student_mentor as Record<string, string>).join(
+                ', '
+              )
+            : '')
+        }
+        terms_available={terms_available}
+        student_level={student_level}
+        prerequisites={prerequisites}
+        compensation={compensationDisplay}
+        hours_per_week={hours_per_week}
+        application_deadline={application_deadline}
+        image_url={image_url}
+      />
+
       <ModalApplicationForm
-        open={openModal}
-        onClose={() => setOpenModal(false)}
+        open={openApply}
+        onClose={() => setOpenApply(false)}
         listingId={listingId}
       />
     </>
