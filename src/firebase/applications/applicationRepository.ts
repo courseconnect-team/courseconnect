@@ -10,11 +10,41 @@ import {
   runTransaction,
   updateDoc,
 } from 'firebase/firestore';
-import type { CollectionReference, DocumentReference, Firestore } from 'firebase/firestore';
+import type {
+  CollectionReference,
+  DocumentReference,
+  Firestore,
+} from 'firebase/firestore';
 import { serverTimestamp } from 'firebase/firestore';
 import { ApplicationData } from '@/types/query';
 
 export type ApplicationType = 'course_assistant' | 'supervised_teaching';
+
+// Applications store course keys as `${semester}|||${courseId}` (see
+// useSemesterOptions.parseCoursesMinimal). Faculty lookups use the bare
+// courseId from the URL, so we match defensively: exact, or any key whose
+// suffix is `|||${courseKey}`.
+function findMatchingCourseKey(
+  courses: Record<string, unknown> | undefined,
+  courseKey: string
+): string | null {
+  if (!courses) return null;
+  if (Object.prototype.hasOwnProperty.call(courses, courseKey))
+    return courseKey;
+  const suffix = `|||${courseKey}`;
+  for (const key of Object.keys(courses)) {
+    if (key.endsWith(suffix)) return key;
+  }
+  return null;
+}
+
+export function resolveCourseStatus(
+  courses: Record<string, string> | undefined,
+  courseKey: string
+): string | undefined {
+  const key = findMatchingCourseKey(courses, courseKey);
+  return key ? courses?.[key] : undefined;
+}
 
 export class ApplicationRepository {
   private db: Firestore;
@@ -23,9 +53,7 @@ export class ApplicationRepository {
     this.db = db;
   }
 
-  private applicationsCollection(
-    type: ApplicationType
-  ): CollectionReference {
+  private applicationsCollection(type: ApplicationType): CollectionReference {
     return collection(this.db, 'applications', type, 'uid');
   }
 
@@ -156,8 +184,15 @@ export class ApplicationRepository {
         throw new Error('Application not found');
       }
 
+      const data = appSnap.data() as ApplicationData;
+      const storedKey =
+        findMatchingCourseKey(
+          data.courses as Record<string, unknown>,
+          courseKey
+        ) || courseKey;
+
       tx.update(appRef, {
-        [`courses.${courseKey}`]: status,
+        [`courses.${storedKey}`]: status,
         updated_at: serverTimestamp(),
       });
     });
@@ -218,7 +253,7 @@ export class ApplicationRepository {
     const allApps = await this.getAllApplicationsByType('course_assistant');
 
     return allApps.filter((app) => {
-      const courseStatus = app.courses?.[courseKey];
+      const courseStatus = resolveCourseStatus(app.courses, courseKey);
       return Boolean(courseStatus && statuses.includes(courseStatus));
     });
   }

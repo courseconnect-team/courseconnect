@@ -44,7 +44,10 @@ interface SourceRecord {
 
 function init() {
   if (!admin.apps.length) {
-    admin.initializeApp({ credential: admin.credential.applicationDefault() });
+    admin.initializeApp({
+      credential: admin.credential.applicationDefault(),
+      projectId: 'courseconnect-c6a7b',
+    });
   }
   return admin.firestore();
 }
@@ -130,14 +133,18 @@ async function migrateRecord(
     };
 
     if (DRY) {
-      console.log(`[DRY] ${record.docPath} -> applications/${appType}/uid/${userId}`);
+      console.log(
+        `[DRY] ${record.docPath} -> applications/${appType}/uid/${userId}`
+      );
       stats.migrated++;
       return;
     }
 
     await targetRef.set(payload, { merge: true });
     stats.migrated++;
-    console.log(`[MIGRATED] ${record.docPath} -> applications/${appType}/uid/${userId}`);
+    console.log(
+      `[MIGRATED] ${record.docPath} -> applications/${appType}/uid/${userId}`
+    );
 
     if (DELETE_OLD) {
       await db.doc(record.docPath).delete();

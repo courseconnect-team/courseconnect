@@ -11,7 +11,10 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 import { ApplicationData, AppRow } from '@/types/query';
-import { ApplicationRepository } from '@/firebase/applications/applicationRepository';
+import {
+  ApplicationRepository,
+  resolveCourseStatus,
+} from '@/firebase/applications/applicationRepository';
 
 export type ByStatus = Record<string, AppRow[]>;
 
@@ -41,7 +44,7 @@ async function fetchApplicationsForCourse(
   const applications = await repo.getApplicationsForCourse(courseKey, statuses);
   const appRows: AppRow[] = applications.map((app) => ({
     id: app.id!,
-    status: app.courses?.[courseKey] || 'applied',
+    status: resolveCourseStatus(app.courses, courseKey) || 'applied',
     data: app,
   }));
 

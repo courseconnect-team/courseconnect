@@ -18,6 +18,7 @@ import { ApplicationModal } from '../ApplicationsModal';
 import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicationById';
 import { SemesterName } from '@/hooks/useSemesterOptions';
 import { addSemesterToCourseDoc } from '@/hooks/Applications/ApplicationFunctions';
+import { resolveCourseStatus } from '@/firebase/applications/applicationRepository';
 
 const ApplicationsPage: FC = () => {
   const [user, role, loading, roleError] = useUserInfo();
@@ -63,7 +64,9 @@ const ApplicationsPage: FC = () => {
     const courses = (hydratedDoc as any)?.courses as
       | Record<string, ApplicationStatus>
       | undefined;
-    return courses?.[courseId];
+    return resolveCourseStatus(courses, courseId) as
+      | ApplicationStatus
+      | undefined;
   }, [selectedRow, hydratedDoc, courseId]);
 
   const close = () => {
