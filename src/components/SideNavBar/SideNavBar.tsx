@@ -1,10 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import handleSignOut from '@/firebase/auth/auth_signout';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 import { NavbarItem } from '@/types/navigation';
 import { usePathname } from 'next/navigation';
+import { useBugReport } from '@/contexts/BugReportContext';
 /**
  * Vertical sidebar navigation that mimics the reference image.
  * - Tailwind handles layout + colours.
@@ -18,6 +20,7 @@ type SideNavProps = {
 
 export default function SideNav({ navItems }: SideNavProps) {
   const pathname = usePathname();
+  const { open: openBugReport } = useBugReport();
   const [open, setOpen] = React.useState(false);
   const handleClose = () => {
     setOpen(false);
@@ -68,8 +71,19 @@ export default function SideNav({ navItems }: SideNavProps) {
         })}
       </nav>
 
-      {/* bottom logout */}
-      <div className="px-2">
+      {/* bottom: report a bug + logout */}
+      <div className="px-2 flex flex-col gap-1.5">
+        <button
+          onClick={openBugReport}
+          aria-label="Report a bug"
+          data-tour="report-bug"
+          className="w-full flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl text-white/80 hover:bg-white/10 hover:text-white cursor-pointer transition-all duration-200 ease-out"
+        >
+          <BugReportOutlinedIcon fontSize="inherit" className="!text-[26px]" />
+          <span className="text-[10.5px] leading-[1.15] tracking-wide font-medium">
+            Report Bug
+          </span>
+        </button>
         <button
           onClick={handleOpen}
           aria-label="Logout"

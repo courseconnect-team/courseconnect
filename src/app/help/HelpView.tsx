@@ -2,20 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import {
-  Box,
-  Tabs,
-  Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  MenuItem,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
+import { Box, Tabs, Tab } from '@mui/material';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
@@ -26,7 +13,7 @@ import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import { Role } from '@/types/User';
 import { useTour } from '@/contexts/TourContext';
-import { useAuth } from '@/firebase/auth/auth_context';
+import { useBugReport } from '@/contexts/BugReportContext';
 import {
   HELP_GUIDES,
   HELP_ROLE_ORDER,
@@ -66,8 +53,8 @@ const HelpView: React.FC<HelpViewProps> = ({ role }) => {
   const visibleRoles = useMemo(() => visibleRolesFor(defaultKey), [defaultKey]);
   const [activeKey, setActiveKey] = useState<HelpRoleKey>(defaultKey);
   const [openSection, setOpenSection] = useState<string | null>(null);
-  const [bugOpen, setBugOpen] = useState(false);
   const { start } = useTour();
+  const { open: openBugReport } = useBugReport();
 
   const guide: HelpGuide = HELP_GUIDES[activeKey];
   const activeIndex = Math.max(0, visibleRoles.indexOf(activeKey));
@@ -125,33 +112,6 @@ const HelpView: React.FC<HelpViewProps> = ({ role }) => {
         >
           <PlayArrowRoundedIcon sx={{ fontSize: 20 }} />
           Start walkthrough
-        </button>
-      </div>
-
-      {/* Bug report CTA */}
-      <div className="rounded-2xl border border-[#F3D9D5] bg-gradient-to-br from-[#FFF5F3] to-white p-6 md:p-7 mb-8 flex flex-col md:flex-row md:items-center gap-5">
-        <div className="shrink-0 w-12 h-12 rounded-xl bg-[#E5484D] text-white flex items-center justify-center">
-          <BugReportOutlinedIcon sx={{ fontSize: 26 }} />
-        </div>
-        <div className="flex-1">
-          <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#B5322D]">
-            Something wrong?
-          </p>
-          <h3 className="text-[19px] md:text-[21px] font-semibold text-[#1E1442] mt-0.5">
-            Report a bug or send feedback
-          </h3>
-          <p className="text-sm text-[#4A3F6B] mt-1.5 leading-relaxed max-w-2xl">
-            Run into a glitch, confusing flow, or something broken? Send the
-            details straight to the CourseConnect team — we&apos;ll jump on it.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setBugOpen(true)}
-          className="shrink-0 inline-flex items-center justify-center gap-2 bg-[#E5484D] text-white hover:bg-[#C43A3E] font-semibold px-5 py-2.5 rounded-full shadow-[0_6px_20px_rgba(229,72,77,0.25)] transition-colors"
-        >
-          <BugReportOutlinedIcon sx={{ fontSize: 20 }} />
-          Report a bug
         </button>
       </div>
 
@@ -292,11 +252,35 @@ const HelpView: React.FC<HelpViewProps> = ({ role }) => {
         </div>
       </section>
 
-      <BugReportDialog
-        open={bugOpen}
-        onClose={() => setBugOpen(false)}
-        role={role}
-      />
+      {/* Bug report CTA */}
+      <section>
+        <div className="rounded-2xl border border-[#F3D9D5] bg-gradient-to-br from-[#FFF5F3] to-white p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5">
+          <div className="shrink-0 w-12 h-12 rounded-xl bg-[#E5484D] text-white flex items-center justify-center">
+            <BugReportOutlinedIcon sx={{ fontSize: 26 }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#B5322D]">
+              Something wrong?
+            </p>
+            <h3 className="text-[19px] md:text-[21px] font-semibold text-[#1E1442] mt-0.5">
+              Report a bug or send feedback
+            </h3>
+            <p className="text-sm text-[#4A3F6B] mt-1.5 leading-relaxed max-w-2xl">
+              Run into a glitch, confusing flow, or something broken? Send the
+              details straight to the CourseConnect team — we&apos;ll jump on
+              it.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={openBugReport}
+            className="shrink-0 inline-flex items-center justify-center gap-2 bg-[#E5484D] text-white hover:bg-[#C43A3E] font-semibold px-5 py-2.5 rounded-full shadow-[0_6px_20px_rgba(229,72,77,0.25)] transition-colors"
+          >
+            <BugReportOutlinedIcon sx={{ fontSize: 20 }} />
+            Report a bug
+          </button>
+        </div>
+      </section>
     </div>
   );
 };
@@ -398,172 +382,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
         </div>
       )}
     </div>
-  );
-};
-
-type BugReportDialogProps = {
-  open: boolean;
-  onClose: () => void;
-  role: Role | string | undefined;
-};
-
-const BugReportDialog: React.FC<BugReportDialogProps> = ({
-  open,
-  onClose,
-  role,
-}) => {
-  const { user } = useAuth();
-  const [summary, setSummary] = useState('');
-  const [description, setDescription] = useState('');
-  const [severity, setSeverity] = useState<'low' | 'medium' | 'high'>('medium');
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const reset = () => {
-    setSummary('');
-    setDescription('');
-    setSeverity('medium');
-    setError(null);
-    setSuccess(false);
-  };
-
-  const handleClose = () => {
-    if (submitting) return;
-    onClose();
-    setTimeout(reset, 200);
-  };
-
-  const handleSubmit = async () => {
-    if (!summary.trim() || !description.trim()) {
-      setError('Please add a short summary and a description.');
-      return;
-    }
-    setSubmitting(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/v1/bug-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          summary: summary.trim(),
-          description: description.trim(),
-          severity,
-          pageUrl:
-            typeof window !== 'undefined' ? window.location.href : undefined,
-          userAgent:
-            typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
-          user: {
-            uid: user?.uid,
-            email: user?.email ?? undefined,
-            displayName: user?.displayName ?? undefined,
-            role: typeof role === 'string' ? role : undefined,
-          },
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Could not send the bug report.');
-      }
-      setSuccess(true);
-      setTimeout(() => {
-        onClose();
-        reset();
-      }, 1200);
-    } catch (e: any) {
-      setError(e.message || 'Could not send the bug report.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 600, color: '#1E1442' }}>
-        Report a bug
-      </DialogTitle>
-      <DialogContent dividers>
-        {success ? (
-          <Alert severity="success">
-            Thanks! Your report was sent to the CourseConnect team.
-          </Alert>
-        ) : (
-          <>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            <TextField
-              label="Short summary"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              fullWidth
-              required
-              inputProps={{ maxLength: 140 }}
-              helperText={`${summary.length}/140`}
-              sx={{ mb: 2 }}
-              disabled={submitting}
-            />
-            <TextField
-              label="What happened? Include steps to reproduce if you can."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              fullWidth
-              required
-              multiline
-              minRows={5}
-              inputProps={{ maxLength: 4000 }}
-              sx={{ mb: 2 }}
-              disabled={submitting}
-            />
-            <TextField
-              label="Severity"
-              value={severity}
-              onChange={(e) =>
-                setSeverity(e.target.value as 'low' | 'medium' | 'high')
-              }
-              select
-              fullWidth
-              disabled={submitting}
-            >
-              <MenuItem value="low">Low — minor annoyance</MenuItem>
-              <MenuItem value="medium">Medium — noticeable issue</MenuItem>
-              <MenuItem value="high">High — blocker / broken</MenuItem>
-            </TextField>
-            <p className="text-xs text-[#6B5AA8] mt-3">
-              We&apos;ll include your email, role, and the page URL so the team
-              can follow up.
-            </p>
-          </>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} disabled={submitting}>
-          {success ? 'Close' : 'Cancel'}
-        </Button>
-        {!success && (
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting}
-            variant="contained"
-            sx={{
-              backgroundColor: '#5A41D8',
-              '&:hover': { backgroundColor: '#2d0f83' },
-            }}
-            startIcon={
-              submitting ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : (
-                <BugReportOutlinedIcon />
-              )
-            }
-          >
-            {submitting ? 'Sending…' : 'Send report'}
-          </Button>
-        )}
-      </DialogActions>
-    </Dialog>
   );
 };
 

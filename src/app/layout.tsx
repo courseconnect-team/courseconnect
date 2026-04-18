@@ -3,6 +3,8 @@ import { AuthProvider } from '@/firebase/auth/auth_context';
 import { AnnouncementsProvider } from '@/contexts/AnnouncementsContext';
 import { TourProvider } from '@/contexts/TourContext';
 import TourOverlay from '@/components/Tour/TourOverlay';
+import { BugReportProvider } from '@/contexts/BugReportContext';
+import BugReportDialog from '@/components/BugReport/BugReportDialog';
 import React, { useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -72,10 +74,13 @@ export default function RootLayout({
               <AuthProvider>
                 <AnnouncementsProvider>
                   <TourProvider>
-                    <CssBaseline />
-                    {/*<Header ColorModeContext={ColorModeContext} />*/}
-                    {children}
-                    <TourOverlay />
+                    <BugReportProvider>
+                      <CssBaseline />
+                      {/*<Header ColorModeContext={ColorModeContext} />*/}
+                      {children}
+                      <TourOverlay />
+                      <BugReportDialog />
+                    </BugReportProvider>
                   </TourProvider>
                 </AnnouncementsProvider>
               </AuthProvider>
