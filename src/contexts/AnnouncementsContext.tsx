@@ -13,14 +13,19 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import GetAnnouncementTimestamp from '@/firebase/util/GetAnnouncementTimestamp';
 import {
   Announcement,
   Audience,
   AudienceDepartment,
   AudienceRole,
 } from '@/types/announcement';
-import { Role } from '@/types/User';
+import { useAnnouncementStates } from '@/hooks/Announcements/useAnnouncementStates';
+import {
+  markRead as markReadHelper,
+  markUnread as markUnreadHelper,
+  markAck as markAckHelper,
+  markAllRead as markAllReadHelper,
+} from '@/hooks/Announcements/markAnnouncementState';
 
 type AnnouncementsContextType = {
   read: Announcement[];
@@ -28,6 +33,10 @@ type AnnouncementsContextType = {
   loading: boolean;
   error: Error | null;
   refresh: () => void;
+  markRead: (id: string) => Promise<void>;
+  markUnread: (id: string) => Promise<void>;
+  markAck: (id: string) => Promise<void>;
+  markAllRead: () => Promise<void>;
 };
 
 const AnnouncementsContext = createContext<AnnouncementsContextType | null>(
@@ -60,6 +69,7 @@ function mapDoc(doc: firebase.firestore.QueryDocumentSnapshot): Announcement {
     title: d.title ?? '',
     bodyMd: d.bodyMd ?? '',
     pinned: !!d.pinned,
+    requireAck: !!d.requireAck,
 
     createdAt: toDate(d.createdAt),
     updatedAt: toDate(d.updatedAt),
@@ -73,6 +83,10 @@ function mapDoc(doc: firebase.firestore.QueryDocumentSnapshot): Announcement {
     audience: (d.audience ?? { type: 'all' }) as Audience,
 
     dispatchStatus: d.dispatchStatus ?? 'unknown',
+
+    recipientCount:
+      typeof d.recipientCount === 'number' ? d.recipientCount : undefined,
+    recipientUids: Array.isArray(d.recipientUids) ? d.recipientUids : undefined,
   };
 }
 
@@ -85,7 +99,10 @@ export function AnnouncementsProvider({
 }: AnnouncementsProviderProps) {
   const { user } = useAuth();
   const [roleData, roleLoading] = GetUserRole(user?.uid);
-  const [timestamp] = GetAnnouncementTimestamp(user?.uid);
+
+  const { statesById, loading: statesLoading } = useAnnouncementStates(
+    user?.uid
+  );
 
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,25 +182,82 @@ export function AnnouncementsProvider({
   const { read, unread } = useMemo(() => {
     return announcements.reduce(
       (acc, a) => {
-        const tMs = a.scheduledAt ?? a.createdAt ?? new Date(Date.now());
-        const isUnread = timestamp == null || typeof timestamp !== 'object' ? true : tMs > (timestamp as unknown as Date);
+        const state = a.id ? statesById.get(a.id) : undefined;
+        const isRead = state?.readAt != null;
+        const isAcked = state?.ackedAt != null;
 
-        (isUnread ? acc.unread : acc.read).push(a);
+        // Partition rule from the plan's High-Level Technical Design:
+        //   (requireAck && !acked) → unread
+        //   else isRead            → read
+        //   else                   → unread
+        const bucket: 'read' | 'unread' =
+          a.requireAck && !isAcked ? 'unread' : isRead ? 'read' : 'unread';
+
+        acc[bucket].push(a);
         return acc;
       },
       { unread: [] as Announcement[], read: [] as Announcement[] }
     );
-  }, [announcements, timestamp]);
+  }, [announcements, statesById]);
+
+  const markReadFn = useCallback(
+    async (id: string) => {
+      if (!user?.uid) return;
+      await markReadHelper(user.uid, id);
+    },
+    [user?.uid]
+  );
+
+  const markUnreadFn = useCallback(
+    async (id: string) => {
+      if (!user?.uid) return;
+      await markUnreadHelper(user.uid, id);
+    },
+    [user?.uid]
+  );
+
+  const markAckFn = useCallback(
+    async (id: string) => {
+      if (!user?.uid) return;
+      await markAckHelper(user.uid, id);
+    },
+    [user?.uid]
+  );
+
+  const markAllReadFn = useCallback(async () => {
+    if (!user?.uid) return;
+    const ids = unread
+      .map((a) => a.id)
+      .filter((id): id is string => typeof id === 'string' && id.length > 0);
+    if (ids.length === 0) return;
+    await markAllReadHelper(user.uid, ids);
+  }, [user?.uid, unread]);
 
   const value = useMemo(
     () => ({
       read,
       unread,
-      loading: loading || roleLoading,
+      loading: loading || roleLoading || statesLoading,
       error,
       refresh,
+      markRead: markReadFn,
+      markUnread: markUnreadFn,
+      markAck: markAckFn,
+      markAllRead: markAllReadFn,
     }),
-    [read, unread, loading, roleLoading, error, refresh]
+    [
+      read,
+      unread,
+      loading,
+      roleLoading,
+      statesLoading,
+      error,
+      refresh,
+      markReadFn,
+      markUnreadFn,
+      markAckFn,
+      markAllReadFn,
+    ]
   );
 
   return (
