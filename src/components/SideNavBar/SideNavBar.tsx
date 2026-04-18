@@ -31,9 +31,9 @@ export default function SideNav({ navItems }: SideNavProps) {
   };
 
   return (
-    <div className="w-14 md:w-20 h-screen bg-[#6C37D8] flex flex-col justify-between items-center pt-14 pb-6">
+    <aside className="relative w-20 md:w-24 h-screen bg-[#6C37D8] flex flex-col justify-between pt-20 pb-4 shadow-[4px_0_16px_-6px_rgba(45,15,131,0.35)]">
       {/* top + middle items */}
-      <div className="flex flex-col space-y-4 mt-5">
+      <nav className="flex flex-col gap-1.5 px-2">
         {navItems.map(({ label, to, icon: Icon }: NavbarItem) => {
           const isActive = pathname === to;
           return (
@@ -41,39 +41,43 @@ export default function SideNav({ navItems }: SideNavProps) {
               key={to}
               href={to}
               data-testid={`nav-${label}`}
-              className={`
-              group relative flex flex-col items-center text-5xl px-2 py-1 duration-200
-              ${isActive ? 'bg-white text-primary' : 'text-white '}
-                hover:border-r-4 "rounded-sm border-black]
-            `}
+              aria-current={isActive ? 'page' : undefined}
+              className={`group relative flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl transition-all duration-200 ease-out ${
+                isActive
+                  ? 'bg-white text-[#6C37D8] shadow-sm'
+                  : 'text-white/85 hover:bg-white/10 hover:text-white'
+              }`}
             >
-              <Icon
-                fontSize="inherit"
-                className={`  
-              ${isActive ? 'bg-white text-primary' : 'text-white '}`}
-              />
               <span
-                className={`text-[12px] mt-1 tracking-wide text-center   ${
-                  isActive ? 'bg-white text-primary' : 'text-white '
+                aria-hidden
+                className={`pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-white transition-all duration-200 ease-out ${
+                  isActive
+                    ? 'h-8 opacity-100'
+                    : 'h-0 opacity-0 group-hover:h-5 group-hover:opacity-70'
                 }`}
-              >
+              />
+              <Icon fontSize="inherit" className="!text-[26px]" />
+              <span className="text-[10.5px] leading-[1.15] tracking-wide text-center font-medium break-words">
                 {label}
               </span>
             </Link>
           );
         })}
-      </div>
+      </nav>
 
       {/* bottom logout */}
-      <button
-        onClick={handleOpen}
-        className="!text-[#FFFFFF] cursor-pointer flex flex-col items-center opacity-70 hover:opacity-100 transition-opacity duration-200"
-      >
-        <LogoutOutlinedIcon className="text-white text-5xl" />
-        <span className="text-white text-[13px] mt-1 tracking-wide">
-          Logout
-        </span>
-      </button>
+      <div className="px-2">
+        <button
+          onClick={handleOpen}
+          aria-label="Logout"
+          className="w-full flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl text-white/80 hover:bg-white/10 hover:text-white cursor-pointer transition-all duration-200 ease-out"
+        >
+          <LogoutOutlinedIcon fontSize="inherit" className="!text-[26px]" />
+          <span className="text-[10.5px] leading-[1.15] tracking-wide font-medium">
+            Logout
+          </span>
+        </button>
+      </div>
       <ConfirmDialog
         open={open}
         title="Logout"
@@ -83,6 +87,6 @@ export default function SideNav({ navItems }: SideNavProps) {
         confirmLabel="Logout"
         confirmColor="error"
       />
-    </div>
+    </aside>
   );
 }
