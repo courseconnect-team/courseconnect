@@ -25,7 +25,7 @@ export type Announcement = {
   senderId?: string;
   senderName?: string | null;
 
-  channels?: {};
+  channels?: { inApp?: boolean; email?: boolean };
 
   dispatchStatus?: string;
 

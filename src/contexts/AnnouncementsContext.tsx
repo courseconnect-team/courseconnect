@@ -11,14 +11,11 @@ import React, {
 } from 'react';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { useDocument } from 'react-firebase-hooks/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import {
-  Announcement,
-  Audience,
-  AudienceDepartment,
-  AudienceRole,
-} from '@/types/announcement';
+import { Announcement, Audience, AudienceRole } from '@/types/announcement';
+import { DEPARTMENTS, isDepartmentMatch } from '@/constants/research';
 import { useAnnouncementStates } from '@/hooks/Announcements/useAnnouncementStates';
 import {
   markRead as markReadHelper,
@@ -26,6 +23,41 @@ import {
   markAck as markAckHelper,
   markAllRead as markAllReadHelper,
 } from '@/hooks/Announcements/markAnnouncementState';
+
+// Resolve a user's stored department string to the short code used in
+// announcement audience tokens (e.g. "dept:ece"). Handles the input shapes
+// currently in production:
+//   1. Short codes stored directly by the signup form (e.g. "ECE", "CS")
+//   2. Canonical full names from src/constants/research.ts (e.g.
+//      "Electrical and Computer Engineering") — case-insensitive since the
+//      profile edit form accepts free-text entry
+//   3. The CISE "Science" vs "Sciences" spelling variant, per isDepartmentMatch
+// Returns null when the department does not map to any known code; in that
+// case the announcements query emits no dept:* token, and the user still
+// sees 'all'-targeted + role-targeted + user-targeted announcements.
+function resolveDepartmentCode(raw: string | undefined | null): string | null {
+  if (!raw) return null;
+  const value = raw.trim();
+  if (!value) return null;
+
+  // Short code match (signup dropdown stores labels directly in most users).
+  const upper = value.toUpperCase();
+  const byLabel = DEPARTMENTS.find((d) => d.label.toUpperCase() === upper);
+  if (byLabel) return byLabel.label;
+
+  // Full name match against canonical DEPARTMENTS list (case-insensitive).
+  const lower = value.toLowerCase();
+  const byFullName = DEPARTMENTS.find((d) => d.value.toLowerCase() === lower);
+  if (byFullName) return byFullName.label;
+
+  // CISE spelling variants ("Science" vs "Sciences") both map to CISE.
+  if (isDepartmentMatch(value, 'CISE')) return 'CISE';
+
+  // Legacy signup option "CS" maps to the CISE department.
+  if (upper === 'CS') return 'CISE';
+
+  return null;
+}
 
 type AnnouncementsContextType = {
   read: Announcement[];
@@ -79,7 +111,10 @@ function mapDoc(doc: firebase.firestore.QueryDocumentSnapshot): Announcement {
     senderId: d.senderId ?? '',
     senderName: d.senderName ?? null,
     audienceTokens: Array.isArray(d.audienceTokens) ? d.audienceTokens : [],
-    channels: Array.isArray(d.channels) ? d.channels : [],
+    channels:
+      d.channels && typeof d.channels === 'object' && !Array.isArray(d.channels)
+        ? d.channels
+        : {},
     audience: (d.audience ?? { type: 'all' }) as Audience,
 
     dispatchStatus: d.dispatchStatus ?? 'unknown',
@@ -100,6 +135,16 @@ export function AnnouncementsProvider({
   const { user } = useAuth();
   const [roleData, roleLoading] = GetUserRole(user?.uid);
 
+  const userDocRef = useMemo(() => {
+    if (!user?.uid) return null;
+    return firebase.firestore().collection('users').doc(user.uid);
+  }, [user?.uid]);
+  // Cast resolves a type-version mismatch between Firebase compat's
+  // DocumentReference<DocumentData> and react-firebase-hooks's expected
+  // DocumentReference<DocumentData, DocumentData>. Same issue GetUserRole.js
+  // sidesteps by being JS.
+  const [userDocSnap] = useDocument(userDocRef as any);
+
   const { statesById, loading: statesLoading } = useAnnouncementStates(
     user?.uid
   );
@@ -110,7 +155,10 @@ export function AnnouncementsProvider({
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const userEmail = user?.email ?? '';
-  const userDepartment: AudienceDepartment = 'ECE';
+  const userDepartment = useMemo(
+    () => resolveDepartmentCode(userDocSnap?.data()?.department),
+    [userDocSnap]
+  );
   const channel = 'inApp';
 
   const userRole = useMemo(() => {
@@ -140,7 +188,7 @@ export function AnnouncementsProvider({
       userRole === 'faculty' ? `role:student` : null,
       userDepartment ? `dept:${norm(userDepartment)}` : null,
       userEmail ? `user:${norm(userEmail)}` : null,
-    ].filter(isNonEmpty);
+    ].filter(isNonEmpty) as string[];
 
     q = q.where('audienceTokens', 'array-contains-any', tokens);
     return q;

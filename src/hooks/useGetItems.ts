@@ -8,6 +8,7 @@ import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
 import { NavbarItem } from '@/types/navigation';
 import { SemesterName } from './useSemesterOptions';
 import { useMemo } from 'react';
@@ -55,6 +56,11 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
     /* ─────────────────────────────────── Admin ─────────────────────────────────── */
     case 'admin':
       return [
+        {
+          label: 'Dashboard',
+          to: '/admin-stats',
+          icon: InsightsOutlinedIcon,
+        },
         { label: 'Users', to: '/users', icon: PersonOutlineOutlinedIcon },
         {
           label: 'Applications',

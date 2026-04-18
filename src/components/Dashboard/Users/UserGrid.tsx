@@ -1,486 +1,372 @@
 'use client';
 
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
 import {
-  GridRowModesModel,
-  GridRowsProp,
-  GridRowModes,
-  GridToolbarContainer,
-  GridToolbarExport,
-  GridToolbarFilterButton,
-  GridToolbarColumnsButton,
-  DataGrid,
-  GridColDef,
-  GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
-  GridRowModel,
-  GridRowEditStopReasons,
-  gridClasses,
-} from '@mui/x-data-grid';
-import {
+  Box,
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
-  LinearProgress,
-  Button,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import type { ColumnDef } from '@tanstack/react-table';
 
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { deleteUserHTTPRequest } from '@/firebase/auth/auth_delete_user';
 import { isE2EMode } from '@/utils/featureFlags';
 
+import {
+  AdminDataTable,
+  ConfirmDialog,
+  RowActionButton,
+  StatusPill,
+  type StatusTone,
+} from '@/components/common/AdminDataTable';
+
 interface User {
   id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-  department: string;
-  role: string;
-  ufid: string;
-  isNew?: boolean;
-  mode?: 'edit' | 'view' | undefined;
-}
-
-interface EditToolbarProps {
-  setUserData: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
-  ) => void;
-}
-
-function EditToolbar(_props: EditToolbarProps) {
-  // match CourseGrid toolbar look (default MUI icons/colors)
-  return (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-      <GridToolbarFilterButton />
-      <GridToolbarColumnsButton />
-    </GridToolbarContainer>
-  );
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  department?: string;
+  role?: string;
+  ufid?: string;
 }
 
 interface UserGridProps {
   userRole: string;
 }
 
-const StripedDataGrid = styled(DataGrid)(() => ({
-  border: 'none',
-  borderRadius: '16px',
-  fontFamily: 'Inter, sans-serif',
-  fontSize: '0.95rem',
+const DEPARTMENTS = ['ECE', 'CISE', 'MAE', 'Other'];
+const ROLES = [
+  'admin',
+  'faculty',
+  'student_assigned',
+  'student',
+  'unapproved',
+  'denied',
+];
 
-  '& .MuiDataGrid-columnHeaders': {
-    backgroundColor: '#D8C6F8',
-    color: '#1C003D',
-    fontWeight: 700,
-    borderBottom: 'none',
-  },
+function roleTone(role?: string): StatusTone {
+  const r = (role || '').toLowerCase();
+  if (r === 'admin') return 'brand';
+  if (r === 'faculty') return 'info';
+  if (r === 'student_assigned') return 'success';
+  if (r === 'unapproved') return 'warning';
+  if (r === 'denied') return 'danger';
+  return 'neutral';
+}
 
-  '& .MuiDataGrid-columnHeaderTitle': {
-    fontWeight: 700,
-  },
+function prettyRole(role?: string) {
+  if (!role) return '—';
+  return role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
-  '& .MuiDataGrid-columnHeader:first-of-type': {
-    paddingLeft: '20px',
-  },
-  '& .MuiDataGrid-cell:first-of-type': {
-    paddingLeft: '25px',
-  },
-
-  [`& .${gridClasses.row}.even`]: {
-    backgroundColor: '#FFFFFF',
-  },
-  [`& .${gridClasses.row}.odd`]: {
-    backgroundColor: '#EEEEEE',
-  },
-
-  '& .MuiDataGrid-row:hover': {
-    backgroundColor: '#EFE6FF',
-  },
-
-  '& .MuiDataGrid-cell': {
-    borderBottom: '1px solid #ECE4FA',
-  },
-
-  '& .MuiDataGrid-footerContainer': {
-    borderTop: 'none',
-  },
-
-  '& .MuiTablePagination-root': {
-    color: '#5D3FC4',
-    fontWeight: 500,
-  },
-}));
-
-export default function UserGrid(props: UserGridProps) {
-  const { userRole } = props;
+export default function UserGrid({ userRole }: UserGridProps) {
   const e2e = isE2EMode();
-
   const [loading, setLoading] = React.useState(false);
+  const [listLoading, setListLoading] = React.useState(true);
   const [userData, setUserData] = React.useState<User[]>([]);
 
-  const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState<GridRowId | null>(null);
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+  const [editing, setEditing] = React.useState<User | null>(null);
+  const [editForm, setEditForm] = React.useState<Partial<User>>({});
 
   React.useEffect(() => {
     if (e2e) {
       setUserData([]);
+      setListLoading(false);
       return;
     }
-
-    const usersRef = firebase.firestore().collection('users');
-    const unsubscribe = usersRef.onSnapshot((querySnapshot) => {
-      const data = querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            fullname: `${doc.data().firstname ?? ''} ${
-              doc.data().lastname ?? ''
-            }`,
-            ...doc.data(),
-          } as unknown as User)
+    const ref = firebase.firestore().collection('users');
+    const unsubscribe = ref.onSnapshot((snap) => {
+      const data = snap.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() } as User)
       );
       setUserData(data);
+      setListLoading(false);
     });
-
     return () => unsubscribe();
   }, [e2e]);
 
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
-  );
-
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
+  const openEdit = (user: User) => {
+    setEditing(user);
+    setEditForm({ ...user });
+  };
+  const closeEdit = () => {
+    setEditing(null);
+    setEditForm({});
   };
 
-  const handleEditClick = (id: GridRowId) => () => {
-    setLoading(true);
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-    setLoading(false);
-  };
-
-  const handleSaveClick = (id: GridRowId) => async () => {
+  const handleSaveEdit = async () => {
+    if (!editing) return;
     setLoading(true);
     try {
-      const updatedRow = userData.find((row) => row.id === id);
-      if (!updatedRow) throw new Error(`No matching user data for id: ${id}`);
-
+      const patch = {
+        firstname: editForm.firstname ?? '',
+        lastname: editForm.lastname ?? '',
+        email: editForm.email ?? '',
+        department: editForm.department ?? '',
+        role: editForm.role ?? '',
+      };
       await firebase
         .firestore()
         .collection('users')
-        .doc(id.toString())
-        .update(updatedRow);
-
-      setRowModesModel({
-        ...rowModesModel,
-        [id]: { mode: GridRowModes.View },
-      });
-    } catch (err) {
-      console.error('Error updating document: ', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDel = (id: GridRowId) => () => {
-    setDelId(id);
-    setDelDia(true);
-  };
-
-  const handleDeleteDiagClose = () => {
-    setDelDia(false);
-    setDelId(null);
-  };
-
-  const handleDeleteClick = async (id: GridRowId) => {
-    setLoading(true);
-    try {
-      await firebase
-        .firestore()
-        .collection('users')
-        .doc(id.toString())
-        .delete();
-      deleteUserHTTPRequest(id.toString());
-      setUserData((prev) => prev.filter((row) => row.id !== id));
-    } catch (err) {
-      console.error('Error removing document: ', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (delId == null) return;
-    await handleDeleteClick(delId);
-    setDelDia(false);
-    setDelId(null);
-  };
-
-  const handleCancelClick = (id: GridRowId) => async () => {
-    setLoading(true);
-    try {
-      const editedRow = userData.find((row) => row.id === id);
-      if (editedRow?.isNew) {
-        await firebase
-          .firestore()
-          .collection('users')
-          .doc(id.toString())
-          .delete();
-        setUserData((prev) => prev.filter((row) => row.id !== id));
-      } else {
-        setRowModesModel({
-          ...rowModesModel,
-          [id]: { mode: GridRowModes.View, ignoreModifications: true },
-        });
-      }
-    } catch (err) {
-      console.error('Error canceling edit: ', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const processRowUpdate = async (newRow: GridRowModel) => {
-    setLoading(true);
-    try {
-      const updatedRow = { ...(newRow as User), isNew: false };
-
-      // new rows not really used in your flow, but keep parity with CourseGrid
-      if ((updatedRow as any).isNew) {
-        await firebase.firestore().collection('users').add(updatedRow);
-      } else {
-        await firebase
-          .firestore()
-          .collection('users')
-          .doc(updatedRow.id)
-          .update(updatedRow);
-      }
-
+        .doc(editing.id)
+        .update(patch);
       setUserData((prev) =>
-        prev.map((row) => (row.id === newRow.id ? (updatedRow as User) : row))
+        prev.map((u) => (u.id === editing.id ? { ...u, ...patch } : u))
       );
-
-      return updatedRow;
-    } catch (err) {
-      console.error('Error processing row update: ', err);
-      throw err;
+      closeEdit();
+    } catch (error) {
+      console.error('Error updating user: ', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const columns: GridColDef[] = [
-    {
-      field: 'firstname',
-      headerName: 'First Name',
-      width: 150,
-      editable: true,
-    },
-    { field: 'lastname', headerName: 'Last Name', width: 150, editable: true },
-    { field: 'email', headerName: 'Email', width: 250, editable: true },
-    {
-      field: 'department',
-      headerName: 'Department',
-      width: 130,
-      editable: true,
-    },
-    { field: 'role', headerName: 'Role', width: 150, editable: true },
-    { field: 'id', headerName: 'User ID', width: 290, editable: true },
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Actions',
-      width: 130,
-      cellClassName: 'actions',
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    setLoading(true);
+    try {
+      await firebase.firestore().collection('users').doc(deleteId).delete();
+      deleteUserHTTPRequest(deleteId);
+      setUserData((prev) => prev.filter((u) => u.id !== deleteId));
+    } catch (error) {
+      console.error('Error deleting user: ', error);
+    } finally {
+      setLoading(false);
+      setDeleteId(null);
+    }
+  };
 
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              key="save"
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{ color: 'primary.main' }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              key="cancel"
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
-        return [
-          <GridActionsCellItem
-            key="edit"
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            key="delete"
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDel(id)}
-            color="inherit"
-          />,
-        ];
+  const columns = React.useMemo<ColumnDef<User, any>[]>(
+    () => [
+      {
+        id: 'name',
+        header: 'Name',
+        accessorFn: (row) =>
+          `${row.firstname ?? ''} ${row.lastname ?? ''}`.trim(),
+        cell: ({ row }) => {
+          const full = `${row.original.firstname ?? ''} ${
+            row.original.lastname ?? ''
+          }`.trim();
+          return (
+            <Box sx={{ fontWeight: 500, color: '#111827' }}>{full || '—'}</Box>
+          );
+        },
+        size: 200,
       },
-    },
-  ];
-
-  return (
-    <>
-      <Box
-        sx={{
-          marginLeft: 10,
-          height: 600,
-          width: '90%',
-          backgroundColor: '#FDFBFF',
-          borderRadius: '16px',
-          boxShadow: '0 2px 8px rgba(128, 90, 213, 0.1)',
-          '& .actions': { color: 'text.secondary' },
-          '& .textPrimary': { color: 'text.primary' },
-        }}
-      >
-        {loading ? <LinearProgress color="warning" /> : null}
-
-        <StripedDataGrid
-          rows={userData}
-          columns={columns}
-          editMode="row"
-          rowModesModel={rowModesModel}
-          onRowModesModelChange={(m) => setRowModesModel(m)}
-          onRowEditStop={handleRowEditStop}
-          processRowUpdate={processRowUpdate}
-          onProcessRowUpdateError={(error) =>
-            console.error('Error processing row update: ', error)
-          }
-          slots={{
-            toolbar: EditToolbar as any,
-          }}
-          slotProps={{
-            toolbar: { setUserData, setRowModesModel } as any,
-          }}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 25 } },
-          }}
-          getRowClassName={(params) =>
-            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-          }
-        />
-      </Box>
-
-      {/* keep your confirm-delete dialog (CourseGrid doesn't have it, but UI matches your app style) */}
-      <Dialog
-        style={{
-          borderImage:
-            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-          boxShadow: '0px 2px 20px 4px #00000040',
-          borderRadius: '20px',
-          border: '2px solid',
-        }}
-        PaperProps={{ style: { borderRadius: 20 } }}
-        open={delDia}
-        onClose={handleDeleteDiagClose}
-      >
-        <DialogTitle
-          style={{
-            fontFamily: 'SF Pro Display-Medium, Helvetica',
-            textAlign: 'center',
-            fontSize: '35px',
-            fontWeight: '540',
-          }}
-        >
-          Delete User
-        </DialogTitle>
-        <form onSubmit={handleSubmit}>
-          <DialogContent>
-            <DialogContentText
-              style={{
-                marginTop: '35px',
-                fontFamily: 'SF Pro Display-Medium, Helvetica',
-                textAlign: 'center',
-                fontSize: '24px',
-                color: 'black',
-              }}
-            >
-              Are you sure you want to delete this user?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions
-            style={{
-              marginTop: '30px',
-              marginBottom: '42px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: '93px',
+      {
+        id: 'email',
+        header: 'Email',
+        accessorKey: 'email',
+        cell: ({ getValue }) => getValue() || '—',
+        size: 260,
+      },
+      {
+        id: 'department',
+        header: 'Department',
+        accessorKey: 'department',
+        cell: ({ getValue }) => getValue() || '—',
+        size: 140,
+      },
+      {
+        id: 'role',
+        header: 'Role',
+        accessorKey: 'role',
+        cell: ({ getValue }) => {
+          const r = getValue() as string | undefined;
+          return <StatusPill label={prettyRole(r)} tone={roleTone(r)} />;
+        },
+        size: 150,
+      },
+      {
+        id: 'id',
+        header: 'User ID',
+        accessorKey: 'id',
+        cell: ({ getValue }) => (
+          <Box
+            component="code"
+            sx={{
+              fontSize: 12,
+              color: '#6B7280',
+              fontFamily:
+                'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
             }}
           >
-            <Button
-              variant="outlined"
-              style={{
-                fontSize: '17px',
-                marginLeft: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                borderColor: '#5736ac',
-                color: '#5736ac',
-                borderWidth: '3px',
-              }}
-              onClick={handleDeleteDiagClose}
-            >
-              Cancel
-            </Button>
+            {getValue() as string}
+          </Box>
+        ),
+        size: 280,
+        meta: { maxWidth: 280 },
+      },
+    ],
+    []
+  );
 
-            <Button
-              variant="contained"
-              style={{
-                fontSize: '17px',
-                marginRight: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                backgroundColor: '#5736ac',
-                color: '#ffffff',
-              }}
-              type="submit"
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </form>
+  return (
+    <Box>
+      <AdminDataTable
+        data={userData}
+        columns={columns}
+        loading={loading || listLoading}
+        getRowId={(r) => r.id}
+        searchPlaceholder="Search users by name, email, department…"
+        tableId={`users-${userRole}`}
+        exportFilename="users.csv"
+        rowActions={(row) => (
+          <>
+            <RowActionButton
+              variant="icon"
+              icon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
+              label="Edit"
+              onClick={() => openEdit(row)}
+            />
+            <RowActionButton
+              variant="icon"
+              icon={<DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />}
+              label="Delete"
+              onClick={() => setDeleteId(row.id)}
+            />
+          </>
+        )}
+        emptyState={{
+          title: 'No users yet',
+          description: 'Users will appear here once they sign up.',
+        }}
+        minWidth={1000}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deleteId)}
+        title="Delete user"
+        description="This removes the account from both Firestore and Firebase Auth. The user will no longer be able to sign in."
+        confirmLabel="Delete user"
+        onCancel={() => setDeleteId(null)}
+        onConfirm={handleConfirmDelete}
+        loading={loading}
+      />
+
+      <Dialog
+        open={Boolean(editing)}
+        onClose={loading ? undefined : closeEdit}
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            minWidth: 480,
+            boxShadow: '0 20px 50px -12px rgba(0,0,0,0.2)',
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontSize: 17, fontWeight: 600 }}>
+          Edit user
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 0.5 }}>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                fullWidth
+                size="small"
+                label="First name"
+                value={editForm.firstname ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, firstname: e.target.value })
+                }
+              />
+              <TextField
+                fullWidth
+                size="small"
+                label="Last name"
+                value={editForm.lastname ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, lastname: e.target.value })
+                }
+              />
+            </Stack>
+            <TextField
+              size="small"
+              label="Email"
+              type="email"
+              value={editForm.email ?? ''}
+              onChange={(e) =>
+                setEditForm({ ...editForm, email: e.target.value })
+              }
+            />
+            <Stack direction="row" spacing={2}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Department"
+                select
+                value={editForm.department ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, department: e.target.value })
+                }
+              >
+                {DEPARTMENTS.map((d) => (
+                  <MenuItem key={d} value={d}>
+                    {d}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                fullWidth
+                size="small"
+                label="Role"
+                select
+                value={editForm.role ?? ''}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, role: e.target.value })
+                }
+              >
+                {ROLES.map((r) => (
+                  <MenuItem key={r} value={r}>
+                    {prettyRole(r)}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Stack>
+            <Typography sx={{ fontSize: 12, color: '#6B7280' }}>
+              User ID:{' '}
+              <Box
+                component="code"
+                sx={{ fontFamily: 'monospace', fontSize: 11 }}
+              >
+                {editing?.id}
+              </Box>
+            </Typography>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={closeEdit}
+            disabled={loading}
+            sx={{ textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveEdit}
+            variant="contained"
+            disabled={loading}
+            sx={{
+              textTransform: 'none',
+              backgroundColor: '#0021A5',
+              '&:hover': { backgroundColor: '#001A85' },
+            }}
+          >
+            {loading ? 'Saving…' : 'Save changes'}
+          </Button>
+        </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 }

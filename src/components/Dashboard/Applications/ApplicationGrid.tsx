@@ -1,308 +1,360 @@
-// @ts-nocheck
-
 'use client';
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import Box from '@mui/material/Box';
 
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import ThumbDownAltIcon from '@mui/icons-material/ThumbDownAlt';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
+import * as React from 'react';
 import {
-  GridRowModesModel,
-  GridRowModes,
-  DataGrid,
-  GridColDef,
-  GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
-  GridRowModel,
-  GridRowEditStopReasons,
-  GridRowsProp,
-  GridToolbarContainer,
-  GridToolbarExport,
-  GridToolbarFilterButton,
-  GridToolbarColumnsButton,
-} from '@mui/x-data-grid';
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  TextField,
+} from '@mui/material';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
+import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
+import type { ColumnDef } from '@tanstack/react-table';
+
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
+import { collection, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
-import GetUserName from '@/firebase/util/GetUserName';
-import { alpha, styled } from '@mui/material/styles';
-import { gridClasses } from '@mui/x-data-grid';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogContentText,
-  Button,
-  TextField,
-  DialogActions,
-  LinearProgress,
-} from '@mui/material';
-import { purple } from '@mui/material/colors';
-
-import UnderDevelopment from '@/component/UnderDevelopment';
 import AppView from './AppView';
-import { ThumbDownOffAlt, ThumbUpOffAlt } from '@mui/icons-material';
+import {
+  AdminDataTable,
+  ConfirmDialog,
+  RowActionButton,
+  StatusPill,
+  type StatusTone,
+} from '@/components/common/AdminDataTable';
 
+// ─── types ──────────────────────────────────────────────────────────────────
 interface Application {
   id: string;
-  additionalprompt: string;
-  available_hours: string;
-  available_semesters: string;
-  courses: string[];
-  date: string;
-  degree: string;
-  department: string;
-  email: string;
-  englishproficiency: string;
-  firstname: string;
-  gpa: string;
-  lastname: string;
-  nationality: string;
-  phonenumber: string;
-  position: string;
-  qualifications: string;
-  semesterstatus: string;
-  ufid: string;
-  isNew?: boolean;
-  mode?: 'edit' | 'view' | undefined;
+  additionalprompt?: string;
+  available_hours?: string;
+  available_semesters?: string | string[];
+  courses?: string[];
+  allcourses?: string[];
+  date?: string;
+  degree?: string;
+  department?: string;
+  email?: string;
+  englishproficiency?: string;
+  firstname?: string;
+  lastname?: string;
+  gpa?: string;
+  nationality?: string;
+  phonenumber?: string;
+  position?: string;
+  qualifications?: string;
+  semesterstatus?: string;
+  ufid?: string;
+  status?: string;
 }
 
 interface ApplicationGridProps {
   userRole: string;
 }
 
-function getFullName(_value: any, row: any) {
-  return `${row?.firstname || ''} ${row?.lastname || ''}`;
+// ─── firestore helpers ──────────────────────────────────────────────────────
+const applicationsSubcollection = () =>
+  firebase
+    .firestore()
+    .collection('applications')
+    .doc('course_assistant')
+    .collection('uid');
+
+const applicationDoc = (id: string) => applicationsSubcollection().doc(id);
+
+function flattenCourses(courses: any): Record<string, string> {
+  if (!courses || typeof courses !== 'object') return {};
+  const out: Record<string, string> = {};
+  for (const [key, val] of Object.entries(courses)) {
+    if (val && typeof val === 'object') {
+      for (const [courseId, status] of Object.entries(
+        val as Record<string, unknown>
+      )) {
+        if (typeof status === 'string') out[courseId] = status;
+      }
+    } else if (typeof val === 'string') {
+      const bare = key.includes('|||') ? key.split('|||').pop() || key : key;
+      out[bare] = val;
+    }
+  }
+  return out;
 }
 
-// ✅ Defined outside component to prevent remount on re-render (preserves filter state)
-const StripedDataGrid = styled(DataGrid)(() => ({
-  border: 'none',
-  borderRadius: '16px',
-  fontFamily: 'Inter, sans-serif',
-  fontSize: '0.95rem',
+// ─── status display ─────────────────────────────────────────────────────────
+function statusToTone(status?: string): StatusTone {
+  const s = (status || '').toLowerCase();
+  if (s.includes('approved')) return 'success';
+  if (s.includes('denied')) return 'danger';
+  if (s.includes('pending')) return 'warning';
+  return 'neutral';
+}
 
-  '& .MuiDataGrid-columnHeaders': {
-    backgroundColor: '#D8C6F8',
-    color: '#1C003D',
-    fontWeight: 700,
-    borderBottom: 'none',
-  },
+function prettyStatus(status?: string): string {
+  if (!status) return 'Pending';
+  return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
-  '& .MuiDataGrid-columnHeaderTitle': {
-    fontWeight: 700,
-  },
-
-  '& .MuiDataGrid-columnHeader:first-of-type': {
-    paddingLeft: '20px',
-  },
-  '& .MuiDataGrid-cell:first-of-type': {
-    paddingLeft: '25px',
-  },
-
-  [`& .${gridClasses.row}.even`]: {
-    backgroundColor: '#FFFFFF',
-  },
-  [`& .${gridClasses.row}.odd`]: {
-    backgroundColor: '#EEEEEE',
-  },
-
-  '& .MuiDataGrid-row:hover': {
-    backgroundColor: '#EFE6FF',
-  },
-
-  '& .MuiDataGrid-cell': {
-    borderBottom: '1px solid #ECE4FA',
-  },
-
-  '& .MuiDataGrid-footerContainer': {
-    borderTop: 'none',
-  },
-
-  '& .MuiTablePagination-root': {
-    color: '#5D3FC4',
-    fontWeight: 500,
-  },
-}));
-
-export default function ApplicationGrid(props: ApplicationGridProps) {
-  // current user
+// ─── component ──────────────────────────────────────────────────────────────
+export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
   const { user } = useAuth();
-  const { userRole } = props;
-  const userName = GetUserName(user?.uid);
-  const [paginationModel, setPaginationModel] = React.useState({
-    page: 0,
-    pageSize: 25,
-  });
-  const [hours, setHours] = React.useState(0);
-
-  // application props
   const [applicationData, setApplicationData] = React.useState<Application[]>(
     []
   );
-  const [valueRadio, setValueRadio] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [listLoading, setListLoading] = React.useState(true);
 
-  const handleChangeRadio = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValueRadio((event.target as HTMLInputElement).value);
+  // dialog state
+  const [viewOpen, setViewOpen] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+  const [denyId, setDenyId] = React.useState<string | null>(null);
+  const [assignOpen, setAssignOpen] = React.useState(false);
+  const [assignCourses, setAssignCourses] = React.useState<string[]>([]);
+  const [assignCourse, setAssignCourse] = React.useState('');
+  const [assignHours, setAssignHours] = React.useState<string>('0');
+
+  // fetch data
+  React.useEffect(() => {
+    const ref = applicationsSubcollection();
+    if (userRole === 'admin') {
+      const unsubscribe = ref.onSnapshot((snap) => {
+        const data = snap.docs
+          .filter((doc) => {
+            const d = doc.data();
+            if (d.status === 'Admin_denied') return false;
+            const flat = flattenCourses(d.courses);
+            if (d.status === 'Admin_approved' && Object.keys(flat).length < 2) {
+              return false;
+            }
+            return true;
+          })
+          .map((doc) => {
+            const d = doc.data();
+            const flat = flattenCourses(d.courses);
+            return {
+              id: doc.id,
+              ...d,
+              courses: Object.entries(flat)
+                .filter(([, v]) => v === 'approved')
+                .map(([k]) => k),
+              allcourses: Object.keys(flat),
+            } as Application;
+          });
+        setApplicationData(data);
+        setListLoading(false);
+      });
+      return () => unsubscribe();
+    }
+
+    if (userRole === 'faculty') {
+      const facultyCourses = collection(firebase.firestore(), 'courses');
+      const q = query(
+        facultyCourses,
+        where('professor_emails', 'array-contains', user?.email)
+      );
+      getDocs(q).catch(() => undefined);
+
+      ref.get().then((snap) => {
+        const data = snap.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() } as Application)
+        );
+        setApplicationData(data);
+        setListLoading(false);
+      });
+    }
+  }, [userRole, user?.email]);
+
+  // ─── handlers ─────────────────────────────────────────────────────────────
+  const handleViewOpen = (id: string) => {
+    setSelectedId(id);
+    setViewOpen(true);
   };
-  // assignment dialog pop-up view setup
-  const [openAssignmentDialog, setOpenAssignmentDialog] = React.useState(false);
-  const [openDenyDialog, setOpenDenyDialog] = React.useState(false);
+  const handleViewClose = () => setViewOpen(false);
 
-  const handleOpenAssignmentDialog = async (id: GridRowId) => {
-    const statusRef = firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString());
-
-    const doc = await getDoc(statusRef);
-    setCodes(
-      Object.entries(doc.data().courses)
-        .filter(([key, value]) => value === 'approved')
-        .map(([key, value]) => key)
-    );
-    setSelectedUserGrid(id);
-
-    setOpenAssignmentDialog(true);
+  const handleOpenAssignmentDialog = async (id: string) => {
+    const doc = await applicationDoc(id).get();
+    const flat = flattenCourses(doc.data()?.courses);
+    const courses = Object.entries(flat)
+      .filter(([, v]) => v === 'approved')
+      .map(([k]) => k);
+    setAssignCourses(courses);
+    setAssignCourse('');
+    setAssignHours('0');
+    setSelectedId(id);
+    setAssignOpen(true);
   };
 
-  const handleDenyAssignmentDialog = async (id: GridRowId) => {
-    const statusRef = firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString());
+  const handleCloseAssignmentDialog = () => setAssignOpen(false);
 
-    const doc = await getDoc(statusRef);
-
-    setCodes(
-      Object.entries(doc.data().courses)
-        .filter(([key, value]) => value === 'denied')
-        .map(([key, value]) => key)
-    );
-
-    setSelectedUserGrid(id);
-    setOpenDenyDialog(true);
+  const handleOpenDenyDialog = (id: string) => {
+    setDenyId(id);
   };
 
-  const handleCloseAssignmentDialog = () => {
-    setOpenAssignmentDialog(false);
+  const sendDenyEmail = async (id: string) => {
+    try {
+      const snapshot = await applicationDoc(id).get();
+      if (!snapshot.exists) return;
+      const d = snapshot.data() as Application;
+      await fetch(
+        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'applicationStatusDenied',
+            data: {
+              user: {
+                name: `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim(),
+                email: d.email,
+              },
+              position: d.position,
+              classCode: d.courses,
+            },
+          }),
+        }
+      );
+    } catch (error) {
+      console.error('Error sending deny email:', error);
+    }
   };
-  const handleCloseDenyDialog = () => {
-    setOpenDenyDialog(false);
+
+  const sendApproveEmail = async (assignment: any) => {
+    try {
+      const snap = await applicationDoc(assignment.student_uid).get();
+      if (!snap.exists) return;
+      const d = snap.data() as Application;
+      await fetch(
+        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'applicationStatusApproved',
+            data: {
+              user: {
+                name: `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim(),
+                email: d.email,
+              },
+              position: assignment.position,
+              classCode: assignment.class_codes,
+            },
+          }),
+        }
+      );
+    } catch (error) {
+      console.error('Error sending approve email:', error);
+    }
+  };
+
+  const handleConfirmDeny = async () => {
+    if (!denyId) return;
+    setLoading(true);
+    try {
+      await applicationDoc(denyId).update({ status: 'Admin_denied' });
+      setApplicationData((prev) => prev.filter((r) => r.id !== denyId));
+      await sendDenyEmail(denyId);
+    } catch (error) {
+      console.error('Error denying application: ', error);
+    } finally {
+      setLoading(false);
+      setDenyId(null);
+    }
   };
 
   const handleSubmitAssignment = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+    if (!selectedId || !assignCourse) return;
     setLoading(true);
 
     try {
-      const student_uid = selectedUserGrid as string;
-      const statusRef = firebase
-        .firestore()
-        .collection('applications')
-        .doc(student_uid.toString());
-      let doc = await getDoc(statusRef);
-
-      const courseDetails = firebase
+      const studentUid = selectedId;
+      const doc = await applicationDoc(studentUid).get();
+      const courseRef = firebase
         .firestore()
         .collection('courses')
-        .doc(valueRadio);
-      const courseDoc = await getDoc(courseDetails);
+        .doc(assignCourse);
+      const courseDoc = await getDoc(courseRef);
 
-      // Update student's application to approved
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(student_uid.toString())
-        .update({
-          status: 'Admin_approved',
-          [`courses.${valueRadio}`]: 'approved',
-        });
+      // find the semester bucket holding this course
+      const existingCourses = doc.data()?.courses || {};
+      let semesterBucket: string | null = null;
+      for (const [semKey, val] of Object.entries(existingCourses)) {
+        if (
+          val &&
+          typeof val === 'object' &&
+          assignCourse in (val as Record<string, unknown>)
+        ) {
+          semesterBucket = semKey;
+          break;
+        }
+      }
+      const coursePath = semesterBucket
+        ? `courses.${semesterBucket}.${assignCourse}`
+        : `courses.${assignCourse}`;
 
-      // Get the current date in month/day/year format
-      const current = new Date();
-      const current_date = `${
-        current.getMonth() + 1
-      }-${current.getDate()}-${current.getFullYear()}`;
+      await applicationDoc(studentUid).update({
+        status: 'Admin_approved',
+        [coursePath]: 'approved',
+      });
 
-      const assignmentObject = {
-        date: current_date as string,
-        student_uid: student_uid as string,
-        class_codes: valueRadio,
+      const now = new Date();
+      const assignment = {
+        date: `${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}`,
+        student_uid: studentUid,
+        class_codes: assignCourse,
         email: doc.data()?.email,
-        name: doc.data()?.firstname + ' ' + doc.data()?.lastname,
+        name: `${doc.data()?.firstname ?? ''} ${doc.data()?.lastname ?? ''}`,
         semesters: doc.data()?.available_semesters,
         department: doc.data()?.department,
-        hours: [hours],
+        hours: [Number(assignHours) || 0],
         position: doc.data()?.position,
         degree: doc.data()?.degree,
         ufid: doc.data()?.ufid,
       };
 
-      // Create the document within the "assignments" collection
-      const assignmentRef = firebase
-        .firestore()
-        .collection('assignments')
-        .doc(assignmentObject.student_uid);
+      const assignmentsCol = firebase.firestore().collection('assignments');
+      const primaryRef = assignmentsCol.doc(studentUid);
+      const primaryDoc = await primaryRef.get();
 
-      doc = await assignmentRef.get();
-      let uid = assignmentObject.student_uid;
-
-      if (doc.exists) {
+      if (primaryDoc.exists) {
         let counter = 1;
-        let newRef = firebase
-          .firestore()
-          .collection('assignments')
-          .doc(`${uid}-${counter}`);
-
-        // Loop to check for the next available document ID
+        let newRef = assignmentsCol.doc(`${studentUid}-${counter}`);
         while ((await newRef.get()).exists) {
           counter++;
-          newRef = firebase
-            .firestore()
-            .collection('assignments')
-            .doc(`${uid}-${counter}`);
+          newRef = assignmentsCol.doc(`${studentUid}-${counter}`);
         }
-
-        // Create a new document with the updated UID and assignmentObject
-        await newRef.set(assignmentObject);
+        await newRef.set(assignment);
       } else {
-        // Document does not exist, create the original document
-        await assignmentRef.set(assignmentObject);
+        await primaryRef.set(assignment);
       }
 
-      // Extract and process the professor emails
+      // notify professors
       const emailArray = courseDoc
         .data()
-        ?.professor_emails.split(';')
-        .map((email) => email.trim());
-
-      // Send emails after all documents have been fetched and updated
+        ?.professor_emails?.split?.(';')
+        ?.map?.((email: string) => email.trim());
       if (emailArray) {
         for (const email of emailArray) {
           try {
-            const response = await fetch(
+            await fetch(
               'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
               {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   type: 'facultyAssignment',
                   data: {
@@ -314,1009 +366,430 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
                 }),
               }
             );
-
-            if (response.ok) {
-              const data = await response.json();
-              console.log('Email sent successfully:', data);
-            } else {
-              throw new Error('Failed to send email');
-            }
-          } catch (error) {
-            console.error('Error sending email:', error);
+          } catch (err) {
+            console.error('Error notifying professor:', err);
           }
         }
       }
 
-      handleSendEmail(assignmentObject);
+      await sendApproveEmail(assignment);
       handleCloseAssignmentDialog();
     } catch (error) {
-      console.error('Error in handleSubmitAssignment:', error);
+      console.error('Error approving application:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // toolbar
-  interface EditToolbarProps {
-    setApplicationData: (
-      newRows: (oldRows: GridRowsProp) => GridRowsProp
-    ) => void;
-    setRowModesModel: (
-      newModel: (oldModel: GridRowModesModel) => GridRowModesModel
-    ) => void;
-  }
-
-  function EditToolbar(props: EditToolbarProps) {
-    const { setApplicationData, setRowModesModel } = props;
-
-    // Add state to control the dialog open status
-    const [open, setOpen] = React.useState(false);
-
-    return (
-      <GridToolbarContainer>
-        <GridToolbarExport />
-        <GridToolbarFilterButton />
-        <GridToolbarColumnsButton />
-      </GridToolbarContainer>
-    );
-  }
-
-  // pop-up view setup
-  const [open, setOpen] = React.useState(false);
-  const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState();
-
-  const [codes, setCodes] = React.useState([]);
-  const [selectedUserGrid, setSelectedUserGrid] =
-    React.useState<GridRowId | null>(null);
-
-  const handleClickOpenGrid = (id: GridRowId) => {
-    setSelectedUserGrid(id);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleDeleteDiagClose = () => {
-    setDelDia(false);
-  };
-
-  // fetching application data from firestore
-  const [loading, setLoading] = useState(false);
-  React.useEffect(() => {
-    const applicationsRef = firebase.firestore().collection('applications');
-
-    if (userRole === 'admin') {
-      const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
-        const data = querySnapshot.docs
-          .filter(function (doc) {
-            if (doc.data().status !== 'Admin_denied') {
-              if (
-                doc.data().status === 'Admin_approved' &&
-                Object.values(doc.data().courses).length < 2
-              ) {
-                return false;
-              }
-              return true;
-            } else {
-              return false;
-            }
-          })
-          .map(
-            (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-                courses: Object.entries(doc.data().courses)
-                  .filter(([key, value]) => value === 'approved')
-                  .map(([key, value]) => key),
-                allcourses: Object.entries(doc.data().courses).map(
-                  ([key, value]) => key
-                ),
-              } as Application)
-          );
-        setApplicationData(data);
-      });
-      // Clean up the subscription on unmount
-      return () => unsubscribe();
-    } else if (userRole === 'faculty') {
-      // the faculty member can only see applications that specify the same class as they have
-      // get the courses that the application specifies
-      // find the courses that the faculty member teaches
-      // if there is an intersection, then the faculty member can see the application
-
-      // find courses that the faculty member teaches
-      const facultyCourses = collection(firebase.firestore(), 'courses');
-      const q = query(
-        facultyCourses,
-        where('professor_emails', 'array-contains', user?.email)
-      );
-      const facultyCoursesSnapshot = getDocs(q);
-
-      // now we have every course that the faculty member teaches
-      // we need the course code from each of them
-      // then we can compare them to the courses that the application specifies
-      // if there is an intersection, then the faculty member can see the application
-
-      applicationsRef.get().then((querySnapshot) => {
-        const data = querySnapshot.docs.map(
-          (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Application)
-        );
-        setApplicationData(data);
-      });
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    setLoading(true);
+    try {
+      await applicationDoc(deleteId).delete();
+      setApplicationData((prev) => prev.filter((r) => r.id !== deleteId));
+    } catch (error) {
+      console.error('Error deleting application:', error);
+    } finally {
+      setLoading(false);
+      setDeleteId(null);
     }
-  }, [userRole, user?.email]);
+  };
 
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
+  // direct approve (faculty flow)
+  const handleFacultyApprove = async (id: string) => {
+    setLoading(true);
+    try {
+      await applicationDoc(id).update({ status: 'Approved' });
+      setApplicationData((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: 'Approved' } : r))
+      );
+    } catch (error) {
+      console.error('Error approving application:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // direct deny (faculty flow)
+  const handleFacultyDeny = async (id: string) => {
+    setLoading(true);
+    try {
+      await applicationDoc(id).update({ status: 'Admin_denied' });
+      setApplicationData((prev) => prev.filter((r) => r.id !== id));
+      await sendDenyEmail(id);
+    } catch (error) {
+      console.error('Error denying application:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── columns ──────────────────────────────────────────────────────────────
+  const adminColumns = React.useMemo<ColumnDef<Application, any>[]>(
+    () => [
+      {
+        id: 'fullname',
+        header: 'Name',
+        accessorFn: (row) =>
+          `${row.firstname ?? ''} ${row.lastname ?? ''}`.trim(),
+        cell: ({ row }) => (
+          <Box sx={{ fontWeight: 500, color: '#111827' }}>
+            {`${row.original.firstname ?? ''} ${
+              row.original.lastname ?? ''
+            }`.trim() || '—'}
+          </Box>
+        ),
+        size: 180,
+      },
+      {
+        id: 'email',
+        header: 'Email',
+        accessorKey: 'email',
+        cell: ({ getValue }) => getValue() || '—',
+        size: 220,
+      },
+      {
+        id: 'degree',
+        header: 'Degree',
+        accessorKey: 'degree',
+        cell: ({ getValue }) => getValue() || '—',
+        size: 90,
+      },
+      {
+        id: 'available_semesters',
+        header: 'Semester(s)',
+        accessorFn: (row) =>
+          Array.isArray(row.available_semesters)
+            ? row.available_semesters.join(', ')
+            : row.available_semesters || '',
+        cell: ({ getValue }) => getValue() || '—',
+        size: 140,
+      },
+      {
+        id: 'allcourses',
+        header: 'All Courses',
+        accessorFn: (row) => (row.allcourses || []).join(', '),
+        cell: ({ getValue }) => (getValue() as string) || '—',
+        size: 220,
+        meta: { maxWidth: 220 },
+      },
+      {
+        id: 'approved_courses',
+        header: 'Approved Courses',
+        accessorFn: (row) => (row.courses || []).join(', '),
+        cell: ({ getValue }) => {
+          const v = getValue() as string;
+          return v ? (
+            <Box sx={{ color: '#065F46', fontWeight: 500 }}>{v}</Box>
+          ) : (
+            <span style={{ color: '#9CA3AF' }}>—</span>
+          );
+        },
+        size: 220,
+        meta: { maxWidth: 220 },
+      },
+      {
+        id: 'position',
+        header: 'Position',
+        accessorKey: 'position',
+        cell: ({ getValue }) => getValue() || '—',
+        size: 90,
+      },
+      {
+        id: 'date',
+        header: 'Date',
+        accessorKey: 'date',
+        cell: ({ getValue }) => getValue() || '—',
+        size: 110,
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ getValue }) => {
+          const raw = getValue() as string | undefined;
+          return (
+            <StatusPill label={prettyStatus(raw)} tone={statusToTone(raw)} />
+          );
+        },
+        size: 150,
+      },
+    ],
+    []
   );
 
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
-  const handleDenyEmail = async (id: GridRowId) => {
-    try {
-      const snapshot = await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .get();
-
-      if (snapshot.exists) {
-        const applicationData = snapshot.data() as Application;
-
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              type: 'applicationStatusDenied',
-              data: {
-                user: {
-                  name: `${applicationData.firstname ?? ''} ${
-                    applicationData.lastname ?? ''
-                  }`.trim(),
-                  email: applicationData.email,
-                },
-                position: applicationData.position,
-                classCode: applicationData.courses,
-              },
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Email sent successfully:', data);
-        } else {
-          throw new Error('Failed to send email');
-        }
-      } else {
-        throw new Error('Application data not found');
-      }
-    } catch (error) {
-      console.error('Error sending email:', error);
-    }
-  };
-
-  const handleSendEmail = async (id: GridRowId) => {
-    try {
-      // Retrieve application data from Firestore
-      const snapshot = await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.student_uid.toString())
-        .get();
-      const snapshot2 = await firebase
-        .firestore()
-        .collection('assignments')
-        .doc(id.student_uid.toString())
-        .get();
-
-      if (snapshot.exists) {
-        const applicationData = snapshot.data() as Application;
-        const assignmentData = snapshot2.data();
-        // Send email using fetched application data
-        const response = await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              type: 'applicationStatusApproved',
-              data: {
-                user: {
-                  name: `${applicationData.firstname ?? ''} ${
-                    applicationData.lastname ?? ''
-                  }`.trim(),
-                  email: applicationData.email,
-                },
-                position: assignmentData.position,
-                classCode: assignmentData.class_codes,
-              },
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Email sent successfully:', data);
-        } else {
-          throw new Error('Failed to send email');
-        }
-      } else {
-        throw new Error('Application data not found');
-      }
-    } catch (error) {
-      console.error('Error sending email:', error);
-    }
-  };
-
-  // approve/deny click handlers
-  const handleDenyClick = async (id: GridRowId) => {
-    event.preventDefault();
-    setLoading(true);
-
-    try {
-      // Update the 'applications' collection in Firestore
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .update({ status: 'Admin_denied' });
-
-      // Remove the denied row from the local state
-      setApplicationData((prevData) => {
-        const newData = prevData.filter((row) => row.id !== id);
-        return newData; // Only return the updated state without the denied row
-      });
-
-      await handleDenyEmail(id);
-      // Close the deny dialog
-      handleCloseDenyDialog();
-    } catch (error) {
-      console.error('Error updating application document: ', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApproveClick = async (id: GridRowId) => {
-    setLoading(true);
-    try {
-      // Update the 'applications' collection
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .update({ status: 'Approved' });
-
-      // Update the state locally to avoid reloading the entire data
-      setApplicationData((prevData) =>
-        prevData.map((row) =>
-          row.id === id ? { ...row, status: 'Approved' } : row
-        )
-      );
-
-      // Send email notification or any other side effects
-      await handleSendEmail(id);
-    } catch (error) {
-      console.error('Error updating application document: ', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
-
-  const handleSaveClick = (id: GridRowId) => () => {
-    setLoading(true);
-    const updatedRow = applicationData.find((row) => row.id === id);
-    if (updatedRow) {
-      firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .update(updatedRow)
-        .then(() => {
-          setRowModesModel({
-            ...rowModesModel,
-            [id]: { mode: GridRowModes.View },
-          });
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          console.error('Error updating document: ', error);
-        });
-    } else {
-      console.error('No matching user data found for id: ', id);
-    }
-  };
-
-  const handleDel = (id: GridRowId) => () => {
-    setDelId(id);
-    setDelDia(true);
-  };
-  const handleDeleteClick = (id: GridRowId) => {
-    setLoading(true);
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString())
-      .delete()
-      .then(() => {
-        setLoading(false);
-        setApplicationData(applicationData.filter((row) => row.id !== id));
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.error('Error removing document: ', error);
-      });
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    handleDeleteClick(delId);
-    setDelDia(false);
-  };
-
-  const handleCancelClick = (id: GridRowId) => () => {
-    const editedRow = applicationData.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .delete()
-        .then(() => {
-          setApplicationData(applicationData.filter((row) => row.id !== id));
-        })
-        .catch((error) => {
-          console.error('Error removing document: ', error);
-        });
-    } else {
-      setRowModesModel({
-        ...rowModesModel,
-        [id]: { mode: GridRowModes.View, ignoreModifications: true },
-      });
-    }
-  };
-
-  const processRowUpdate = (newRow: GridRowModel, oldRow: GridRowModel) => {
-    setLoading(true);
-    const availableHoursArray =
-      typeof newRow.availability === 'string' && newRow.availability
-        ? newRow.availability.split(',').map((hour) => hour.trim())
-        : oldRow.availability;
-
-    const availableSemestersArray =
-      typeof newRow.semesters === 'string' && newRow.semesters
-        ? newRow.semesters.split(',').map((semester) => semester.trim())
-        : oldRow.semesters;
-
-    const coursesArray =
-      typeof newRow.courses === 'string' && newRow.courses
-        ? newRow.courses.split(',').map((course) => course.trim())
-        : oldRow.courses;
-
-    const updatedRow = {
-      ...(newRow as Application),
-      availability: availableHoursArray,
-      semesters: availableSemestersArray,
-      courses: coursesArray,
-      isNew: false,
-    };
-
-    if (updatedRow) {
-      if (updatedRow.isNew) {
-        return firebase
-          .firestore()
-          .collection('applications')
-          .add(updatedRow)
-          .then(() => {
-            setApplicationData(
-              applicationData.map((row) =>
-                row.id === newRow.id ? updatedRow : row
-              )
-            );
-            setLoading(false);
-            return updatedRow;
-          })
-          .catch((error) => {
-            setLoading(false);
-            console.error('Error adding document: ', error);
-            throw error;
-          });
-      } else {
-        return firebase
-          .firestore()
-          .collection('applications')
-          .doc(updatedRow.id)
-          .update(updatedRow)
-          .then(() => {
-            setApplicationData(
-              applicationData.map((row) =>
-                row.id === newRow.id ? updatedRow : row
-              )
-            );
-            setLoading(false);
-            return updatedRow;
-          })
-          .catch((error) => {
-            setLoading(false);
-            console.error('Error updating document: ', error);
-            throw error;
-          });
-      }
-    } else {
-      setLoading(false);
-      return Promise.reject(
-        new Error('No matching user data found for id: ' + newRow.id)
-      );
-    }
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-  let columns: GridColDef[] = [
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Actions',
-      width: 370,
-      cellClassName: 'actions',
-      getActions: ({ id, row }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              key="1"
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{
-                color: 'primary.main',
-              }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              key="2"
-              icon={<CancelIcon />}
-              label="Cancel"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
-        return [
-          <Button
-            key="3"
-            variant="outlined"
-            color="inherit"
-            size="small"
-            style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
-            startIcon={<ZoomInIcon />}
-            onClick={(event) => handleClickOpenGrid(id)}
-          >
-            View
-          </Button>,
-          <Button
-            key="8"
-            variant="outlined"
-            color="inherit"
-            size="small"
-            style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
-            startIcon={<EditIcon />}
-            onClick={handleEditClick(id)}
-          >
-            Edit
-          </Button>,
-
-          <Button
-            key="7"
-            variant="outlined"
-            color="primary"
-            size="small"
-            style={{
-              marginRight: '20px',
-              height: '25px',
-              textTransform: 'none',
-            }}
-            startIcon={<DeleteIcon />}
-            onClick={handleDel(id)}
-          >
-            Delete
-          </Button>,
-          <GridActionsCellItem
-            key="4"
-            icon={<ThumbUpOffAlt />}
-            label="Approve"
-            onClick={(event) => handleOpenAssignmentDialog(id)}
-            color="success"
-          />,
-          <GridActionsCellItem
-            key="5"
-            icon={<ThumbDownOffAlt />}
-            label="Deny"
-            onClick={() => handleDenyAssignmentDialog(id)}
-            color="error"
-          />,
-        ];
-      },
-    },
-    {
-      field: 'fullname',
-      headerName: 'Full Name',
-      width: 200,
-      editable: false,
-      valueGetter: getFullName,
-    },
-
-    { field: 'email', headerName: 'Email', width: 230, editable: true },
-
-    {
-      field: 'degree',
-      headerName: 'Degree',
-      width: 100,
-      editable: true,
-    },
-
-    {
-      field: 'available_semesters',
-      headerName: 'Semester(s)',
-      width: 150,
-      editable: false,
-    },
-
-    {
-      field: 'allcourses',
-      headerName: 'All Course(s)',
-      width: 250,
-      editable: true,
-    },
-    {
-      field: 'courses',
-      headerName: 'Faculty Approved Course(s)',
-      width: 250,
-      editable: true,
-    },
-
-    { field: 'position', headerName: 'Position', width: 70, editable: true },
-    { field: 'date', headerName: 'Date', width: 100, editable: true },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 130,
-      editable: true,
-      renderCell: (params) => {
-        let color = '#f2a900';
-        let backgroundColor = '#fffdf0';
-
-        if (params.value === 'Admin_approved') {
-          color = '#4caf50';
-          backgroundColor = '#e8f5e9';
-        }
-
-        return (
-          <span
-            style={{
-              color: color,
-              border: `1px solid ${color}`,
-              padding: '2px 4px',
-              borderRadius: '4px',
-              backgroundColor: backgroundColor,
-              display: 'inline-block',
-            }}
-          >
-            {params.value}
-          </span>
-        );
-      },
-    },
-    ,
-  ];
-
-  if (userRole === 'faculty') {
-    columns = [
+  const facultyColumns = React.useMemo<ColumnDef<Application, any>[]>(
+    () => [
       {
-        field: 'actions',
-        type: 'actions',
-        headerName: 'Actions',
-        width: 130,
-        cellClassName: 'actions',
-        getActions: ({ id }) => {
-          return [
-            <GridActionsCellItem
-              key="3"
-              icon={<ZoomInIcon />}
-              label="View"
-              onClick={(event) => handleClickOpenGrid(id)}
-              color="primary"
-            />,
-            <GridActionsCellItem
-              key="4"
-              icon={<ThumbUpOffAlt />}
-              label="Approve"
-              onClick={(event) => handleApproveClick(id)}
-              color="success"
-            />,
-            <GridActionsCellItem
-              key="5"
-              icon={<ThumbDownOffAlt />}
-              label="Deny"
-              onClick={(event) => handleDenyClick(id)}
-              color="error"
-            />,
-          ];
+        id: 'fullname',
+        header: 'Name',
+        accessorFn: (row) =>
+          `${row.firstname ?? ''} ${row.lastname ?? ''}`.trim(),
+        cell: ({ row }) => (
+          <Box sx={{ fontWeight: 500, color: '#111827' }}>
+            {`${row.original.firstname ?? ''} ${
+              row.original.lastname ?? ''
+            }`.trim() || '—'}
+          </Box>
+        ),
+        size: 170,
+      },
+      { id: 'ufid', header: 'UFID', accessorKey: 'ufid', size: 110 },
+      { id: 'email', header: 'Email', accessorKey: 'email', size: 200 },
+      { id: 'position', header: 'Position', accessorKey: 'position', size: 90 },
+      {
+        id: 'semesters',
+        header: 'Semester(s)',
+        accessorFn: (row) =>
+          Array.isArray(row.available_semesters)
+            ? row.available_semesters.join(', ')
+            : row.available_semesters || '',
+        size: 140,
+      },
+      {
+        id: 'available_hours',
+        header: 'Hours',
+        accessorKey: 'available_hours',
+        size: 80,
+      },
+      {
+        id: 'courses',
+        header: 'Courses',
+        accessorFn: (row) =>
+          Array.isArray(row.courses)
+            ? row.courses.join(', ')
+            : row.courses || '',
+        size: 180,
+        meta: { maxWidth: 180 },
+      },
+      {
+        id: 'semesterstatus',
+        header: 'Academic Status',
+        accessorKey: 'semesterstatus',
+        size: 140,
+      },
+      { id: 'date', header: 'Date', accessorKey: 'date', size: 100 },
+      {
+        id: 'status',
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ getValue }) => {
+          const raw = getValue() as string | undefined;
+          return (
+            <StatusPill label={prettyStatus(raw)} tone={statusToTone(raw)} />
+          );
         },
+        size: 140,
       },
-      {
-        field: 'ufid',
-        headerName: 'UFID',
-        width: 100,
-        editable: false,
-      },
-      { field: 'position', headerName: 'Position', width: 70, editable: false },
-      {
-        field: 'semesters',
-        headerName: 'Semester(s)',
-        width: 130,
-        editable: false,
-      },
-      {
-        field: 'available_hours',
-        headerName: 'Hours',
-        width: 100,
-        editable: false,
-      },
-      {
-        field: 'fullname',
-        headerName: 'Full Name',
-        width: 150,
-        editable: false,
-        valueGetter: getFullName,
-      },
-      { field: 'email', headerName: 'Email', width: 200, editable: false },
-      { field: 'courses', headerName: 'Courses', width: 200, editable: false },
-      {
-        field: 'semesterstatus',
-        headerName: 'Academic Status',
-        width: 130,
-        editable: false,
-      },
-      { field: 'date', headerName: 'Date', width: 80, editable: false },
-      {
-        field: 'status',
-        headerName: 'App Status',
-        width: 100,
-        editable: false,
-      },
-    ];
-  }
-  const ODD_OPACITY = 0.2;
+    ],
+    []
+  );
+
+  const isAdmin = userRole === 'admin';
+
+  const rowActions = (row: Application) =>
+    isAdmin ? (
+      <>
+        <RowActionButton
+          variant="icon"
+          icon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
+          label="View"
+          onClick={() => handleViewOpen(row.id)}
+        />
+        <RowActionButton
+          variant="icon"
+          icon={<ThumbUpOutlinedIcon sx={{ fontSize: 16 }} />}
+          label="Approve"
+          tone="success"
+          onClick={() => handleOpenAssignmentDialog(row.id)}
+        />
+        <RowActionButton
+          variant="icon"
+          icon={<ThumbDownOutlinedIcon sx={{ fontSize: 16 }} />}
+          label="Deny"
+          tone="danger"
+          onClick={() => handleOpenDenyDialog(row.id)}
+        />
+        <RowActionButton
+          variant="icon"
+          icon={<DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />}
+          label="Delete"
+          tone="neutral"
+          onClick={() => setDeleteId(row.id)}
+        />
+      </>
+    ) : (
+      <>
+        <RowActionButton
+          variant="icon"
+          icon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
+          label="View"
+          onClick={() => handleViewOpen(row.id)}
+        />
+        <RowActionButton
+          variant="icon"
+          icon={<ThumbUpOutlinedIcon sx={{ fontSize: 16 }} />}
+          label="Approve"
+          tone="success"
+          onClick={() => handleFacultyApprove(row.id)}
+        />
+        <RowActionButton
+          variant="icon"
+          icon={<ThumbDownOutlinedIcon sx={{ fontSize: 16 }} />}
+          label="Deny"
+          tone="danger"
+          onClick={() => handleFacultyDeny(row.id)}
+        />
+      </>
+    );
 
   return (
-    <Box
-      sx={{
-        '& .actions': {
-          color: 'text.secondary',
-        },
-        '& .textPrimary': {
-          color: 'text.primary',
-        },
-      }}
-    >
-      {loading ? <LinearProgress color="warning" /> : null}
-      <StripedDataGrid
-        rows={applicationData}
-        columns={columns}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        processRowUpdate={processRowUpdate}
-        checkboxSelection
-        slots={{
-          toolbar: EditToolbar as any,
+    <Box>
+      <AdminDataTable
+        data={applicationData}
+        columns={isAdmin ? adminColumns : facultyColumns}
+        loading={loading || listLoading}
+        getRowId={(r) => r.id}
+        searchPlaceholder="Search applicants by name, email, course…"
+        tableId={`applications-${userRole}`}
+        exportFilename="applications.csv"
+        rowActions={rowActions}
+        emptyState={{
+          title: 'No applications yet',
+          description: isAdmin
+            ? 'When students submit applications, they will appear here for review.'
+            : 'Applications for your courses will appear here.',
         }}
-        slotProps={{
-          toolbar: { setApplicationData, setRowModesModel } as any,
-        }}
-        paginationModel={paginationModel}
-        onPaginationModelChange={setPaginationModel} // Keep pagination state in sync
-        getRowClassName={(params) =>
-          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-        }
-        sx={{
-          borderRadius: '16px',
-          maxHeight: '80vh',
-          maxWidth: '180vh',
-          minHeight: '80vh',
-          minWidth: '180vh',
-        }}
+        minWidth={1200}
       />
+
+      {/* View dialog */}
       <Dialog
-        open={open}
-        onClose={handleClose}
+        open={viewOpen}
+        onClose={handleViewClose}
+        maxWidth="lg"
         PaperProps={{
-          style: {
-            maxWidth: '2000px',
-            maxHeight: 'none',
-            display: 'flex',
-            flexDirection: 'column',
-            minWidth: '1000px',
-            borderRadius: '16px',
+          sx: {
+            borderRadius: '12px',
+            minWidth: { xs: '90vw', md: '900px' },
           },
         }}
       >
-        {/* Display the application data of the selected user */}
-        {selectedUserGrid && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              height: '100%',
-
-              overflow: 'hidden',
+        {selectedId && (
+          <AppView
+            close={handleViewClose}
+            handleDenyClick={(id) => {
+              handleViewClose();
+              handleOpenDenyDialog(String(id));
             }}
-          >
-            <AppView
-              close={handleClose}
-              handleDenyClick={handleDenyClick}
-              handleOpenAssignmentDialog={handleOpenAssignmentDialog}
-              uid={selectedUserGrid as string}
-            />
-          </Box>
+            handleOpenAssignmentDialog={(id) => {
+              handleViewClose();
+              handleOpenAssignmentDialog(String(id));
+            }}
+            uid={selectedId}
+          />
         )}
       </Dialog>
 
+      {/* Delete confirm */}
+      <ConfirmDialog
+        open={Boolean(deleteId)}
+        title="Delete application"
+        description="This will permanently remove the applicant's submission. This action cannot be undone."
+        confirmLabel="Delete"
+        onCancel={() => setDeleteId(null)}
+        onConfirm={handleConfirmDelete}
+        loading={loading}
+      />
+
+      {/* Deny confirm */}
+      <ConfirmDialog
+        open={Boolean(denyId)}
+        title="Deny applicant"
+        description="The applicant will be notified by email. You can approve them later if circumstances change."
+        confirmLabel="Deny applicant"
+        tone="danger"
+        onCancel={() => setDenyId(null)}
+        onConfirm={handleConfirmDeny}
+        loading={loading}
+      />
+
+      {/* Course assignment dialog */}
       <Dialog
-        style={{
-          borderImage:
-            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-          boxShadow: '0px 2px 20px 4px #00000040',
-          borderRadius: '20px',
-          border: '2px solid',
-        }}
+        open={assignOpen}
+        onClose={handleCloseAssignmentDialog}
         PaperProps={{
-          style: { borderRadius: 20 },
+          sx: {
+            borderRadius: '12px',
+            minWidth: 420,
+            boxShadow: '0 20px 50px -12px rgba(0,0,0,0.2)',
+          },
         }}
-        open={delDia}
-        onClose={handleDeleteDiagClose}
       >
-        <DialogTitle
-          style={{
-            fontFamily: 'SF Pro Display-Medium, Helvetica',
-            textAlign: 'center',
-            fontSize: '35px',
-            fontWeight: '540',
-          }}
-        >
-          Delete Applicant
+        <DialogTitle sx={{ fontSize: 17, fontWeight: 600 }}>
+          Assign course
         </DialogTitle>
-        <form onSubmit={(e) => handleSubmit(e)}>
-          <DialogContent>
-            <DialogContentText
-              style={{
-                marginTop: '35px',
-                fontFamily: 'SF Pro Display-Medium, Helvetica',
-                textAlign: 'center',
-                fontSize: '24px',
-                color: 'black',
-              }}
-            >
-              Are you sure you want to delete this applicant?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions
-            style={{
-              marginTop: '30px',
-              marginBottom: '42px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: '93px',
-            }}
-          >
-            <Button
-              variant="outlined"
-              style={{
-                fontSize: '17px',
-                marginLeft: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                borderColor: '#5736ac',
-                color: '#5736ac',
-                borderWidth: '3px',
-              }}
-              onClick={handleDeleteDiagClose}
-            >
-              Cancel
-            </Button>
-
-            <Button
-              variant="contained"
-              style={{
-                fontSize: '17px',
-                marginRight: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                backgroundColor: '#5736ac',
-                color: '#ffffff',
-              }}
-              type="submit"
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-
-      <Dialog open={openAssignmentDialog} onClose={handleCloseAssignmentDialog}>
-        <DialogTitle>Course Assignment</DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
-            {codes != [] ? (
+            {assignCourses.length > 0 ? (
               <>
-                <DialogContentText>
-                  Please select the course code to which the student shall be
-                  assigned and the hours the student will work.
+                <DialogContentText sx={{ mb: 2, fontSize: 14 }}>
+                  Select the course and hours for this assignment.
                 </DialogContentText>
-                <br />
-                <FormControl required>
+                <FormControl required sx={{ width: '100%' }}>
                   <RadioGroup
-                    name="positions-radio-group"
-                    value={valueRadio}
-                    onChange={handleChangeRadio}
-                    aria-required="true"
+                    name="course-radio-group"
+                    value={assignCourse}
+                    onChange={(e) => setAssignCourse(e.target.value)}
                   >
-                    {codes.map((code) => {
-                      return (
-                        <FormControlLabel
-                          key={code}
-                          value={code}
-                          control={<Radio />}
-                          label={code.replace(/,/g, ', ')}
-                        />
-                      );
-                    })}
+                    {assignCourses.map((code) => (
+                      <FormControlLabel
+                        key={code}
+                        value={code}
+                        control={<Radio size="small" />}
+                        label={code.replace(/,/g, ', ')}
+                        sx={{
+                          '& .MuiFormControlLabel-label': { fontSize: 14 },
+                        }}
+                      />
+                    ))}
                   </RadioGroup>
-                  <br />
                   <TextField
-                    defaultValue={0}
-                    label="Hours"
-                    onChange={(event) => {
-                      setHours(event.target.value);
-                    }}
-                  >
-                    {' '}
-                  </TextField>
-                </FormControl>{' '}
+                    label="Hours per week"
+                    type="number"
+                    value={assignHours}
+                    onChange={(e) => setAssignHours(e.target.value)}
+                    size="small"
+                    sx={{ mt: 2, maxWidth: 200 }}
+                    inputProps={{ min: 0 }}
+                  />
+                </FormControl>
               </>
             ) : (
-              <DialogContentText>
-                No faculty has accepted this student yet.
+              <DialogContentText sx={{ fontSize: 14 }}>
+                No faculty member has approved this applicant for any course
+                yet.
               </DialogContentText>
             )}
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseAssignmentDialog}>Cancel</Button>
-            <Button type="submit">Submit</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-
-      <Dialog
-        style={{
-          borderImage:
-            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-          boxShadow: '0px 2px 20px 4px #00000040',
-          borderRadius: '20px',
-          border: '2px solid',
-        }}
-        PaperProps={{
-          style: { borderRadius: 20 },
-        }}
-        open={openDenyDialog}
-        onClose={handleCloseDenyDialog}
-      >
-        <DialogTitle
-          style={{
-            fontFamily: 'SF Pro Display-Medium, Helvetica',
-            textAlign: 'center',
-            fontSize: '35px',
-            fontWeight: '540',
-          }}
-        >
-          Deny Applicant
-        </DialogTitle>
-        <form onSubmit={handleDenyClick}>
-          <DialogContent>
-            <DialogContentText
-              style={{
-                marginTop: '35px',
-                fontFamily: 'SF Pro Display-Medium, Helvetica',
-                textAlign: 'center',
-                fontSize: '24px',
-                color: 'black',
-              }}
-            >
-              Are you sure you want to deny this applicant?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions
-            style={{
-              marginTop: '30px',
-              marginBottom: '42px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: '93px',
-            }}
-          >
+          <DialogActions sx={{ px: 3, pb: 2 }}>
             <Button
-              variant="outlined"
-              style={{
-                fontSize: '17px',
-                marginLeft: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                borderColor: '#5736ac',
-                color: '#5736ac',
-                borderWidth: '3px',
-              }}
-              onClick={handleCloseDenyDialog}
+              onClick={handleCloseAssignmentDialog}
+              sx={{ textTransform: 'none' }}
             >
-              No
+              Cancel
             </Button>
-
             <Button
+              type="submit"
               variant="contained"
-              style={{
-                fontSize: '17px',
-                marginRight: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
+              disabled={!assignCourse || loading}
+              sx={{
                 textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                backgroundColor: '#5736ac',
-                color: '#ffffff',
+                backgroundColor: '#0021A5',
+                '&:hover': { backgroundColor: '#001A85' },
               }}
-              onClick={() => handleDenyClick(selectedUserGrid)}
             >
-              Yes
+              {loading ? 'Assigning…' : 'Assign'}
             </Button>
           </DialogActions>
         </form>

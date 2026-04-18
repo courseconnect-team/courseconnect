@@ -1,402 +1,142 @@
-// components/StatsGrid.tsx
 'use client';
 
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import ZoomIn from '@mui/icons-material/ZoomIn';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import {
-  GridRowModesModel,
-  GridRowModes,
-  GridToolbarContainer,
-  GridToolbarExport,
-  GridToolbarFilterButton,
-  GridToolbarColumnsButton,
-  DataGrid,
-  GridColDef,
-  GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
-  GridRowModel,
-  GridRowEditStopReasons,
-  useGridApiContext,
-  gridClasses,
-} from '@mui/x-data-grid';
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  LinearProgress,
-  Button,
-} from '@mui/material';
+import { Alert, Box } from '@mui/material';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import Link from 'next/link';
+import type { ColumnDef } from '@tanstack/react-table';
+
+import { useDeleteFacultyStat, useFacultyStats } from '@/hooks/useFacultyStats';
+import { FacultyStats } from '@/types/User';
+
 import {
-  useFacultyStats,
-  useDeleteFacultyStat,
-  useUpdateFacultyStat,
-} from '@/hooks/useFacultyStats';
-import { User } from '@/types/User';
-import { alpha, styled } from '@mui/material/styles';
-
-interface EditToolbarProps {
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
-  ) => void;
-}
-
-function EditToolbar(props: EditToolbarProps) {
-  const { setRowModesModel } = props;
-
-  return (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-      <GridToolbarFilterButton />
-      <GridToolbarColumnsButton />
-    </GridToolbarContainer>
-  );
-}
+  AdminDataTable,
+  ConfirmDialog,
+  RowActionButton,
+  StatusPill,
+  type StatusTone,
+} from '@/components/common/AdminDataTable';
 
 interface UserGridProps {
   userRole: string;
 }
 
-const ODD_OPACITY = 0.2;
+function levelTone(level?: string): StatusTone {
+  const v = (level || '').toLowerCase();
+  if (v.includes('high')) return 'success';
+  if (v.includes('medium')) return 'warning';
+  if (v.includes('low')) return 'neutral';
+  return 'info';
+}
 
-const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-  [`& .${gridClasses.row}.even`]: {
-    backgroundColor: '#562EBA1F',
-    '&:hover, &.Mui-hovered': {
-      backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
-      '@media (hover: none)': {
-        backgroundColor: 'transparent',
-      },
-    },
-    '&.Mui-selected': {
-      backgroundColor: alpha(
-        theme.palette.primary.main,
-        ODD_OPACITY + theme.palette.action.selectedOpacity
-      ),
-      '&:hover, &.Mui-hovered': {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          ODD_OPACITY +
-          theme.palette.action.selectedOpacity +
-          theme.palette.action.hoverOpacity
-        ),
-        '@media (hover: none)': {
-          backgroundColor: alpha(
-            theme.palette.primary.main,
-            ODD_OPACITY + theme.palette.action.selectedOpacity
-          ),
-        },
-      },
-    },
-  },
-}));
-
-export default function StatsGrid(props: UserGridProps) {
-  const { userRole } = props;
+export default function StatsGrid({ userRole }: UserGridProps) {
   const { data, isLoading, error } = useFacultyStats();
   const deleteMutation = useDeleteFacultyStat();
-  const updateMutation = useUpdateFacultyStat();
+  const [deleteId, setDeleteId] = React.useState<string | null>(null);
 
-  const [delDia, setDelDia] = React.useState(false);
-  const [delId, setDelId] = React.useState<string | undefined>();
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
+    try {
+      await deleteMutation.mutateAsync(deleteId);
+    } catch (err) {
+      console.error('Error deleting faculty stat:', err);
+    } finally {
+      setDeleteId(null);
+    }
+  };
 
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {}
+  const columns = React.useMemo<ColumnDef<FacultyStats, any>[]>(
+    () => [
+      {
+        id: 'instructor',
+        header: 'Instructor',
+        accessorKey: 'instructor',
+        cell: ({ getValue }) => (
+          <Box sx={{ fontWeight: 500, color: '#111827' }}>
+            {(getValue() as string) || '—'}
+          </Box>
+        ),
+        size: 200,
+      },
+      {
+        id: 'research_level',
+        header: 'Research Activity',
+        accessorKey: 'research_level',
+        cell: ({ getValue }) => {
+          const v = getValue() as string | undefined;
+          if (!v) return <span style={{ color: '#9CA3AF' }}>—</span>;
+          return <StatusPill label={v} tone={levelTone(v)} />;
+        },
+        size: 200,
+      },
+      {
+        id: 'teaching_load',
+        header: 'Teaching Load',
+        accessorKey: 'teaching_load',
+        cell: ({ getValue }) => {
+          const v = getValue() as string | undefined;
+          return v || <span style={{ color: '#9CA3AF' }}>—</span>;
+        },
+        size: 200,
+      },
+    ],
+    []
   );
 
-  const handleDeleteDiagClose = () => {
-    setDelDia(false);
-  };
-
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (
-    params,
-    event
-  ) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
-  const handleSaveClick = (id: GridRowId) => () => {
-    const updatedRow = data?.find((row) => row.id === id);
-    if (updatedRow) {
-      updateMutation.mutate(updatedRow);
-      setRowModesModel({
-        ...rowModesModel,
-        [id]: { mode: GridRowModes.View },
-      });
-    } else {
-      console.error('No matching user data found for id: ', id);
-    }
-  };
-
-  const handleDel = (id: GridRowId) => () => {
-    setDelId(id.toString());
-    setDelDia(true);
-  };
-
-  const handleDeleteClick = (id: string) => {
-    deleteMutation.mutate(id);
-    // deleteUserHTTPRequest(id); // Remove if redundant, as React Query handles refetching
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (delId) {
-      handleDeleteClick(delId);
-    }
-    setDelDia(false);
-  };
-
-  function CustomToolbar() {
-    const apiRef = useGridApiContext();
-
+  if (error) {
     return (
-      <GridToolbarContainer>
-        <GridToolbarExport />
-      </GridToolbarContainer>
+      <Alert severity="error" sx={{ borderRadius: '8px' }}>
+        Error loading faculty stats.
+      </Alert>
     );
   }
 
-  const handleCancelClick = (id: GridRowId) => () => {
-    const editedRow = data?.find((row) => row.id === id);
-    if (editedRow && editedRow.isNew) {
-      deleteMutation.mutate(id.toString());
-    } else {
-      setRowModesModel({
-        ...rowModesModel,
-        [id]: { mode: GridRowModes.View, ignoreModifications: true },
-      });
-    }
-  };
-
-  const processRowUpdate = async (newRow: GridRowModel) => {
-    const updatedRow = { ...(newRow as User), isNew: false };
-    try {
-      await updateMutation.mutateAsync(updatedRow as any);
-      return updatedRow;
-    } catch (error) {
-      console.error('Error updating row:', error);
-      throw error;
-    }
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-  const columns: GridColDef[] = [
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Actions',
-      width: 200,
-      cellClassName: 'actions',
-      getActions: ({ id }) => {
-        return [
-          <Button
-            key={`view-${id}`}
-            variant="outlined"
-            color="inherit"
-            size="small"
-            style={{ marginLeft: 0, height: '25px', textTransform: 'none' }}
-            startIcon={<ZoomIn />}
-            component={Link}
-            href={`/faculty/${id}`} // Fixed template literal
-          >
-            View
-          </Button>,
-          <GridActionsCellItem
-            key={`delete-${id}`}
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDel(id)}
-            color="inherit"
-          />,
-        ];
-      },
-    },
-    {
-      field: 'instructor',
-      headerName: 'Instructor',
-      width: 150,
-      editable: false,
-    },
-    {
-      field: 'research_level',
-      headerName: 'Research Activity Level',
-      width: 200,
-      editable: false,
-    },
-    {
-      field: 'teaching_load',
-      headerName: 'Teaching Load',
-      width: 200,
-      editable: false,
-    },
-    // {
-    //   field: 'teaching_load',
-    //   headerName: 'Teaching Load',
-    //   width: 200,
-    //   editable: false,
-    // },
-    // {
-    //   field: 'acu2',
-    //   headerName: 'Accumulated Course Credits',
-    //   width: 220,
-    //   editable: true,
-    // },
-    // { field: 'cd', headerName: 'Credit Deficit', width: 150, editable: true },
-    // { field: 'ce', headerName: 'Credit Excess', width: 150, editable: true },
-    // {
-    //   field: 'tot',
-    //   headerName: 'Total Classes Taught (3yrs)',
-    //   width: 200,
-    //   editable: true,
-    // },
-    // {
-    //   field: 'acu3',
-    //   headerName: 'Average Course Units',
-    //   width: 170,
-    //   editable: true,
-    // },
-    // { field: 'lc', headerName: 'Lab Courses', width: 150, editable: true },
-  ];
-
-  if (isLoading) {
-    return <LinearProgress />;
-  }
-
-  if (error) {
-    return <div>Error loading data</div>;
-  }
-
   return (
-    <Box
-      sx={{
-        height: 600,
-        width: '100%',
-        '& .actions': {
-          color: 'text.secondary',
-        },
-        '& .textPrimary': {
-          color: 'text.primary',
-        },
-      }}
-    >
-      <Dialog
-        style={{
-          borderImage:
-            'linear-gradient(to bottom, rgb(9, 251, 211), rgb(255, 111, 241)) 1',
-          boxShadow: '0px 2px 20px 4px #00000040',
-          borderRadius: '20px',
-          border: '2px solid',
-        }}
-        PaperProps={{
-          style: { borderRadius: 20 },
-        }}
-        open={delDia}
-        onClose={handleDeleteDiagClose}
-      >
-        <DialogTitle
-          style={{
-            fontFamily: 'SF Pro Display-Medium, Helvetica',
-            textAlign: 'center',
-            fontSize: '35px',
-            fontWeight: '540',
-          }}
-        >
-          Delete Instructor
-        </DialogTitle>
-        <form onSubmit={handleSubmit}>
-          <DialogContent>
-            <DialogContentText
-              style={{
-                marginTop: '35px',
-                fontFamily: 'SF Pro Display-Medium, Helvetica',
-                textAlign: 'center',
-                fontSize: '24px',
-                color: 'black',
-              }}
-            >
-              Are you sure you want to delete this instructor?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions
-            style={{
-              marginTop: '30px',
-              marginBottom: '42px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: '93px',
-            }}
-          >
-            <Button
-              variant="outlined"
-              style={{
-                fontSize: '17px',
-                marginLeft: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                borderColor: '#5736ac',
-                color: '#5736ac',
-                borderWidth: '3px',
-              }}
-              onClick={handleDeleteDiagClose}
-            >
-              Cancel
-            </Button>
-
-            <Button
-              variant="contained"
-              style={{
-                fontSize: '17px',
-                marginRight: '110px',
-                borderRadius: '10px',
-                height: '43px',
-                width: '120px',
-                textTransform: 'none',
-                fontFamily: 'SF Pro Display-Bold , Helvetica',
-                backgroundColor: '#5736ac',
-                color: '#ffffff',
-              }}
-              type="submit"
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-      <StripedDataGrid
-        rows={data || []}
+    <Box>
+      <AdminDataTable
+        data={data ?? []}
         columns={columns}
-        slots={{
-          toolbar: EditToolbar as any,
+        loading={isLoading}
+        getRowId={(r) => r.id ?? r.instructor}
+        searchPlaceholder="Search faculty…"
+        tableId={`faculty-stats-${userRole}`}
+        exportFilename="faculty-stats.csv"
+        rowActions={(row) => (
+          <>
+            <RowActionButton
+              variant="icon"
+              icon={<OpenInNewRoundedIcon sx={{ fontSize: 16 }} />}
+              label="Open details"
+              tone="brand"
+              onClick={() => {
+                const href = `/faculty/${row.id ?? row.instructor}`;
+                window.location.assign(href);
+              }}
+            />
+            <RowActionButton
+              variant="icon"
+              icon={<DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />}
+              label="Delete"
+              onClick={() => setDeleteId((row.id ?? row.instructor) as string)}
+            />
+          </>
+        )}
+        emptyState={{
+          title: 'No faculty stats',
+          description:
+            'Faculty teaching load and research activity metrics will appear here once recorded.',
         }}
-        slotProps={{
-          toolbar: { setRowModesModel } as any,
-        }}
-        editMode="row"
-        getRowId={(row) => row.instructor}
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        processRowUpdate={processRowUpdate}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 25 } },
-        }}
-        getRowClassName={(params) =>
-          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-        }
-        sx={{ borderRadius: '16px' }}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deleteId)}
+        title="Delete faculty record"
+        description="This removes the instructor's record from the stats dashboard."
+        confirmLabel="Delete record"
+        onCancel={() => setDeleteId(null)}
+        onConfirm={handleConfirmDelete}
+        loading={deleteMutation.isPending}
       />
     </Box>
   );
