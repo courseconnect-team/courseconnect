@@ -196,7 +196,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 2: Mark-on-detail-view, per-row toggle, and mark-all-read**
+- [x] **Unit 2: Mark-on-detail-view, per-row toggle, and mark-all-read**
 
 **Goal:** Wire the UI to the new mark-\* functions. Opening `/announcements/[id]` auto-marks read. The list shows a "Mark all as read" button above Unread when non-empty. Each row exposes a compact "Mark read" / "Mark unread" action on hover / focus.
 

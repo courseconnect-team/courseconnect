@@ -1,6 +1,13 @@
+'use client';
+
 import * as React from 'react';
+import { useState } from 'react';
 import type firebase from 'firebase/app';
 import 'firebase/firestore';
+import toast from 'react-hot-toast';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import type { Announcement } from '@/types/announcement';
 
 type TimestampLike =
@@ -32,7 +39,7 @@ function toJsDate(v: TimestampLike): Date | null {
   return null;
 }
 
-function formatPostedAt(v: TimestampLike) {
+function formatDateTime(v: TimestampLike) {
   const d = toJsDate(v);
   if (!d) return '';
 
@@ -46,16 +53,54 @@ function formatPostedAt(v: TimestampLike) {
     minute: '2-digit',
   }).format(d);
 
-  return `Posted on ${datePart} at ${timePart}`;
+  return `${datePart} at ${timePart}`;
+}
+
+function formatPostedAt(v: TimestampLike) {
+  const formatted = formatDateTime(v);
+  return formatted ? `Posted on ${formatted}` : '';
 }
 
 type Props = {
   announcement: Announcement;
+  /**
+   * The current user's ack timestamp for this announcement, if any.
+   * Only meaningful when `announcement.requireAck === true`.
+   */
+  ackedAt?: Date | null;
+  /**
+   * Callback invoked when the user clicks "I acknowledge". The caller
+   * is responsible for wiring this to `markAck(id)` from the
+   * `useAnnouncements()` context.
+   */
+  onAcknowledge?: () => Promise<void>;
 };
 
-export default function AnnouncementView({ announcement }: Props) {
+export default function AnnouncementView({
+  announcement,
+  ackedAt,
+  onAcknowledge,
+}: Props) {
   const initial = getInitial(announcement.senderName);
   const postedLine = formatPostedAt(announcement.createdAt);
+
+  const [busy, setBusy] = useState(false);
+
+  const requireAck = announcement.requireAck === true;
+  const isAcked = ackedAt != null;
+
+  const handleAcknowledge = async () => {
+    if (!onAcknowledge || busy) return;
+    setBusy(true);
+    try {
+      await onAcknowledge();
+    } catch (err) {
+      console.error('Failed to acknowledge announcement:', err);
+      toast.error('Could not acknowledge this announcement. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -85,6 +130,42 @@ export default function AnnouncementView({ announcement }: Props) {
             {announcement.bodyMd}
           </div>
         </div>
+
+        {/* Ack footer — only rendered for requireAck items. */}
+        {requireAck && (
+          <div className="sticky bottom-0 rounded-b-xl border-t border-gray-200 bg-white/95 px-6 py-4 backdrop-blur">
+            {isAcked ? (
+              <div
+                data-testid="ack-confirmation"
+                className="flex items-center gap-2 text-sm font-medium text-green-700"
+              >
+                <CheckCircleIcon fontSize="small" />
+                <span>{`Acknowledged on ${formatDateTime(ackedAt)}`}</span>
+              </div>
+            ) : (
+              <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-sm text-gray-700">
+                  This announcement requires your acknowledgment.
+                </div>
+                <Button
+                  data-testid="ack-button"
+                  variant="contained"
+                  color="primary"
+                  disabled={busy || !onAcknowledge}
+                  onClick={handleAcknowledge}
+                  startIcon={
+                    busy ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : undefined
+                  }
+                  className="w-full sm:w-auto"
+                >
+                  {busy ? 'Acknowledging...' : 'I acknowledge'}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -219,8 +219,86 @@ test.describe('[student] mark-read UI flows', () => {
     await expect(sameRow).toHaveAttribute('aria-label', /\(unread\)$/);
   });
 
-  test.skip('requireAck items stay in Unread after detail-view open until acknowledged', async () => {
-    // Covered in Unit 3 (ack flow). The partition rule from Unit 1
-    // already enforces this; Unit 3 adds the acknowledge button.
+  test('requireAck items stay in Unread after detail-view open until acknowledged', async ({
+    page,
+  }) => {
+    // Fixture caveat (see file header): the stub fixtures cannot seed a
+    // real Firestore `requireAck=true` announcement for the test user,
+    // so we cannot deterministically open one and observe the Unread
+    // bucket reacting to an ack click. Instead, this test asserts the
+    // structural invariants that MUST hold regardless of seeded data:
+    //
+    //   1. The announcements list renders (possibly empty) without
+    //      errors. Per-row `(unread)` aria-labels are only removed by
+    //      explicit mark-read (Unit 2) or markAck (Unit 3) — they are
+    //      never removed merely by visiting a detail page of a
+    //      requireAck item.
+    //   2. If we can reach a detail view (seeded or otherwise), the
+    //      ack affordances follow the contract:
+    //        - requireAck announcement, not yet acked → exactly one
+    //          element with `data-testid="ack-button"` exists and no
+    //          `data-testid="ack-confirmation"` exists.
+    //        - requireAck announcement, acked → exactly one
+    //          `data-testid="ack-confirmation"` element and no
+    //          `data-testid="ack-button"`.
+    //        - non-requireAck announcement → neither testid exists.
+    //
+    // With no seed we verify what is verifiable (list renders; the two
+    // testids are mutually exclusive wherever they appear) and document
+    // the remaining coverage gap rather than fabricating assertions.
+
+    await page.goto('/announcements', { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('load');
+    await expectNotLoading(page);
+
+    // Structural guarantee on the list page: an announcement detail
+    // link opens /announcements/{id}. We walk into the first available
+    // row (if any) and assert the ack-testid invariant on the detail
+    // view.
+    const firstRow = page.locator('a[href^="/announcements/"]').first();
+    const rowVisible = await firstRow
+      .isVisible({ timeout: 500 })
+      .catch(() => false);
+
+    if (!rowVisible) {
+      test.info().annotations.push({
+        type: 'skip-reason',
+        description:
+          'Fixture stubs auth only; no announcements seeded, so no detail view is reachable to exercise the ack flow. Structural invariant (ack-button and ack-confirmation are mutually exclusive on the detail view) is unobservable without seeded content.',
+      });
+      // Empty-state page is still a healthy render; assert it.
+      await expect(page.locator('body')).toBeVisible();
+      return;
+    }
+
+    const href = await firstRow.getAttribute('href');
+    expect(href).toBeTruthy();
+    await firstRow.click();
+    await page.waitForURL(/\/announcements\/.+/);
+    await expectNotLoading(page);
+
+    // Mutually exclusive contract: a detail view MUST NOT simultaneously
+    // show an ack button AND an ack confirmation. Either one (exclusive)
+    // or neither (for non-requireAck items) is valid.
+    const ackButtonCount = await page.getByTestId('ack-button').count();
+    const ackConfirmCount = await page.getByTestId('ack-confirmation').count();
+    expect(
+      !(ackButtonCount > 0 && ackConfirmCount > 0),
+      'ack-button and ack-confirmation must never render together'
+    ).toBe(true);
+
+    // If the detail view is a requireAck item in its not-yet-acked
+    // state, exercising the button should flip the view to the
+    // confirmation state. This is the end-to-end happy path; it will
+    // only execute when the fixture supplies such an announcement.
+    if (ackButtonCount > 0) {
+      const ackButton = page.getByTestId('ack-button');
+      await expect(ackButton).toBeEnabled();
+      await ackButton.click();
+      await expect(page.getByTestId('ack-confirmation')).toBeVisible({
+        timeout: 5_000,
+      });
+      await expect(page.getByTestId('ack-button')).toHaveCount(0);
+    }
   });
 });

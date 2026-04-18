@@ -1,6 +1,6 @@
 'use client';
 import { useParams } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
@@ -9,6 +9,7 @@ import { LinearProgress } from '@mui/material';
 import AnnouncementView from '@/components/AnnouncementView/AnnouncementView';
 import { useFetchAnnouncementById } from '@/hooks/Announcements/useFetchAnnouncementById';
 import { useAnnouncements } from '@/contexts/AnnouncementsContext';
+import { useAnnouncementStates } from '@/hooks/Announcements/useAnnouncementStates';
 
 export default function AnnouncementPage({}: {}) {
   const params = useParams<{ id: string }>();
@@ -19,7 +20,15 @@ export default function AnnouncementPage({}: {}) {
     error: appError,
   } = useFetchAnnouncementById(params.id);
 
-  const { markRead } = useAnnouncements();
+  const { markRead, markAck } = useAnnouncements();
+
+  // Live subscription to the current user's announcement-state docs so
+  // we can render the correct ack state on the detail view (the
+  // context uses this same hook internally; sharing it does not add a
+  // second Firestore listener — Firestore dedupes listeners on the
+  // same ref, but either way the cost is trivial for a per-user query).
+  const { statesById } = useAnnouncementStates(user?.uid);
+  const state = params?.id ? statesById.get(params.id) : undefined;
 
   // Guard against React Strict Mode's double-invoke in dev and against
   // re-firing when unrelated deps change.
@@ -37,6 +46,11 @@ export default function AnnouncementPage({}: {}) {
     });
   }, [user?.uid, params?.id, markRead]);
 
+  const onAcknowledge = useCallback(async () => {
+    if (!params?.id) return;
+    await markAck(params.id);
+  }, [markAck, params?.id]);
+
   if (loading || appLoading) return <LinearProgress />;
   if (appError || !data) {
     return <PageLayout mainTitle="Error" navItems={getNavItems(role)} />;
@@ -44,7 +58,11 @@ export default function AnnouncementPage({}: {}) {
 
   return (
     <PageLayout navItems={getNavItems(role)}>
-      <AnnouncementView announcement={data} />
+      <AnnouncementView
+        announcement={data}
+        ackedAt={state?.ackedAt ?? null}
+        onAcknowledge={onAcknowledge}
+      />
     </PageLayout>
   );
 }
