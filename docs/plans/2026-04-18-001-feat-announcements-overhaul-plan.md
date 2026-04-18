@@ -155,7 +155,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ## Implementation Units
 
-- [ ] **Unit 1: Per-user announcement state model + read hook**
+- [x] **Unit 1: Per-user announcement state model + read hook**
 
 **Goal:** Introduce the per-(user, announcement) state subcollection and a hook that subscribes to it for the current user. Replace the broken timestamp-based read check in the announcements context so the partition uses per-announcement state. No UI changes yet; this unit just makes "read" storable per item.
 

@@ -1,12 +1,15 @@
 import Link from 'next/link';
+import { MouseEvent, useState } from 'react';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import MarkEmailReadOutlined from '@mui/icons-material/MarkEmailReadOutlined';
+import MarkEmailUnreadOutlined from '@mui/icons-material/MarkEmailUnreadOutlined';
 import { AnnouncementData } from '@/types/announcement';
 
 function getInitial(name: string) {
   const trimmed = name.trim();
   return trimmed ? trimmed[0].toUpperCase() : '?';
 }
-
-type TimestampLike = { seconds: number; nanoseconds: number };
 
 function formatDate(d: Date) {
   const month = (d.getMonth() + 1).toString();
@@ -15,7 +18,13 @@ function formatDate(d: Date) {
   return `${month} ${date}, ${year}`;
 }
 
-type Props = AnnouncementData & { id: string; unread?: boolean };
+type Props = AnnouncementData & {
+  id: string;
+  unread?: boolean;
+  requireAck?: boolean;
+  onMarkRead?: (id: string) => Promise<void>;
+  onMarkUnread?: (id: string) => Promise<void>;
+};
 
 export default function AnnouncementsRow({
   id,
@@ -24,14 +33,49 @@ export default function AnnouncementsRow({
   body,
   sendDate,
   unread = false,
+  requireAck = false,
+  onMarkRead,
+  onMarkUnread,
 }: Props) {
   const initial = getInitial(senderName);
+  const [busy, setBusy] = useState(false);
 
   const base =
-    'block w-full border-t border-gray-200 px-6 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400';
+    'group relative block w-full border-t border-gray-200 px-6 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400';
 
   const unreadStyle = 'bg-red-50 hover:bg-red-100'; // subtle highlight
   const readStyle = 'bg-white hover:bg-gray-50';
+
+  // Per-row affordance visibility:
+  //   - unread + !requireAck  → show "Mark read" (MarkEmailReadOutlined)
+  //   - read                   → show "Mark unread" (MarkEmailUnreadOutlined)
+  //   - unread + requireAck    → hide entirely (user must open & acknowledge)
+  const showMarkRead = unread && !requireAck && !!onMarkRead;
+  const showMarkUnread = !unread && !!onMarkUnread;
+  const showToggle = showMarkRead || showMarkUnread;
+
+  const toggleLabel = showMarkRead ? 'Mark as read' : 'Mark as unread';
+  const ToggleIcon = showMarkRead
+    ? MarkEmailReadOutlined
+    : MarkEmailUnreadOutlined;
+
+  const handleToggle = async (e: MouseEvent<HTMLButtonElement>) => {
+    // Keep the wrapping <Link> from navigating when the user clicks the
+    // icon button inside it.
+    e.preventDefault();
+    e.stopPropagation();
+    if (busy) return;
+    try {
+      setBusy(true);
+      if (showMarkRead && onMarkRead) {
+        await onMarkRead(id);
+      } else if (showMarkUnread && onMarkUnread) {
+        await onMarkUnread(id);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <Link
@@ -68,10 +112,31 @@ export default function AnnouncementsRow({
           </div>
         </div>
 
-        <div className="flex-none text-right">
-          <div className="text-sm font-semibold text-gray-900">Posted on:</div>
-          <div className="text-sm text-gray-500">
-            {sendDate ? formatDate(sendDate as any) : '—'}
+        <div className="flex flex-none items-center gap-3">
+          {showToggle && (
+            <Tooltip title={toggleLabel} placement="left">
+              <IconButton
+                aria-label={toggleLabel}
+                size="small"
+                disabled={busy}
+                onClick={handleToggle}
+                // Sit above the <Link>'s click target. Hidden by default,
+                // revealed on row hover or keyboard focus (including focus
+                // landing on the button itself). Always tabbable.
+                className="relative z-10 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 focus-visible:opacity-100"
+              >
+                <ToggleIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          <div className="text-right">
+            <div className="text-sm font-semibold text-gray-900">
+              Posted on:
+            </div>
+            <div className="text-sm text-gray-500">
+              {sendDate ? formatDate(sendDate as any) : '—'}
+            </div>
           </div>
         </div>
       </div>
