@@ -15,6 +15,7 @@ import {
 import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import { useBugReport } from '@/contexts/BugReportContext';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
+import firebase from '@/firebase/firebase_config';
 
 const BugReportDialog: React.FC = () => {
   const { isOpen, close } = useBugReport();
@@ -70,6 +71,25 @@ const BugReportDialog: React.FC = () => {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Could not send the bug report.');
+      }
+      try {
+        await firebase
+          .firestore()
+          .collection('bug_reports')
+          .add({
+            summary: summary.trim(),
+            description: description.trim(),
+            severity,
+            pageUrl:
+              typeof window !== 'undefined' ? window.location.href : null,
+            uid: user?.uid ?? null,
+            email: user?.email ?? null,
+            displayName: user?.displayName ?? null,
+            role: typeof role === 'string' ? role : null,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+      } catch (persistErr) {
+        console.error('Failed to persist bug report:', persistErr);
       }
       setSuccess(true);
       setTimeout(() => {
