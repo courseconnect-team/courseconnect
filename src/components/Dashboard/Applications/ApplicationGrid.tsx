@@ -36,6 +36,38 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { query, where, collection, getDocs, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
+
+// Applications live at applications/course_assistant/uid/{uid} after the
+// schema migration. Everything in this grid targets that subcollection.
+const applicationsSubcollection = () =>
+  firebase
+    .firestore()
+    .collection('applications')
+    .doc('course_assistant')
+    .collection('uid');
+
+const applicationDoc = (id: string) => applicationsSubcollection().doc(id);
+
+// Courses are stored nested as { [semester]: { [courseId]: status } }.
+// Flatten to { [courseId]: status } for the admin grid's legacy filters.
+// Also tolerates the two legacy flat shapes ('sem|||course' and bare 'course').
+function flattenCourses(courses: any): Record<string, string> {
+  if (!courses || typeof courses !== 'object') return {};
+  const out: Record<string, string> = {};
+  for (const [key, val] of Object.entries(courses)) {
+    if (val && typeof val === 'object') {
+      for (const [courseId, status] of Object.entries(
+        val as Record<string, unknown>
+      )) {
+        if (typeof status === 'string') out[courseId] = status;
+      }
+    } else if (typeof val === 'string') {
+      const bare = key.includes('|||') ? key.split('|||').pop() || key : key;
+      out[bare] = val;
+    }
+  }
+  return out;
+}
 import GetUserName from '@/firebase/util/GetUserName';
 import { alpha, styled } from '@mui/material/styles';
 import { gridClasses } from '@mui/x-data-grid';
@@ -163,16 +195,12 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const [openDenyDialog, setOpenDenyDialog] = React.useState(false);
 
   const handleOpenAssignmentDialog = async (id: GridRowId) => {
-    const statusRef = firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString());
-
-    const doc = await getDoc(statusRef);
+    const doc = await applicationDoc(id.toString()).get();
+    const flat = flattenCourses(doc.data()?.courses);
     setCodes(
-      Object.entries(doc.data().courses)
-        .filter(([key, value]) => value === 'approved')
-        .map(([key, value]) => key)
+      Object.entries(flat)
+        .filter(([, value]) => value === 'approved')
+        .map(([key]) => key)
     );
     setSelectedUserGrid(id);
 
@@ -180,17 +208,12 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
 
   const handleDenyAssignmentDialog = async (id: GridRowId) => {
-    const statusRef = firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString());
-
-    const doc = await getDoc(statusRef);
-
+    const doc = await applicationDoc(id.toString()).get();
+    const flat = flattenCourses(doc.data()?.courses);
     setCodes(
-      Object.entries(doc.data().courses)
-        .filter(([key, value]) => value === 'denied')
-        .map(([key, value]) => key)
+      Object.entries(flat)
+        .filter(([, value]) => value === 'denied')
+        .map(([key]) => key)
     );
 
     setSelectedUserGrid(id);
@@ -212,11 +235,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     try {
       const student_uid = selectedUserGrid as string;
-      const statusRef = firebase
-        .firestore()
-        .collection('applications')
-        .doc(student_uid.toString());
-      let doc = await getDoc(statusRef);
+      let doc = await applicationDoc(student_uid.toString()).get();
 
       const courseDetails = firebase
         .firestore()
@@ -224,15 +243,30 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
         .doc(valueRadio);
       const courseDoc = await getDoc(courseDetails);
 
+      // Figure out which semester bucket holds this course so we update the
+      // nested `courses[semester][courseId]` slot rather than creating a
+      // parallel flat key.
+      const existingCourses = doc.data()?.courses || {};
+      let semesterBucket: string | null = null;
+      for (const [semKey, val] of Object.entries(existingCourses)) {
+        if (
+          val &&
+          typeof val === 'object' &&
+          valueRadio in (val as Record<string, unknown>)
+        ) {
+          semesterBucket = semKey;
+          break;
+        }
+      }
+      const coursePath = semesterBucket
+        ? `courses.${semesterBucket}.${valueRadio}`
+        : `courses.${valueRadio}`;
+
       // Update student's application to approved
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(student_uid.toString())
-        .update({
-          status: 'Admin_approved',
-          [`courses.${valueRadio}`]: 'approved',
-        });
+      await applicationDoc(student_uid.toString()).update({
+        status: 'Admin_approved',
+        [coursePath]: 'approved',
+      });
 
       // Get the current date in month/day/year format
       const current = new Date();
@@ -386,37 +420,32 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   // fetching application data from firestore
   const [loading, setLoading] = useState(false);
   React.useEffect(() => {
-    const applicationsRef = firebase.firestore().collection('applications');
+    const applicationsRef = applicationsSubcollection();
 
     if (userRole === 'admin') {
       const unsubscribe = applicationsRef.onSnapshot((querySnapshot) => {
         const data = querySnapshot.docs
           .filter(function (doc) {
-            if (doc.data().status !== 'Admin_denied') {
-              if (
-                doc.data().status === 'Admin_approved' &&
-                Object.values(doc.data().courses).length < 2
-              ) {
-                return false;
-              }
-              return true;
-            } else {
+            const d = doc.data();
+            if (d.status === 'Admin_denied') return false;
+            const flat = flattenCourses(d.courses);
+            if (d.status === 'Admin_approved' && Object.keys(flat).length < 2) {
               return false;
             }
+            return true;
           })
-          .map(
-            (doc) =>
-              ({
-                id: doc.id,
-                ...doc.data(),
-                courses: Object.entries(doc.data().courses)
-                  .filter(([key, value]) => value === 'approved')
-                  .map(([key, value]) => key),
-                allcourses: Object.entries(doc.data().courses).map(
-                  ([key, value]) => key
-                ),
-              } as Application)
-          );
+          .map((doc) => {
+            const d = doc.data();
+            const flat = flattenCourses(d.courses);
+            return {
+              id: doc.id,
+              ...d,
+              courses: Object.entries(flat)
+                .filter(([, value]) => value === 'approved')
+                .map(([key]) => key),
+              allcourses: Object.keys(flat),
+            } as Application;
+          });
         setApplicationData(data);
       });
       // Clean up the subscription on unmount
@@ -468,11 +497,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   const handleDenyEmail = async (id: GridRowId) => {
     try {
-      const snapshot = await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .get();
+      const snapshot = await applicationDoc(id.toString()).get();
 
       if (snapshot.exists) {
         const applicationData = snapshot.data() as Application;
@@ -517,11 +542,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleSendEmail = async (id: GridRowId) => {
     try {
       // Retrieve application data from Firestore
-      const snapshot = await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.student_uid.toString())
-        .get();
+      const snapshot = await applicationDoc(id.student_uid.toString()).get();
       const snapshot2 = await firebase
         .firestore()
         .collection('assignments')
@@ -571,16 +592,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
   // approve/deny click handlers
   const handleDenyClick = async (id: GridRowId) => {
-    event.preventDefault();
     setLoading(true);
 
     try {
-      // Update the 'applications' collection in Firestore
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .update({ status: 'Admin_denied' });
+      // Update the application's status in the subcollection
+      await applicationDoc(id.toString()).update({ status: 'Admin_denied' });
 
       // Remove the denied row from the local state
       setApplicationData((prevData) => {
@@ -601,12 +617,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleApproveClick = async (id: GridRowId) => {
     setLoading(true);
     try {
-      // Update the 'applications' collection
-      await firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
-        .update({ status: 'Approved' });
+      await applicationDoc(id.toString()).update({ status: 'Approved' });
 
       // Update the state locally to avoid reloading the entire data
       setApplicationData((prevData) =>
@@ -632,10 +643,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
     setLoading(true);
     const updatedRow = applicationData.find((row) => row.id === id);
     if (updatedRow) {
-      firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
+      applicationDoc(id.toString())
         .update(updatedRow)
         .then(() => {
           setRowModesModel({
@@ -659,10 +667,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   };
   const handleDeleteClick = (id: GridRowId) => {
     setLoading(true);
-    firebase
-      .firestore()
-      .collection('applications')
-      .doc(id.toString())
+    applicationDoc(id.toString())
       .delete()
       .then(() => {
         setLoading(false);
@@ -683,10 +688,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
   const handleCancelClick = (id: GridRowId) => () => {
     const editedRow = applicationData.find((row) => row.id === id);
     if (editedRow!.isNew) {
-      firebase
-        .firestore()
-        .collection('applications')
-        .doc(id.toString())
+      applicationDoc(id.toString())
         .delete()
         .then(() => {
           setApplicationData(applicationData.filter((row) => row.id !== id));
@@ -729,9 +731,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
 
     if (updatedRow) {
       if (updatedRow.isNew) {
-        return firebase
-          .firestore()
-          .collection('applications')
+        return applicationsSubcollection()
           .add(updatedRow)
           .then(() => {
             setApplicationData(
@@ -748,10 +748,7 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
             throw error;
           });
       } else {
-        return firebase
-          .firestore()
-          .collection('applications')
-          .doc(updatedRow.id)
+        return applicationDoc(updatedRow.id)
           .update(updatedRow)
           .then(() => {
             setApplicationData(
