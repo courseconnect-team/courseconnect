@@ -36,6 +36,7 @@ export default function Applications(props: ApplicationsProps) {
       <Box sx={{ mb: 3 }}>
         <Paper
           variant="outlined"
+          data-tour="applications-tabs"
           sx={{
             display: 'inline-block',
             borderRadius: 2,

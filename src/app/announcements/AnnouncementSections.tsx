@@ -74,7 +74,11 @@ export default function AnnouncementSections({ role }: { role: Role }) {
     <div className="flex flex-col gap-4">
       {canCreate ? (
         <div className="flex items-center gap-3">
-          <PrimaryButton w={170} onClick={() => setOpen(true)}>
+          <PrimaryButton
+            w={170}
+            onClick={() => setOpen(true)}
+            data-tour="add-announcement"
+          >
             Add Announcement
           </PrimaryButton>
 
