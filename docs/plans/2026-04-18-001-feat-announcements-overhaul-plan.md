@@ -237,7 +237,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 3: Recipient acknowledgment flow**
+- [x] **Unit 3: Recipient acknowledgment flow**
 
 **Goal:** Render an "I acknowledge" action on the detail view when `requireAck === true` and the current user has not yet acknowledged. Clicking it writes `ackedAt` (and `readAt` if absent) via the `markAck` helper. Unacknowledged required-ack items stay in the Unread bucket.
 
@@ -277,7 +277,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 4: Sender-side ack dashboard**
+- [x] **Unit 4: Sender-side ack dashboard**
 
 **Goal:** When the viewer is the sender of a `requireAck` announcement (or an admin), show a panel on the detail view listing how many people have acknowledged and expanding to show who has and hasn't.
 
