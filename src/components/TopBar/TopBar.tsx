@@ -1,9 +1,8 @@
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
-import { AppBar } from '@mui/material';
+import { AppBar, Badge } from '@mui/material';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-import NotificationsActiveOutlinedIcon from '@mui/icons-material/NotificationsActiveOutlined';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import { EceLogoPng } from '@/components/EceLogoPng/EceLogoPng';
 import Link from 'next/link';
@@ -13,7 +12,7 @@ import { useAnnouncements } from '@/contexts/AnnouncementsContext';
 export default function TopNav() {
   const [user, role, loading, error] = useUserInfo();
   const { unread } = useAnnouncements();
-  const onNotifications = () => {};
+  const unreadCount = unread?.length ?? 0;
   const display = (v: unknown, fallback = 'Not listed'): string => {
     if (v == null) return fallback; // null/undefined
     if (typeof v === 'string') {
@@ -43,14 +42,19 @@ export default function TopNav() {
         <div className="!text-[#FFFFFF] flex items-center gap-3">
           {/* Notifications */}
           <Link href="/announcements">
-            <IconButton onClick={onNotifications} className="!text-[#FFFFFF]">
-              {/* <Badge color="error" overlap="circular" variant="dot"> */}
-              {(unread?.length ?? 0) > 0 ? (
-                <NotificationsActiveOutlinedIcon fontSize="medium" />
-              ) : (
+            <IconButton
+              aria-label={`Announcements (${unreadCount} unread)`}
+              className="!text-[#FFFFFF]"
+            >
+              <Badge
+                badgeContent={unreadCount}
+                color="error"
+                max={9}
+                overlap="circular"
+                invisible={unreadCount === 0}
+              >
                 <NotificationsNoneOutlinedIcon fontSize="medium" />
-              )}
-              {/* </Badge> */}
+              </Badge>
             </IconButton>
           </Link>
 

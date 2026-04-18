@@ -11,6 +11,7 @@ import {
   Box,
   FormGroup,
   FormControlLabel,
+  FormHelperText,
   Checkbox,
   Chip,
   Autocomplete,
@@ -298,15 +299,21 @@ export default function AnnouncementDialog({
               }
               label="Pin to top"
             />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={requireAck}
-                  onChange={(e) => setRequireAck(e.target.checked)}
-                />
-              }
-              label="Require acknowledgment"
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={requireAck}
+                    onChange={(e) => setRequireAck(e.target.checked)}
+                  />
+                }
+                label="Require acknowledgment"
+              />
+              <FormHelperText sx={{ ml: '32px', mt: '-4px', maxWidth: 320 }}>
+                Recipients will be asked to explicitly acknowledge this
+                announcement.
+              </FormHelperText>
+            </Box>
             <Divider flexItem orientation="vertical" sx={{ mx: 1 }} />
             <FormControlLabel
               control={

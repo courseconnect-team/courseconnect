@@ -196,7 +196,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 2: Mark-on-detail-view, per-row toggle, and mark-all-read**
+- [x] **Unit 2: Mark-on-detail-view, per-row toggle, and mark-all-read**
 
 **Goal:** Wire the UI to the new mark-\* functions. Opening `/announcements/[id]` auto-marks read. The list shows a "Mark all as read" button above Unread when non-empty. Each row exposes a compact "Mark read" / "Mark unread" action on hover / focus.
 
@@ -237,7 +237,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 3: Recipient acknowledgment flow**
+- [x] **Unit 3: Recipient acknowledgment flow**
 
 **Goal:** Render an "I acknowledge" action on the detail view when `requireAck === true` and the current user has not yet acknowledged. Clicking it writes `ackedAt` (and `readAt` if absent) via the `markAck` helper. Unacknowledged required-ack items stay in the Unread bucket.
 
@@ -277,7 +277,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 4: Sender-side ack dashboard**
+- [x] **Unit 4: Sender-side ack dashboard**
 
 **Goal:** When the viewer is the sender of a `requireAck` announcement (or an admin), show a panel on the detail view listing how many people have acknowledged and expanding to show who has and hasn't.
 
@@ -332,7 +332,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 5: Top-bar bell badge with count**
+- [x] **Unit 5: Top-bar bell badge with count**
 
 **Goal:** Replace the icon-swap with a real badge showing the unread count. Cap display at `9+`.
 
@@ -368,7 +368,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 6: Presentation polish (pin, markdown rendering, preview snippet, composer copy)**
+- [x] **Unit 6: Presentation polish (pin, markdown rendering, preview snippet, composer copy)**
 
 **Goal:** Make the list scannable and the detail view legible. Pinned rows get a pin icon and a subtle tint. Row body previews show plain text derived from the markdown. The detail view renders markdown as formatted content. The composer's requireAck checkbox has a helper string.
 
@@ -412,7 +412,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 7: Firestore indexes and rules note**
+- [x] **Unit 7: Firestore indexes and rules note**
 
 **Goal:** Update `firestore.indexes.json` to include the collection-group index used by the ack dashboard. Document (not create) the gap in Firestore security rules.
 
@@ -444,7 +444,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 8: Remove obsolete timestamp hook**
+- [x] **Unit 8: Remove obsolete timestamp hook**
 
 **Goal:** Delete the broken `GetAnnouncementTimestamp.js` and the now-unused `markAnnouncementAsSeen.ts`. Ensure nothing still imports them.
 

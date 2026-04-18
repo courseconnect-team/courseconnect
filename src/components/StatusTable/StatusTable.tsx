@@ -39,9 +39,14 @@ function StatusPill({
   }
 }
 
+type CoursesShape =
+  | Record<string, string>
+  | Record<string, Record<string, string>>
+  | null;
+
 interface StatusTableProps {
   assignments: string[];
-  courses: Record<string, string> | null;
+  courses: CoursesShape;
   adminApproved: boolean;
   adminDenied: boolean;
   position: string;
@@ -54,6 +59,36 @@ type Row = {
   submitted: string;
   status: 'accepted' | 'rejected' | 'pending' | 'in-progress';
 };
+
+// Canonical shape is nested: { [semester]: { [courseId]: status } }.
+// Legacy flat shape "<semester>|||<courseId>" -> status is split back out
+// so pre-migration docs still render correctly.
+function flattenCourses(
+  courses: Exclude<CoursesShape, null>
+): Array<{ courseId: string; semester: string; state: string }> {
+  const out: Array<{ courseId: string; semester: string; state: string }> = [];
+  for (const [key, value] of Object.entries(courses)) {
+    if (value && typeof value === 'object') {
+      for (const [courseId, state] of Object.entries(value)) {
+        if (typeof state === 'string') {
+          out.push({ courseId, semester: key, state });
+        }
+      }
+    } else if (typeof value === 'string') {
+      const sepIdx = key.indexOf('|||');
+      if (sepIdx !== -1) {
+        out.push({
+          semester: key.slice(0, sepIdx),
+          courseId: key.slice(sepIdx + 3),
+          state: value,
+        });
+      } else {
+        out.push({ semester: '', courseId: key, state: value });
+      }
+    }
+  }
+  return out;
+}
 
 export const StatusTable: React.FC<StatusTableProps> = ({
   assignments,
@@ -77,13 +112,14 @@ export const StatusTable: React.FC<StatusTableProps> = ({
 
   /* per-course statuses */
   if (courses) {
-    Object.entries(courses).forEach(([course, state]) => {
+    flattenCourses(courses).forEach(({ courseId, semester, state }) => {
       let status: Row['status'] = 'pending';
       if (state === 'approved' && adminApproved) status = 'accepted';
       else if (state === 'denied') status = 'rejected';
       else if (state === 'applied') status = 'in-progress';
+      const label = semester ? `${courseId} (${semester})` : courseId;
       rows.push({
-        application: course,
+        application: label,
         position: position,
         submitted: dateApplied,
         status,
