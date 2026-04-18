@@ -57,8 +57,17 @@ export default function Application() {
   React.useEffect(() => {
     async function fetchData() {
       try {
-        const visibleSems = await fetchClosestSemesters(3);
-        console.log('Visible semesters:', visibleSems);
+        const candidateSems = await fetchClosestSemesters(3);
+
+        const semesterDocs = await Promise.all(
+          candidateSems.map((semesterId) =>
+            firebase.firestore().collection('semesters').doc(semesterId).get()
+          )
+        );
+
+        const visibleSems = semesterDocs
+          .filter((doc) => doc.exists && doc.data()?.hidden === false)
+          .map((doc) => doc.id);
 
         const allCourses: { raw: string; semester: string }[] = [];
 
