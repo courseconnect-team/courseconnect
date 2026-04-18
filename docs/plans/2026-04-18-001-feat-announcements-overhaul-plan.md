@@ -368,7 +368,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 6: Presentation polish (pin, markdown rendering, preview snippet, composer copy)**
+- [x] **Unit 6: Presentation polish (pin, markdown rendering, preview snippet, composer copy)**
 
 **Goal:** Make the list scannable and the detail view legible. Pinned rows get a pin icon and a subtle tint. Row body previews show plain text derived from the markdown. The detail view renders markdown as formatted content. The composer's requireAck checkbox has a helper string.
 
@@ -412,7 +412,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 7: Firestore indexes and rules note**
+- [x] **Unit 7: Firestore indexes and rules note**
 
 **Goal:** Update `firestore.indexes.json` to include the collection-group index used by the ack dashboard. Document (not create) the gap in Firestore security rules.
 
@@ -444,7 +444,7 @@ Not consulted — local patterns are strong for every layer this plan touches (F
 
 ---
 
-- [ ] **Unit 8: Remove obsolete timestamp hook**
+- [x] **Unit 8: Remove obsolete timestamp hook**
 
 **Goal:** Delete the broken `GetAnnouncementTimestamp.js` and the now-unused `markAnnouncementAsSeen.ts`. Ensure nothing still imports them.
 
