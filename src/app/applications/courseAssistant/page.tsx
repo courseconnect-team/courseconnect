@@ -31,6 +31,24 @@ import {
   CourseOption,
 } from '@/hooks/useSemesterOptions';
 import { callFunction } from '@/firebase/functions/callFunction';
+import { modernInputSx } from '@/components/FormStyles';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[\d()+\-\s]{7,20}$/;
+const UFID_RE = /^\d{8}$/;
+
+type FieldErrors = Partial<
+  Record<
+    | 'firstName'
+    | 'lastName'
+    | 'email'
+    | 'ufid'
+    | 'phone'
+    | 'resumeLink'
+    | 'qualifications',
+    string
+  >
+>;
 
 export default function Application() {
   const router = useRouter();
@@ -49,6 +67,15 @@ export default function Application() {
 
   const [selectedCourses, setSelectedCourses] = React.useState<string[]>([]);
   const [names, setNames] = useState<{ raw: string; semester: string }[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  const clearFieldError = (key: keyof FieldErrors) =>
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
 
   const handleAdditionalPromptChange = (newValue: string) => {
     setAdditionalPromptValue(newValue);
@@ -191,74 +218,53 @@ export default function Application() {
       resume_link: formData.get('resumeLink') as string,
     };
 
-    if (!applicationData.email.includes('ufl.edu')) {
-      toast.error('Please enter a valid ufl email!');
+    const nextErrors: FieldErrors = {};
+    if (!applicationData.firstname.trim())
+      nextErrors.firstName = 'First name is required.';
+    if (!applicationData.lastname.trim())
+      nextErrors.lastName = 'Last name is required.';
+    if (!applicationData.email.trim()) nextErrors.email = 'Email is required.';
+    else if (!EMAIL_RE.test(applicationData.email))
+      nextErrors.email = 'Enter a valid email address.';
+    else if (!applicationData.email.toLowerCase().endsWith('ufl.edu'))
+      nextErrors.email = 'Must be a ufl.edu email.';
+    if (!applicationData.ufid.trim()) nextErrors.ufid = 'UFID is required.';
+    else if (!UFID_RE.test(applicationData.ufid))
+      nextErrors.ufid = 'UFID must be 8 digits.';
+    if (!applicationData.phonenumber.trim())
+      nextErrors.phone = 'Phone number is required.';
+    else if (!PHONE_RE.test(applicationData.phonenumber))
+      nextErrors.phone = 'Enter a valid phone number.';
+    if (!applicationData.resume_link?.trim())
+      nextErrors.resumeLink = 'Resume link is required.';
+    else if (!/^https?:\/\//.test(applicationData.resume_link))
+      nextErrors.resumeLink = 'Must be a full URL (starts with http/https).';
+    if (!applicationData.qualifications?.trim())
+      nextErrors.qualifications = 'Please describe your qualifications.';
+
+    const dropdownMsg: string[] = [];
+    if (!applicationData.degree) dropdownMsg.push('degree');
+    if (!applicationData.department) dropdownMsg.push('department');
+    if (!applicationData.semesterstatus) dropdownMsg.push('semester status');
+    if (!applicationData.position) dropdownMsg.push('position');
+    if (applicationData.available_hours.length === 0)
+      dropdownMsg.push('available hours');
+    if (coursesArray.length === 0) dropdownMsg.push('at least one course');
+
+    if (Object.keys(nextErrors).length > 0 || dropdownMsg.length > 0) {
+      setFieldErrors(nextErrors);
+      if (Object.keys(nextErrors).length > 0) {
+        toast.error('Please fix the highlighted fields.');
+      }
+      if (dropdownMsg.length > 0) {
+        toast.error(`Please select: ${dropdownMsg.join(', ')}.`);
+      }
       setLoading(false);
       return;
-    } else if (applicationData.firstname === '') {
-      toast.error('Please enter a valid first name!');
-      setLoading(false);
-      return;
-    } else if (applicationData.lastname === '') {
-      toast.error('Please enter a valid last name!');
-      setLoading(false);
-      return;
-    } else if (applicationData.ufid === '') {
-      toast.error('Please enter a valid ufid!');
-      setLoading(false);
-      return;
-    } else if (applicationData.phonenumber === '') {
-      toast.error('Please enter a valid phone number!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.degree === null ||
-      applicationData.degree === ''
-    ) {
-      toast.error('Please select a degree!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.department === null ||
-      applicationData.department === ''
-    ) {
-      toast.error('Please select a department!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.semesterstatus === null ||
-      applicationData.semesterstatus === ''
-    ) {
-      toast.error('Please select a semester status!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.resume_link === null ||
-      applicationData.resume_link === ''
-    ) {
-      toast.error('Please provide a resume link!');
-      setLoading(false);
-      return;
-    } else if (
-      applicationData.position === null ||
-      applicationData.position === ''
-    ) {
-      toast.error('Please enter a position!');
-      setLoading(false);
-      return;
-    } else if (applicationData.available_hours.length === 0) {
-      toast.error('Please enter your available hours!');
-      setLoading(false);
-      return;
-    } else if (applicationData.available_semesters.length === 0) {
-      toast.error('Please enter your available semesters!');
-      setLoading(false);
-      return;
-    } else if (coursesArray.length === 0) {
-      toast.error('Please enter your courses!');
-      setLoading(false);
-      return;
-    } else {
+    }
+
+    setFieldErrors({});
+    {
       const toastId = toast.loading('Processing application', {
         duration: 30000,
       });
@@ -359,6 +365,10 @@ export default function Application() {
                   id="firstName"
                   label="First Name"
                   autoFocus
+                  error={!!fieldErrors.firstName}
+                  helperText={fieldErrors.firstName ?? ' '}
+                  onChange={() => clearFieldError('firstName')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -371,6 +381,10 @@ export default function Application() {
                   label="Last Name"
                   name="lastName"
                   autoComplete="family-name"
+                  error={!!fieldErrors.lastName}
+                  helperText={fieldErrors.lastName ?? ' '}
+                  onChange={() => clearFieldError('lastName')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -382,8 +396,12 @@ export default function Application() {
                   id="email"
                   label="Email Address"
                   name="email"
+                  type="email"
                   autoComplete="email"
-                  helperText="Enter your UF email address. Example: gator@ufl.edu"
+                  error={!!fieldErrors.email}
+                  helperText={fieldErrors.email ?? 'Example: gator@ufl.edu'}
+                  onChange={() => clearFieldError('email')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -395,7 +413,11 @@ export default function Application() {
                   id="ufid"
                   label="UFID"
                   name="ufid"
-                  helperText="Enter your UFID. Example: 12345678"
+                  inputMode="numeric"
+                  error={!!fieldErrors.ufid}
+                  helperText={fieldErrors.ufid ?? '8-digit UF ID'}
+                  onChange={() => clearFieldError('ufid')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -408,8 +430,11 @@ export default function Application() {
                   label="Phone Number"
                   type="tel"
                   id="phone-number"
-                  autoComplete="phone-number"
-                  helperText="Enter your phone number. Example: 123-456-7890"
+                  autoComplete="tel"
+                  error={!!fieldErrors.phone}
+                  helperText={fieldErrors.phone ?? 'Example: 123-456-7890'}
+                  onChange={() => clearFieldError('phone')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -515,6 +540,15 @@ export default function Application() {
                   id="resumeLink"
                   label="Resume Link"
                   name="resumeLink"
+                  type="url"
+                  placeholder="https://drive.google.com/..."
+                  error={!!fieldErrors.resumeLink}
+                  helperText={
+                    fieldErrors.resumeLink ??
+                    'Paste a shareable Google Drive link.'
+                  }
+                  onChange={() => clearFieldError('resumeLink')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
@@ -540,6 +574,10 @@ export default function Application() {
                   multiline
                   rows={8}
                   variant="filled"
+                  error={!!fieldErrors.qualifications}
+                  helperText={fieldErrors.qualifications ?? ' '}
+                  onChange={() => clearFieldError('qualifications')}
+                  sx={modernInputSx}
                 />
               </Grid>
 
