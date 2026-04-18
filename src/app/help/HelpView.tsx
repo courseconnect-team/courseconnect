@@ -128,6 +128,34 @@ const HelpView: React.FC<HelpViewProps> = ({ role }) => {
         </button>
       </div>
 
+      {/* Bug report CTA */}
+      <div className="rounded-2xl border border-[#F3D9D5] bg-gradient-to-br from-[#FFF5F3] to-white p-6 md:p-7 mb-8 flex flex-col md:flex-row md:items-center gap-5">
+        <div className="shrink-0 w-12 h-12 rounded-xl bg-[#E5484D] text-white flex items-center justify-center">
+          <BugReportOutlinedIcon sx={{ fontSize: 26 }} />
+        </div>
+        <div className="flex-1">
+          <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#B5322D]">
+            Something wrong?
+          </p>
+          <h3 className="text-[19px] md:text-[21px] font-semibold text-[#1E1442] mt-0.5">
+            Report a bug or send feedback
+          </h3>
+          <p className="text-sm text-[#4A3F6B] mt-1.5 leading-relaxed max-w-2xl">
+            Run into a glitch, confusing flow, or something broken? Send the
+            details straight to the CourseConnect team on Slack — we&apos;ll
+            jump on it.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setBugOpen(true)}
+          className="shrink-0 inline-flex items-center justify-center gap-2 bg-[#E5484D] text-white hover:bg-[#C43A3E] font-semibold px-5 py-2.5 rounded-full shadow-[0_6px_20px_rgba(229,72,77,0.25)] transition-colors"
+        >
+          <BugReportOutlinedIcon sx={{ fontSize: 20 }} />
+          Report a bug
+        </button>
+      </div>
+
       {/* Role tabs */}
       {visibleRoles.length > 1 && (
         <Box
@@ -262,36 +290,6 @@ const HelpView: React.FC<HelpViewProps> = ({ role }) => {
               </p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Bug report CTA */}
-      <section>
-        <div className="rounded-2xl border border-[#F3D9D5] bg-gradient-to-br from-[#FFF5F3] to-white p-6 md:p-7 flex flex-col md:flex-row md:items-center gap-5">
-          <div className="shrink-0 w-12 h-12 rounded-xl bg-[#E5484D] text-white flex items-center justify-center">
-            <BugReportOutlinedIcon sx={{ fontSize: 26 }} />
-          </div>
-          <div className="flex-1">
-            <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[#B5322D]">
-              Something wrong?
-            </p>
-            <h3 className="text-[19px] md:text-[21px] font-semibold text-[#1E1442] mt-0.5">
-              Report a bug or send feedback
-            </h3>
-            <p className="text-sm text-[#4A3F6B] mt-1.5 leading-relaxed max-w-2xl">
-              Run into a glitch, confusing flow, or something broken? Send the
-              details straight to the CourseConnect team on Slack — we&apos;ll
-              jump on it.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setBugOpen(true)}
-            className="shrink-0 inline-flex items-center justify-center gap-2 bg-[#E5484D] text-white hover:bg-[#C43A3E] font-semibold px-5 py-2.5 rounded-full shadow-[0_6px_20px_rgba(229,72,77,0.25)] transition-colors"
-          >
-            <BugReportOutlinedIcon sx={{ fontSize: 20 }} />
-            Report a bug
-          </button>
         </div>
       </section>
 
