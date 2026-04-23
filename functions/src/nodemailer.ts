@@ -189,7 +189,9 @@ export async function sendUnapprovedUserNotificationEmail(
       subject: 'New Unapproved User',
       text: `Dear Admin,\n\n${displayName(
         user
-      )} has recently created an account and is awaiting your approval. Please review ${user.email}'s account and approve or deny registration at your earliest convenience.\n\nBest regards,\nCourse Connect Team`,
+      )} has recently created an account and is awaiting your approval. Please review ${
+        user.email
+      }'s account and approve or deny registration at your earliest convenience.\n\nBest regards,\nCourse Connect Team`,
     },
     'Unapproved user notification email sent:'
   );
@@ -225,5 +227,40 @@ export async function sendRenewTAEmail(
       text: message,
     },
     'TA renewal email sent:'
+  );
+}
+
+// Unit 4 of multi-department support — notification email for pending-
+// memberships invites. The invite itself lives in Firestore; this email is
+// just a nudge telling the invitee to sign in. No time-limited tokens; the
+// pending doc materializes on their first authenticated session.
+export async function sendInviteNotificationEmail(
+  invitee: EmailUser,
+  deptName: string,
+  roleLabel: string,
+  inviterName: string,
+  signInUrl: string
+): Promise<void> {
+  const subject = `You've been added as ${roleLabel} of ${deptName} on Course Connect`;
+  const body = `Hi ${displayName(invitee)},
+
+${inviterName} has added you as ${roleLabel} of ${deptName} on Course Connect.
+
+To activate your access, sign in with your UF email at:
+${signInUrl}
+
+Your role will become active the first time you sign in. Nothing expires — if you sign in later, the invite will still apply.
+
+If you weren't expecting this, you can safely ignore the email or reach out to ${inviterName} directly.
+
+— Course Connect`;
+  await sendMail(
+    {
+      from: email,
+      to: invitee.email,
+      subject,
+      text: body,
+    },
+    'Invite notification email sent:'
   );
 }
