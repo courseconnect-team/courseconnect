@@ -64,15 +64,36 @@ async function main() {
     return;
   }
 
-  await db.collection('users').doc(user.uid).set(
-    {
-      superAdmin: true,
-      superAdminAt: admin.firestore.FieldValue.serverTimestamp(),
-    },
-    { merge: true }
-  );
+  // Also stamp role='admin' when the user has no role or an unapproved
+  // role. Every existing admin page and rule gates on role === 'admin';
+  // without this the super admin would be blocked out of the regular
+  // admin surfaces until Unit 7's scoping rules ship.
+  const existingSnap = await db.collection('users').doc(user.uid).get();
+  const existingRole = existingSnap.data()?.role;
+  const needsAdminRole =
+    typeof existingRole !== 'string' ||
+    existingRole === '' ||
+    existingRole === 'unapproved' ||
+    existingRole.startsWith('student');
+
+  const payload: Record<string, any> = {
+    superAdmin: true,
+    superAdminAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  if (needsAdminRole) {
+    payload.role = 'admin';
+  }
+
+  await db.collection('users').doc(user.uid).set(payload, { merge: true });
 
   console.log(`✓ users/${user.uid}.superAdmin = true`);
+  if (needsAdminRole) {
+    console.log(
+      `✓ users/${user.uid}.role = 'admin' (was ${existingRole ?? '<unset>'})`
+    );
+  } else {
+    console.log(`  users/${user.uid}.role unchanged (${existingRole})`);
+  }
 }
 
 main().catch((err) => {
