@@ -24,7 +24,9 @@
  */
 
 const admin = require('firebase-admin');
-import { resolveDepartmentCode } from '@/constants/research';
+// Relative path, not the @/ alias — ts-node from the CLI does not honor the
+// tsconfig path alias the Next app uses.
+import { resolveDepartmentCode } from '../constants/research';
 
 type AnyMap = Record<string, any>;
 
