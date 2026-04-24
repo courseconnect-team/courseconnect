@@ -421,6 +421,64 @@ export const previewCourseFetch = functions
     }
   });
 
+// --- Cancel a running run ---
+//
+// Cooperative: flips `cancelRequested` on the run doc. The runner polls this
+// flag between provider pages and between batch commits and bails out
+// cleanly, writing a 'cancelled' terminal state. Idempotent — calling twice
+// on the same run is a no-op after the first flip.
+
+export const cancelCourseFetchRun = functions.https.onRequest(
+  async (req: Request, res: Response) => {
+    setCors(req, res);
+    if (!handleMethod(req, res)) return;
+    const caller = await verifyAuth(req, res);
+    if (!caller) return;
+    if (!(await ensureAdmin(caller.uid, res))) return;
+
+    try {
+      const body = asRecord(req.body);
+      const configId = readString(body, 'configId');
+      const runId = readString(body, 'runId');
+      if (!configId || !runId) {
+        fail(res, 'Missing configId or runId');
+        return;
+      }
+      const runRef = db
+        .collection('courseFetchConfigs')
+        .doc(configId)
+        .collection('runs')
+        .doc(runId);
+      const snap = await runRef.get();
+      if (!snap.exists) {
+        fail(res, 'Run not found', 404);
+        return;
+      }
+      const data = snap.data() ?? {};
+      if (data.status !== 'running') {
+        // Already terminal — nothing to cancel. Return 200 so the UI treats
+        // this as a no-op rather than an error.
+        res
+          .status(200)
+          .json({ configId, runId, cancelled: false, alreadyTerminal: true });
+        return;
+      }
+      await runRef.set(
+        {
+          cancelRequested: true,
+          cancelRequestedBy: caller.uid,
+          cancelRequestedAt: now(),
+        },
+        { merge: true }
+      );
+      res.status(200).json({ configId, runId, cancelled: true });
+    } catch (error) {
+      console.error('cancelCourseFetchRun failed:', error);
+      fail(res, 'Failed to cancel run', 500);
+    }
+  }
+);
+
 // --- Run history ---
 
 export const listCourseFetchRuns = functions.https.onRequest(

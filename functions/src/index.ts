@@ -621,5 +621,6 @@ export {
   triggerCourseFetch,
   previewCourseFetch,
   listCourseFetchRuns,
+  cancelCourseFetchRun,
   scheduledCourseFetchRefresh,
 } from './courseFetch';

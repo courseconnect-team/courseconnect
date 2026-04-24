@@ -289,13 +289,13 @@ export const ADMIN_GUIDE: HelpGuide = {
       steps: [
         'Pick the target semester at the top, or create a new one. Use Hide/Unhide to control whether students can see it — keep it hidden while you stage data.',
         'Auto-fetch tab: click "New workflow" to build a pipeline — choose a source (e.g. one.uf.edu), filter by department / code prefix / course number range / level / campus, pick a refresh cadence (manual, hourly, daily, weekly, or every N hours), and point it at a semester. Toggle Enabled to arm the schedule.',
-        'Auto-fetch → Preview: always run Preview first on a new workflow. The dialog shows a new-vs-update diff so you know what will change before applying. "Run now" triggers it on demand; History shows past runs with counts and any errors.',
+        'Auto-fetch → Run…: every run starts from Preview (a dry fetch with a new-vs-update diff). Apply the subset you want, and the workflow card shows live phase (Fetching… / Writing…) with a Cancel run button — for manual runs and live scheduled runs alike. Cancelled runs keep any writes that committed before cancel fired. History shows past runs with counts and any errors.',
         'Upload & maintain tab: use "Upload Semester Data" to ingest an Excel course list manually (code, title, instructor emails, meeting times, enrollment cap). "Upload Employment Actions" attaches the UFID → action mapping for the term. Manual uploads are preserved across auto-fetch runs.',
         'Manage courses tab: browse the rows currently in the semester, edit typos, and remove stragglers. "Clear Semester Data" wipes every course for the selected semester — use only when you are about to reload from scratch.',
       ],
       tips: [
         'Your active department is stamped on every course you write — whether auto-fetched or uploaded. Super admins who belong to multiple departments should confirm the active department in their Profile before writing.',
-        'Preview before "Run now": the dry-run catches filter mistakes (wrong code prefix, stale term) without touching Firestore.',
+        'Preview is required: the dry-run catches filter mistakes (wrong code prefix, stale term) without touching Firestore. There is no "Run without preview" path.',
         'Partial-success status means some sections errored; open History on the workflow to see which ones.',
         'If the Auto-fetch tab says it cannot load workflows, the course-fetch Cloud Functions are not deployed — redeploy from functions/.',
         'Clearing is permanent. Back up the Excel source (or disable workflows) before running it.',
@@ -385,7 +385,7 @@ export const ADMIN_GUIDE: HelpGuide = {
     },
     {
       q: 'A fetch workflow is stuck in "running" — what do I do?',
-      a: 'Open History on the workflow to see the run record. If the provider timed out, disable the schedule, fix the config (filters too broad, wrong term), then Preview + Run now to retry.',
+      a: 'Open History on the workflow to see the run record. If the provider timed out, disable the schedule, fix the config (filters too broad, wrong term), then Preview and Apply to retry.',
     },
     {
       q: 'How do I add a new department to Course Connect?',

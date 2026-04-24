@@ -12,6 +12,7 @@ import {
   type ValidatedConfig,
 } from './validation';
 import type {
+  CancelCheck,
   FetchResult,
   NormalizedCourse,
   NormalizedMeetingTime,
@@ -128,8 +129,9 @@ async function commitCoursesAndSections(
   provider: string,
   config: ValidatedConfig,
   result: FetchResult,
-  includeCourses?: string[]
-): Promise<void> {
+  includeCourses?: string[],
+  checkCancel?: CancelCheck
+): Promise<{ cancelled: boolean }> {
   const catalog = db.collection('catalog');
   const termCode =
     (result.providerMeta &&
@@ -168,13 +170,18 @@ async function commitCoursesAndSections(
   type Op = () => void;
   let batch = db.batch();
   let ops = 0;
+  let cancelled = false;
   const flush = async () => {
     if (ops === 0) return;
     await batch.commit();
     batch = db.batch();
     ops = 0;
+    if (checkCancel && (await checkCancel())) {
+      cancelled = true;
+    }
   };
   const add = async (op: Op) => {
+    if (cancelled) return;
     op();
     ops++;
     if (ops >= BATCH_LIMIT) await flush();
@@ -191,6 +198,7 @@ async function commitCoursesAndSections(
   );
 
   for (const course of coursesToWrite) {
+    if (cancelled) break;
     // 1) Cross-term catalog doc — audit/reuse across configs.
     const catalogId = `${prefix}:${course.code}`;
     const catalogRef = catalog.doc(catalogId);
@@ -230,6 +238,7 @@ async function commitCoursesAndSections(
   // Also write per-section catalog rows (pure audit, independent of the
   // legacy semester layout).
   for (const section of sectionsToWrite) {
+    if (cancelled) break;
     const parentId = `${prefix}:${section.courseCode}`;
     const sectionId = `${prefix}:${section.classNumber}`;
     const ref = catalog.doc(parentId).collection('sections').doc(sectionId);
@@ -251,6 +260,7 @@ async function commitCoursesAndSections(
   }
 
   await flush();
+  return { cancelled };
 }
 
 export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
@@ -269,11 +279,13 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
     configId,
     startedAt: now(),
     status: 'running',
+    phase: 'fetching',
     rawCount: 0,
     courseCount: 0,
     sectionCount: 0,
     errors: [],
     warnings: [],
+    cancelRequested: false,
     triggeredBy,
     ...(triggeredByUid ? { triggeredByUid } : {}),
   });
@@ -287,10 +299,22 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
     { merge: true }
   );
 
+  // Cooperative cancellation probe. Reads the run doc; returns true once an
+  // admin has hit Cancel via cancelCourseFetchRun. One extra read per page /
+  // batch is cheap at UF scale.
+  const checkCancel: CancelCheck = async () => {
+    try {
+      const snap = await runRef.get();
+      return snap.exists && snap.data()?.cancelRequested === true;
+    } catch {
+      return false;
+    }
+  };
+
   const snapshot = toConfigSnapshot(configId, config);
   let result: FetchResult;
   try {
-    result = await fetchCoursesForConfig(snapshot);
+    result = await fetchCoursesForConfig(snapshot, { checkCancel });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     const finishedAt = new Date();
@@ -327,19 +351,35 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
     };
   }
 
-  try {
-    await commitCoursesAndSections(
-      db,
-      configId,
-      config.provider,
-      config,
-      result,
-      includeCourses
-    );
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    result.status = result.status === 'failed' ? 'failed' : 'partial_success';
-    result.errors.push(`persist: ${message}`);
+  // If the provider loop was cancelled, skip persist entirely. No partial
+  // writes, no lastSuccessAt bump; nextRefreshAt still advances so a cron
+  // doesn't retry-storm on the next tick.
+  let persistCancelled = false;
+  if (result.status === 'cancelled' || result.cancelled) {
+    // fall through to terminal block
+  } else {
+    await runRef.set({ phase: 'writing' }, { merge: true });
+    try {
+      const commitRes = await commitCoursesAndSections(
+        db,
+        configId,
+        config.provider,
+        config,
+        result,
+        includeCourses,
+        checkCancel
+      );
+      persistCancelled = commitRes.cancelled;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      result.status = result.status === 'failed' ? 'failed' : 'partial_success';
+      result.errors.push(`persist: ${message}`);
+    }
+  }
+
+  const cancelled = result.status === 'cancelled' || persistCancelled;
+  if (cancelled) {
+    result.status = 'cancelled';
   }
 
   const finishedAt = new Date();
@@ -361,13 +401,32 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
       ).length
     : result.sections.length;
 
+  // Pull the cancelling uid off the run doc (if any) so the warning message
+  // names the admin who hit Cancel. Best-effort only.
+  let cancelWho: string | undefined;
+  if (cancelled) {
+    try {
+      const snap = await runRef.get();
+      const data = snap.data();
+      if (typeof data?.cancelRequestedBy === 'string') {
+        cancelWho = data.cancelRequestedBy;
+      }
+    } catch {
+      // ignore
+    }
+    const phase = persistCancelled ? 'writing' : 'fetching';
+    result.warnings.unshift(
+      `run cancelled${cancelWho ? ` by ${cancelWho}` : ''} during ${phase}`
+    );
+  }
+
   await runRef.set(
     {
       finishedAt: now(),
       status: result.status,
       rawCount: result.rawCount,
-      courseCount: persistedCourseCount,
-      sectionCount: persistedSectionCount,
+      courseCount: cancelled && !persistCancelled ? 0 : persistedCourseCount,
+      sectionCount: cancelled && !persistCancelled ? 0 : persistedSectionCount,
       errors: result.errors.slice(0, 50),
       warnings: result.warnings.slice(0, 50),
       durationMs,
@@ -382,8 +441,12 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
     .set(
       {
         lastStatus: result.status,
-        lastError: result.errors[0] ?? admin.firestore.FieldValue.delete(),
-        lastSuccessAt: result.status === 'failed' ? undefined : now(),
+        lastError:
+          cancelled || !result.errors[0]
+            ? admin.firestore.FieldValue.delete()
+            : result.errors[0],
+        lastSuccessAt:
+          result.status === 'failed' || cancelled ? undefined : now(),
         nextRefreshAt: computeNextRefreshAt(config.refresh, finishedAt),
       },
       { merge: true }
@@ -393,8 +456,8 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
     runId,
     status: result.status,
     rawCount: result.rawCount,
-    courseCount: persistedCourseCount,
-    sectionCount: persistedSectionCount,
+    courseCount: cancelled && !persistCancelled ? 0 : persistedCourseCount,
+    sectionCount: cancelled && !persistCancelled ? 0 : persistedSectionCount,
     durationMs,
     errors: result.errors,
     warnings: result.warnings,

@@ -81,10 +81,29 @@ export function useCourseFetchApi() {
     []
   );
 
+  const cancelRun = useCallback(
+    async (
+      configId: string,
+      runId: string
+    ): Promise<{ cancelled: boolean; alreadyTerminal?: boolean }> => {
+      return callFunction('cancelCourseFetchRun', { configId, runId });
+    },
+    []
+  );
+
   // Memoize the returned object so callers can depend on its identity
   // (e.g. inside useEffect deps) without triggering re-render loops.
   return useMemo(
-    () => ({ list, create, update, remove, trigger, preview, listRuns }),
-    [list, create, update, remove, trigger, preview, listRuns]
+    () => ({
+      list,
+      create,
+      update,
+      remove,
+      trigger,
+      preview,
+      listRuns,
+      cancelRun,
+    }),
+    [list, create, update, remove, trigger, preview, listRuns, cancelRun]
   );
 }

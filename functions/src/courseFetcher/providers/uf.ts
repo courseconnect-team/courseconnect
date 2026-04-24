@@ -17,6 +17,7 @@
 // read from `process.env.ONE_UF_COOKIE` at runtime only — never hardcoded.
 
 import type {
+  CancelCheck,
   ConfigSnapshot,
   Fetcher,
   NormalizedCourse,
@@ -268,19 +269,27 @@ function normalizeSectionRow(
 // One worker walks last-control-number = start, start+stride, start+2*stride, ...
 // stopping when its response reports RETRIEVEDROWS == 0. Each worker records
 // errors independently so a single shard failing does not abort the run.
+// If checkCancel returns true between pages, the worker returns what it has
+// so far and sets cancelled=true.
 async function walkStride(params: {
   termCode: string;
   start: number;
   stride: number;
   fetcher: Fetcher;
-}): Promise<{ rawCourses: unknown[]; errors: string[] }> {
-  const { termCode, start, stride, fetcher } = params;
+  checkCancel?: CancelCheck;
+}): Promise<{ rawCourses: unknown[]; errors: string[]; cancelled: boolean }> {
+  const { termCode, start, stride, fetcher, checkCancel } = params;
   const rawCourses: unknown[] = [];
   const errors: string[] = [];
   let last = start;
+  let cancelled = false;
   // Safety cap: 400 * stride ~= 20k control numbers per worker, far above
   // any real term size. Prevents infinite loops on provider bugs.
   for (let i = 0; i < 400; i++) {
+    if (checkCancel && (await checkCancel())) {
+      cancelled = true;
+      break;
+    }
     const url = buildUrl(termCode, last);
     let page: UFPage;
     try {
@@ -297,13 +306,13 @@ async function walkStride(params: {
     if (page.rawCourses.length > 0) rawCourses.push(...page.rawCourses);
     last += stride;
   }
-  return { rawCourses, errors };
+  return { rawCourses, errors, cancelled };
 }
 
 export const ufProvider: Provider = {
   id: 'UF',
   resolveTermCode: ufTermCode,
-  async fetch({ config, termCode, fetcher }) {
+  async fetch({ config, termCode, fetcher, checkCancel }) {
     const use = fetcher ?? (globalThis.fetch as Fetcher);
     const warnings: string[] = [];
     const errors: string[] = [];
@@ -316,8 +325,9 @@ export const ufProvider: Provider = {
     // department/prefix parameters.
     const workerCount = Math.max(1, Math.min(config.concurrency, 16));
     const stride = PAGE_SIZE * workerCount;
-    const workers: Array<Promise<{ rawCourses: unknown[]; errors: string[] }>> =
-      [];
+    const workers: Array<
+      Promise<{ rawCourses: unknown[]; errors: string[]; cancelled: boolean }>
+    > = [];
     for (let i = 0; i < workerCount; i++) {
       workers.push(
         walkStride({
@@ -325,10 +335,12 @@ export const ufProvider: Provider = {
           start: PAGE_SIZE * i,
           stride,
           fetcher: use,
+          checkCancel,
         })
       );
     }
     const results = await Promise.all(workers);
+    const cancelled = results.some((r) => r.cancelled);
     for (const r of results) {
       if (r.errors.length) errors.push(...r.errors);
       for (const row of r.rawCourses) {
@@ -349,6 +361,7 @@ export const ufProvider: Provider = {
       sections: normalizedSections,
       errors,
       warnings,
+      ...(cancelled ? { cancelled: true } : {}),
     };
   },
 };
