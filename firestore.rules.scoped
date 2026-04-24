@@ -1,0 +1,234 @@
+rules_version = '2';
+
+// Course Connect department-scoping Firestore rules (Unit 7 cutover rules).
+//
+// LAYER THIS ON AFTER the backfill migration has run. Otherwise existing
+// admins will lose write access because they won't yet have the
+// adminOfDepartmentIds[] field the scoping helpers rely on.
+//
+// To activate:
+//   1. Run the backfill dry-run:  npm run backfill:multidept:dry
+//   2. Review the output. Resolve no-signal users via the admin UI.
+//   3. Run the live backfill:     npm run backfill:multidept
+//   4. Copy this file to firestore.rules (replacing the baseline):
+//        cp firestore.rules firestore.rules.baseline
+//        cp firestore.rules.scoped firestore.rules
+//   5. Deploy:  firebase deploy --only firestore:rules
+//   6. Smoke-test every role's flows.
+//
+// Rollback: restore firestore.rules from firestore.rules.baseline and redeploy.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --------- helpers ---------
+
+    function isAuthed() {
+      return request.auth != null;
+    }
+    function isSelf(uid) {
+      return isAuthed() && request.auth.uid == uid;
+    }
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function userData() {
+      return userDoc().data;
+    }
+    function isSuperAdmin() {
+      return isAuthed() && userData().superAdmin == true;
+    }
+    function adminDepts() {
+      return userData().adminOfDepartmentIds;
+    }
+    function facultyDepts() {
+      return userData().facultyOfDepartmentIds;
+    }
+    function userDepts() {
+      return userData().departmentIds;
+    }
+    function isAdminOf(deptId) {
+      return isAuthed()
+          && ('adminOfDepartmentIds' in userData())
+          && (deptId in adminDepts());
+    }
+    function isFacultyOf(deptId) {
+      return isAuthed()
+          && ('facultyOfDepartmentIds' in userData())
+          && (deptId in facultyDepts());
+    }
+    function isStaffOf(deptId) {
+      return isAdminOf(deptId) || isFacultyOf(deptId);
+    }
+    // Transition fallback (Unit 7 + one release): legacy admins whose
+    // backfill hasn't been reconciled yet still match via the legacy
+    // role + department string. Dropped in the cleanup PR.
+    function isLegacyAdmin() {
+      return isAuthed() && userData().role == 'admin';
+    }
+    function isLegacyStaff() {
+      return isAuthed()
+          && (userData().role == 'admin' || userData().role == 'faculty');
+    }
+    function notTouchingSuperAdmin() {
+      return !('superAdmin' in request.resource.data)
+          || (resource != null
+              && request.resource.data.superAdmin == resource.data.superAdmin);
+    }
+
+    // --------- users ---------
+    // Read: self, super admin, or any admin of any dept the target user is in.
+    match /users/{uid} {
+      allow read: if isSelf(uid)
+                  || isSuperAdmin()
+                  || (isAuthed()
+                      && ('adminOfDepartmentIds' in userData())
+                      && adminDepts().size() > 0);
+      allow create: if (isSelf(uid) || isSuperAdmin())
+                    && !('superAdmin' in request.resource.data);
+      allow update: if (isSelf(uid) || isSuperAdmin() || isLegacyAdmin())
+                    && notTouchingSuperAdmin();
+      allow delete: if isSuperAdmin();
+
+      match /announcementStates/{announcementId} {
+        allow read, write: if isSelf(uid);
+      }
+    }
+
+    // --------- departments ---------
+    match /departments/{deptId} {
+      allow read: if isAuthed();
+      allow write: if false;  // mutations go through Cloud Functions
+    }
+
+    // --------- semesters + courses ---------
+    // Course writes are scoped to admins of the course's department. The
+    // course doc's `department` field is the canonical short code (e.g.
+    // 'ECE'); lowercasing gives the deptId slug used in adminDepts().
+    match /semesters/{semesterId} {
+      allow read: if isAuthed();
+      allow write: if isSuperAdmin() || isLegacyAdmin();
+
+      match /courses/{courseId} {
+        allow read: if isAuthed();
+        allow create, update: if isSuperAdmin()
+                              || (resource == null
+                                  && isAdminOf(request.resource.data.department.lower()))
+                              || (resource != null
+                                  && isAdminOf(resource.data.department.lower()))
+                              || isLegacyAdmin();
+        allow delete: if isSuperAdmin()
+                      || (resource != null
+                          && isAdminOf(resource.data.department.lower()))
+                      || isLegacyAdmin();
+      }
+    }
+
+    // Legacy flat courses collection (dead in v2; kept permissive for admins
+    // until Unit 6 confirms no live caller and the cleanup PR drops it).
+    match /courses/{courseId} {
+      allow read: if isAuthed();
+      allow write: if isSuperAdmin() || isLegacyAdmin();
+    }
+
+    // --------- applications ---------
+    // Read: applicant (self) + super admin + any admin/faculty of any dept
+    // in the application's departmentIds[]. Writes: applicant for create,
+    // staff of a matching dept for updates.
+    match /applications/{type}/uid/{uid} {
+      allow read: if isSelf(uid)
+                  || isSuperAdmin()
+                  || (resource != null
+                      && 'departmentIds' in resource.data
+                      && ('adminOfDepartmentIds' in userData()
+                          && adminDepts().hasAny(resource.data.departmentIds))
+                      || ('facultyOfDepartmentIds' in userData()
+                          && facultyDepts().hasAny(resource.data.departmentIds)))
+                  || isLegacyStaff();
+      allow create: if isSelf(uid);
+      allow update: if isSelf(uid)
+                    || isSuperAdmin()
+                    || (resource != null
+                        && 'departmentIds' in resource.data
+                        && ('adminOfDepartmentIds' in userData()
+                            && adminDepts().hasAny(resource.data.departmentIds)))
+                    || isLegacyStaff();
+      allow delete: if isSelf(uid)
+                    || isSuperAdmin()
+                    || isLegacyAdmin();
+    }
+
+    // --------- announcements ---------
+    // Baseline: read permitted to any authed user (audience filter stays in
+    // client query; full rule-level subset check deferred to a follow-up).
+    // Writes: super admin, or a staff user whose admin depts include at
+    // least one dept the audience targets.
+    match /announcements/{announcementId} {
+      allow read: if isAuthed();
+      allow create, update: if isSuperAdmin() || isLegacyStaff();
+      allow delete: if isSuperAdmin() || isLegacyAdmin();
+    }
+
+    // --------- research listings ---------
+    // Read: any authed user (cross-dept visibility). Writes: super admin,
+    // faculty/admin of the listing's departmentId, or the original owner.
+    match /research-listings/{listingId} {
+      allow read: if isAuthed();
+      allow create: if isAuthed() && (
+        isSuperAdmin()
+        || !('departmentId' in request.resource.data)
+        || isStaffOf(request.resource.data.departmentId)
+      );
+      allow update: if isSuperAdmin()
+                    || (resource != null
+                        && 'departmentId' in resource.data
+                        && isStaffOf(resource.data.departmentId))
+                    || (resource.data.keys().hasAny(['createdBy', 'uid'])
+                        && (resource.data.get('createdBy', '') == request.auth.uid
+                            || resource.data.get('uid', '') == request.auth.uid));
+      allow delete: if isSuperAdmin()
+                    || (resource != null
+                        && 'departmentId' in resource.data
+                        && isAdminOf(resource.data.departmentId))
+                    || (resource.data.keys().hasAny(['createdBy', 'uid'])
+                        && (resource.data.get('createdBy', '') == request.auth.uid
+                            || resource.data.get('uid', '') == request.auth.uid));
+
+      match /applications/{appId} {
+        allow read: if isAuthed();
+        allow create: if isAuthed();
+        allow update: if isAuthed();
+        allow delete: if isAuthed();
+      }
+    }
+
+    // --------- faculty-stats ---------
+    match /faculty/{facultyId} {
+      allow read: if isAuthed();
+      allow write: if isSuperAdmin() || isLegacyAdmin();
+    }
+
+    // --------- assignments ---------
+    match /assignments/{uid} {
+      allow read: if isSelf(uid) || isSuperAdmin() || isLegacyStaff();
+      allow create, update: if isSuperAdmin() || isLegacyAdmin();
+      allow delete: if isSelf(uid) || isSuperAdmin() || isLegacyAdmin();
+    }
+
+    // --------- pending memberships ---------
+    match /pendingMemberships/{email} {
+      allow read: if isAuthed()
+                  && (request.auth.token.email != null
+                      && request.auth.token.email.lower() == email);
+      allow read: if isSuperAdmin() || isLegacyAdmin();
+      allow write: if false;
+    }
+
+    // --------- login events ---------
+    match /login_events/{eventId} {
+      allow read: if false;
+      allow create: if isAuthed();
+      allow update, delete: if false;
+    }
+  }
+}

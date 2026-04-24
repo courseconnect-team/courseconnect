@@ -343,6 +343,53 @@ export const processApplicationForm = functions.https.onRequest(
         .collection('uid')
         .doc(uid);
 
+      // Resolve departmentIds server-side from the courses the applicant is
+      // applying to. The client cannot supply departmentIds — any value
+      // passed in the body is dropped. Each course doc at
+      // semesters/{sem}/courses/{cid}.department holds a canonical short
+      // code (e.g. 'ECE') which we lowercase to match the `departments/{id}`
+      // slug convention. Missing or unresolvable course docs are silently
+      // skipped; the application still lands with whatever depts could
+      // be resolved (and Unit 7 backfill will clean up orphans).
+      const resolvedDepartmentIds = await (async () => {
+        const incomingCourses = asRecord(body.courses);
+        const deptIds = new Set<string>();
+        const lookups: Array<Promise<void>> = [];
+        for (const [sem, bucket] of Object.entries(incomingCourses)) {
+          if (!bucket || typeof bucket !== 'object' || Array.isArray(bucket)) {
+            continue;
+          }
+          for (const courseId of Object.keys(
+            bucket as Record<string, unknown>
+          )) {
+            lookups.push(
+              db
+                .collection('semesters')
+                .doc(sem)
+                .collection('courses')
+                .doc(courseId)
+                .get()
+                .then((courseSnap) => {
+                  const raw = courseSnap.data()?.department;
+                  if (typeof raw !== 'string') return;
+                  const normalized = raw.trim().toLowerCase();
+                  if (normalized.length >= 2 && normalized.length <= 6) {
+                    deptIds.add(normalized);
+                  }
+                })
+                .catch((err) => {
+                  console.warn(
+                    `processApplicationForm: failed to resolve dept for ${sem}/${courseId}`,
+                    err
+                  );
+                })
+            );
+          }
+        }
+        await Promise.all(lookups);
+        return Array.from(deptIds).sort();
+      })();
+
       await db.runTransaction(async (tx) => {
         const existing = await tx.get(applicationRef);
         const payload: Record<string, unknown> = {
@@ -352,12 +399,27 @@ export const processApplicationForm = functions.https.onRequest(
           updated_at: admin.firestore.FieldValue.serverTimestamp(),
         };
 
+        // Client-supplied departmentIds are ignored; server controls this field.
+        delete payload.departmentIds;
         delete payload.created_at;
         delete payload.updated_at;
 
         if (!existing.exists) {
           payload.created_at = admin.firestore.FieldValue.serverTimestamp();
         }
+
+        // Union the resolved set with whatever was already on the doc so a
+        // resubmission expands (but never drops) the application's dept
+        // footprint. The denormalized array enables dept-admin reads under
+        // Unit 7's scoping rules.
+        const existingDeptIds = Array.isArray(existing.data()?.departmentIds)
+          ? (existing.data()?.departmentIds as unknown[]).filter(
+              (v): v is string => typeof v === 'string'
+            )
+          : [];
+        payload.departmentIds = Array.from(
+          new Set([...existingDeptIds, ...resolvedDepartmentIds])
+        ).sort();
 
         // Union the new submission's courses with whatever was on the
         // existing doc so a resubmission doesn't wipe out admin-set
