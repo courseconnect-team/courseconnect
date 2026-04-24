@@ -396,6 +396,59 @@ test('fetchCoursesForConfig marks failed when every worker errors', async () => 
   assert.ok(result.errors.length > 0);
 });
 
+test('fetchCoursesForConfig short-circuits when checkCancel fires mid-walk', async () => {
+  // Provider returns one page with real rows, then would normally continue.
+  // We flip cancel to true after the first page is fetched, so the worker
+  // should bail before issuing a second request. The result is marked
+  // 'cancelled' and its rows reflect only pre-cancel pages.
+  let cancelled = false;
+  let fetchCalls = 0;
+  const firstPage = ufResponse([
+    {
+      code: 'COP3502',
+      name: 'Programming Fundamentals 1',
+      sections: [
+        {
+          classNumber: '11111',
+          number: '001',
+          instructors: [{ name: 'A. Alpha' }],
+          meetTimes: [],
+        },
+      ],
+    },
+  ]);
+  const stub: Fetcher = async () => {
+    fetchCalls++;
+    // Flip cancel after the first successful fetch so the *next* loop
+    // iteration bails. The worker's cancel probe runs before buildUrl.
+    cancelled = true;
+    return new Response(JSON.stringify(firstPage), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+  };
+
+  const result = await fetchCoursesForConfig(
+    {
+      id: 'cfg-cancel',
+      provider: 'UF',
+      institution: 'UF',
+      term: 'fall',
+      year: 2026,
+      filters: { codePrefixes: ['COP'] },
+      concurrency: 1,
+    },
+    { fetcher: stub, checkCancel: async () => cancelled }
+  );
+
+  assert.equal(result.status, 'cancelled');
+  assert.equal(result.cancelled, true);
+  // One pre-cancel fetch landed; no second fetch after cancel flipped.
+  assert.equal(fetchCalls, 1);
+  assert.equal(result.courses.length, 1);
+  assert.equal(result.sections.length, 1);
+});
+
 test('fetchCoursesForConfig handles non-JSON gracefully', async () => {
   const stub: Fetcher = async () =>
     new Response('<html>oops</html>', {

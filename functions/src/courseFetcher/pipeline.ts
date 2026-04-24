@@ -10,6 +10,7 @@ import {
 } from './normalize';
 import { ufProvider } from './providers/uf';
 import type {
+  CancelCheck,
   ConfigSnapshot,
   Fetcher,
   FetchResult,
@@ -29,7 +30,7 @@ export function getProvider(id: ProviderId): Provider {
 
 export async function fetchCoursesForConfig(
   config: ConfigSnapshot,
-  options: { fetcher?: Fetcher } = {}
+  options: { fetcher?: Fetcher; checkCancel?: CancelCheck } = {}
 ): Promise<FetchResult> {
   const provider = getProvider(config.provider);
   const termCode =
@@ -42,6 +43,7 @@ export async function fetchCoursesForConfig(
       config,
       termCode,
       fetcher: options.fetcher,
+      checkCancel: options.checkCancel,
     });
   } catch (err) {
     return {
@@ -54,6 +56,7 @@ export async function fetchCoursesForConfig(
     };
   }
 
+  const cancelled = providerResult.cancelled === true;
   const rawCount = providerResult.rawCount;
 
   const filtered = providerResult.courses
@@ -75,12 +78,13 @@ export async function fetchCoursesForConfig(
   const errors = providerResult.errors ?? [];
   const warnings = providerResult.warnings ?? [];
 
-  const status: FetchResult['status'] =
-    errors.length === 0
-      ? 'success'
-      : dedupedCourses.length > 0
-      ? 'partial_success'
-      : 'failed';
+  const status: FetchResult['status'] = cancelled
+    ? 'cancelled'
+    : errors.length === 0
+    ? 'success'
+    : dedupedCourses.length > 0
+    ? 'partial_success'
+    : 'failed';
 
   return {
     status,
@@ -90,5 +94,6 @@ export async function fetchCoursesForConfig(
     errors,
     warnings,
     providerMeta: { termCode },
+    ...(cancelled ? { cancelled: true } : {}),
   };
 }

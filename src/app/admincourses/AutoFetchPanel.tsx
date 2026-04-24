@@ -14,8 +14,8 @@ import {
   Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import HistoryIcon from '@mui/icons-material/History';
@@ -26,8 +26,14 @@ import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { toast } from 'react-hot-toast';
+import firebase from '@/firebase/firebase_config';
+import 'firebase/firestore';
 import { useCourseFetchApi } from '@/hooks/useCourseFetch';
-import type { CourseFetchConfig, CoursePreview } from '@/types/courseFetch';
+import type {
+  CourseFetchConfig,
+  CourseFetchPhase,
+  CoursePreview,
+} from '@/types/courseFetch';
 import { toDateOrNull } from '@/types/courseFetch';
 import ConfigForm, { semesterNameFromTermYear } from './ConfigForm';
 import RunHistoryDialog from './RunHistoryDialog';
@@ -170,14 +176,21 @@ function Arrow() {
 
 // --- Config card ---
 
+interface ActiveRunState {
+  runId: string;
+  phase?: CourseFetchPhase;
+  cancelling?: boolean;
+  triggeredBy?: 'manual' | 'scheduled';
+}
+
 function ConfigCard(props: {
   config: CourseFetchConfig;
   currentSemester: string;
-  running: boolean;
+  activeRun: ActiveRunState | null;
   previewing: boolean;
   onToggle: (enabled: boolean) => void;
-  onRun: () => void;
   onPreview: () => void;
+  onCancel: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onHistory: () => void;
@@ -308,56 +321,80 @@ function ConfigCard(props: {
             'Never run'
           )}
         </Typography>
-        <Stack direction="row" spacing={0.5}>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={
-              props.previewing ? (
-                <CircularProgress size={14} />
-              ) : (
-                <VisibilityOutlinedIcon fontSize="small" />
-              )
-            }
-            disabled={props.previewing || props.running}
-            onClick={props.onPreview}
-            sx={{
-              textTransform: 'none',
-              borderColor: 'rgba(86,46,186,0.4)',
-              color: PURPLE,
-              '&:hover': {
-                borderColor: PURPLE,
-                bgcolor: 'rgba(86,46,186,0.04)',
-              },
-            }}
-          >
-            Preview
-          </Button>
-          <Button
-            size="small"
-            variant="contained"
-            disableElevation
-            startIcon={
-              props.running ? (
-                <CircularProgress size={14} color="inherit" />
-              ) : (
-                <PlayArrowIcon fontSize="small" />
-              )
-            }
-            disabled={props.running || props.previewing}
-            onClick={props.onRun}
-            sx={{
-              textTransform: 'none',
-              bgcolor: PURPLE,
-              '&:hover': { bgcolor: '#4524a0' },
-            }}
-          >
-            Run now
-          </Button>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          {props.activeRun ? (
+            <>
+              <Chip
+                size="small"
+                icon={<CircularProgress size={12} thickness={5} />}
+                label={
+                  props.activeRun.phase === 'writing' ? 'Writing…' : 'Fetching…'
+                }
+                sx={{
+                  bgcolor: 'rgba(86,46,186,0.08)',
+                  color: PURPLE,
+                  fontWeight: 600,
+                  '& .MuiChip-icon': { color: PURPLE, ml: '6px' },
+                }}
+              />
+              {props.activeRun.triggeredBy === 'scheduled' && (
+                <Chip
+                  size="small"
+                  label="scheduled"
+                  variant="outlined"
+                  sx={{ borderColor: 'divider', color: 'text.secondary' }}
+                />
+              )}
+              <Button
+                size="small"
+                variant="outlined"
+                color="error"
+                startIcon={
+                  props.activeRun.cancelling ? (
+                    <CircularProgress size={14} color="inherit" />
+                  ) : (
+                    <StopCircleOutlinedIcon fontSize="small" />
+                  )
+                }
+                disabled={props.activeRun.cancelling}
+                onClick={props.onCancel}
+                sx={{ textTransform: 'none' }}
+              >
+                {props.activeRun.cancelling ? 'Cancelling…' : 'Cancel run'}
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="small"
+              variant="contained"
+              disableElevation
+              startIcon={
+                props.previewing ? (
+                  <CircularProgress size={14} color="inherit" />
+                ) : (
+                  <VisibilityOutlinedIcon fontSize="small" />
+                )
+              }
+              disabled={props.previewing}
+              onClick={props.onPreview}
+              sx={{
+                textTransform: 'none',
+                bgcolor: PURPLE,
+                '&:hover': { bgcolor: '#4524a0' },
+              }}
+            >
+              Run…
+            </Button>
+          )}
           <IconButton size="small" onClick={props.onHistory} title="History">
             <HistoryIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={props.onEdit} title="Edit">
+          <IconButton
+            size="small"
+            onClick={props.onEdit}
+            title="Edit"
+            disabled={!!props.activeRun}
+          >
             <EditIcon fontSize="small" />
           </IconButton>
           <IconButton
@@ -365,6 +402,7 @@ function ConfigCard(props: {
             color="error"
             onClick={props.onDelete}
             title="Delete"
+            disabled={!!props.activeRun}
           >
             <DeleteIcon fontSize="small" />
           </IconButton>
@@ -390,7 +428,9 @@ export default function AutoFetchPanel({
   const [formOpen, setFormOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<CourseFetchConfig | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
-  const [runningId, setRunningId] = React.useState<string | null>(null);
+  const [activeRuns, setActiveRuns] = React.useState<
+    Record<string, ActiveRunState>
+  >({});
   const [historyId, setHistoryId] = React.useState<string | null>(null);
   const [previewConfig, setPreviewConfig] =
     React.useState<CourseFetchConfig | null>(null);
@@ -400,6 +440,16 @@ export default function AutoFetchPanel({
     null
   );
 
+  // Track which runIds have already emitted a terminal toast so re-fires of
+  // the same terminal snapshot (or stale historical runs loaded at mount)
+  // don't spam the admin.
+  const toastedRunIdsRef = React.useRef<Set<string>>(new Set());
+  // Per-runId cleanup functions for run-doc subscriptions. Keyed by runId so
+  // a new run on the same config can coexist with a terminal-cleanup race.
+  const runSubsRef = React.useRef<Map<string, () => void>>(new Map());
+
+  // Manual reload kept for the Refresh button; the collection snapshot below
+  // also keeps configs live, so this is primarily for explicit user action.
   const reload = React.useCallback(async () => {
     setLoading(true);
     setLoadError(null);
@@ -414,9 +464,140 @@ export default function AutoFetchPanel({
     }
   }, [api]);
 
+  // Live listener on the configs collection — picks up cron-initiated runs,
+  // live status transitions, and the `lastRunId` bump on Apply without
+  // requiring a manual refresh.
   React.useEffect(() => {
-    reload();
-  }, [reload]);
+    const unsub = firebase
+      .firestore()
+      .collection('courseFetchConfigs')
+      .orderBy('createdAt', 'desc')
+      .limit(200)
+      .onSnapshot(
+        (snap) => {
+          const list: CourseFetchConfig[] = snap.docs.map(
+            (d) => ({ id: d.id, ...d.data() } as CourseFetchConfig)
+          );
+          setConfigs(list);
+          setLoading(false);
+          setLoadError(null);
+        },
+        (err) => {
+          console.error('courseFetchConfigs listener error:', err);
+          setLoadError(err.message);
+          setLoading(false);
+        }
+      );
+    return () => unsub();
+  }, []);
+
+  // For each config with an un-toasted runId, attach a run-doc listener that
+  // streams `phase` while running and fires a terminal toast exactly once.
+  // Historical terminal runs (configs loaded at mount where lastStatus is
+  // not 'running') are added to toastedRunIdsRef so we never retroactively
+  // toast them.
+  React.useEffect(() => {
+    for (const c of configs) {
+      const runId = c.lastRunId;
+      if (!runId) continue;
+      if (c.lastStatus !== 'running') {
+        toastedRunIdsRef.current.add(runId);
+        continue;
+      }
+      if (toastedRunIdsRef.current.has(runId)) continue;
+      if (runSubsRef.current.has(runId)) continue;
+
+      const configId = c.id;
+      const label = c.label;
+      const ref = firebase
+        .firestore()
+        .collection('courseFetchConfigs')
+        .doc(configId)
+        .collection('runs')
+        .doc(runId);
+      const unsub = ref.onSnapshot(
+        (snap) => {
+          if (!snap.exists) return;
+          const data = snap.data() as Record<string, unknown>;
+          const status = String(data.status ?? '');
+          if (status === 'running') {
+            setActiveRuns((prev) => ({
+              ...prev,
+              [configId]: {
+                runId,
+                phase:
+                  (data.phase as CourseFetchPhase | undefined) ?? 'fetching',
+                cancelling:
+                  prev[configId]?.cancelling || data.cancelRequested === true,
+                triggeredBy:
+                  (data.triggeredBy as 'manual' | 'scheduled' | undefined) ??
+                  'manual',
+              },
+            }));
+            return;
+          }
+          // Terminal transition — remove active run, toast once, self-destroy.
+          setActiveRuns((prev) => {
+            const existing = prev[configId];
+            if (!existing || existing.runId !== runId) return prev;
+            const { [configId]: _drop, ...rest } = prev;
+            return rest;
+          });
+          if (!toastedRunIdsRef.current.has(runId)) {
+            toastedRunIdsRef.current.add(runId);
+            const courseCount = Number(data.courseCount ?? 0);
+            const sectionCount = Number(data.sectionCount ?? 0);
+            const errors = Array.isArray(data.errors)
+              ? (data.errors as unknown[]).filter(
+                  (e): e is string => typeof e === 'string'
+                )
+              : [];
+            if (status === 'success') {
+              toast.success(
+                `${label}: ${courseCount} course${
+                  courseCount === 1 ? '' : 's'
+                } · ${sectionCount} section${sectionCount === 1 ? '' : 's'}`
+              );
+            } else if (status === 'partial_success') {
+              toast(
+                `${label}: partial — ${courseCount} courses, ${
+                  errors.length
+                } error${errors.length === 1 ? '' : 's'}`,
+                { icon: '⚠️' }
+              );
+            } else if (status === 'cancelled') {
+              toast(
+                `${label}: cancelled — ${courseCount} course${
+                  courseCount === 1 ? '' : 's'
+                } written`,
+                { icon: '⏹️' }
+              );
+            } else {
+              toast.error(`${label}: ${errors[0] ?? 'Run failed'}`);
+            }
+          }
+          const u = runSubsRef.current.get(runId);
+          if (u) {
+            u();
+            runSubsRef.current.delete(runId);
+          }
+        },
+        (err) => {
+          console.error(`run ${runId} listener error:`, err);
+        }
+      );
+      runSubsRef.current.set(runId, unsub);
+    }
+  }, [configs]);
+
+  // Unmount cleanup for any still-open run-doc subscriptions.
+  React.useEffect(() => {
+    const subs = runSubsRef.current;
+    return () => {
+      subs.forEach((unsub) => unsub());
+      subs.clear();
+    };
+  }, []);
 
   const handleCreate = () => {
     setEditing(null);
@@ -445,33 +626,54 @@ export default function AutoFetchPanel({
       toast.error(e instanceof Error ? e.message : 'Update failed');
     }
   };
-  const handleTrigger = async (
-    c: CourseFetchConfig,
-    includeCourses?: string[]
-  ) => {
-    setRunningId(c.id);
-    const toastId = toast.loading(`Running ${c.label}…`);
-    try {
-      const res = await api.trigger(c.id, includeCourses);
-      toast.dismiss(toastId);
-      if (res.status === 'success') {
-        toast.success(
-          `Done: ${res.courseCount} courses · ${res.sectionCount} sections`
-        );
-      } else if (res.status === 'partial_success') {
-        toast(
-          `Partial: ${res.courseCount} courses, ${res.errors.length} errors`,
-          { icon: '⚠️' }
-        );
-      } else {
-        toast.error(res.errors[0] ?? 'Run failed');
-      }
-      reload();
-    } catch (e) {
-      toast.dismiss(toastId);
+  // Fires the trigger and returns. Terminal state + toasts flow through the
+  // run-doc snapshot listener above, not this promise — the Cloud Function
+  // call blocks until the run completes, but we don't need that for the UI
+  // since the snapshot already reflects 'running' immediately.
+  const startRun = (c: CourseFetchConfig, includeCourses?: string[]) => {
+    // Optimistic placeholder so the card shows "Fetching…" + disabled Cancel
+    // until the snapshot fills in the real runId.
+    setActiveRuns((prev) =>
+      prev[c.id]
+        ? prev
+        : {
+            ...prev,
+            [c.id]: {
+              runId: '',
+              phase: 'fetching',
+              cancelling: false,
+              triggeredBy: 'manual',
+            },
+          }
+    );
+    api.trigger(c.id, includeCourses).catch((e) => {
       toast.error(e instanceof Error ? e.message : 'Run failed');
-    } finally {
-      setRunningId(null);
+      setActiveRuns((prev) => {
+        const existing = prev[c.id];
+        if (!existing || existing.runId !== '') return prev;
+        const { [c.id]: _drop, ...rest } = prev;
+        return rest;
+      });
+    });
+  };
+
+  const handleCancel = async (c: CourseFetchConfig) => {
+    const active = activeRuns[c.id];
+    if (!active || !active.runId) return;
+    setActiveRuns((prev) =>
+      prev[c.id]
+        ? { ...prev, [c.id]: { ...prev[c.id], cancelling: true } }
+        : prev
+    );
+    try {
+      await api.cancelRun(c.id, active.runId);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Cancel failed');
+      setActiveRuns((prev) =>
+        prev[c.id]
+          ? { ...prev, [c.id]: { ...prev[c.id], cancelling: false } }
+          : prev
+      );
     }
   };
   const runPreview = React.useCallback(
@@ -500,10 +702,11 @@ export default function AutoFetchPanel({
     setPreviewData(null);
     setPreviewError(null);
   };
-  const handleApplyFromPreview = async (selectedCodes: string[]) => {
+  const handleApplyFromPreview = (selectedCodes: string[]) => {
     if (!previewConfig) return;
-    await handleTrigger(previewConfig, selectedCodes);
+    const cfg = previewConfig;
     handleClosePreview();
+    startRun(cfg, selectedCodes);
   };
 
   const handleSubmit = async (
@@ -557,8 +760,10 @@ export default function AutoFetchPanel({
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Each workflow fetches from a provider, applies your filters, and
-              writes into the target semester&apos;s course list. Schedule a
-              cadence or run on-demand. Manual Excel uploads are preserved.
+              writes into the target semester&apos;s course list. Runs always
+              start from Preview, and a running job — whether manual or
+              scheduled — can be cancelled mid-flight. Manual Excel uploads are
+              preserved.
             </Typography>
           </Stack>
           <Stack direction="row" spacing={1}>
@@ -657,11 +862,11 @@ export default function AutoFetchPanel({
             key={c.id}
             config={c}
             currentSemester={currentSemester}
-            running={runningId === c.id}
+            activeRun={activeRuns[c.id] ?? null}
             previewing={previewLoading && previewConfig?.id === c.id}
             onToggle={(enabled) => handleToggle(c, enabled)}
-            onRun={() => handleTrigger(c)}
             onPreview={() => handlePreview(c)}
+            onCancel={() => handleCancel(c)}
             onEdit={() => handleEdit(c)}
             onDelete={() => handleDelete(c)}
             onHistory={() => setHistoryId(c.id)}
@@ -691,7 +896,7 @@ export default function AutoFetchPanel({
         preview={previewData}
         loading={previewLoading}
         loadError={previewError}
-        applying={runningId === previewConfig?.id}
+        applying={false}
         onClose={handleClosePreview}
         onRetry={() => previewConfig && runPreview(previewConfig)}
         onApply={handleApplyFromPreview}

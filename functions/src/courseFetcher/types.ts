@@ -5,7 +5,16 @@ export type ProviderId = 'UF';
 export type SemesterTermLower = 'spring' | 'summer' | 'fall';
 export type CourseLevel = 'undergraduate' | 'graduate' | 'any';
 export type CourseCampus = 'main' | 'online' | 'any';
-export type FetchStatus = 'success' | 'partial_success' | 'failed';
+export type FetchStatus =
+  | 'success'
+  | 'partial_success'
+  | 'failed'
+  | 'cancelled';
+
+// Cooperative cancellation probe. Pipeline/provider code awaits this at
+// natural checkpoints (between pages, before persist, between batches) and
+// bails out cleanly if it resolves true. Returning false means "keep going".
+export type CancelCheck = () => Promise<boolean>;
 
 export interface FilterOptions {
   codePrefixes?: string[];
@@ -70,6 +79,7 @@ export interface FetchResult {
   errors: string[];
   warnings: string[];
   providerMeta?: Record<string, unknown>;
+  cancelled?: boolean;
 }
 
 export interface Provider {
@@ -82,7 +92,8 @@ export interface Provider {
     config: ConfigSnapshot;
     termCode: string;
     fetcher?: Fetcher;
-  }): Promise<Omit<FetchResult, 'status'>>;
+    checkCancel?: CancelCheck;
+  }): Promise<Omit<FetchResult, 'status'> & { cancelled?: boolean }>;
 }
 
 // Abstracted so tests can inject a deterministic implementation without
@@ -92,5 +103,5 @@ export type Fetcher = (url: string, init?: RequestInit) => Promise<Response>;
 // Public entry point the Cloud Function calls.
 export type FetchCoursesForConfig = (
   config: ConfigSnapshot,
-  options?: { fetcher?: Fetcher }
+  options?: { fetcher?: Fetcher; checkCancel?: CancelCheck }
 ) => Promise<FetchResult>;

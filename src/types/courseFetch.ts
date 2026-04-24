@@ -25,7 +25,10 @@ export type CourseFetchStatus =
   | 'running'
   | 'success'
   | 'partial_success'
-  | 'failed';
+  | 'failed'
+  | 'cancelled';
+
+export type CourseFetchPhase = 'fetching' | 'writing';
 
 // Admin-editable config. Source of truth is `courseFetchConfigs/{id}`.
 export interface CourseFetchConfig {
@@ -84,6 +87,10 @@ export interface CourseFetchRun {
   durationMs?: number;
   triggeredBy: 'manual' | 'scheduled';
   triggeredByUid?: string;
+  phase?: CourseFetchPhase;
+  cancelRequested?: boolean;
+  cancelRequestedBy?: string;
+  cancelRequestedAt?: FirestoreLikeTimestamp;
 }
 
 // Normalized course in the app-facing catalog.
