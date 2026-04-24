@@ -9,6 +9,7 @@ import AnnouncementsRow from './AnnouncementsRow';
 
 import { usePostAnnouncement } from '@/hooks/Announcements/usePostAnnouncement';
 import { useAnnouncements } from '@/contexts/AnnouncementsContext';
+import { useDepartments } from '@/hooks/useDepartments';
 
 import { Announcement } from '@/types/announcement';
 
@@ -16,6 +17,12 @@ export default function AnnouncementSections({ role }: { role: Role }) {
   const [open, setOpen] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
   const { postAnnouncement, posting, error: postError } = usePostAnnouncement();
+
+  // Department audience picker is driven by the live departments collection —
+  // no hardcoded ECE/CISE/MAE list. Active-only; archived depts are not
+  // selectable for new announcements (Unit 6 of multi-department support).
+  const { departments } = useDepartments({ include: 'active' });
+  const departmentOptions = departments.map((d) => d.code);
 
   const {
     read,
@@ -96,6 +103,7 @@ export default function AnnouncementSections({ role }: { role: Role }) {
           onSubmit={handleSubmit}
           open={open}
           loading={posting}
+          departmentOptions={departmentOptions}
         />
       ) : null}
 

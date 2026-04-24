@@ -10,7 +10,7 @@ import {
   readString,
   setCors,
   verifyAuth,
-} from './index';
+} from './shared';
 
 // Per-department roles stored on the user doc. Plan: the `roles` array is the
 // authoritative shape; `adminOfDepartmentIds` / `facultyOfDepartmentIds` /

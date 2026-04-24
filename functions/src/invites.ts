@@ -10,7 +10,7 @@ import {
   readString,
   setCors,
   verifyAuth,
-} from './index';
+} from './shared';
 import { sendInviteNotificationEmail } from './nodemailer';
 
 // Pending-memberships pattern (Unit 4 of multi-department support).
