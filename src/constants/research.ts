@@ -104,6 +104,41 @@ export function getDepartmentLabel(value: string): string {
   return dept?.label || value;
 }
 
+// Resolve a user-entered department string to the canonical short code
+// (e.g. 'CISE') used throughout the app. Handles the three input shapes
+// currently found in production:
+//   1. Short codes from the signup dropdown (e.g. 'ECE', 'CS' — case-insensitive)
+//   2. Canonical full names from the DEPARTMENTS list above (e.g.
+//      'Electrical and Computer Engineering' — case-insensitive since the
+//      profile edit form accepts free-text entry)
+//   3. The CISE 'Science' vs 'Sciences' spelling variant via isDepartmentMatch
+// Returns null when the department does not map to any known code.
+export function resolveDepartmentCode(
+  raw: string | undefined | null
+): string | null {
+  if (!raw) return null;
+  const value = raw.trim();
+  if (!value) return null;
+
+  // Short code match (signup dropdown stores labels directly in most users).
+  const upper = value.toUpperCase();
+  const byLabel = DEPARTMENTS.find((d) => d.label.toUpperCase() === upper);
+  if (byLabel) return byLabel.label;
+
+  // Full name match against canonical DEPARTMENTS list (case-insensitive).
+  const lower = value.toLowerCase();
+  const byFullName = DEPARTMENTS.find((d) => d.value.toLowerCase() === lower);
+  if (byFullName) return byFullName.label;
+
+  // CISE spelling variants ("Science" vs "Sciences") both map to CISE.
+  if (isDepartmentMatch(value, 'CISE')) return 'CISE';
+
+  // Legacy signup option "CS" maps to the CISE department.
+  if (upper === 'CS') return 'CISE';
+
+  return null;
+}
+
 // Helper function to check if a department matches (handles naming variations)
 export function isDepartmentMatch(
   department: string,
