@@ -137,6 +137,52 @@ export interface CatalogSection {
   sourceConfigId: string;
 }
 
+// --- preview (dry run) ---
+
+export interface PreviewSection {
+  classNumber: string;
+  sectionNumber?: string;
+  instructors: Array<{ name: string; email?: string }>;
+  meetingTimes: Array<{
+    day: string;
+    startTime?: string;
+    endTime?: string;
+    rawTime?: string;
+    location?: string;
+    building?: string;
+    room?: string;
+  }>;
+  enrollmentCap?: number;
+  enrolled?: number;
+  campus?: string;
+  deliveryMode?: string;
+  diffStatus: 'new' | 'updated';
+}
+
+export interface PreviewCourse {
+  code: string;
+  codeWithSpace: string;
+  title: string;
+  credits?: string;
+  department?: string;
+  sections: PreviewSection[];
+}
+
+export interface CoursePreview {
+  status: CourseFetchStatus;
+  rawCount: number;
+  courseCount: number;
+  sectionCount: number;
+  newSectionCount: number;
+  updatedSectionCount: number;
+  termCode?: string;
+  targetSemester: string;
+  truncated: boolean;
+  courses: PreviewCourse[];
+  errors: string[];
+  warnings: string[];
+}
+
 // --- helpers ---
 
 // We accept either a Firestore Timestamp (when hydrated server-side) or an

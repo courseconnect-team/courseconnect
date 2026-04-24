@@ -73,10 +73,25 @@ department, code)` for catalog queries, and a collection-group index on
    - **Refresh** — `Manual only`, `Hourly`, `Daily`, `Weekly`, or
      `Every N hours`
    - **Enabled** — leave off until you've run it once manually
-5. Save, click the ▶ **Run now** button on the workflow card, and watch
-   the status chip update. The header's course count reflects new rows in
-   real time (Firestore subscription). Use the 🕒 history icon to inspect
-   per-run details.
+5. Save the workflow, then click 👁 **Preview** on the card for a dry
+   run. The preview dialog shows exactly how many sections are new vs
+   updates against the target semester, lets you filter and search the
+   results, and surfaces any errors before writing anything. Click
+   **Apply to {SemesterName}** inside the dialog to commit, or ▶ **Run
+   now** on the card to skip straight to writing without the preview.
+6. After a run the status chip updates on the card. The page header's
+   course count reflects new rows in real time (Firestore subscription).
+   Use the 🕒 history icon to inspect per-run details.
+
+## Preview (dry run)
+
+`previewCourseFetch` runs the full fetch → filter → normalize pipeline
+without writing anything, then diffs `{code}__{classNumber}` doc ids
+against the target `semesters/{SemesterName}/courses/*` collection.
+Every previewed section is tagged `new` (not in the semester yet) or
+`updated` (exists — Apply will merge in-place). Response is capped at
+1000 courses; rare unfiltered previews set `truncated: true` while Apply
+still writes all matching courses.
 
 ## How scheduled refresh works
 

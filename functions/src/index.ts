@@ -619,6 +619,7 @@ export {
   updateCourseFetchConfig,
   deleteCourseFetchConfig,
   triggerCourseFetch,
+  previewCourseFetch,
   listCourseFetchRuns,
   scheduledCourseFetchRefresh,
 } from './courseFetch';

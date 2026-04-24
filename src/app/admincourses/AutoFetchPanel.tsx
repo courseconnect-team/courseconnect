@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import HistoryIcon from '@mui/icons-material/History';
@@ -26,10 +27,11 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { toast } from 'react-hot-toast';
 import { useCourseFetchApi } from '@/hooks/useCourseFetch';
-import type { CourseFetchConfig } from '@/types/courseFetch';
+import type { CourseFetchConfig, CoursePreview } from '@/types/courseFetch';
 import { toDateOrNull } from '@/types/courseFetch';
 import ConfigForm, { semesterNameFromTermYear } from './ConfigForm';
 import RunHistoryDialog from './RunHistoryDialog';
+import PreviewDialog from './PreviewDialog';
 
 const PURPLE = '#562EBA';
 
@@ -173,8 +175,10 @@ function ConfigCard(props: {
   config: CourseFetchConfig;
   currentSemester: string;
   running: boolean;
+  previewing: boolean;
   onToggle: (enabled: boolean) => void;
   onRun: () => void;
+  onPreview: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onHistory: () => void;
@@ -308,6 +312,30 @@ function ConfigCard(props: {
         <Stack direction="row" spacing={0.5}>
           <Button
             size="small"
+            variant="outlined"
+            startIcon={
+              props.previewing ? (
+                <CircularProgress size={14} />
+              ) : (
+                <VisibilityOutlinedIcon fontSize="small" />
+              )
+            }
+            disabled={props.previewing || props.running}
+            onClick={props.onPreview}
+            sx={{
+              textTransform: 'none',
+              borderColor: 'rgba(86,46,186,0.4)',
+              color: PURPLE,
+              '&:hover': {
+                borderColor: PURPLE,
+                bgcolor: 'rgba(86,46,186,0.04)',
+              },
+            }}
+          >
+            Preview
+          </Button>
+          <Button
+            size="small"
             variant="contained"
             disableElevation
             startIcon={
@@ -317,7 +345,7 @@ function ConfigCard(props: {
                 <PlayArrowIcon fontSize="small" />
               )
             }
-            disabled={props.running}
+            disabled={props.running || props.previewing}
             onClick={props.onRun}
             sx={{
               textTransform: 'none',
@@ -365,6 +393,13 @@ export default function AutoFetchPanel({
   const [submitting, setSubmitting] = React.useState(false);
   const [runningId, setRunningId] = React.useState<string | null>(null);
   const [historyId, setHistoryId] = React.useState<string | null>(null);
+  const [previewConfig, setPreviewConfig] =
+    React.useState<CourseFetchConfig | null>(null);
+  const [previewLoading, setPreviewLoading] = React.useState(false);
+  const [previewError, setPreviewError] = React.useState<string | null>(null);
+  const [previewData, setPreviewData] = React.useState<CoursePreview | null>(
+    null
+  );
 
   const reload = React.useCallback(async () => {
     setLoading(true);
@@ -437,6 +472,38 @@ export default function AutoFetchPanel({
       setRunningId(null);
     }
   };
+  const runPreview = React.useCallback(
+    async (c: CourseFetchConfig) => {
+      setPreviewLoading(true);
+      setPreviewError(null);
+      setPreviewData(null);
+      try {
+        const res = await api.preview(c.id);
+        setPreviewData(res);
+      } catch (e) {
+        setPreviewError(e instanceof Error ? e.message : 'Preview failed');
+      } finally {
+        setPreviewLoading(false);
+      }
+    },
+    [api]
+  );
+
+  const handlePreview = (c: CourseFetchConfig) => {
+    setPreviewConfig(c);
+    runPreview(c);
+  };
+  const handleClosePreview = () => {
+    setPreviewConfig(null);
+    setPreviewData(null);
+    setPreviewError(null);
+  };
+  const handleApplyFromPreview = async () => {
+    if (!previewConfig) return;
+    await handleTrigger(previewConfig);
+    handleClosePreview();
+  };
+
   const handleSubmit = async (
     draft: Omit<
       CourseFetchConfig,
@@ -589,8 +656,10 @@ export default function AutoFetchPanel({
             config={c}
             currentSemester={currentSemester}
             running={runningId === c.id}
+            previewing={previewLoading && previewConfig?.id === c.id}
             onToggle={(enabled) => handleToggle(c, enabled)}
             onRun={() => handleTrigger(c)}
+            onPreview={() => handlePreview(c)}
             onEdit={() => handleEdit(c)}
             onDelete={() => handleDelete(c)}
             onHistory={() => setHistoryId(c.id)}
@@ -613,6 +682,17 @@ export default function AutoFetchPanel({
         configId={historyId}
         onClose={() => setHistoryId(null)}
         load={api.listRuns}
+      />
+      <PreviewDialog
+        open={!!previewConfig}
+        config={previewConfig}
+        preview={previewData}
+        loading={previewLoading}
+        loadError={previewError}
+        applying={runningId === previewConfig?.id}
+        onClose={handleClosePreview}
+        onRetry={() => previewConfig && runPreview(previewConfig)}
+        onApply={handleApplyFromPreview}
       />
     </Stack>
   );
