@@ -4,7 +4,8 @@ import React from 'react';
 import SideNav from '@/components/SideNavBar/SideNavBar';
 import TopNav from '@/components/TopBar/TopBar';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
-import { getNavItems } from '@/hooks/useGetItems';
+import { getNavItemsForUser } from '@/hooks/useGetItems';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 interface HeaderCardProps {
   title: string;
@@ -13,11 +14,15 @@ interface HeaderCardProps {
 
 export default function HeaderCard({ title, children }: HeaderCardProps) {
   const [user, role, loading, error] = useUserInfo();
+  const { user: currentUser } = useCurrentUser();
 
   if (loading) return <div>Loading…</div>;
   if (error) return <div>Error loading user info</div>;
 
-  const navItems = getNavItems(role);
+  const navItems = getNavItemsForUser({
+    role,
+    superAdmin: currentUser.superAdmin,
+  });
 
   return (
     <div className="flex h-screen">
