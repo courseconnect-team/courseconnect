@@ -112,13 +112,6 @@ export function filterCourse(
     if (!f.codePrefixes.some((p) => prefix === p.toUpperCase())) return false;
   }
 
-  if (f.departments && f.departments.length > 0) {
-    const dept = (
-      course.department ?? departmentFromCode(course.code)
-    ).toUpperCase();
-    if (!f.departments.some((d) => dept === d.toUpperCase())) return false;
-  }
-
   // Number range filter — pull trailing digits from the code.
   if (f.numberMin != null || f.numberMax != null) {
     const digits = course.code.match(/(\d{3,4})/);

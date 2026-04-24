@@ -8,7 +8,6 @@ export type CourseCampus = 'main' | 'online' | 'any';
 export type FetchStatus = 'success' | 'partial_success' | 'failed';
 
 export interface FilterOptions {
-  departments?: string[];
   codePrefixes?: string[];
   numberMin?: number;
   numberMax?: number;
@@ -32,7 +31,8 @@ export interface NormalizedCourse {
   code: string; // 'COP3502'
   codeWithSpace: string; // 'COP 3502'
   title: string;
-  department?: string;
+  department?: string; // short code prefix, e.g. 'COP'
+  departmentName?: string; // human-readable provider name, e.g. 'Computer & Information Science & Engineering'
   description?: string;
   credits?: string;
   level?: CourseLevel;

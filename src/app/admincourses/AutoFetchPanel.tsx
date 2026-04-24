@@ -85,7 +85,6 @@ function refreshLabel(refresh: CourseFetchConfig['refresh']): string {
 
 function filterSummary(c: CourseFetchConfig): string {
   const parts: string[] = [];
-  if (c.departments.length > 0) parts.push(c.departments.join(', '));
   if (c.codePrefixes.length > 0) parts.push(c.codePrefixes.join(', '));
   if (c.numberMin != null || c.numberMax != null) {
     parts.push(`${c.numberMin ?? 0}–${c.numberMax ?? 9999}`);

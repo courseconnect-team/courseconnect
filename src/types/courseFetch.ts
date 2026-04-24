@@ -38,8 +38,8 @@ export interface CourseFetchConfig {
   termCode?: string; // optional explicit override; usually derived from provider
 
   // Filters — empty array / undefined means "no restriction".
-  departments: string[]; // e.g. ['CISE', 'ECE']
-  codePrefixes: string[]; // e.g. ['COP', 'EEL']
+  // codePrefixes matches UF 2–4 letter course prefixes (e.g. 'COP', 'EEL').
+  codePrefixes: string[];
   numberMin?: number; // e.g. 3000 for junior+
   numberMax?: number;
   campus: CourseCampus;
@@ -164,7 +164,8 @@ export interface PreviewCourse {
   codeWithSpace: string;
   title: string;
   credits?: string;
-  department?: string;
+  department?: string; // short code prefix
+  departmentName?: string; // full provider-supplied name
   sections: PreviewSection[];
 }
 
@@ -234,7 +235,6 @@ export const DEFAULT_COURSE_FETCH_CONFIG: Omit<
   institution: 'UF',
   term: 'spring',
   year: new Date().getFullYear(),
-  departments: [],
   codePrefixes: [],
   campus: 'any',
   level: 'any',

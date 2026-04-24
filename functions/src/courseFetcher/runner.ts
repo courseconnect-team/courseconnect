@@ -78,6 +78,7 @@ function buildSemesterCourseDoc(
     title: course.title,
     credits: course.credits ?? '',
     department: (course.department ?? '').toUpperCase(),
+    department_name: course.departmentName ?? '',
     professor_names: instructorNames.join(', '),
     professor_emails: instructorEmails,
     enrollment_cap:

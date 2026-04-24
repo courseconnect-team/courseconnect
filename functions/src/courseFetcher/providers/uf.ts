@@ -162,7 +162,18 @@ function normalizeCourseRow(row: unknown): {
   const description = str(pick(row, 'description'));
   const credits =
     str(pick(row, 'openCredits')) ?? str(pick(row, 'credits')) ?? undefined;
-  const dept = str(pick(row, 'deptName')) ?? str(pick(row, 'department'));
+
+  // ONE.UF does not place deptName on the course row — it lives on each
+  // section. All sections of a course share the same department, so the
+  // first section's deptName is authoritative for the course.
+  const rawSectionsForDept = pick(row, 'sections');
+  const firstSection = Array.isArray(rawSectionsForDept)
+    ? rawSectionsForDept[0]
+    : undefined;
+  const departmentName =
+    str(pick(row, 'deptName')) ??
+    str(pick(row, 'department')) ??
+    str(pick(firstSection, 'deptName'));
 
   const course: NormalizedCourse = {
     code,
@@ -170,7 +181,7 @@ function normalizeCourseRow(row: unknown): {
     title,
     description,
     credits,
-    department: dept,
+    departmentName,
   };
 
   const rawSections = pick(row, 'sections');
