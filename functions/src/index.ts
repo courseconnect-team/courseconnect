@@ -50,7 +50,7 @@ type EmailType =
 
 type ApplicationType = 'course_assistant' | 'supervised_teaching';
 
-function setCors(req: Request, res: Response): void {
+export function setCors(req: Request, res: Response): void {
   const origin = req.get('origin');
   res.set('Vary', 'Origin');
   if (origin && ALLOWED_ORIGINS.has(origin)) {
@@ -60,7 +60,7 @@ function setCors(req: Request, res: Response): void {
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
-function handleMethod(req: Request, res: Response): boolean {
+export function handleMethod(req: Request, res: Response): boolean {
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
     return false;
@@ -80,13 +80,13 @@ function getBearerToken(req: Request): string | null {
   return authHeader.substring('Bearer '.length).trim();
 }
 
-function asRecord(value: unknown): Record<string, unknown> {
+export function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object'
     ? (value as Record<string, unknown>)
     : {};
 }
 
-function readString(
+export function readString(
   source: Record<string, unknown>,
   key: string
 ): string | undefined {
@@ -122,7 +122,7 @@ function readApplicationType(value: unknown): ApplicationType | null {
   return null;
 }
 
-async function verifyAuth(
+export async function verifyAuth(
   req: Request,
   res: Response
 ): Promise<admin.auth.DecodedIdToken | null> {
@@ -141,7 +141,7 @@ async function verifyAuth(
   }
 }
 
-async function getRole(uid: string): Promise<string> {
+export async function getRole(uid: string): Promise<string> {
   const snap = await db.collection('users').doc(uid).get();
   const data = snap.data() as Record<string, unknown> | undefined;
   return typeof data?.role === 'string' ? data.role : '';
@@ -156,9 +156,29 @@ async function ensureStaffRole(uid: string, res: Response): Promise<boolean> {
   return true;
 }
 
-function fail(res: Response, message: string, code = 400): void {
+export function fail(res: Response, message: string, code = 400): void {
   res.status(code).json({ message });
 }
+
+// Verify the caller is a super admin. Reads users/{uid}.superAdmin directly —
+// this is the bootstrap gate until claims-backed roles land in Unit 3, and
+// the `superAdmin` field is protected from client writes by firestore.rules.
+export async function ensureSuperAdmin(
+  uid: string,
+  res: Response
+): Promise<boolean> {
+  const snap = await db.collection('users').doc(uid).get();
+  const data = snap.data() as Record<string, unknown> | undefined;
+  if (data?.superAdmin !== true) {
+    res.status(403).json({ message: 'Forbidden — super admin only' });
+    return false;
+  }
+  return true;
+}
+
+// The shared Firestore + Auth handles so new Cloud Function files don't
+// re-initialize the SDK.
+export { db, auth };
 
 export const sendEmail = functions.https.onRequest(async (req, res) => {
   setCors(req, res);
@@ -624,3 +644,25 @@ export const deleteUserFromID = functions.https.onRequest(
     }
   }
 );
+
+// --- multi-department support (Unit 2+) ---
+
+export {
+  createDepartment,
+  updateDepartment,
+  archiveDepartment,
+  unarchiveDepartment,
+} from './departments';
+
+export {
+  setRole,
+  revokeRole,
+  promoteSuperAdmin,
+  demoteSuperAdmin,
+} from './roles';
+
+export {
+  createPendingMembership,
+  revokePendingMembership,
+  materializePendingMemberships,
+} from './invites';

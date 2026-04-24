@@ -10,6 +10,7 @@ import React, {
 import { useRouter, usePathname } from 'next/navigation';
 import firebase from '../firebase_config';
 import { isE2EMode, getE2EUser } from '@/utils/featureFlags';
+import { callFunction } from '@/firebase/functions/callFunction';
 
 const AuthContext = createContext();
 
@@ -18,6 +19,7 @@ export function useAuth() {
 }
 
 const LOGIN_RECORDED_KEY = 'cc_login_recorded_uid';
+const MATERIALIZE_KEY = 'cc_materialize_pending_uid';
 
 async function recordLoginOnce(user) {
   if (!user || typeof window === 'undefined') return;
@@ -48,6 +50,22 @@ async function recordLoginOnce(user) {
   }
 }
 
+// Unit 4 of multi-department support: resolve any pending-memberships invite
+// for this user's email on first sign-in of the session. Idempotent server-
+// side; the sessionStorage guard just avoids hitting the Cloud Function
+// every page navigation. Failure here is non-fatal — the user is still
+// signed in; next session retries.
+async function materializePendingOnce(user) {
+  if (!user || typeof window === 'undefined') return;
+  try {
+    if (sessionStorage.getItem(MATERIALIZE_KEY) === user.uid) return;
+    sessionStorage.setItem(MATERIALIZE_KEY, user.uid);
+    await callFunction('materializePendingMemberships', {});
+  } catch (err) {
+    console.error('Failed to materialize pending memberships:', err);
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +84,10 @@ export function AuthProvider({ children }) {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       setLoading(false);
-      if (user) recordLoginOnce(user);
+      if (user) {
+        recordLoginOnce(user);
+        materializePendingOnce(user);
+      }
 
       if (
         !user &&

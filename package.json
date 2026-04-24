@@ -14,7 +14,11 @@
     "migrate:applications": "ts-node src/scripts/migrateApplications.ts",
     "migrate:applications:dry": "ts-node src/scripts/migrateApplications.ts --dry",
     "cleanup:nested-apps": "ts-node src/scripts/cleanupNestedApplications.ts",
-    "cleanup:nested-apps:execute": "ts-node src/scripts/cleanupNestedApplications.ts --execute"
+    "cleanup:nested-apps:execute": "ts-node src/scripts/cleanupNestedApplications.ts --execute",
+    "seed:departments:dry": "ts-node src/scripts/seedDepartments.ts",
+    "seed:departments": "ts-node src/scripts/seedDepartments.ts --execute",
+    "bootstrap:super-admin:dry": "ts-node src/scripts/bootstrapSuperAdmin.ts",
+    "bootstrap:super-admin": "ts-node src/scripts/bootstrapSuperAdmin.ts --execute"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

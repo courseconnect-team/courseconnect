@@ -145,5 +145,36 @@ service cloud.firestore {
       allow create, update: if isAdmin();
       allow delete: if isSelf(uid) || isAdmin();
     }
+
+    // --------- departments (Unit 2+) ---------
+    // Any authed user may read the departments list (used by pickers, research
+    // filters, announcement audience UI). Writes are restricted to super
+    // admins via Cloud Function (admin SDK bypasses rules); we still deny
+    // client writes here as defense-in-depth.
+    match /departments/{deptId} {
+      allow read: if isAuthed();
+      allow write: if false;
+    }
+
+    // --------- pending memberships (Unit 4) ---------
+    // The invitee needs to read their own pending doc to see that an invite
+    // exists; admins/super admins need read+delete to manage the list.
+    // Writes go through Cloud Functions (admin SDK) only.
+    match /pendingMemberships/{email} {
+      allow read: if isAuthed()
+                  && (request.auth.token.email != null
+                      && request.auth.token.email.lower() == email);
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // --------- login events (audit trail; writes only) ---------
+    // auth_context.js appends a row on first sign-in per session. No one
+    // reads these from the client today.
+    match /login_events/{eventId} {
+      allow read: if false;
+      allow create: if isAuthed();
+      allow update, delete: if false;
+    }
   }
 }
