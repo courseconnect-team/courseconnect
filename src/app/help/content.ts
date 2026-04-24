@@ -7,6 +7,7 @@ import BookOutlinedIcon from '@mui/icons-material/BookOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
 
 export type HelpRoleKey = 'student' | 'faculty' | 'admin';
 
@@ -236,12 +237,13 @@ export const ADMIN_GUIDE: HelpGuide = {
   label: 'Admin',
   tagline: 'Manage users, review applications, and run the semester.',
   overview:
-    'Admins operate the department-wide workflow: approving faculty accounts, reviewing every TA and Supervised Teaching application, uploading semester course data, tracking faculty teaching load, and publishing announcements.',
+    'Admins run their department end-to-end: approving faculty accounts, reviewing every TA and Supervised Teaching application, populating the semester course list (auto-fetch or Excel upload), tracking faculty teaching load, and publishing announcements. Everything you do is scoped to your active department. Super admins additionally create and manage departments themselves.',
   quickStart: [
-    'Start each semester by uploading course data and employment actions in Courses.',
+    'Start each semester in Courses — create a fetch workflow to auto-populate from one.uf.edu, or upload the Excel roster manually, then load employment actions.',
     'Approve any pending faculty accounts in Users → Unapproved Faculty.',
     'Review submitted applications in Applications and approve / deny in bulk or individually.',
     'Upload teaching-load data in Faculty Stats so assignment decisions are well-informed.',
+    'Super admin only: open Departments to onboard a new department or invite additional admins/faculty.',
   ],
   sections: [
     {
@@ -283,17 +285,40 @@ export const ADMIN_GUIDE: HelpGuide = {
       icon: BookOutlinedIcon,
       path: '/admincourses',
       summary:
-        'The canonical source of semester course data. Upload, hide, and clear semesters here.',
+        'Populate, maintain, and curate the semester course list. Three tabs: Auto-fetch (scheduled scrape), Upload & maintain (Excel), and Manage courses (row-level review). Every course you write is stamped with your active department.',
       steps: [
-        'Select an existing semester from the dropdown or create a new one.',
-        'Use "Upload Semester Data" to ingest the Excel course list (code, title, instructor emails, meeting times, enrollment cap).',
-        'Use "Upload Employment Actions" to attach the UFID → action mapping for the term.',
-        'Hide / Unhide a semester to control whether students can see it.',
-        '"Clear Semester Data" wipes every course for the selected semester — use with caution.',
+        'Pick the target semester at the top, or create a new one. Use Hide/Unhide to control whether students can see it — keep it hidden while you stage data.',
+        'Auto-fetch tab: click "New workflow" to build a pipeline — choose a source (e.g. one.uf.edu), filter by department / code prefix / course number range / level / campus, pick a refresh cadence (manual, hourly, daily, weekly, or every N hours), and point it at a semester. Toggle Enabled to arm the schedule.',
+        'Auto-fetch → Preview: always run Preview first on a new workflow. The dialog shows a new-vs-update diff so you know what will change before applying. "Run now" triggers it on demand; History shows past runs with counts and any errors.',
+        'Upload & maintain tab: use "Upload Semester Data" to ingest an Excel course list manually (code, title, instructor emails, meeting times, enrollment cap). "Upload Employment Actions" attaches the UFID → action mapping for the term. Manual uploads are preserved across auto-fetch runs.',
+        'Manage courses tab: browse the rows currently in the semester, edit typos, and remove stragglers. "Clear Semester Data" wipes every course for the selected semester — use only when you are about to reload from scratch.',
       ],
       tips: [
-        'Hide the semester until uploads are complete, then unhide to make it visible.',
-        'Clearing is permanent — export or back up before running it.',
+        'Your active department is stamped on every course you write — whether auto-fetched or uploaded. Super admins who belong to multiple departments should confirm the active department in their Profile before writing.',
+        'Preview before "Run now": the dry-run catches filter mistakes (wrong code prefix, stale term) without touching Firestore.',
+        'Partial-success status means some sections errored; open History on the workflow to see which ones.',
+        'If the Auto-fetch tab says it cannot load workflows, the course-fetch Cloud Functions are not deployed — redeploy from functions/.',
+        'Clearing is permanent. Back up the Excel source (or disable workflows) before running it.',
+      ],
+    },
+    {
+      id: 'departments',
+      title: 'Departments',
+      icon: ApartmentOutlinedIcon,
+      path: '/admin/departments',
+      summary:
+        'Super-admin only. Create and archive departments, and manage who is admin or faculty in each one. Every course, application, announcement, and research listing is scoped by department, so this is where onboarding a new department starts.',
+      steps: [
+        'Open Departments from the sidebar. The list shows every department with status (Active / Archived) and its id.',
+        'Click "New department" to onboard a department. Enter a 2–6 letter code (e.g. ECE, CISE, MAE), the full name, and the email of the first admin. Submitting creates the department and queues an invite.',
+        'The invited admin receives an email; they gain access the first time they sign in with that email. If the invite fails while the department succeeds, use the "Resend" action on the error banner.',
+        "Click a department to open its detail page. Under Members, invite additional admins or faculty by email, change a member's role, or remove access. Pending invites show separately until the user first signs in.",
+        'Archive a department to revoke its admin nav and hide its surfaces; Unarchive restores it. Archiving does not delete data — courses, applications, and announcements for that department are retained.',
+      ],
+      tips: [
+        'Only super admins see the Departments nav entry. Department admins cannot create or archive departments.',
+        'A user can belong to multiple departments with different roles (e.g. admin in CISE, faculty in ECE). Each membership is tracked independently.',
+        'Initial seed — if the list is empty, either seed ECE/CISE/MAE via the seed:departments script or create the first department manually.',
       ],
     },
     {
@@ -344,7 +369,7 @@ export const ADMIN_GUIDE: HelpGuide = {
   faqs: [
     {
       q: 'A faculty member says their course is not showing up — why?',
-      a: 'Check the Courses page: the semester may be hidden, or that course may be missing from the most recent upload.',
+      a: 'Check the Courses page: the semester may be hidden, the course may be missing from the latest auto-fetch or Excel upload, or it may have been ingested under a different department. Open the Manage courses tab and confirm the row exists with the right department stamp.',
     },
     {
       q: 'How do I bulk-deny applications that are out of scope?',
@@ -352,7 +377,23 @@ export const ADMIN_GUIDE: HelpGuide = {
     },
     {
       q: 'Can I recover cleared semester data?',
-      a: 'No. "Clear Semester Data" is destructive. Back up the Excel source before clearing.',
+      a: 'No. "Clear Semester Data" is destructive. Back up the Excel source (or re-run the fetch workflow) before clearing.',
+    },
+    {
+      q: 'Do auto-fetch runs overwrite courses I fixed up by hand?',
+      a: 'Fetch runs upsert by course key within the target semester. Fields pulled from the provider are refreshed; fields you added that the provider does not populate are preserved. Preview the diff first if you are unsure — the dialog shows adds vs. updates.',
+    },
+    {
+      q: 'A fetch workflow is stuck in "running" — what do I do?',
+      a: 'Open History on the workflow to see the run record. If the provider timed out, disable the schedule, fix the config (filters too broad, wrong term), then Preview + Run now to retry.',
+    },
+    {
+      q: 'How do I add a new department to Course Connect?',
+      a: 'Super admin only: open Departments → New department, enter the code / name / first admin email, and submit. The admin gets access on their first sign-in with that email, and can then invite faculty from the department detail page.',
+    },
+    {
+      q: 'I belong to more than one department — which one am I writing into?',
+      a: 'Your active department governs uploads and fetch stamping. It is visible in your Profile. If it is wrong, switch it there before running an Excel upload or a course fetch.',
     },
   ],
 };

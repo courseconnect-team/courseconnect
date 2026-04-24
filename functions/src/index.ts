@@ -610,3 +610,16 @@ export {
   revokePendingMembership,
   materializePendingMemberships,
 } from './invites';
+
+// --- course-fetch pipeline ---
+
+export {
+  listCourseFetchConfigs,
+  createCourseFetchConfig,
+  updateCourseFetchConfig,
+  deleteCourseFetchConfig,
+  triggerCourseFetch,
+  previewCourseFetch,
+  listCourseFetchRuns,
+  scheduledCourseFetchRefresh,
+} from './courseFetch';
