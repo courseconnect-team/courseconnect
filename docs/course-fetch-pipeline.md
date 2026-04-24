@@ -7,33 +7,43 @@ UI edits configs.
 
 ## What's in this feature
 
-| Layer                       | Path                                            |
-| --------------------------- | ----------------------------------------------- |
-| Shared types (frontend)     | `src/types/courseFetch.ts`                      |
-| Frontend API client         | `src/hooks/useCourseFetch.ts`                   |
-| Admin UI                    | `src/app/admin-course-fetch/*`                  |
-| Scraper service             | `functions/src/courseFetcher/*`                 |
-| UF provider                 | `functions/src/courseFetcher/providers/uf.ts`   |
-| HTTPS + scheduled endpoints | `functions/src/courseFetch.ts`                  |
-| Firestore rules             | `firestore.rules` (course-fetch block)          |
-| Firestore indexes           | `firestore.indexes.json` (course-fetch entries) |
-| Tests                       | `functions/src/courseFetcher/__tests__/*`       |
+| Layer                       | Path                                                                  |
+| --------------------------- | --------------------------------------------------------------------- |
+| Shared types (frontend)     | `src/types/courseFetch.ts`                                            |
+| Frontend API client         | `src/hooks/useCourseFetch.ts`                                         |
+| Admin UI                    | `src/app/admincourses/*` (Auto-fetch tab, SemesterStatus, ConfigForm) |
+| Scraper service             | `functions/src/courseFetcher/*`                                       |
+| UF provider                 | `functions/src/courseFetcher/providers/uf.ts`                         |
+| HTTPS + scheduled endpoints | `functions/src/courseFetch.ts`                                        |
+| Firestore rules             | `firestore.rules` (course-fetch block)                                |
+| Firestore indexes           | `firestore.indexes.json` (course-fetch entries)                       |
+| Tests                       | `functions/src/courseFetcher/__tests__/*`                             |
 
 ## Data model
 
-Four Firestore collections:
+Each run writes to two places:
+
+1. **Live semester** — one doc per section at
+   `semesters/{SemesterName}/courses/{code}__{classNumber}`, matching the
+   existing Excel-upload schema (`class_number`, `professor_emails`,
+   `professor_names`, `code`, `credits`, `department`, `enrollment_cap`,
+   `enrolled`, `title`, `semester`, `meeting_times[{day, time, location}]`)
+   plus `source: 'auto-fetch'` + `sourceConfigId`. `SemesterName` comes
+   from the config's term+year, capitalized (e.g. Fall 2026). Using `__`
+   in the doc id guarantees no collision with Excel rows keyed by
+   `{code} : {instructor}`.
+2. **Cross-term catalog** — normalized audit trail at
+   `catalog/{provider}:{termCode}:{code}` with a `sections` subcollection
+   keyed by `{provider}:{termCode}:{classNumber}`. Independent of the
+   semester layout; useful for provider-level analytics and cross-year
+   dedup.
+
+Plus:
 
 - `courseFetchConfigs/{id}` — admin-managed configs (label, provider, term,
   year, departments, filters, refresh cadence, enabled, status fields).
-- `courseFetchConfigs/{id}/runs/{runId}` — one document per fetch attempt
-  with status, counts, errors, warnings, and duration.
-- `catalog/{courseId}` — normalized scraped courses. Doc id shape is
-  `PROVIDER:termCode:CODE`, e.g. `UF:2268:COP3502`.
-- `catalog/{courseId}/sections/{sectionId}` — sections under each course.
-  Doc id shape is `PROVIDER:termCode:classNumber`, e.g. `UF:2268:11111`.
-
-These collections are separate from the existing `semesters/{name}/courses`
-collection used by the Excel-upload flow — no existing data is touched.
+- `courseFetchConfigs/{id}/runs/{runId}` — one doc per fetch attempt with
+  status, counts, errors, warnings, and duration.
 
 Rules: configs and runs are admin-only read; catalog collections are
 readable by any authed user. All writes go through Cloud Functions using
@@ -44,23 +54,29 @@ Indexes: `courseFetchConfigs(enabled, nextRefreshAt)` for the scheduler,
 department, code)` for catalog queries, and a collection-group index on
 `sections(termCode, courseCode, classNumber)`.
 
-## How to add a new course-fetch config
+## How to add a new auto-fetch workflow
 
 1. Sign in as an admin.
-2. Open **Course Fetch** in the admin sidebar (or navigate to
-   `/admin-course-fetch`).
-3. Click **New config**, fill in at minimum:
+2. Open **Courses** in the admin sidebar (navigate to `/admincourses`).
+3. The page header shows the current semester and live course count. Use
+   the semester selector to choose which term the workflow will target.
+4. Switch to the **Auto-fetch** tab and click **New workflow**. Fill in:
    - **Label** — e.g. `UF Spring CISE + Math`
    - **Provider** — `UF` (only option today)
-   - **Term** + **Year** — e.g. `spring 2026`
+   - **Term** + **Year** — the workflow computes the target semester from
+     these (e.g. `spring 2026` → `Spring 2026`). The dialog shows the
+     exact semester doc id your workflow will write to so there's no
+     ambiguity.
    - **Departments** (optional) — comma-separated uppercase codes,
      e.g. `CISE, MATH`
    - **Code prefixes** (optional) — e.g. `COP, EEL, MAC`
    - **Refresh** — `Manual only`, `Hourly`, `Daily`, `Weekly`, or
      `Every N hours`
    - **Enabled** — leave off until you've run it once manually
-4. Save, click the ▶ **Run now** action, and watch the status chip update.
-   Use the 🕒 history button to inspect per-run details.
+5. Save, click the ▶ **Run now** button on the workflow card, and watch
+   the status chip update. The header's course count reflects new rows in
+   real time (Firestore subscription). Use the 🕒 history icon to inspect
+   per-run details.
 
 ## How scheduled refresh works
 

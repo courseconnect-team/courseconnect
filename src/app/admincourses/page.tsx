@@ -1,481 +1,172 @@
 'use client';
+
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
+import { Box, Paper, Tab, Tabs } from '@mui/material';
+import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import { Toaster } from 'react-hot-toast';
 import { useAuth } from '@/firebase/auth/auth_context';
-import { Toaster, toast } from 'react-hot-toast';
-import { useState, useEffect } from 'react';
 import GetUserRole from '@/firebase/util/GetUserRole';
-import 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
-import { read, utils } from 'xlsx';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import 'firebase/firestore';
 import Courses from '@/component/Dashboard/AdminCourses/Courses';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import {
-  DeleteOutline,
-  FileUploadOutlined,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { getNavItems } from '@/hooks/useGetItems';
 import { isE2EMode } from '@/utils/featureFlags';
 import { useSemesters } from '@/hooks/useSemesterOptions';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { resolveDepartmentCode } from '@/constants/research';
+import SemesterStatus from './SemesterStatus';
+import AutoFetchPanel from './AutoFetchPanel';
+import UploadPanel from './UploadPanel';
+
+type AdminCoursesTab = 'fetch' | 'upload' | 'manage';
 
 export default function AdminCoursesPage() {
-  const { currentSemester, options } = useSemesters();
+  const { currentSemester } = useSemesters();
   const { user } = useAuth();
-  const [role, loading, error] = GetUserRole(user?.uid);
+  const [role, loading] = GetUserRole(user?.uid);
   const { user: currentUser } = useCurrentUser();
-  // Resolve the admin's department at xlsx-upload time. For admins migrated
-  // to the per-(user,dept) roles model this is `activeDeptId` (lowercased id);
-  // legacy admins still fall back to the resolved code of their single
-  // `users/{uid}.department` string.
   const uploadDeptCode =
     (currentUser.activeDeptId ?? '').toUpperCase() ||
     resolveDepartmentCode(currentUser.legacyDepartment);
+
   const isE2E = isE2EMode();
-  const [semester, setSemester] = useState<string>(currentSemester);
-  const [menu, setMenu] = useState<string[]>([]);
-  const [semesterHidden, setSemesterHidden] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [newSem, setNewSem] = useState('');
-  const [open, setOpen] = useState(false);
+  const [semester, setSemester] = React.useState<string>(currentSemester);
+  const [semesters, setSemesters] = React.useState<string[]>([]);
+  const [semesterHidden, setSemesterHidden] = React.useState(false);
+  const [processing, setProcessing] = React.useState(false);
+  const [tab, setTab] = React.useState<AdminCoursesTab>('fetch');
 
-  const handleClose = () => {
-    setSemester('');
-    setOpen(false);
-  };
-
-  const handleSemesterCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await firebase
-      .firestore()
-      .collection('semesters')
-      .doc(newSem)
-      .set({ semester: newSem, hidden: false });
-    setSemester(newSem);
-    setOpen(false);
-  };
-
-  //Testing Code Start
-  useEffect(() => {
+  React.useEffect(() => {
     if (isE2E) {
-      setMenu([]);
+      setSemesters([]);
       setSemesterHidden(false);
       return;
     }
-    //Testing Code End
-
-    const updateMenu = async () => {
-      const arr: string[] = [];
-      const querySnapshot = await firebase
-        .firestore()
-        .collection('semesters')
-        .get();
-      querySnapshot.forEach((doc) => {
-        arr.push(doc.id);
-        if (semester === '') {
-          setSemester(doc.id);
-        }
-      });
-      setMenu(arr);
-    };
-
-    const setHidden = async () => {
-      const doc = await firebase
-        .firestore()
-        .collection('semesters')
-        .doc(semester)
-        .get();
-      setSemesterHidden(!!doc.data()?.hidden);
-    };
-
-    updateMenu();
-    setHidden();
-  }, [semester, processing, isE2E]);
-
-  const handleDeleteSem = async () => {
-    setProcessing(true);
-    const toastId = toast.loading(
-      'Clearing semester data. This may take a couple minutes.',
-      { duration: 30000000 }
+    const db = firebase.firestore();
+    const unsub = db.collection('semesters').onSnapshot(
+      (snap) => {
+        const ids: string[] = [];
+        snap.forEach((doc) => ids.push(doc.id));
+        ids.sort((a, b) => b.localeCompare(a));
+        setSemesters(ids);
+        if (!semester && ids.length > 0) setSemester(ids[0]);
+      },
+      (err) => {
+        console.error('semesters listener error:', err);
+      }
     );
+    return () => unsub();
+  }, [isE2E, semester]);
 
-    const querySnapshot = await firebase
+  React.useEffect(() => {
+    if (isE2E || !semester) {
+      setSemesterHidden(false);
+      return;
+    }
+    const unsub = firebase
       .firestore()
-      .collection('courses')
-      .where('semester', '==', semester)
-      .get();
-    querySnapshot.forEach((doc) => doc.ref.delete());
+      .collection('semesters')
+      .doc(semester)
+      .onSnapshot(
+        (snap) => setSemesterHidden(!!snap.data()?.hidden),
+        () => setSemesterHidden(false)
+      );
+    return () => unsub();
+  }, [isE2E, semester]);
 
-    setProcessing(false);
-    toast.success('Semester data cleared!');
-    toast.dismiss(toastId);
-  };
-
-  const handleSemesterHiddenToggle = async () => {
-    setProcessing(true);
-    const toastId = toast.loading(
-      'Toggling semester visibility. This may take a couple minutes.',
-      { duration: 30000000 }
-    );
-
+  const handleToggleHidden = async () => {
+    if (!semester) return;
     await firebase
       .firestore()
       .collection('semesters')
       .doc(semester)
       .set({ hidden: !semesterHidden }, { merge: true });
-
-    setProcessing(false);
-    toast.success('Semester visibility toggled!');
-    toast.dismiss(toastId);
-  };
-
-  const readActionsExcelFile = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setProcessing(true);
-    const toastId = toast.loading(
-      'Processing course data. This may take a couple minutes.',
-      { duration: 300000000 }
-    );
-    try {
-      const file = e.target.files?.[0];
-      if (!file) {
-        // User cancelled file picker
-        setProcessing(false);
-        toast.dismiss(toastId);
-        toast.error('No file selected.', { duration: 2000 });
-        return;
-      }
-
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = read(arrayBuffer);
-      const data: any[] = [];
-
-      workbook.SheetNames.forEach((sheetName) => {
-        const sheetData = utils.sheet_to_json(workbook.Sheets[sheetName]);
-        sheetData.forEach((row: any) => data.push(row));
-      });
-
-      const actionByUFID = new Map<string, string>();
-      const CURRENT_SEMESTER = 'Spring 2026';
-      for (const row of data) {
-        const rawUFID = String(row['UFID'] ?? '') as string;
-        const action = (row['ECE - Requested Action'] ?? '') as string;
-        const ufid = rawUFID.trim();
-        const cleanedAction = action.trim();
-
-        if (!ufid || !cleanedAction) continue;
-
-        actionByUFID.set(ufid, cleanedAction);
-      }
-
-      const updateActions = async () => {
-        const db = firebase.firestore();
-        const batch = db.batch();
-
-        const appsSnap = await db.collection('applications').get();
-
-        appsSnap.forEach((doc) => {
-          const data = doc.data();
-          const ufid = (data.ufid ?? data.UFID ?? '').toString().trim();
-          const semesters = (data.available_semesters ?? []) as string[];
-
-          if (
-            !Array.isArray(semesters) ||
-            !semesters.includes(CURRENT_SEMESTER)
-          ) {
-            return;
-          }
-          let action = 'NEW HIRE';
-          if (ufid && actionByUFID.has(ufid)) {
-            action = actionByUFID.get(ufid)!;
-          }
-
-          console.log(`Updating UFID ${ufid} with action ${action}`);
-          batch.update(doc.ref, { employmentAction: action });
-        });
-
-        await batch.commit();
-      };
-
-      await updateActions();
-
-      setProcessing(false);
-      toast.dismiss(toastId);
-      toast.success('Employment actions updated successfully!', {
-        duration: 2000,
-      });
-    } catch (err) {
-      console.error(err);
-      setProcessing(false);
-      toast.dismiss(toastId);
-      toast.error('Data upload failed.', { duration: 2000 });
-    }
-  };
-
-  const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    if (!uploadDeptCode) {
-      toast.error(
-        'No department on your account. Ask a super admin to assign one before uploading.',
-        { duration: 4000 }
-      );
-      input.value = '';
-      return;
-    }
-    const confirmed = window.confirm(
-      `Import "${file.name}" into ${uploadDeptCode} for ${semester}?\n\nEvery course in this file will be attached to ${uploadDeptCode}.`
-    );
-    if (!confirmed) {
-      input.value = '';
-      return;
-    }
-
-    setProcessing(true);
-    const toastId = toast.loading(
-      `Processing course data for ${uploadDeptCode}. This may take a couple minutes.`,
-      { duration: 300000000 }
-    );
-
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = read(arrayBuffer);
-      const data: any[] = [];
-
-      workbook.SheetNames.forEach((sheetName) => {
-        const sheetData = utils.sheet_to_json(workbook.Sheets[sheetName]);
-        sheetData.forEach((row: any) => data.push(row));
-      });
-
-      const course = new Set();
-
-      for (const row of data) {
-        const mappedRow: any = {};
-
-        mappedRow['Course'] = row['__EMPTY_1'];
-        mappedRow['Course Title'] = row['__EMPTY_23'];
-        mappedRow['Instructor'] = row['__EMPTY_24'];
-        mappedRow['Instructor Emails'] = row['__EMPTY_25'];
-        mappedRow['Class Nbr'] = row['__EMPTY_6'];
-        mappedRow['Min - Max Cred'] = row['__EMPTY_11'];
-        mappedRow['Day/s'] = row['__EMPTY_12'];
-        mappedRow['Time'] = row['__EMPTY_13'];
-        mappedRow['Facility'] = row['__EMPTY_15'];
-        mappedRow['Enr Cap'] = row['__EMPTY_26'];
-        mappedRow['Enrolled'] = row['__EMPTY_28'];
-        if (
-          !course.has(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`)
-        ) {
-          course.add(`${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`);
-
-          const rawEmails = mappedRow['Instructor Emails'] ?? 'undef';
-          const emailArray =
-            rawEmails === 'undef'
-              ? []
-              : rawEmails.split(';').map((email: string) => email.trim());
-
-          await firebase
-            .firestore()
-            .collection('semesters')
-            .doc(semester)
-            .collection('courses')
-            .doc(`${mappedRow['Course']} : ${mappedRow['Instructor']}`)
-            .set({
-              class_number: mappedRow['Class Nbr'] ?? 'undef',
-              professor_emails: emailArray,
-              professor_names: mappedRow['Instructor'] ?? 'undef',
-              code: mappedRow['Course'] ?? 'undef',
-              credits: mappedRow['Min - Max Cred'] ?? 'undef',
-              department: uploadDeptCode,
-              enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
-              enrolled: mappedRow['Enrolled'] ?? 'undef',
-              title: mappedRow['Course Title'] ?? 'undef',
-              semester: semester,
-              meeting_times: [
-                {
-                  day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
-                  time: mappedRow['Time'] ?? 'undef',
-                  location: mappedRow['Facility'] ?? 'undef',
-                },
-              ],
-            });
-        }
-      }
-
-      setProcessing(false);
-      toast.dismiss(toastId);
-      toast.success('Data upload complete!', { duration: 2000 });
-    } catch (err) {
-      console.log(err);
-      setProcessing(false);
-      toast.dismiss(toastId);
-      toast.error('Data upload failed.', { duration: 2000 });
-    }
-  };
-
-  const handleChange = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    if (value === 'New Semester') {
-      setOpen(true);
-    } else {
-      setSemester(value);
-    }
   };
 
   if (loading) return <div>Loading…</div>;
-  if (error) return <div>Error loading role</div>;
-  if (role !== 'admin') return <div> Forbidden </div>;
+  if (role !== 'admin') return <div>Forbidden</div>;
 
   return (
-    <PageLayout mainTitle="Admin Courses" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Courses" navItems={getNavItems(role)}>
       <Toaster />
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Create Semester</DialogTitle>
-        <form onSubmit={handleSemesterCreate}>
-          <DialogContent>
-            <DialogContentText>
-              Please enter the new semester&apos;s name.
-            </DialogContentText>
-            <FormControl required fullWidth>
-              <TextField
-                name="Semester"
-                variant="filled"
-                onChange={(e) => setNewSem(e.target.value)}
-                required
-                label="Semester"
-                autoFocus
-              />
-            </FormControl>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button type="submit" variant="contained">
-              Confirm
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pb: 4 }}>
+        <SemesterStatus
+          semester={semester}
+          semesters={semesters}
+          semesterHidden={semesterHidden}
+          onSemesterChange={setSemester}
+          onSemesterCreated={setSemester}
+          onToggleHidden={handleToggleHidden}
+        />
 
-      <Box
-        sx={{
-          mt: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '100%',
-        }}
-      >
-        <Box
+        <Paper
+          elevation={0}
           sx={{
-            mb: 2,
-            width: '100%',
-            display: 'flex',
-            flexWrap: 'nowrap',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 5,
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: 'divider',
+            overflow: 'hidden',
           }}
         >
-          <input
-            id="employment-actions-file"
-            type="file"
-            multiple
-            onChange={readActionsExcelFile}
-            onClick={(e) => (e.currentTarget.value = '')}
-            style={{ display: 'none' }}
-          />
-          <label htmlFor="employment-actions-file">
-            <Button
-              component="span"
-              variant="contained"
-              startIcon={<FileUploadOutlined />}
-              sx={{ textTransform: 'none' }}
-            >
-              Upload Employment Actions Data
-            </Button>
-          </label>
-
-          {/* Semester Data upload */}
-          <input
-            id="semester-data-file"
-            type="file"
-            multiple
-            onChange={readExcelFile}
-            onClick={(e) => (e.currentTarget.value = '')}
-            style={{ display: 'none' }}
-          />
-          <label htmlFor="semester-data-file">
-            <Button
-              component="span"
-              variant="contained"
-              data-tour="upload-semester-data"
-              startIcon={<FileUploadOutlined />}
-              sx={{ textTransform: 'none' }}
-            >
-              Upload Semester Data
-            </Button>
-          </label>
-
-          <Button
-            variant="contained"
-            onClick={handleDeleteSem}
-            startIcon={<DeleteOutline />}
-            sx={{ textTransform: 'none' }}
+          <Tabs
+            value={tab}
+            onChange={(_, v) => setTab(v)}
+            sx={{
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              px: 1.5,
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 600,
+                minHeight: 52,
+              },
+              '& .Mui-selected': { color: '#562EBA !important' },
+              '& .MuiTabs-indicator': { backgroundColor: '#562EBA' },
+            }}
           >
-            Clear Semester Data
-          </Button>
+            <Tab
+              value="fetch"
+              icon={<AutoAwesomeOutlinedIcon fontSize="small" />}
+              iconPosition="start"
+              label="Auto-fetch"
+            />
+            <Tab
+              value="upload"
+              icon={<FileUploadOutlinedIcon fontSize="small" />}
+              iconPosition="start"
+              label="Upload & maintain"
+            />
+            <Tab
+              value="manage"
+              icon={<ListAltOutlinedIcon fontSize="small" />}
+              iconPosition="start"
+              label="Manage courses"
+            />
+          </Tabs>
 
-          <Button
-            variant="contained"
-            onClick={handleSemesterHiddenToggle}
-            data-tour="hide-semester-data"
-            startIcon={semesterHidden ? <Visibility /> : <VisibilityOff />}
-            sx={{ textTransform: 'none' }}
-          >
-            {semesterHidden ? 'Unhide' : 'Hide'} Semester Data
-          </Button>
-
-          <FormControl sx={{ minWidth: 140 }}>
-            <InputLabel id="semester-select-label">Semester</InputLabel>
-            <Select
-              labelId="semester-select-label"
-              id="semester-select"
-              value={semester}
-              label="Semester"
-              onChange={handleChange}
-            >
-              {menu.map((sem) => (
-                <MenuItem key={sem} value={sem}>
-                  {sem}
-                </MenuItem>
-              ))}
-              <MenuItem value="New Semester">Create New Semester</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-
-        <Courses
-          userRole={role as string}
-          semester={semester}
-          processing={processing}
-        />
+          <Box sx={{ p: 2.5 }}>
+            {tab === 'fetch' && <AutoFetchPanel currentSemester={semester} />}
+            {tab === 'upload' && (
+              <UploadPanel
+                semester={semester}
+                uploadDeptCode={uploadDeptCode}
+                currentSemesterForActions="Spring 2026"
+                processing={processing}
+                setProcessing={setProcessing}
+              />
+            )}
+            {tab === 'manage' && (
+              <Courses
+                userRole={role as string}
+                semester={semester}
+                processing={processing}
+              />
+            )}
+          </Box>
+        </Paper>
       </Box>
     </PageLayout>
   );
