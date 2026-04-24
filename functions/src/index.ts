@@ -1,6 +1,5 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import type { Request, Response } from 'express';
 import {
   sendForgotPasswordEmail,
   sendApplicationConfirmationEmail,
@@ -13,28 +12,17 @@ import {
   sendApplicantToFaculty,
   sendStatusUpdateToApplicant,
 } from './nodemailer';
-
-if (!admin.apps.length) {
-  admin.initializeApp();
-}
-
-const db = admin.firestore();
-const auth = admin.auth();
-db.settings({ ignoreUndefinedProperties: true });
-
-const ALLOWED_ORIGINS = new Set(
-  [
-    'https://courseconnect.eng.ufl.edu',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    ...(process.env.ALLOWED_ORIGINS ?? '')
-      .split(',')
-      .map((v) => v.trim())
-      .filter(Boolean),
-  ].filter(Boolean)
-);
-
-const STAFF_ROLES = new Set(['admin', 'faculty']);
+import {
+  asRecord,
+  auth,
+  db,
+  ensureStaffRole,
+  fail,
+  handleMethod,
+  readString,
+  setCors,
+  verifyAuth,
+} from './shared';
 
 type EmailType =
   | 'sendApplicantToFaculty'
@@ -49,54 +37,6 @@ type EmailType =
   | 'renewTA';
 
 type ApplicationType = 'course_assistant' | 'supervised_teaching';
-
-export function setCors(req: Request, res: Response): void {
-  const origin = req.get('origin');
-  res.set('Vary', 'Origin');
-  if (origin && ALLOWED_ORIGINS.has(origin)) {
-    res.set('Access-Control-Allow-Origin', origin);
-  }
-  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-}
-
-export function handleMethod(req: Request, res: Response): boolean {
-  if (req.method === 'OPTIONS') {
-    res.status(204).send('');
-    return false;
-  }
-  if (req.method !== 'POST') {
-    res.status(405).json({ message: 'Method not allowed' });
-    return false;
-  }
-  return true;
-}
-
-function getBearerToken(req: Request): string | null {
-  const authHeader = req.get('authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
-  }
-  return authHeader.substring('Bearer '.length).trim();
-}
-
-export function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === 'object'
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
-export function readString(
-  source: Record<string, unknown>,
-  key: string
-): string | undefined {
-  const value = source[key];
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-  const trimmed = value.trim();
-  return trimmed.length ? trimmed : undefined;
-}
 
 function readEmailType(value: unknown): EmailType | null {
   if (typeof value !== 'string') return null;
@@ -121,64 +61,6 @@ function readApplicationType(value: unknown): ApplicationType | null {
   }
   return null;
 }
-
-export async function verifyAuth(
-  req: Request,
-  res: Response
-): Promise<admin.auth.DecodedIdToken | null> {
-  const token = getBearerToken(req);
-  if (!token) {
-    res.status(401).json({ message: 'Missing bearer token' });
-    return null;
-  }
-
-  try {
-    return await auth.verifyIdToken(token);
-  } catch (error) {
-    console.error('Token verification failed:', error);
-    res.status(401).json({ message: 'Invalid auth token' });
-    return null;
-  }
-}
-
-export async function getRole(uid: string): Promise<string> {
-  const snap = await db.collection('users').doc(uid).get();
-  const data = snap.data() as Record<string, unknown> | undefined;
-  return typeof data?.role === 'string' ? data.role : '';
-}
-
-async function ensureStaffRole(uid: string, res: Response): Promise<boolean> {
-  const role = await getRole(uid);
-  if (!STAFF_ROLES.has(role)) {
-    res.status(403).json({ message: 'Forbidden' });
-    return false;
-  }
-  return true;
-}
-
-export function fail(res: Response, message: string, code = 400): void {
-  res.status(code).json({ message });
-}
-
-// Verify the caller is a super admin. Reads users/{uid}.superAdmin directly —
-// this is the bootstrap gate until claims-backed roles land in Unit 3, and
-// the `superAdmin` field is protected from client writes by firestore.rules.
-export async function ensureSuperAdmin(
-  uid: string,
-  res: Response
-): Promise<boolean> {
-  const snap = await db.collection('users').doc(uid).get();
-  const data = snap.data() as Record<string, unknown> | undefined;
-  if (data?.superAdmin !== true) {
-    res.status(403).json({ message: 'Forbidden — super admin only' });
-    return false;
-  }
-  return true;
-}
-
-// The shared Firestore + Auth handles so new Cloud Function files don't
-// re-initialize the SDK.
-export { db, auth };
 
 export const sendEmail = functions.https.onRequest(async (req, res) => {
   setCors(req, res);
@@ -461,6 +343,53 @@ export const processApplicationForm = functions.https.onRequest(
         .collection('uid')
         .doc(uid);
 
+      // Resolve departmentIds server-side from the courses the applicant is
+      // applying to. The client cannot supply departmentIds — any value
+      // passed in the body is dropped. Each course doc at
+      // semesters/{sem}/courses/{cid}.department holds a canonical short
+      // code (e.g. 'ECE') which we lowercase to match the `departments/{id}`
+      // slug convention. Missing or unresolvable course docs are silently
+      // skipped; the application still lands with whatever depts could
+      // be resolved (and Unit 7 backfill will clean up orphans).
+      const resolvedDepartmentIds = await (async () => {
+        const incomingCourses = asRecord(body.courses);
+        const deptIds = new Set<string>();
+        const lookups: Array<Promise<void>> = [];
+        for (const [sem, bucket] of Object.entries(incomingCourses)) {
+          if (!bucket || typeof bucket !== 'object' || Array.isArray(bucket)) {
+            continue;
+          }
+          for (const courseId of Object.keys(
+            bucket as Record<string, unknown>
+          )) {
+            lookups.push(
+              db
+                .collection('semesters')
+                .doc(sem)
+                .collection('courses')
+                .doc(courseId)
+                .get()
+                .then((courseSnap) => {
+                  const raw = courseSnap.data()?.department;
+                  if (typeof raw !== 'string') return;
+                  const normalized = raw.trim().toLowerCase();
+                  if (normalized.length >= 2 && normalized.length <= 6) {
+                    deptIds.add(normalized);
+                  }
+                })
+                .catch((err) => {
+                  console.warn(
+                    `processApplicationForm: failed to resolve dept for ${sem}/${courseId}`,
+                    err
+                  );
+                })
+            );
+          }
+        }
+        await Promise.all(lookups);
+        return Array.from(deptIds).sort();
+      })();
+
       await db.runTransaction(async (tx) => {
         const existing = await tx.get(applicationRef);
         const payload: Record<string, unknown> = {
@@ -470,12 +399,27 @@ export const processApplicationForm = functions.https.onRequest(
           updated_at: admin.firestore.FieldValue.serverTimestamp(),
         };
 
+        // Client-supplied departmentIds are ignored; server controls this field.
+        delete payload.departmentIds;
         delete payload.created_at;
         delete payload.updated_at;
 
         if (!existing.exists) {
           payload.created_at = admin.firestore.FieldValue.serverTimestamp();
         }
+
+        // Union the resolved set with whatever was already on the doc so a
+        // resubmission expands (but never drops) the application's dept
+        // footprint. The denormalized array enables dept-admin reads under
+        // Unit 7's scoping rules.
+        const existingDeptIds = Array.isArray(existing.data()?.departmentIds)
+          ? (existing.data()?.departmentIds as unknown[]).filter(
+              (v): v is string => typeof v === 'string'
+            )
+          : [];
+        payload.departmentIds = Array.from(
+          new Set([...existingDeptIds, ...resolvedDepartmentIds])
+        ).sort();
 
         // Union the new submission's courses with whatever was on the
         // existing doc so a resubmission doesn't wipe out admin-set

@@ -15,7 +15,7 @@ import {
   readString,
   setCors,
   verifyAuth,
-} from './index';
+} from './shared';
 import { runAndPersist } from './courseFetcher/runner';
 import {
   computeNextRefreshAt,
@@ -199,9 +199,7 @@ export const deleteCourseFetchConfig = functions.https.onRequest(
 
 // --- Manual trigger ---
 
-async function loadValidatedConfig(
-  id: string
-): Promise<{
+async function loadValidatedConfig(id: string): Promise<{
   config: ValidatedConfig;
   doc: FirebaseFirestore.DocumentSnapshot;
 } | null> {

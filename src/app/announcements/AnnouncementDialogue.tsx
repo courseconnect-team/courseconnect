@@ -62,7 +62,7 @@ export default function AnnouncementDialog({
   onSubmit,
   loading = false,
   roleOptions = ['admin', 'faculty', 'student'],
-  departmentOptions = ['ECE', 'CISE', 'MAE'],
+  departmentOptions = [],
 }: Props) {
   const formatDateInputValue = (value: Date | null) => {
     if (!value) return '';

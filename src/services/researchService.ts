@@ -7,11 +7,23 @@ import {
   ResearchListing,
   normalizeResearchListing,
 } from '@/app/models/ResearchModel';
+import { resolveDepartmentCode } from '@/constants/research';
 
 export interface ResearchFilters {
   department?: string;
   studentLevel?: string;
   termsAvailable?: string;
+}
+
+// Derive the canonical departmentId (lowercase slug matching departments/{id})
+// from whatever the form handed us. Returns null when the department is
+// missing or unresolvable; callers write the listing without a departmentId
+// in that case and Unit 7 backfill will fix it up during cutover.
+function deriveDepartmentId(
+  department: string | null | undefined
+): string | null {
+  const code = resolveDepartmentCode(department);
+  return code ? code.toLowerCase() : null;
 }
 
 /**
@@ -92,7 +104,13 @@ export async function createResearchListing(
   formData: Partial<ResearchListing>
 ): Promise<string> {
   try {
-    const docRef = await db.collection('research-listings').add(formData);
+    // Stamp departmentId alongside the existing department string. Used by
+    // Unit 7 dept-scoping rules and by dept-admin queries.
+    const deptId = deriveDepartmentId(formData.department);
+    const toWrite: Record<string, unknown> = { ...formData };
+    if (deptId) toWrite.departmentId = deptId;
+
+    const docRef = await db.collection('research-listings').add(toWrite);
     return docRef.id;
   } catch (error) {
     console.error('Error creating research listing:', error);
@@ -108,7 +126,13 @@ export async function updateResearchListing(
   updates: Partial<ResearchListing>
 ): Promise<void> {
   try {
-    await db.collection('research-listings').doc(listingId).update(updates);
+    const toWrite: Record<string, unknown> = { ...updates };
+    // Keep departmentId in sync if department is being changed.
+    if (Object.prototype.hasOwnProperty.call(updates, 'department')) {
+      const deptId = deriveDepartmentId(updates.department);
+      if (deptId) toWrite.departmentId = deptId;
+    }
+    await db.collection('research-listings').doc(listingId).update(toWrite);
   } catch (error) {
     console.error('Error updating research listing:', error);
     throw new Error('Failed to update research listing');

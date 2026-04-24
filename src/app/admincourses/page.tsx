@@ -30,11 +30,21 @@ import PageLayout from '@/components/PageLayout/PageLayout';
 import { getNavItems } from '@/hooks/useGetItems';
 import { isE2EMode } from '@/utils/featureFlags';
 import { useSemesters } from '@/hooks/useSemesterOptions';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { resolveDepartmentCode } from '@/constants/research';
 
 export default function AdminCoursesPage() {
   const { currentSemester, options } = useSemesters();
   const { user } = useAuth();
   const [role, loading, error] = GetUserRole(user?.uid);
+  const { user: currentUser } = useCurrentUser();
+  // Resolve the admin's department at xlsx-upload time. For admins migrated
+  // to the per-(user,dept) roles model this is `activeDeptId` (lowercased id);
+  // legacy admins still fall back to the resolved code of their single
+  // `users/{uid}.department` string.
+  const uploadDeptCode =
+    (currentUser.activeDeptId ?? '').toUpperCase() ||
+    resolveDepartmentCode(currentUser.legacyDepartment);
   const isE2E = isE2EMode();
   const [semester, setSemester] = useState<string>(currentSemester);
   const [menu, setMenu] = useState<string[]>([]);
@@ -218,16 +228,33 @@ export default function AdminCoursesPage() {
   };
 
   const readExcelFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!uploadDeptCode) {
+      toast.error(
+        'No department on your account. Ask a super admin to assign one before uploading.',
+        { duration: 4000 }
+      );
+      input.value = '';
+      return;
+    }
+    const confirmed = window.confirm(
+      `Import "${file.name}" into ${uploadDeptCode} for ${semester}?\n\nEvery course in this file will be attached to ${uploadDeptCode}.`
+    );
+    if (!confirmed) {
+      input.value = '';
+      return;
+    }
+
     setProcessing(true);
     const toastId = toast.loading(
-      'Processing course data. This may take a couple minutes.',
+      `Processing course data for ${uploadDeptCode}. This may take a couple minutes.`,
       { duration: 300000000 }
     );
 
     try {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
       const arrayBuffer = await file.arrayBuffer();
       const workbook = read(arrayBuffer);
       const data: any[] = [];
@@ -276,7 +303,7 @@ export default function AdminCoursesPage() {
               professor_names: mappedRow['Instructor'] ?? 'undef',
               code: mappedRow['Course'] ?? 'undef',
               credits: mappedRow['Min - Max Cred'] ?? 'undef',
-              department: 'ECE',
+              department: uploadDeptCode,
               enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
               enrolled: mappedRow['Enrolled'] ?? 'undef',
               title: mappedRow['Course Title'] ?? 'undef',

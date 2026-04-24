@@ -10,10 +10,45 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import { NavbarItem } from '@/types/navigation';
 import { SemesterName } from './useSemesterOptions';
 import { useMemo } from 'react';
 import { Role } from '@/types/User';
+
+// Super admin Departments entry. Appended to the sidebar for users with
+// superAdmin === true regardless of their legacy role (a super admin who
+// happens to have admin/faculty roles will see the standard items plus
+// this one).
+const DEPARTMENTS_NAV: NavbarItem = {
+  label: 'Departments',
+  to: '/admin/departments',
+  icon: AccountTreeOutlinedIcon,
+};
+
+// Wrap getNavItems with super-admin awareness. Called by HeaderCard so every
+// admin-area page gains the Departments entry for super admins without per-
+// page changes.
+export const getNavItemsForUser = (params: {
+  role: Role;
+  superAdmin?: boolean;
+}): NavbarItem[] => {
+  const items = getNavItems(params.role);
+  if (params.superAdmin) {
+    // Insert before the Help item if present; else append.
+    const helpIdx = items.findIndex((i) => i.label === 'Help');
+    if (helpIdx >= 0) {
+      return [
+        ...items.slice(0, helpIdx),
+        DEPARTMENTS_NAV,
+        ...items.slice(helpIdx),
+      ];
+    }
+    return [...items, DEPARTMENTS_NAV];
+  }
+  return items;
+};
+
 export const getNavItems = (userRole: Role): NavbarItem[] => {
   switch (userRole) {
     /* ─────────────────────────────── Student buckets ───────────────────────────── */

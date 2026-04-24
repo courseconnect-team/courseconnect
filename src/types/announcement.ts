@@ -1,5 +1,9 @@
 export type AudienceType = 'all' | 'roles' | 'departments' | 'users';
-export type AudienceDepartment = 'ECE' | 'CISE' | 'MAE';
+// Department audience values are department short codes (e.g. 'ECE', 'CISE').
+// Originally a fixed union; opened up in Unit 6 of multi-department support
+// now that departments are managed through the app. Kept as an alias of
+// `string` for backward compatibility with existing consumers.
+export type AudienceDepartment = string;
 export type AudienceRole = 'admin' | 'faculty' | 'student';
 
 export type Audience =

@@ -15,7 +15,7 @@ import { useDocument } from 'react-firebase-hooks/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import { Announcement, Audience, AudienceRole } from '@/types/announcement';
-import { DEPARTMENTS, isDepartmentMatch } from '@/constants/research';
+import { resolveDepartmentCode } from '@/constants/research';
 import { useAnnouncementStates } from '@/hooks/Announcements/useAnnouncementStates';
 import {
   markRead as markReadHelper,
@@ -23,41 +23,6 @@ import {
   markAck as markAckHelper,
   markAllRead as markAllReadHelper,
 } from '@/hooks/Announcements/markAnnouncementState';
-
-// Resolve a user's stored department string to the short code used in
-// announcement audience tokens (e.g. "dept:ece"). Handles the input shapes
-// currently in production:
-//   1. Short codes stored directly by the signup form (e.g. "ECE", "CS")
-//   2. Canonical full names from src/constants/research.ts (e.g.
-//      "Electrical and Computer Engineering") — case-insensitive since the
-//      profile edit form accepts free-text entry
-//   3. The CISE "Science" vs "Sciences" spelling variant, per isDepartmentMatch
-// Returns null when the department does not map to any known code; in that
-// case the announcements query emits no dept:* token, and the user still
-// sees 'all'-targeted + role-targeted + user-targeted announcements.
-function resolveDepartmentCode(raw: string | undefined | null): string | null {
-  if (!raw) return null;
-  const value = raw.trim();
-  if (!value) return null;
-
-  // Short code match (signup dropdown stores labels directly in most users).
-  const upper = value.toUpperCase();
-  const byLabel = DEPARTMENTS.find((d) => d.label.toUpperCase() === upper);
-  if (byLabel) return byLabel.label;
-
-  // Full name match against canonical DEPARTMENTS list (case-insensitive).
-  const lower = value.toLowerCase();
-  const byFullName = DEPARTMENTS.find((d) => d.value.toLowerCase() === lower);
-  if (byFullName) return byFullName.label;
-
-  // CISE spelling variants ("Science" vs "Sciences") both map to CISE.
-  if (isDepartmentMatch(value, 'CISE')) return 'CISE';
-
-  // Legacy signup option "CS" maps to the CISE department.
-  if (upper === 'CS') return 'CISE';
-
-  return null;
-}
 
 type AnnouncementsContextType = {
   read: Announcement[];
