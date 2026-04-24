@@ -280,15 +280,32 @@ export const promoteSuperAdmin = functions.https.onRequest(async (req, res) => {
       return;
     }
 
-    await db.collection('users').doc(uid).set(
-      {
-        superAdmin: true,
-        superAdminAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
+    // Also stamp role='admin' when the user lacks a staff role so the
+    // existing admin pages and rules (which gate on role === 'admin')
+    // accept them. Same behavior as bootstrapSuperAdmin.
+    const existingSnap = await db.collection('users').doc(uid).get();
+    const existingRole = existingSnap.data()?.role;
+    const needsAdminRole =
+      typeof existingRole !== 'string' ||
+      existingRole === '' ||
+      existingRole === 'unapproved' ||
+      existingRole.startsWith('student');
 
-    res.status(200).json({ uid, superAdmin: true });
+    const payload: Record<string, unknown> = {
+      superAdmin: true,
+      superAdminAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    if (needsAdminRole) {
+      payload.role = 'admin';
+    }
+
+    await db.collection('users').doc(uid).set(payload, { merge: true });
+
+    res.status(200).json({
+      uid,
+      superAdmin: true,
+      roleStampedAdmin: needsAdminRole,
+    });
   } catch (error) {
     console.error('promoteSuperAdmin failed:', error);
     fail(res, 'Error promoting super admin', 500);

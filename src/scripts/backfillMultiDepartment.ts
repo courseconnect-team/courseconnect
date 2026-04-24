@@ -24,7 +24,12 @@
  */
 
 const admin = require('firebase-admin');
-import { resolveDepartmentCode } from '@/constants/research';
+// CommonJS require (not an ES import) so the tsconfig "module": "esnext"
+// setting doesn't force Node to treat this file as ESM. Matches the pattern
+// used by src/scripts/migrateApplications.ts.
+const { resolveDepartmentCode } = require('../constants/research') as {
+  resolveDepartmentCode: (raw: string | undefined | null) => string | null;
+};
 
 type AnyMap = Record<string, any>;
 
