@@ -30,7 +30,8 @@ export default function AdminCoursesPage() {
   const { user: currentUser } = useCurrentUser();
   const uploadDeptCode =
     (currentUser.activeDeptId ?? '').toUpperCase() ||
-    resolveDepartmentCode(currentUser.legacyDepartment);
+    resolveDepartmentCode(currentUser.legacyDepartment) ||
+    '';
 
   const isE2E = isE2EMode();
   const [semester, setSemester] = React.useState<string>(currentSemester);
