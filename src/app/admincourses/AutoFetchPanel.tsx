@@ -445,11 +445,14 @@ export default function AutoFetchPanel({
       toast.error(e instanceof Error ? e.message : 'Update failed');
     }
   };
-  const handleTrigger = async (c: CourseFetchConfig) => {
+  const handleTrigger = async (
+    c: CourseFetchConfig,
+    includeCourses?: string[]
+  ) => {
     setRunningId(c.id);
     const toastId = toast.loading(`Running ${c.label}…`);
     try {
-      const res = await api.trigger(c.id);
+      const res = await api.trigger(c.id, includeCourses);
       toast.dismiss(toastId);
       if (res.status === 'success') {
         toast.success(
@@ -497,9 +500,9 @@ export default function AutoFetchPanel({
     setPreviewData(null);
     setPreviewError(null);
   };
-  const handleApplyFromPreview = async () => {
+  const handleApplyFromPreview = async (selectedCodes: string[]) => {
     if (!previewConfig) return;
-    await handleTrigger(previewConfig);
+    await handleTrigger(previewConfig, selectedCodes);
     handleClosePreview();
   };
 

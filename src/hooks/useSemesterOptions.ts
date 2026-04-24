@@ -36,7 +36,7 @@ export function generateSemesters(startYear = 2023): SemesterName[] {
   }
 
   const currentIndex = out.findIndex(
-    (s) => s === `${currentTerm} ${currentYear}` as SemesterName
+    (s) => s === (`${currentTerm} ${currentYear}` as SemesterName)
   );
 
   if (currentIndex === -1) return out.reverse();
@@ -102,29 +102,51 @@ export type CourseOption = {
   name: string;
 };
 
+// Input for the course picker. Fields come straight from the semester's course
+// doc (`semesters/{sem}/courses/{id}`) — previously we reconstructed them by
+// splitting the doc id on ":" but the doc id is now `${code}__{classNumber}`
+// (shared with auto-fetch), so structured fields are authoritative.
+export type CourseMinimalInput = {
+  code: string;
+  classNumber: string;
+  instructor: string;
+  semester: string;
+  // Human-friendly code with the conventional space, e.g. "COP 3502". Optional;
+  // falls back to inserting a space via the same rule auto-fetch uses.
+  codeWithSpace?: string;
+};
+
+function prettyCode(code: string, fallback?: string): string {
+  if (fallback && fallback.trim()) return fallback.trim();
+  const m = code.match(/^([A-Z]{2,4})(\d{3,4}[A-Z]?)$/);
+  return m ? `${m[1]} ${m[2]}` : code;
+}
+
 export function parseCoursesMinimal(
-  courses: { raw: string; semester: string }[]
+  courses: CourseMinimalInput[]
 ): CourseOption[] {
-  return courses.map(({ raw, semester }) => {
-    const safe = String(raw ?? '').trim();
-    const [left, right = ''] = safe.split(':', 2);
-    const code = (left ?? '').trim();
-    const instrRaw = right.trim();
+  return courses.map(
+    ({ code, classNumber, instructor, semester, codeWithSpace }) => {
+      const safeCode = String(code ?? '')
+        .trim()
+        .toUpperCase();
+      const display = prettyCode(safeCode, codeWithSpace);
+      const instrClean = String(instructor ?? '').trim();
+      const safeInstructor =
+        instrClean && instrClean.toLowerCase() !== 'undefined'
+          ? instrClean
+          : 'Instructor Unknown';
+      const department = safeCode.slice(0, 3).toUpperCase();
+      const docId = `${safeCode}__${String(classNumber ?? '').trim()}`;
 
-    const instructor =
-      instrRaw && instrRaw.toLowerCase() !== 'undefined'
-        ? instrRaw
-        : 'Instructor Unknown';
-
-    const department = code.slice(0, 3).toUpperCase();
-
-    return {
-      code,
-      instructor,
-      department,
-      semester,
-      value: `${semester}|||${safe}`,
-      name: `${code} : ${instructor} (${semester})`,
-    };
-  });
+      return {
+        code: safeCode,
+        instructor: safeInstructor,
+        department,
+        semester,
+        value: `${semester}|||${docId}`,
+        name: `${display} : ${safeInstructor} (${semester})`,
+      };
+    }
+  );
 }

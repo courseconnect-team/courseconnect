@@ -105,6 +105,10 @@ export interface RunContext {
   triggeredBy: 'manual' | 'scheduled';
   triggeredByUid?: string;
   leaseToken?: string;
+  // When provided, only courses whose code (uppercased) is in this set are
+  // persisted. Used by the Preview → Apply flow so admins can curate the
+  // write set without widening the config's filters.
+  includeCourses?: string[];
 }
 
 export interface RunOutcome {
@@ -123,7 +127,8 @@ async function commitCoursesAndSections(
   configId: string,
   provider: string,
   config: ValidatedConfig,
-  result: FetchResult
+  result: FetchResult,
+  includeCourses?: string[]
 ): Promise<void> {
   const catalog = db.collection('catalog');
   const termCode =
@@ -132,10 +137,24 @@ async function commitCoursesAndSections(
     '';
   const prefix = `${provider}:${termCode}`;
 
+  const includeSet =
+    includeCourses && includeCourses.length > 0
+      ? new Set(includeCourses.map((c) => c.trim().toUpperCase()))
+      : null;
+  const isIncluded = (code: string) =>
+    includeSet === null || includeSet.has(code.trim().toUpperCase());
+
+  const coursesToWrite = includeSet
+    ? result.courses.filter((c) => isIncluded(c.code))
+    : result.courses;
+  const sectionsToWrite = includeSet
+    ? result.sections.filter((s) => isIncluded(s.courseCode))
+    : result.sections;
+
   // Index sections by courseCode so we can emit one legacy semester-course
   // doc per (course, section) pair below.
   const sectionsByCourse = new Map<string, NormalizedSection[]>();
-  for (const section of result.sections) {
+  for (const section of sectionsToWrite) {
     const key = section.courseCode;
     const bucket = sectionsByCourse.get(key);
     if (bucket) bucket.push(section);
@@ -171,7 +190,7 @@ async function commitCoursesAndSections(
     )
   );
 
-  for (const course of result.courses) {
+  for (const course of coursesToWrite) {
     // 1) Cross-term catalog doc — audit/reuse across configs.
     const catalogId = `${prefix}:${course.code}`;
     const catalogRef = catalog.doc(catalogId);
@@ -210,7 +229,7 @@ async function commitCoursesAndSections(
 
   // Also write per-section catalog rows (pure audit, independent of the
   // legacy semester layout).
-  for (const section of result.sections) {
+  for (const section of sectionsToWrite) {
     const parentId = `${prefix}:${section.courseCode}`;
     const sectionId = `${prefix}:${section.classNumber}`;
     const ref = catalog.doc(parentId).collection('sections').doc(sectionId);
@@ -235,7 +254,8 @@ async function commitCoursesAndSections(
 }
 
 export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
-  const { db, configId, config, triggeredBy, triggeredByUid } = ctx;
+  const { db, configId, config, triggeredBy, triggeredByUid, includeCourses } =
+    ctx;
   const runRef = db
     .collection('courseFetchConfigs')
     .doc(configId)
@@ -313,7 +333,8 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
       configId,
       config.provider,
       config,
-      result
+      result,
+      includeCourses
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -324,16 +345,33 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
   const finishedAt = new Date();
   const durationMs = finishedAt.getTime() - startedAt.getTime();
 
+  // Report counts of what was actually persisted — when the caller curated a
+  // subset via includeCourses, the fetched totals overstate the write.
+  const includeSet =
+    includeCourses && includeCourses.length > 0
+      ? new Set(includeCourses.map((c) => c.trim().toUpperCase()))
+      : null;
+  const persistedCourseCount = includeSet
+    ? result.courses.filter((c) => includeSet.has(c.code.trim().toUpperCase()))
+        .length
+    : result.courses.length;
+  const persistedSectionCount = includeSet
+    ? result.sections.filter((s) =>
+        includeSet.has(s.courseCode.trim().toUpperCase())
+      ).length
+    : result.sections.length;
+
   await runRef.set(
     {
       finishedAt: now(),
       status: result.status,
       rawCount: result.rawCount,
-      courseCount: result.courses.length,
-      sectionCount: result.sections.length,
+      courseCount: persistedCourseCount,
+      sectionCount: persistedSectionCount,
       errors: result.errors.slice(0, 50),
       warnings: result.warnings.slice(0, 50),
       durationMs,
+      ...(includeSet ? { curated: true } : {}),
     },
     { merge: true }
   );
@@ -355,8 +393,8 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
     runId,
     status: result.status,
     rawCount: result.rawCount,
-    courseCount: result.courses.length,
-    sectionCount: result.sections.length,
+    courseCount: persistedCourseCount,
+    sectionCount: persistedSectionCount,
     durationMs,
     errors: result.errors,
     warnings: result.warnings,

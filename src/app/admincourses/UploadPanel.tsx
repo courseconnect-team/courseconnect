@@ -11,6 +11,32 @@ import 'firebase/firestore';
 
 const PURPLE = '#562EBA';
 
+// Normalize a course code the same way the auto-fetch pipeline does
+// (`functions/.../normalize.ts`): strip whitespace, uppercase. The result is
+// the bare "COP3502" form used inside doc ids.
+function normalizeCode(raw: unknown): string {
+  return String(raw ?? '')
+    .replace(/\s+/g, '')
+    .trim()
+    .toUpperCase();
+}
+
+function addCodeSpace(code: string): string {
+  const m = code.match(/^([A-Z]{2,4})(\d{3,4}[A-Z]?)$/);
+  return m ? `${m[1]} ${m[2]}` : code;
+}
+
+function normalizeClassNumber(raw: unknown): string {
+  return String(raw ?? '').trim();
+}
+
+// Doc-id shape shared with auto-fetch (`runner.ts::commitCoursesAndSections`).
+// Keeping these aligned means the auto-fetch and Excel paths write into the
+// same doc so re-runs merge in place instead of producing duplicates.
+function semesterCourseDocId(code: string, classNumber: string): string {
+  return `${code}__${classNumber}`;
+}
+
 export interface UploadPanelProps {
   semester: string;
   uploadDeptCode: string;
@@ -82,6 +108,7 @@ export default function UploadPanel({
       });
 
       const seen = new Set<string>();
+      let skippedMissingId = 0;
       for (const row of data) {
         const mappedRow: Record<string, any> = {
           Course: row['__EMPTY_1'],
@@ -96,9 +123,16 @@ export default function UploadPanel({
           'Enr Cap': row['__EMPTY_26'],
           Enrolled: row['__EMPTY_28'],
         };
-        const key = `${mappedRow['Class Nbr']} ${mappedRow['Instructor']}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
+
+        const code = normalizeCode(mappedRow['Course']);
+        const classNumber = normalizeClassNumber(mappedRow['Class Nbr']);
+        if (!code || !classNumber) {
+          skippedMissingId++;
+          continue;
+        }
+        const docId = semesterCourseDocId(code, classNumber);
+        if (seen.has(docId)) continue;
+        seen.add(docId);
 
         const rawEmails = mappedRow['Instructor Emails'] ?? 'undef';
         const emailArray =
@@ -106,32 +140,47 @@ export default function UploadPanel({
             ? []
             : rawEmails.split(';').map((e: string) => e.trim());
 
+        const instructor = String(mappedRow['Instructor'] ?? '').trim();
+
         await firebase
           .firestore()
           .collection('semesters')
           .doc(semester)
           .collection('courses')
-          .doc(`${mappedRow['Course']} : ${mappedRow['Instructor']}`)
-          .set({
-            class_number: mappedRow['Class Nbr'] ?? 'undef',
-            professor_emails: emailArray,
-            professor_names: mappedRow['Instructor'] ?? 'undef',
-            code: mappedRow['Course'] ?? 'undef',
-            credits: mappedRow['Min - Max Cred'] ?? 'undef',
-            department: uploadDeptCode,
-            enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
-            enrolled: mappedRow['Enrolled'] ?? 'undef',
-            title: mappedRow['Course Title'] ?? 'undef',
-            semester,
-            meeting_times: [
-              {
-                day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
-                time: mappedRow['Time'] ?? 'undef',
-                location: mappedRow['Facility'] ?? 'undef',
-              },
-            ],
-            source: 'excel-upload',
-          });
+          .doc(docId)
+          .set(
+            {
+              class_number: classNumber,
+              professor_emails: emailArray,
+              professor_names: instructor || 'undef',
+              code,
+              codeWithSpace: addCodeSpace(code),
+              credits: mappedRow['Min - Max Cred'] ?? 'undef',
+              department: uploadDeptCode,
+              enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
+              enrolled: mappedRow['Enrolled'] ?? 'undef',
+              title: mappedRow['Course Title'] ?? 'undef',
+              semester,
+              meeting_times: [
+                {
+                  day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
+                  time: mappedRow['Time'] ?? 'undef',
+                  location: mappedRow['Facility'] ?? 'undef',
+                },
+              ],
+              source: 'excel-upload',
+            },
+            { merge: true }
+          );
+      }
+
+      if (skippedMissingId > 0) {
+        toast(
+          `${skippedMissingId} row${
+            skippedMissingId === 1 ? '' : 's'
+          } skipped: missing course code or class number.`,
+          { icon: '⚠️', duration: 4000 }
+        );
       }
 
       setProcessing(false);
