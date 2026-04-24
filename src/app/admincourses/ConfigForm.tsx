@@ -58,7 +58,6 @@ function draftFromInitial(
     term: initial.term,
     year: initial.year,
     termCode: initial.termCode,
-    departments: initial.departments ?? [],
     codePrefixes: initial.codePrefixes ?? [],
     numberMin: initial.numberMin,
     numberMax: initial.numberMax,
@@ -88,9 +87,6 @@ export default function ConfigForm({
   submitting,
 }: ConfigFormProps) {
   const [draft, setDraft] = React.useState<Draft>(draftFromInitial(initial));
-  const [departmentsRaw, setDepartmentsRaw] = React.useState(
-    joinCsv(initial?.departments)
-  );
   const [prefixesRaw, setPrefixesRaw] = React.useState(
     joinCsv(initial?.codePrefixes)
   );
@@ -98,7 +94,6 @@ export default function ConfigForm({
 
   React.useEffect(() => {
     setDraft(draftFromInitial(initial));
-    setDepartmentsRaw(joinCsv(initial?.departments));
     setPrefixesRaw(joinCsv(initial?.codePrefixes));
     setErr(null);
   }, [initial, open]);
@@ -107,7 +102,6 @@ export default function ConfigForm({
     setErr(null);
     const payload: Draft = {
       ...draft,
-      departments: parseCsv(departmentsRaw),
       codePrefixes: parseCsv(prefixesRaw),
     };
     try {
@@ -202,15 +196,8 @@ export default function ConfigForm({
             />
           </Stack>
           <TextField
-            label="Departments (comma-separated)"
-            helperText="e.g. CISE, ECE. Leave empty for all."
-            value={departmentsRaw}
-            onChange={(e) => setDepartmentsRaw(e.target.value)}
-            fullWidth
-          />
-          <TextField
             label="Course code prefixes (comma-separated)"
-            helperText="e.g. COP, EEL. Leave empty for all."
+            helperText="UF 2–4 letter prefix on the course code. CISE: COP, CAP, CIS, CEN, CDA, CNT. ECE: EEL, EEE, EGN. Leave empty for all."
             value={prefixesRaw}
             onChange={(e) => setPrefixesRaw(e.target.value)}
             fullWidth

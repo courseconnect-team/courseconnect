@@ -78,14 +78,14 @@ function course(
   };
 }
 
-test('filterCourse respects code prefix and department filters', () => {
-  const cop = course('COP3502', { department: 'CISE' });
-  const cda = course('CDA3101', { department: 'CISE' });
-  const mac = course('MAC2311', { department: 'MATH' });
+test('filterCourse matches on code prefix', () => {
+  const cop = course('COP3502');
+  const cda = course('CDA3101');
+  const mac = course('MAC2311');
   assert.equal(filterCourse(cop, { codePrefixes: ['COP'] }), true);
   assert.equal(filterCourse(cda, { codePrefixes: ['COP'] }), false);
-  assert.equal(filterCourse(cop, { departments: ['CISE'] }), true);
-  assert.equal(filterCourse(mac, { departments: ['CISE'] }), false);
+  assert.equal(filterCourse(mac, { codePrefixes: ['COP', 'CDA'] }), false);
+  assert.equal(filterCourse(cda, { codePrefixes: ['COP', 'CDA'] }), true);
 });
 
 test('filterCourse respects numberMin/numberMax', () => {
@@ -196,12 +196,34 @@ test('validateConfigInput rejects bad term / provider / prefixes', () => {
     provider: 'MIT',
     term: 'winter',
     year: 1800,
-    departments: ['cs4life'],
     codePrefixes: ['x'],
     refresh: { mode: 'monthly' },
   });
   assert.equal(res.ok, false);
   assert.ok(!res.ok && res.errors.length >= 4);
+});
+
+test('validateConfigInput folds legacy departments into codePrefixes', () => {
+  const res = validateConfigInput({
+    label: 'legacy',
+    provider: 'UF',
+    term: 'fall',
+    year: 2026,
+    // Old configs may still have `departments` set; valid 2–4 letter codes
+    // get folded into codePrefixes. Entries that don't match the UF prefix
+    // shape (e.g. 'ECE3') are dropped silently so the config still loads.
+    departments: ['EEL', 'CISE', 'ECE3'],
+    codePrefixes: ['COP'],
+    refresh: { mode: 'manual' },
+  });
+  assert.equal(res.ok, true);
+  if (res.ok) {
+    assert.deepEqual([...res.value.codePrefixes].sort(), [
+      'CISE',
+      'COP',
+      'EEL',
+    ]);
+  }
 });
 
 test('validateConfigInput enforces everyHours range for everyNHours', () => {
@@ -365,7 +387,7 @@ test('fetchCoursesForConfig marks failed when every worker errors', async () => 
       institution: 'UF',
       term: 'spring',
       year: 2026,
-      filters: { departments: ['CISE'] },
+      filters: { codePrefixes: ['COP'] },
       concurrency: 1,
     },
     { fetcher: stub }

@@ -283,6 +283,7 @@ type PreviewCourseRow = {
   title: string;
   credits?: string;
   department?: string;
+  departmentName?: string;
   sections: PreviewSectionRow[];
 };
 
@@ -378,6 +379,7 @@ export const previewCourseFetch = functions
           title: c.title,
           credits: c.credits,
           department: c.department,
+          departmentName: c.departmentName,
           sections: sectionsByCourse.get(c.code) ?? [],
         }));
 

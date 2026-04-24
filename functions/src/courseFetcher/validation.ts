@@ -29,7 +29,6 @@ export type ValidatedConfig = {
   term: SemesterTermLower;
   year: number;
   termCode?: string;
-  departments: string[];
   codePrefixes: string[];
   numberMin?: number;
   numberMax?: number;
@@ -58,7 +57,6 @@ const REFRESH_MODES = [
   'weekly',
   'everyNHours',
 ] as const;
-const DEPT_CODE = /^[A-Z]{2,6}$/;
 const COURSE_PREFIX = /^[A-Z]{2,4}$/;
 
 function isNonEmptyString(v: unknown): v is string {
@@ -143,18 +141,28 @@ export function validateConfigInput(input: ConfigInput): ValidationResult {
     }
   }
 
-  const departments = toStringArray(
-    input.departments,
-    DEPT_CODE,
-    'departments',
-    errors
-  );
+  // The Departments and Course code prefixes fields were merged into a single
+  // codePrefixes list — on UF both compared against the same 2–4 letter code
+  // prefix. We still accept `departments` from legacy stored configs and fold
+  // any valid 2–4 letter codes into the codePrefixes union. Entries that
+  // don't match UF's prefix shape (e.g. 'ECE3') are dropped silently rather
+  // than erroring so a stored config can still load and be re-saved.
   const codePrefixes = toStringArray(
     input.codePrefixes,
     COURSE_PREFIX,
     'codePrefixes',
     errors
   );
+  const legacyDeptErrors: string[] = [];
+  const legacyDepts = toStringArray(
+    input.departments,
+    COURSE_PREFIX,
+    'departments',
+    legacyDeptErrors
+  );
+  for (const d of legacyDepts) {
+    if (!codePrefixes.includes(d)) codePrefixes.push(d);
+  }
 
   let numberMin: number | undefined;
   let numberMax: number | undefined;
@@ -229,7 +237,6 @@ export function validateConfigInput(input: ConfigInput): ValidationResult {
       term: term as SemesterTermLower,
       year,
       termCode,
-      departments,
       codePrefixes,
       numberMin,
       numberMax,
@@ -255,7 +262,6 @@ export function toConfigSnapshot(
     year: v.year,
     termCode: v.termCode,
     filters: {
-      departments: v.departments,
       codePrefixes: v.codePrefixes,
       numberMin: v.numberMin,
       numberMax: v.numberMax,
