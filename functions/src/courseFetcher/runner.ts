@@ -11,9 +11,87 @@ import {
   toConfigSnapshot,
   type ValidatedConfig,
 } from './validation';
-import type { FetchResult } from './types';
+import type {
+  FetchResult,
+  NormalizedCourse,
+  NormalizedMeetingTime,
+  NormalizedSection,
+} from './types';
 
 const BATCH_LIMIT = 450; // leave headroom below the 500-op Firestore limit
+
+// Map a config's (term, year) to the semester doc name the app uses
+// everywhere else. The existing collection is `semesters/{name}/courses/*`
+// with names like 'Spring 2026' / 'Fall 2026', so we match that casing.
+function semesterNameFromConfig(
+  term: ValidatedConfig['term'],
+  year: number
+): string {
+  const cap = term.charAt(0).toUpperCase() + term.slice(1);
+  return `${cap} ${year}`;
+}
+
+function formatTimeRange(
+  start: string | undefined,
+  end: string | undefined,
+  raw: string | undefined
+): string {
+  if (start && end) return `${start} - ${end}`;
+  if (start) return start;
+  if (end) return end;
+  return raw ?? '';
+}
+
+function toLegacyMeetingTimes(times: NormalizedMeetingTime[]): Array<{
+  day: string;
+  time: string;
+  location: string;
+}> {
+  if (!Array.isArray(times) || times.length === 0) return [];
+  return times.map((m) => ({
+    day: (m.day ?? '').trim(),
+    time: formatTimeRange(m.startTime, m.endTime, m.rawTime),
+    location: (m.location ?? '').trim(),
+  }));
+}
+
+// Build a doc matching the existing semester-course schema used by the
+// Excel upload flow. The `source` + `sourceConfigId` fields let the UI
+// distinguish auto-fetched rows from manually uploaded ones.
+function buildSemesterCourseDoc(
+  course: NormalizedCourse,
+  section: NormalizedSection,
+  semesterName: string,
+  configId: string,
+  provider: string
+): Record<string, unknown> {
+  const instructorNames = section.instructors
+    .map((i) => i.name)
+    .filter(Boolean);
+  const instructorEmails = section.instructors
+    .map((i) => i.email)
+    .filter((e): e is string => Boolean(e));
+
+  return {
+    class_number: section.classNumber,
+    code: course.code,
+    title: course.title,
+    credits: course.credits ?? '',
+    department: (course.department ?? '').toUpperCase(),
+    professor_names: instructorNames.join(', '),
+    professor_emails: instructorEmails,
+    enrollment_cap:
+      section.enrollmentCap != null ? String(section.enrollmentCap) : '',
+    enrolled: section.enrolled != null ? String(section.enrolled) : '',
+    title_section: section.sectionNumber ?? '',
+    semester: semesterName,
+    meeting_times: toLegacyMeetingTimes(section.meetingTimes),
+    source: 'auto-fetch',
+    sourceConfigId: configId,
+    sourceProvider: provider,
+    updated_at: admin.firestore.FieldValue.serverTimestamp(),
+  };
+}
 
 function now(): FirebaseFirestore.FieldValue {
   return admin.firestore.FieldValue.serverTimestamp();
@@ -43,6 +121,7 @@ async function commitCoursesAndSections(
   db: FirebaseFirestore.Firestore,
   configId: string,
   provider: string,
+  config: ValidatedConfig,
   result: FetchResult
 ): Promise<void> {
   const catalog = db.collection('catalog');
@@ -51,6 +130,20 @@ async function commitCoursesAndSections(
       (result.providerMeta as Record<string, unknown>).termCode) ||
     '';
   const prefix = `${provider}:${termCode}`;
+
+  // Index sections by courseCode so we can emit one legacy semester-course
+  // doc per (course, section) pair below.
+  const sectionsByCourse = new Map<string, NormalizedSection[]>();
+  for (const section of result.sections) {
+    const key = section.courseCode;
+    const bucket = sectionsByCourse.get(key);
+    if (bucket) bucket.push(section);
+    else sectionsByCourse.set(key, [section]);
+  }
+
+  const semesterName = semesterNameFromConfig(config.term, config.year);
+  const semesterRef = db.collection('semesters').doc(semesterName);
+  const semesterCourses = semesterRef.collection('courses');
 
   type Op = () => void;
   let batch = db.batch();
@@ -67,34 +160,74 @@ async function commitCoursesAndSections(
     if (ops >= BATCH_LIMIT) await flush();
   };
 
+  // Ensure the semester doc exists so the admin UI's semester list includes
+  // it even on a fresh term. `merge: true` preserves `hidden` if already set.
+  await add(() =>
+    batch.set(
+      semesterRef,
+      { semester: semesterName, hidden: false },
+      { merge: true }
+    )
+  );
+
   for (const course of result.courses) {
-    const id = `${prefix}:${course.code}`;
-    const ref = catalog.doc(id);
-    const payload = {
-      ...course,
-      id,
-      provider,
-      termCode,
-      lastUpdated: now(),
-      sourceConfigId: configId,
-    };
-    await add(() => batch.set(ref, payload, { merge: true }));
+    // 1) Cross-term catalog doc — audit/reuse across configs.
+    const catalogId = `${prefix}:${course.code}`;
+    const catalogRef = catalog.doc(catalogId);
+    await add(() =>
+      batch.set(
+        catalogRef,
+        {
+          ...course,
+          id: catalogId,
+          provider,
+          termCode,
+          lastUpdated: now(),
+          sourceConfigId: configId,
+        },
+        { merge: true }
+      )
+    );
+
+    // 2) Live semester-course docs — one per section, matching the existing
+    // schema the app already reads. Doc id uses `__` to avoid colliding
+    // with Excel rows which use `${code} : ${instructor}`.
+    const sections = sectionsByCourse.get(course.code) ?? [];
+    for (const section of sections) {
+      const semDocId = `${course.code}__${section.classNumber}`;
+      const semRef = semesterCourses.doc(semDocId);
+      const semPayload = buildSemesterCourseDoc(
+        course,
+        section,
+        semesterName,
+        configId,
+        provider
+      );
+      await add(() => batch.set(semRef, semPayload, { merge: true }));
+    }
   }
 
+  // Also write per-section catalog rows (pure audit, independent of the
+  // legacy semester layout).
   for (const section of result.sections) {
     const parentId = `${prefix}:${section.courseCode}`;
     const sectionId = `${prefix}:${section.classNumber}`;
     const ref = catalog.doc(parentId).collection('sections').doc(sectionId);
-    const payload = {
-      ...section,
-      id: sectionId,
-      courseId: parentId,
-      provider,
-      termCode,
-      lastUpdated: now(),
-      sourceConfigId: configId,
-    };
-    await add(() => batch.set(ref, payload, { merge: true }));
+    await add(() =>
+      batch.set(
+        ref,
+        {
+          ...section,
+          id: sectionId,
+          courseId: parentId,
+          provider,
+          termCode,
+          lastUpdated: now(),
+          sourceConfigId: configId,
+        },
+        { merge: true }
+      )
+    );
   }
 
   await flush();
@@ -174,7 +307,13 @@ export async function runAndPersist(ctx: RunContext): Promise<RunOutcome> {
   }
 
   try {
-    await commitCoursesAndSections(db, configId, config.provider, result);
+    await commitCoursesAndSections(
+      db,
+      configId,
+      config.provider,
+      config,
+      result
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     result.status = result.status === 'failed' ? 'failed' : 'partial_success';

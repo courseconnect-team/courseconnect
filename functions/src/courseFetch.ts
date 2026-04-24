@@ -17,8 +17,10 @@ import {
   verifyAuth,
 } from './shared';
 import { runAndPersist } from './courseFetcher/runner';
+import { fetchCoursesForConfig } from './courseFetcher/pipeline';
 import {
   computeNextRefreshAt,
+  toConfigSnapshot,
   validateConfigInput,
   type ValidatedConfig,
 } from './courseFetcher/validation';
@@ -247,6 +249,167 @@ export const triggerCourseFetch = functions.https.onRequest(
     }
   }
 );
+
+// --- Preview (dry run) ---
+//
+// Runs the full fetch + filter + normalize pipeline but does NOT persist.
+// Joins sections under their course for rendering, and diffs each
+// `{code}__{classNumber}` against existing docs in the target semester so
+// the UI can tag rows as "new" or "updated".
+
+type PreviewSectionRow = {
+  classNumber: string;
+  sectionNumber?: string;
+  instructors: Array<{ name: string; email?: string }>;
+  meetingTimes: Array<{
+    day: string;
+    startTime?: string;
+    endTime?: string;
+    rawTime?: string;
+    location?: string;
+    building?: string;
+    room?: string;
+  }>;
+  enrollmentCap?: number;
+  enrolled?: number;
+  campus?: string;
+  deliveryMode?: string;
+  diffStatus: 'new' | 'updated';
+};
+
+type PreviewCourseRow = {
+  code: string;
+  codeWithSpace: string;
+  title: string;
+  credits?: string;
+  department?: string;
+  sections: PreviewSectionRow[];
+};
+
+function semesterNameFrom(
+  term: 'spring' | 'summer' | 'fall',
+  year: number
+): string {
+  const cap = term.charAt(0).toUpperCase() + term.slice(1);
+  return `${cap} ${year}`;
+}
+
+// Fetch just the doc ids already present in the target semester so we can
+// mark each previewed section as new vs updated. Reads only doc ids (uses
+// a snapshot but we ignore the data) — cheaper than pulling full docs.
+async function existingSemesterDocIds(
+  semesterName: string
+): Promise<Set<string>> {
+  const snap = await db
+    .collection('semesters')
+    .doc(semesterName)
+    .collection('courses')
+    .select()
+    .get();
+  const out = new Set<string>();
+  snap.forEach((d) => out.add(d.id));
+  return out;
+}
+
+export const previewCourseFetch = functions
+  .runWith({ timeoutSeconds: 300, memory: '1GB' })
+  .https.onRequest(async (req: Request, res: Response) => {
+    setCors(req, res);
+    if (!handleMethod(req, res)) return;
+    const caller = await verifyAuth(req, res);
+    if (!caller) return;
+    if (!(await ensureAdmin(caller.uid, res))) return;
+
+    try {
+      const body = asRecord(req.body);
+      const id = readString(body, 'id');
+      if (!id) {
+        fail(res, 'Missing id');
+        return;
+      }
+      const loaded = await loadValidatedConfig(id);
+      if (!loaded) {
+        fail(res, 'Config not found or invalid', 404);
+        return;
+      }
+      const config = loaded.config;
+      const snapshot = toConfigSnapshot(id, config);
+      const targetSemester = semesterNameFrom(config.term, config.year);
+
+      // Fetch + normalize, and read the existing semester doc ids in
+      // parallel — the two are independent.
+      const [result, existing] = await Promise.all([
+        fetchCoursesForConfig(snapshot),
+        existingSemesterDocIds(targetSemester),
+      ]);
+
+      // Group sections under their course and compute diff status.
+      const sectionsByCourse = new Map<string, PreviewSectionRow[]>();
+      let newCount = 0;
+      let updatedCount = 0;
+      for (const s of result.sections) {
+        const docId = `${s.courseCode}__${s.classNumber}`;
+        const diffStatus: 'new' | 'updated' = existing.has(docId)
+          ? 'updated'
+          : 'new';
+        if (diffStatus === 'new') newCount++;
+        else updatedCount++;
+        const row: PreviewSectionRow = {
+          classNumber: s.classNumber,
+          sectionNumber: s.sectionNumber,
+          instructors: s.instructors,
+          meetingTimes: s.meetingTimes,
+          enrollmentCap: s.enrollmentCap,
+          enrolled: s.enrolled,
+          campus: s.campus,
+          deliveryMode: s.deliveryMode,
+          diffStatus,
+        };
+        const bucket = sectionsByCourse.get(s.courseCode);
+        if (bucket) bucket.push(row);
+        else sectionsByCourse.set(s.courseCode, [row]);
+      }
+
+      const courses: PreviewCourseRow[] = result.courses
+        .filter((c) => (sectionsByCourse.get(c.code)?.length ?? 0) > 0)
+        .map((c) => ({
+          code: c.code,
+          codeWithSpace: c.codeWithSpace,
+          title: c.title,
+          credits: c.credits,
+          department: c.department,
+          sections: sectionsByCourse.get(c.code) ?? [],
+        }));
+
+      // Cap the response at 1000 courses to stay well under Cloud Functions'
+      // response limit. Admins rarely preview unfiltered catalogs; for those
+      // cases we report the total and truncation flag separately.
+      const capped = courses.slice(0, 1000);
+      const truncated = courses.length > capped.length;
+
+      const termCode = (
+        result.providerMeta as Record<string, unknown> | undefined
+      )?.termCode;
+
+      res.status(200).json({
+        status: result.status,
+        rawCount: result.rawCount,
+        courseCount: courses.length,
+        sectionCount: result.sections.length,
+        newSectionCount: newCount,
+        updatedSectionCount: updatedCount,
+        termCode,
+        targetSemester,
+        truncated,
+        courses: capped,
+        errors: result.errors.slice(0, 50),
+        warnings: result.warnings.slice(0, 50),
+      });
+    } catch (error) {
+      console.error('previewCourseFetch failed:', error);
+      fail(res, 'Failed to preview fetch', 500);
+    }
+  });
 
 // --- Run history ---
 

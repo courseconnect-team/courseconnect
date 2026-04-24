@@ -9,7 +9,6 @@ import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
-import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import { NavbarItem } from '@/types/navigation';
 import { SemesterName } from './useSemesterOptions';
@@ -104,11 +103,6 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
           icon: DescriptionOutlinedIcon,
         },
         { label: 'Courses', to: '/admincourses', icon: BookOutlinedIcon },
-        {
-          label: 'Course Fetch',
-          to: '/admin-course-fetch',
-          icon: CloudDownloadOutlinedIcon,
-        },
         // {
         //   label: 'Scheduling',
         //   to: '/scheduling',

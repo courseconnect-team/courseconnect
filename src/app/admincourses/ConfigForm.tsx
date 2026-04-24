@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -16,11 +17,22 @@ import {
   Stack,
   Switch,
   TextField,
+  Typography,
 } from '@mui/material';
 import {
   CourseFetchConfig,
   DEFAULT_COURSE_FETCH_CONFIG,
 } from '@/types/courseFetch';
+
+// Mirrors the server-side `semesterNameFromConfig` helper so admins see the
+// exact semester doc id their workflow will write to.
+export function semesterNameFromTermYear(
+  term: 'spring' | 'summer' | 'fall',
+  year: number
+): string {
+  const cap = term.charAt(0).toUpperCase() + term.slice(1);
+  return `${cap} ${year}`;
+}
 
 type Draft = Omit<
   CourseFetchConfig,
@@ -105,10 +117,23 @@ export default function ConfigForm({
     }
   };
 
+  const targetSemester = semesterNameFromTermYear(draft.term, draft.year);
+
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="sm">
-      <DialogTitle>{initial ? 'Edit config' : 'New config'}</DialogTitle>
+      <DialogTitle>
+        {initial ? 'Edit workflow' : 'New auto-fetch workflow'}
+      </DialogTitle>
       <DialogContent>
+        <Alert severity="info" sx={{ mt: 1, mb: 1 }}>
+          This workflow will write courses into{' '}
+          <Typography component="span" sx={{ fontWeight: 600 }}>
+            {targetSemester}
+          </Typography>
+          {'. '}
+          Re-runs update in place using <code>{`{code}__{classNumber}`}</code>{' '}
+          doc ids so Excel uploads are never overwritten.
+        </Alert>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
             label="Label"
