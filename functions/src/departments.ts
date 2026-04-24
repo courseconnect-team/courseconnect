@@ -9,7 +9,7 @@ import {
   readString,
   setCors,
   verifyAuth,
-} from './index';
+} from './shared';
 
 // --- validation ---
 
