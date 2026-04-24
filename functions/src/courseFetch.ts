@@ -233,6 +233,13 @@ export const triggerCourseFetch = functions.https.onRequest(
         fail(res, 'Config not found or invalid', 404);
         return;
       }
+      const rawInclude = (body as Record<string, unknown>).includeCourses;
+      const includeCourses = Array.isArray(rawInclude)
+        ? rawInclude
+            .filter((v): v is string => typeof v === 'string')
+            .map((v) => v.trim().toUpperCase())
+            .filter(Boolean)
+        : undefined;
       // Run synchronously. Cloud Functions v1 has a 540s timeout; a single
       // config shouldn't exceed that. If it does we'll split into shards.
       const outcome = await runAndPersist({
@@ -241,6 +248,7 @@ export const triggerCourseFetch = functions.https.onRequest(
         config: loaded.config,
         triggeredBy: 'manual',
         triggeredByUid: caller.uid,
+        includeCourses,
       });
       res.status(200).json(outcome);
     } catch (error) {

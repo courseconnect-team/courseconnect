@@ -5,6 +5,7 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   Dialog,
@@ -44,7 +45,7 @@ export interface PreviewDialogProps {
   loadError: string | null;
   applying: boolean;
   onClose: () => void;
-  onApply: () => void;
+  onApply: (selectedCodes: string[]) => void;
   onRetry: () => void;
 }
 
@@ -68,22 +69,31 @@ function sectionSummary(s: PreviewSection): string {
   return names || 'Instructor TBA';
 }
 
-function countInFilter(
+// Courses that pass the current tab filter (before search).
+function coursesMatchingFilter(
   courses: PreviewCourse[],
   filter: Filter
+): PreviewCourse[] {
+  if (filter === 'all') return courses;
+  return courses.filter((c) => c.sections.some((s) => s.diffStatus === filter));
+}
+
+function countSelection(
+  courses: PreviewCourse[],
+  selected: Set<string>,
+  filter: Filter
 ): { courses: number; sections: number } {
-  if (filter === 'all') {
-    return {
-      courses: courses.length,
-      sections: courses.reduce((acc, c) => acc + c.sections.length, 0),
-    };
-  }
   let cCount = 0;
   let sCount = 0;
   for (const c of courses) {
-    const matching = c.sections.filter((s) => s.diffStatus === filter);
-    if (matching.length > 0) cCount++;
-    sCount += matching.length;
+    if (!selected.has(c.code)) continue;
+    const sections =
+      filter === 'all'
+        ? c.sections
+        : c.sections.filter((s) => s.diffStatus === filter);
+    if (sections.length === 0) continue;
+    cCount++;
+    sCount += sections.length;
   }
   return { courses: cCount, sections: sCount };
 }
@@ -189,10 +199,14 @@ function CourseCard({
   course,
   filter,
   initiallyExpanded,
+  checked,
+  onToggleChecked,
 }: {
   course: PreviewCourse;
   filter: Filter;
   initiallyExpanded: boolean;
+  checked: boolean;
+  onToggleChecked: () => void;
 }) {
   const [expanded, setExpanded] = React.useState(initiallyExpanded);
   const sections =
@@ -210,8 +224,11 @@ function CourseCard({
       sx={{
         borderRadius: 2,
         border: '1px solid',
-        borderColor: 'divider',
+        borderColor: checked ? 'rgba(86,46,186,0.35)' : 'divider',
+        bgcolor: checked ? 'white' : 'rgba(0,0,0,0.02)',
         overflow: 'hidden',
+        opacity: checked ? 1 : 0.7,
+        transition: 'border-color 120ms, background-color 120ms, opacity 120ms',
       }}
     >
       <Stack
@@ -219,13 +236,24 @@ function CourseCard({
         alignItems="center"
         spacing={1.5}
         sx={{
-          px: 2,
+          px: 1,
           py: 1.25,
           bgcolor: '#fafafa',
           cursor: 'pointer',
         }}
         onClick={() => setExpanded((e) => !e)}
       >
+        <Checkbox
+          size="small"
+          checked={checked}
+          onClick={(e) => e.stopPropagation()}
+          onChange={onToggleChecked}
+          sx={{
+            color: 'rgba(86,46,186,0.5)',
+            '&.Mui-checked': { color: PURPLE },
+          }}
+          inputProps={{ 'aria-label': `Include ${course.code} in apply` }}
+        />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
             {course.codeWithSpace} · {course.title}
@@ -275,13 +303,15 @@ export default function PreviewDialog({
 }: PreviewDialogProps) {
   const [filter, setFilter] = React.useState<Filter>('all');
   const [search, setSearch] = React.useState('');
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
 
+  // Default selection = every course in the preview (nothing excluded).
   React.useEffect(() => {
-    if (open) {
-      setFilter('all');
-      setSearch('');
-    }
-  }, [open]);
+    if (!open) return;
+    setFilter('all');
+    setSearch('');
+    setSelected(new Set(preview?.courses.map((c) => c.code) ?? []));
+  }, [open, preview]);
 
   const filteredCourses = React.useMemo(() => {
     if (!preview) return [] as PreviewCourse[];
@@ -296,9 +326,90 @@ export default function PreviewDialog({
     });
   }, [preview, search, filter]);
 
-  const counts = preview
-    ? countInFilter(preview.courses, filter)
+  const visibleCodes = React.useMemo(
+    () => filteredCourses.map((c) => c.code),
+    [filteredCourses]
+  );
+
+  const selectionCounts = preview
+    ? countSelection(preview.courses, selected, filter)
     : { courses: 0, sections: 0 };
+
+  const totalNewInSelection = preview
+    ? preview.courses.reduce(
+        (acc, c) =>
+          selected.has(c.code)
+            ? acc + c.sections.filter((s) => s.diffStatus === 'new').length
+            : acc,
+        0
+      )
+    : 0;
+  const totalUpdatedInSelection = preview
+    ? preview.courses.reduce(
+        (acc, c) =>
+          selected.has(c.code)
+            ? acc + c.sections.filter((s) => s.diffStatus === 'updated').length
+            : acc,
+        0
+      )
+    : 0;
+
+  const visibleSelectedCount = visibleCodes.reduce(
+    (acc, code) => (selected.has(code) ? acc + 1 : acc),
+    0
+  );
+  const allVisibleSelected =
+    visibleCodes.length > 0 && visibleSelectedCount === visibleCodes.length;
+  const someVisibleSelected = visibleSelectedCount > 0 && !allVisibleSelected;
+
+  const toggleCourse = (code: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
+      return next;
+    });
+  };
+
+  const selectVisible = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const code of visibleCodes) next.add(code);
+      return next;
+    });
+  };
+
+  const clearVisible = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const code of visibleCodes) next.delete(code);
+      return next;
+    });
+  };
+
+  const selectOnlyStatus = (status: 'new' | 'updated') => {
+    if (!preview) return;
+    // Restrict to the currently searched set, but ignore the tab filter so
+    // this action is predictable no matter which tab you're on.
+    const term = search.trim().toLowerCase();
+    const matchesSearch = (c: PreviewCourse) => {
+      if (!term) return true;
+      const hay = `${c.code} ${c.title} ${c.department ?? ''}`.toLowerCase();
+      return hay.includes(term);
+    };
+    const next = new Set<string>();
+    for (const c of preview.courses) {
+      if (!matchesSearch(c)) continue;
+      if (c.sections.some((s) => s.diffStatus === status)) next.add(c.code);
+    }
+    setSelected(next);
+  };
+
+  const canApply =
+    !applying &&
+    !!preview &&
+    preview.status !== 'failed' &&
+    selectionCounts.sections > 0;
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
@@ -383,8 +494,8 @@ export default function PreviewDialog({
 
             {preview.truncated && (
               <Alert severity="info" sx={{ mb: 2 }}>
-                Showing the first 1000 courses. Apply will write all{' '}
-                {preview.courseCount} courses.
+                Showing the first 1000 courses. Apply will write every course
+                you select below.
               </Alert>
             )}
 
@@ -395,48 +506,124 @@ export default function PreviewDialog({
               </Alert>
             )}
 
-            {/* Filters */}
+            {/* Filters + quick actions */}
             {preview.sectionCount > 0 && (
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={1.5}
-                alignItems={{ xs: 'stretch', sm: 'center' }}
-                sx={{ mb: 1.5 }}
-              >
-                <Tabs
-                  value={filter}
-                  onChange={(_, v) => setFilter(v)}
-                  sx={{
-                    minHeight: 36,
-                    '& .MuiTab-root': {
+              <Stack spacing={1.25} sx={{ mb: 1.5 }}>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={1.5}
+                  alignItems={{ xs: 'stretch', sm: 'center' }}
+                >
+                  <Tabs
+                    value={filter}
+                    onChange={(_, v) => setFilter(v)}
+                    sx={{
                       minHeight: 36,
-                      textTransform: 'none',
-                      fontWeight: 600,
-                    },
-                    '& .Mui-selected': { color: `${PURPLE} !important` },
-                    '& .MuiTabs-indicator': { backgroundColor: PURPLE },
+                      '& .MuiTab-root': {
+                        minHeight: 36,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                      },
+                      '& .Mui-selected': { color: `${PURPLE} !important` },
+                      '& .MuiTabs-indicator': { backgroundColor: PURPLE },
+                    }}
+                  >
+                    <Tab value="all" label={`All (${preview.sectionCount})`} />
+                    <Tab
+                      value="new"
+                      label={`New (${preview.newSectionCount})`}
+                    />
+                    <Tab
+                      value="updated"
+                      label={`Updates (${preview.updatedSectionCount})`}
+                    />
+                  </Tabs>
+                  <Box sx={{ flex: 1 }} />
+                  <TextField
+                    size="small"
+                    placeholder="Filter by code or title…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    sx={{ minWidth: 260 }}
+                  />
+                </Stack>
+
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  flexWrap="wrap"
+                  useFlexGap
+                  sx={{
+                    p: 1,
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: '#fafafa',
                   }}
                 >
-                  <Tab
-                    value="all"
-                    label={`All (${
-                      countInFilter(preview.courses, 'all').sections
-                    })`}
+                  <Checkbox
+                    size="small"
+                    checked={allVisibleSelected}
+                    indeterminate={someVisibleSelected}
+                    onChange={() =>
+                      allVisibleSelected ? clearVisible() : selectVisible()
+                    }
+                    disabled={visibleCodes.length === 0}
+                    sx={{
+                      color: 'rgba(86,46,186,0.5)',
+                      '&.Mui-checked': { color: PURPLE },
+                      '&.MuiCheckbox-indeterminate': { color: PURPLE },
+                    }}
+                    inputProps={{ 'aria-label': 'Select all visible courses' }}
                   />
-                  <Tab value="new" label={`New (${preview.newSectionCount})`} />
-                  <Tab
-                    value="updated"
-                    label={`Updates (${preview.updatedSectionCount})`}
-                  />
-                </Tabs>
-                <Box sx={{ flex: 1 }} />
-                <TextField
-                  size="small"
-                  placeholder="Filter by code or title…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  sx={{ minWidth: 260 }}
-                />
+                  <Typography variant="body2" sx={{ mr: 1 }}>
+                    <strong>{selectionCounts.courses}</strong> of{' '}
+                    {preview.courseCount} courses selected
+                  </Typography>
+                  <Button
+                    size="small"
+                    onClick={selectVisible}
+                    disabled={visibleCodes.length === 0 || allVisibleSelected}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Select all visible
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={clearVisible}
+                    disabled={visibleSelectedCount === 0}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Clear visible
+                  </Button>
+                  <Divider orientation="vertical" flexItem />
+                  <Button
+                    size="small"
+                    onClick={() => selectOnlyStatus('new')}
+                    disabled={preview.newSectionCount === 0}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Select new only
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={() => selectOnlyStatus('updated')}
+                    disabled={preview.updatedSectionCount === 0}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Select updates only
+                  </Button>
+                  <Divider orientation="vertical" flexItem />
+                  <Button
+                    size="small"
+                    onClick={() => setSelected(new Set())}
+                    disabled={selected.size === 0}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Clear all
+                  </Button>
+                </Stack>
               </Stack>
             )}
 
@@ -450,6 +637,8 @@ export default function PreviewDialog({
                   course={c}
                   filter={filter}
                   initiallyExpanded={filteredCourses.length <= 5}
+                  checked={selected.has(c.code)}
+                  onToggleChecked={() => toggleCourse(c.code)}
                 />
               ))}
               {filteredCourses.length === 0 && preview.sectionCount > 0 && (
@@ -467,7 +656,10 @@ export default function PreviewDialog({
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
           {preview
-            ? `${counts.courses} courses · ${counts.sections} sections in current view`
+            ? `Applying ${selectionCounts.courses} courses · ${selectionCounts.sections} sections` +
+              (totalNewInSelection || totalUpdatedInSelection
+                ? ` (${totalNewInSelection} new, ${totalUpdatedInSelection} updates)`
+                : '')
             : ''}
         </Typography>
         <Button onClick={onClose} disabled={applying}>
@@ -476,13 +668,8 @@ export default function PreviewDialog({
         <Button
           variant="contained"
           disableElevation
-          onClick={onApply}
-          disabled={
-            applying ||
-            !preview ||
-            preview.status === 'failed' ||
-            preview.sectionCount === 0
-          }
+          onClick={() => onApply(Array.from(selected))}
+          disabled={!canApply}
           startIcon={
             applying ? (
               <CircularProgress size={16} color="inherit" />
@@ -498,7 +685,9 @@ export default function PreviewDialog({
         >
           {applying
             ? 'Applying…'
-            : `Apply to ${preview?.targetSemester ?? 'semester'}`}
+            : `Apply ${selectionCounts.courses} course${
+                selectionCounts.courses === 1 ? '' : 's'
+              } to ${preview?.targetSemester ?? 'semester'}`}
         </Button>
       </DialogActions>
     </Dialog>

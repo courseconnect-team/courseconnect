@@ -29,6 +29,7 @@ import {
   fetchClosestSemesters,
   parseCoursesMinimal,
   CourseOption,
+  CourseMinimalInput,
 } from '@/hooks/useSemesterOptions';
 import { callFunction } from '@/firebase/functions/callFunction';
 import { modernInputSx } from '@/components/FormStyles';
@@ -66,7 +67,7 @@ export default function Application() {
   const [success, setSuccess] = React.useState(false);
 
   const [selectedCourses, setSelectedCourses] = React.useState<string[]>([]);
-  const [names, setNames] = useState<{ raw: string; semester: string }[]>([]);
+  const [names, setNames] = useState<CourseMinimalInput[]>([]);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const clearFieldError = (key: keyof FieldErrors) =>
@@ -96,7 +97,7 @@ export default function Application() {
           .filter((doc) => doc.exists && doc.data()?.hidden === false)
           .map((doc) => doc.id);
 
-        const allCourses: { raw: string; semester: string }[] = [];
+        const allCourses: CourseMinimalInput[] = [];
 
         await Promise.all(
           visibleSems.map(async (semesterId) => {
@@ -108,8 +109,30 @@ export default function Application() {
               .get();
 
             snapshot.docs.forEach((doc) => {
+              const d = doc.data() as {
+                code?: string;
+                codeWithSpace?: string;
+                class_number?: string;
+                classNumber?: string;
+                professor_names?: string;
+                instructor?: string;
+              };
+              const code = String(d.code ?? '')
+                .trim()
+                .toUpperCase();
+              const classNumber = String(
+                d.class_number ?? d.classNumber ?? ''
+              ).trim();
+              // Skip docs missing the canonical fields — the migration script
+              // backfills older Excel rows that predate this schema.
+              if (!code || !classNumber) return;
               allCourses.push({
-                raw: doc.id,
+                code,
+                classNumber,
+                instructor: String(
+                  d.professor_names ?? d.instructor ?? ''
+                ).trim(),
+                codeWithSpace: d.codeWithSpace,
                 semester: semesterId,
               });
             });
@@ -133,8 +156,9 @@ export default function Application() {
       try {
         const courseNamesWithSemester = selectedCourses.map((course) => {
           const [semester, raw] = course.split('|||');
-          const [courseCode] = raw.split(':');
-          return `${courseCode.trim()} (${semester})`;
+          // New encoding: raw = `${code}__${classNumber}`. Peel off the code.
+          const code = raw.split('__')[0] ?? raw;
+          return `${code.trim()} (${semester})`;
         });
 
         const resultString = courseNamesWithSemester.join(', ');

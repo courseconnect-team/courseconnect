@@ -46,7 +46,8 @@ export function useCourseFetchApi() {
 
   const trigger = useCallback(
     async (
-      id: string
+      id: string,
+      includeCourses?: string[]
     ): Promise<{
       runId: string;
       status: string;
@@ -57,7 +58,10 @@ export function useCourseFetchApi() {
       errors: string[];
       warnings: string[];
     }> => {
-      return callFunction('triggerCourseFetch', { id });
+      return callFunction('triggerCourseFetch', {
+        id,
+        ...(includeCourses ? { includeCourses } : {}),
+      });
     },
     []
   );
