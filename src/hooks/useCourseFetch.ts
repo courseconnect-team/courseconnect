@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { callFunction } from '@/firebase/functions/callFunction';
 import type { CourseFetchConfig, CourseFetchRun } from '@/types/courseFetch';
 
@@ -69,5 +69,10 @@ export function useCourseFetchApi() {
     []
   );
 
-  return { list, create, update, remove, trigger, listRuns };
+  // Memoize the returned object so callers can depend on its identity
+  // (e.g. inside useEffect deps) without triggering re-render loops.
+  return useMemo(
+    () => ({ list, create, update, remove, trigger, listRuns }),
+    [list, create, update, remove, trigger, listRuns]
+  );
 }
