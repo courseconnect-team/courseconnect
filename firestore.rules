@@ -168,6 +168,34 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // --------- course-fetch pipeline ---------
+    // Configs and per-run history live under `courseFetchConfigs`. All writes
+    // (including scheduled runs) go through Cloud Functions using the admin
+    // SDK, which bypasses rules. Client reads are admin-only; direct client
+    // writes are denied as defense-in-depth.
+    match /courseFetchConfigs/{configId} {
+      allow read: if isAdmin();
+      allow write: if false;
+
+      match /runs/{runId} {
+        allow read: if isAdmin();
+        allow write: if false;
+      }
+    }
+
+    // Normalized scraped catalog. Any authed user may read so it can drive
+    // pickers and future student/faculty features; writes go through Cloud
+    // Functions only.
+    match /catalog/{courseId} {
+      allow read: if isAuthed();
+      allow write: if false;
+
+      match /sections/{sectionId} {
+        allow read: if isAuthed();
+        allow write: if false;
+      }
+    }
+
     // --------- login events (audit trail; writes only) ---------
     // auth_context.js appends a row on first sign-in per session. No one
     // reads these from the client today.

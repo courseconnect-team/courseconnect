@@ -61,6 +61,41 @@
           "order": "ASCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "courseFetchConfigs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "enabled", "order": "ASCENDING" },
+        { "fieldPath": "nextRefreshAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "runs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "configId", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "catalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "provider", "order": "ASCENDING" },
+        { "fieldPath": "termCode", "order": "ASCENDING" },
+        { "fieldPath": "department", "order": "ASCENDING" },
+        { "fieldPath": "code", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sections",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "termCode", "order": "ASCENDING" },
+        { "fieldPath": "courseCode", "order": "ASCENDING" },
+        { "fieldPath": "classNumber", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
