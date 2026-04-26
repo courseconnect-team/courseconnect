@@ -25,6 +25,7 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { collection, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
+import { emailToUsername } from '@/utils/email';
 
 import AppView from './AppView';
 import {
@@ -162,7 +163,11 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       const facultyCourses = collection(firebase.firestore(), 'courses');
       const q = query(
         facultyCourses,
-        where('professor_emails', 'array-contains', user?.email)
+        where(
+          'professor_usernames',
+          'array-contains',
+          emailToUsername(user?.email)
+        )
       );
       getDocs(q).catch(() => undefined);
 

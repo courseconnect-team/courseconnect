@@ -20,7 +20,9 @@
     "bootstrap:super-admin:dry": "ts-node src/scripts/bootstrapSuperAdmin.ts",
     "bootstrap:super-admin": "ts-node src/scripts/bootstrapSuperAdmin.ts --execute",
     "backfill:multidept:dry": "ts-node src/scripts/backfillMultiDepartment.ts",
-    "backfill:multidept": "ts-node src/scripts/backfillMultiDepartment.ts --execute"
+    "backfill:multidept": "ts-node src/scripts/backfillMultiDepartment.ts --execute",
+    "backfill:professor-usernames:dry": "ts-node src/scripts/backfillProfessorUsernames.ts",
+    "backfill:professor-usernames": "ts-node src/scripts/backfillProfessorUsernames.ts --execute"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

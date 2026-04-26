@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import { read, utils } from 'xlsx';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { emailsToUsernames } from '@/utils/email';
 
 const PURPLE = '#562EBA';
 
@@ -152,6 +153,7 @@ export default function UploadPanel({
             {
               class_number: classNumber,
               professor_emails: emailArray,
+              professor_usernames: emailsToUsernames(emailArray),
               professor_names: instructor || 'undef',
               code,
               codeWithSpace: addCodeSpace(code),

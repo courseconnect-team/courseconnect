@@ -7,13 +7,14 @@ import {
 import * as React from 'react';
 import firebase from '@/firebase/firebase_config';
 import { SemesterName } from '../useSemesterOptions';
+import { emailToUsername } from '@/utils/email';
 
 export type CourseTuple = [string, string, string, SemesterName];
 interface CourseDoc {
   code?: string | null;
   title?: string | null;
   semester: string;
-  professor_emails: string[];
+  professor_usernames?: string[];
 }
 export interface CourseRow {
   id: string;
@@ -27,6 +28,8 @@ export async function getFacultyCoursesMany(
   uemail: string
 ): Promise<CourseRow[]> {
   if (!semesters.length) return [];
+  const username = emailToUsername(uemail);
+  if (!username) return [];
   const db = firebase.firestore();
 
   const chunks: string[][] = [];
@@ -38,7 +41,7 @@ export async function getFacultyCoursesMany(
       const q = query(
         collection(db, 'courses'),
         where('semester', 'in', semChunk),
-        where('professor_emails', 'array-contains', uemail)
+        where('professor_usernames', 'array-contains', username)
       );
       const snap = await getDocs(q);
       const rows: CourseRow[] = [];

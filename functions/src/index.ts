@@ -23,6 +23,7 @@ import {
   setCors,
   verifyAuth,
 } from './shared';
+import { emailsToUsernames } from './email';
 
 type EmailType =
   | 'sendApplicantToFaculty'
@@ -499,12 +500,19 @@ export const processCreateCourseForm = functions.https.onRequest(
         return;
       }
 
+      const professorEmails = Array.isArray(body.professor_emails)
+        ? (body.professor_emails as unknown[]).filter(
+            (e): e is string => typeof e === 'string'
+          )
+        : [];
+
       const courseObject = {
         code,
         title,
         id,
         professor_names: body.professor_names ?? [],
-        professor_emails: body.professor_emails ?? [],
+        professor_emails: professorEmails,
+        professor_usernames: emailsToUsernames(professorEmails),
         helper_names: body.helper_names ?? [],
         helper_emails: body.helper_emails ?? [],
         credits: body.credits ?? '',

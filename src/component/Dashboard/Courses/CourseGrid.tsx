@@ -23,6 +23,7 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { isE2EMode } from '@/utils/featureFlags';
+import { emailToUsername, emailsToUsernames } from '@/utils/email';
 
 import UnderDevelopment from '@/component/UnderDevelopment';
 import {
@@ -127,8 +128,14 @@ export default function CourseGrid({
     if (userRole === 'admin') {
       coursesRef.get().then(onData).catch(onErr);
     } else if (userRole === 'faculty') {
+      const username = emailToUsername(userEmail);
+      if (!username) {
+        setCourseData([]);
+        setListLoading(false);
+        return;
+      }
       coursesRef
-        .where('professor_emails', 'array-contains', userEmail)
+        .where('professor_usernames', 'array-contains', username)
         .get()
         .then(onData)
         .catch(onErr);
@@ -169,6 +176,7 @@ export default function CourseGrid({
     if (!editing) return;
     setLoading(true);
     try {
+      const editedEmails = asList(editForm.professor_emails);
       const patch = {
         code: editForm.code,
         title: editForm.title,
@@ -176,7 +184,8 @@ export default function CourseGrid({
         enrolled: editForm.enrolled,
         enrollment_cap: editForm.enrollment_cap,
         professor_names: asList(editForm.professor_names),
-        professor_emails: asList(editForm.professor_emails),
+        professor_emails: editedEmails,
+        professor_usernames: emailsToUsernames(editedEmails),
         helper_names: asList(editForm.helper_names),
         helper_emails: asList(editForm.helper_emails),
         semester: editForm.semester || semester,

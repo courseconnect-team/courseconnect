@@ -48,6 +48,7 @@ import { callFunction } from '@/firebase/functions/callFunction';
 const repo = new ApplicationRepository(getFirestore());
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserName from '@/firebase/util/GetUserName';
+import { emailToUsername } from '@/utils/email';
 import { alpha, styled } from '@mui/material/styles';
 import { gridClasses } from '@mui/x-data-grid';
 
@@ -378,7 +379,11 @@ export default function ApplicationGrid(props: ApplicationGridProps) {
       const facultyCourses = collection(firebase.firestore(), 'courses');
       const q = query(
         facultyCourses,
-        where('professor_emails', 'array-contains', user?.email)
+        where(
+          'professor_usernames',
+          'array-contains',
+          emailToUsername(user?.email)
+        )
       );
       const facultyCoursesSnapshot = getDocs(q);
 
