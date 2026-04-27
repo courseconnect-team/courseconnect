@@ -17,6 +17,7 @@ import { CourseApplicationsTable } from '@/components/ApplicationsTable/Applicat
 import { ApplicationModal } from '../ApplicationsModal';
 import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicationById';
 import { SemesterName, prettyCourseId } from '@/hooks/useSemesterOptions';
+import { useCourseDetails } from '@/hooks/Courses/useFetchCourse';
 import { addSemesterToCourseDoc } from '@/hooks/Applications/ApplicationFunctions';
 import { resolveCourseStatus } from '@/firebase/applications/applicationRepository';
 
@@ -43,6 +44,9 @@ const ApplicationsPage: FC = () => {
     semesterId,
     statuses
   );
+
+  const { course } = useCourseDetails(courseId, semesterId as SemesterName);
+  const instructor = course?.instructor;
 
   const rows = data?.all ?? [];
 
@@ -94,7 +98,7 @@ const ApplicationsPage: FC = () => {
 
   return (
     <PageLayout
-      mainTitle={`${prettyCourseId(courseId)} - ${semesterId}`}
+      mainTitle={`${prettyCourseId(courseId, instructor)} - ${semesterId}`}
       navItems={getNavItems(role)}
     >
       <div className="mb-6">
@@ -109,6 +113,7 @@ const ApplicationsPage: FC = () => {
         semester={semesterId as SemesterName}
         selectedFilter={statusFilter}
         courseId={courseId}
+        instructor={instructor}
         loading={isLoading}
       />
       {modal && id && (
@@ -116,6 +121,7 @@ const ApplicationsPage: FC = () => {
           open={Boolean(modal && id)}
           courseId={courseId}
           semester={semesterId}
+          instructor={instructor}
           id={id ?? ''}
           onClose={close}
           parentPath={pathname}

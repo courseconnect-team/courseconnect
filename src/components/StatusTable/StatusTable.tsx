@@ -1,5 +1,8 @@
 // StatusTable.tsx – updated to use design-system colours from tailwind.config.js
 import React from 'react';
+import { useQueries } from '@tanstack/react-query';
+import { doc, getDoc } from 'firebase/firestore';
+import firebase from '@/firebase/firebase_config';
 import { prettyCourseId } from '@/hooks/useSemesterOptions';
 
 /* Pill that reflects the four possible states */
@@ -91,6 +94,22 @@ function flattenCourses(
   return out;
 }
 
+async function fetchCourseInstructor(
+  semester: string,
+  courseId: string
+): Promise<unknown> {
+  if (!semester || !courseId) return undefined;
+  const ref = doc(
+    firebase.firestore(),
+    'semesters',
+    semester,
+    'courses',
+    courseId
+  );
+  const snap = await getDoc(ref);
+  return snap.exists() ? snap.data()?.professor_names : undefined;
+}
+
 export const StatusTable: React.FC<StatusTableProps> = ({
   assignments,
   courses,
@@ -99,6 +118,22 @@ export const StatusTable: React.FC<StatusTableProps> = ({
   position,
   dateApplied,
 }) => {
+  const flattened = React.useMemo(
+    () => (courses ? flattenCourses(courses) : []),
+    [courses]
+  );
+
+  const instructorQueries = useQueries({
+    queries: flattened.map(({ courseId, semester }) => ({
+      queryKey: ['courseInstructor', semester, courseId],
+      queryFn: () => fetchCourseInstructor(semester, courseId),
+      enabled: Boolean(semester && courseId),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    })),
+  });
+
   const rows: Row[] = [];
 
   /* accepted assignments */
@@ -112,22 +147,20 @@ export const StatusTable: React.FC<StatusTableProps> = ({
   );
 
   /* per-course statuses */
-  if (courses) {
-    flattenCourses(courses).forEach(({ courseId, semester, state }) => {
-      let status: Row['status'] = 'pending';
-      if (state === 'approved' && adminApproved) status = 'accepted';
-      else if (state === 'denied') status = 'rejected';
-      else if (state === 'applied') status = 'in-progress';
-      const pretty = prettyCourseId(courseId);
-      const label = semester ? `${pretty} (${semester})` : pretty;
-      rows.push({
-        application: label,
-        position: position,
-        submitted: dateApplied,
-        status,
-      });
+  flattened.forEach(({ courseId, semester, state }, i) => {
+    let status: Row['status'] = 'pending';
+    if (state === 'approved' && adminApproved) status = 'accepted';
+    else if (state === 'denied') status = 'rejected';
+    else if (state === 'applied') status = 'in-progress';
+    const pretty = prettyCourseId(courseId, instructorQueries[i]?.data);
+    const label = semester ? `${pretty} (${semester})` : pretty;
+    rows.push({
+      application: label,
+      position: position,
+      submitted: dateApplied,
+      status,
     });
-  }
+  });
 
   /* whole application denied */
   if (adminDenied) rows.forEach((r) => (r.status = 'rejected'));

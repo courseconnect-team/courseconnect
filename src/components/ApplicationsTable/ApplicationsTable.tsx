@@ -165,6 +165,7 @@ export interface CourseApplicationsTableProps {
   emptyMessage?: string;
   courseId: string;
   semester: SemesterName;
+  instructor?: unknown;
 }
 
 export const CourseApplicationsTable: React.FC<
@@ -178,6 +179,7 @@ export const CourseApplicationsTable: React.FC<
   loading = false,
   emptyMessage = 'No applications for this course.',
   courseId,
+  instructor,
 }) => {
   const [confirm, setConfirm] = React.useState<{
     open: boolean;
@@ -417,7 +419,8 @@ export const CourseApplicationsTable: React.FC<
         description={
           confirm.kind === 'approve'
             ? `This will mark the application as approved for ${prettyCourseId(
-                courseId
+                courseId,
+                instructor
               )}.`
             : `This will mark the application as denied and notify the applicant.`
         }

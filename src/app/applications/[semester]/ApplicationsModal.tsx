@@ -15,6 +15,7 @@ import { prettyCourseId } from '@/hooks/useSemesterOptions';
 export interface ApplicationModalProps {
   courseId: string;
   semester?: string;
+  instructor?: unknown;
   open: boolean;
   onClose: () => void;
   id: string;
@@ -26,6 +27,7 @@ export interface ApplicationModalProps {
 export function ApplicationModal({
   courseId,
   semester,
+  instructor,
   open,
   onClose,
   id,
@@ -58,7 +60,9 @@ export function ApplicationModal({
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b">
-        <div className="text-sm font-medium">{prettyCourseId(courseId)}</div>
+        <div className="text-sm font-medium">
+          {prettyCourseId(courseId, instructor)}
+        </div>
         <div className="flex items-center gap-2">
           <a
             className="text-xs underline"
@@ -90,6 +94,7 @@ export function ApplicationModal({
               data={documentData}
               courseId={courseId}
               semester={semester}
+              instructor={instructor}
               documentId={id}
               status={documentStatus}
             />
