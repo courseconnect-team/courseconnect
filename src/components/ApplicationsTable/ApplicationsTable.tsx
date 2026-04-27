@@ -9,7 +9,7 @@ import {
   approveApplication,
 } from '@/hooks/Applications/ApplicationFunctions';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
-import { SemesterName } from '@/hooks/useSemesterOptions';
+import { SemesterName, prettyCourseId } from '@/hooks/useSemesterOptions';
 type AdminStatus = 'approved' | 'pending' | 'denied';
 
 export type UIRow = {
@@ -416,7 +416,9 @@ export const CourseApplicationsTable: React.FC<
         }
         description={
           confirm.kind === 'approve'
-            ? `This will mark the application as approved for ${courseId}.`
+            ? `This will mark the application as approved for ${prettyCourseId(
+                courseId
+              )}.`
             : `This will mark the application as denied and notify the applicant.`
         }
         confirmLabel={confirm.kind === 'approve' ? 'Approve' : 'Deny'}

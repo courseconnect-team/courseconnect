@@ -1,5 +1,6 @@
 // StatusTable.tsx – updated to use design-system colours from tailwind.config.js
 import React from 'react';
+import { prettyCourseId } from '@/hooks/useSemesterOptions';
 
 /* Pill that reflects the four possible states */
 function StatusPill({
@@ -117,7 +118,8 @@ export const StatusTable: React.FC<StatusTableProps> = ({
       if (state === 'approved' && adminApproved) status = 'accepted';
       else if (state === 'denied') status = 'rejected';
       else if (state === 'applied') status = 'in-progress';
-      const label = semester ? `${courseId} (${semester})` : courseId;
+      const pretty = prettyCourseId(courseId);
+      const label = semester ? `${pretty} (${semester})` : pretty;
       rows.push({
         application: label,
         position: position,
