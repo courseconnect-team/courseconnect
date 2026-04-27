@@ -122,21 +122,42 @@ function prettyCode(code: string, fallback?: string): string {
   return m ? `${m[1]} ${m[2]}` : code;
 }
 
+// Normalize a `professor_names` field for display. Firestore stores either a
+// string ("Rambo, Keith Jeffrey") or an array of strings; collapse arrays to a
+// comma-separated list and strip placeholder values.
+export function formatInstructor(raw: unknown): string {
+  const list = Array.isArray(raw) ? raw : [raw];
+  const cleaned = list
+    .map((v) => String(v ?? '').trim())
+    .filter(
+      (v) =>
+        v &&
+        v.toLowerCase() !== 'undefined' &&
+        v.toLowerCase() !== 'undef' &&
+        v.toLowerCase() !== 'unknown'
+    );
+  return cleaned.join(', ');
+}
+
 // Render a `semesters/*/courses/*` doc id for display. New canonical ids look
-// like `EEL3111C__10747` (code__classNumber) — show as `EEL 3111C · #10747`.
-// Legacy `EEL3111C : Rambo,Keith Jeffrey` ids are already human-readable, so
-// pass them through as-is.
-export function prettyCourseId(rawId: string): string {
+// like `EEL3111C__10747` (code__classNumber). When an instructor is supplied,
+// prefer "EEL 3111C · Rambo, Keith Jeffrey"; otherwise fall back to the class
+// number (`EEL 3111C · #10747`). Legacy `EEL3111C : Rambo,Keith Jeffrey` ids
+// are already human-readable, so pass them through as-is.
+export function prettyCourseId(rawId: string, instructor?: unknown): string {
   if (!rawId) return '';
+  const instr = formatInstructor(instructor);
   const dunderIdx = rawId.indexOf('__');
   if (dunderIdx !== -1) {
     const code = rawId.slice(0, dunderIdx).trim().toUpperCase();
     const classNumber = rawId.slice(dunderIdx + 2).trim();
     const display = prettyCode(code);
+    if (instr) return `${display} · ${instr}`;
     return classNumber ? `${display} · #${classNumber}` : display;
   }
   if (rawId.includes(' : ')) return rawId;
-  return prettyCode(rawId.trim().toUpperCase());
+  const display = prettyCode(rawId.trim().toUpperCase());
+  return instr ? `${display} · ${instr}` : display;
 }
 
 export function parseCoursesMinimal(

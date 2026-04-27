@@ -14,6 +14,7 @@ type Props = {
   documentId: string;
   courseId: string;
   semester?: string;
+  instructor?: unknown;
 };
 
 export function ApplicationPreview({
@@ -22,6 +23,7 @@ export function ApplicationPreview({
   courseId,
   status,
   semester,
+  instructor,
 }: Props) {
   const {
     firstname,
@@ -253,7 +255,8 @@ export function ApplicationPreview({
         description={
           confirm.kind === 'approve'
             ? `This will mark the application as approved for ${prettyCourseId(
-                courseId
+                courseId,
+                instructor
               )}.`
             : `This will mark the application as denied and notify the applicant.`
         }
