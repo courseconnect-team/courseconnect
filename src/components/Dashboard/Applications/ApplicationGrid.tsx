@@ -25,6 +25,7 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { collection, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
+import { emailToUsername } from '@/utils/email';
 
 import AppView from './AppView';
 import {
@@ -162,7 +163,11 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       const facultyCourses = collection(firebase.firestore(), 'courses');
       const q = query(
         facultyCourses,
-        where('professor_emails', 'array-contains', user?.email)
+        where(
+          'professor_usernames',
+          'array-contains',
+          emailToUsername(user?.email)
+        )
       );
       getDocs(q).catch(() => undefined);
 
@@ -186,9 +191,9 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
   const handleOpenAssignmentDialog = async (id: string) => {
     const doc = await applicationDoc(id).get();
     const flat = flattenCourses(doc.data()?.courses);
-    const courses = Object.entries(flat)
-      .filter(([, v]) => v === 'approved')
-      .map(([k]) => k);
+    // Admin approval supersedes faculty: allow assigning any course the
+    // applicant applied for, even if no faculty member has approved it yet.
+    const courses = Object.keys(flat);
     setAssignCourses(courses);
     setAssignCourse('');
     setAssignHours('0');
@@ -767,8 +772,8 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
               </>
             ) : (
               <DialogContentText sx={{ fontSize: 14 }}>
-                No faculty member has approved this applicant for any course
-                yet.
+                This applicant has not selected any courses on their
+                application.
               </DialogContentText>
             )}
           </DialogContent>

@@ -26,12 +26,20 @@ Each run writes to two places:
 1. **Live semester** — one doc per section at
    `semesters/{SemesterName}/courses/{code}__{classNumber}`, matching the
    existing Excel-upload schema (`class_number`, `professor_emails`,
-   `professor_names`, `code`, `credits`, `department`, `enrollment_cap`,
-   `enrolled`, `title`, `semester`, `meeting_times[{day, time, location}]`)
-   plus `source: 'auto-fetch'` + `sourceConfigId`. `SemesterName` comes
-   from the config's term+year, capitalized (e.g. Fall 2026). Using `__`
-   in the doc id guarantees no collision with Excel rows keyed by
-   `{code} : {instructor}`.
+   `professor_usernames`, `professor_names`, `code`, `credits`,
+   `department`, `enrollment_cap`, `enrolled`, `title`, `semester`,
+   `meeting_times[{day, time, location}]`) plus `source: 'auto-fetch'` +
+   `sourceConfigId`. `SemesterName` comes from the config's term+year,
+   capitalized (e.g. Fall 2026). Using `__` in the doc id guarantees no
+   collision with Excel rows keyed by `{code} : {instructor}`.
+
+   `professor_usernames` is the lowercased local part of each entry in
+   `professor_emails` (e.g. `john.doe@ece.ufl.edu` →
+   `john.doe`). Faculty queries match on this field so a professor who
+   logs in with `john.doe@ufl.edu` still sees a course rostered under
+   `john.doe@ece.ufl.edu`. Helper lives in `src/utils/email.ts` (mirrored
+   in `functions/src/email.ts`).
+
 2. **Cross-term catalog** — normalized audit trail at
    `catalog/{provider}:{termCode}:{code}` with a `sections` subcollection
    keyed by `{provider}:{termCode}:{classNumber}`. Independent of the

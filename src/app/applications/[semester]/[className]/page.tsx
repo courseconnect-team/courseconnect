@@ -16,7 +16,7 @@ import { AppRow, ApplicationStatus, StatusFilter } from '@/types/query';
 import { CourseApplicationsTable } from '@/components/ApplicationsTable/ApplicationsTable';
 import { ApplicationModal } from '../ApplicationsModal';
 import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicationById';
-import { SemesterName } from '@/hooks/useSemesterOptions';
+import { SemesterName, prettyCourseId } from '@/hooks/useSemesterOptions';
 import { addSemesterToCourseDoc } from '@/hooks/Applications/ApplicationFunctions';
 import { resolveCourseStatus } from '@/firebase/applications/applicationRepository';
 
@@ -94,7 +94,7 @@ const ApplicationsPage: FC = () => {
 
   return (
     <PageLayout
-      mainTitle={`${courseId} - ${semesterId}`}
+      mainTitle={`${prettyCourseId(courseId)} - ${semesterId}`}
       navItems={getNavItems(role)}
     >
       <div className="mb-6">

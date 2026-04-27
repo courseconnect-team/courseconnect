@@ -1,6 +1,7 @@
 import React from 'react';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 import { ApplicationData } from '@/types/query';
+import { prettyCourseId } from '@/hooks/useSemesterOptions';
 import {
   approveApplication,
   denyApplication,
@@ -251,7 +252,9 @@ export function ApplicationPreview({
         }
         description={
           confirm.kind === 'approve'
-            ? `This will mark the application as approved for ${courseId}.`
+            ? `This will mark the application as approved for ${prettyCourseId(
+                courseId
+              )}.`
             : `This will mark the application as denied and notify the applicant.`
         }
         confirmLabel={confirm.kind === 'approve' ? 'Approve' : 'Deny'}

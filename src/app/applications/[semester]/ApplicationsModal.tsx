@@ -10,6 +10,7 @@ import { useTheme } from '@mui/material/styles';
 import { ApplicationPreview } from '@/components/ApplicationPreview/ApplicationPreview';
 import { ApplicationData, ApplicationStatus } from '@/types/query';
 import Box from '@mui/material/Box';
+import { prettyCourseId } from '@/hooks/useSemesterOptions';
 
 export interface ApplicationModalProps {
   courseId: string;
@@ -57,7 +58,7 @@ export function ApplicationModal({
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b">
-        <div className="text-sm font-medium">{courseId}</div>
+        <div className="text-sm font-medium">{prettyCourseId(courseId)}</div>
         <div className="flex items-center gap-2">
           <a
             className="text-xs underline"

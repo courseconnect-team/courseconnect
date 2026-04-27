@@ -18,6 +18,7 @@ import type {
   NormalizedMeetingTime,
   NormalizedSection,
 } from './types';
+import { emailsToUsernames } from '../email';
 
 const BATCH_LIMIT = 450; // leave headroom below the 500-op Firestore limit
 
@@ -82,6 +83,7 @@ function buildSemesterCourseDoc(
     department_name: course.departmentName ?? '',
     professor_names: instructorNames.join(', '),
     professor_emails: instructorEmails,
+    professor_usernames: emailsToUsernames(instructorEmails),
     enrollment_cap:
       section.enrollmentCap != null ? String(section.enrollmentCap) : '',
     enrolled: section.enrolled != null ? String(section.enrolled) : '',

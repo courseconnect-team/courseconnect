@@ -15,6 +15,7 @@ import { CircularProgress } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { callFunction } from '@/firebase/functions/callFunction';
+import { emailsToUsernames } from '@/utils/email';
 interface CreateCourseDialogProps {
   open: boolean;
   setOpen: (value: boolean) => void;
@@ -65,6 +66,7 @@ const CreateCourseDialog: React.FC<CreateCourseDialogProps> = ({
       id: formData.get('class-number') as string,
       professor_names: professorNameList as string[],
       professor_emails: professorEmailList as string[],
+      professor_usernames: emailsToUsernames(professorEmailList),
       helper_names: [] as string[],
       helper_emails: [] as string[],
       credits: formData.get('course-credits') as string,

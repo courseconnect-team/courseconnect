@@ -14,11 +14,12 @@ import {
 } from '@tanstack/react-query';
 import type { SemesterName } from '../useSemesterOptions';
 import type { CourseTuple } from './useFetchFacultyMultiApplications';
+import { emailToUsername } from '@/utils/email';
 
 interface CourseDoc {
   code?: string | null;
   title?: string | null;
-  professor_emails?: string[]; // keep type flexible during migration
+  professor_usernames?: string[];
   // termId?: string;             // include if you duplicated it in each doc
 }
 
@@ -29,8 +30,13 @@ export async function getFacultyCourses(
 ): Promise<CourseTuple[]> {
   // semesters/{termId}/courses
   const db = firebase.firestore();
+  const username = emailToUsername(uemail);
+  if (!username) return [];
   const col = collection(db, 'semesters', semester, 'courses');
-  const q = query(col, where('professor_emails', 'array-contains', uemail));
+  const q = query(
+    col,
+    where('professor_usernames', 'array-contains', username)
+  );
 
   const snap = await getDocs(q);
   const rows: CourseTuple[] = [];
@@ -46,11 +52,13 @@ export async function getFacultyCoursesAllTerms(
   uemail: string
 ): Promise<CourseTuple[]> {
   const db = firebase.firestore();
+  const username = emailToUsername(uemail);
+  if (!username) return [];
 
   // requires a composite index if you also filter/order by other fields
   const q = query(
     collectionGroup(db, 'courses'),
-    where('professor_emails', 'array-contains', uemail)
+    where('professor_usernames', 'array-contains', username)
   );
   const snap = await getDocs(q);
 

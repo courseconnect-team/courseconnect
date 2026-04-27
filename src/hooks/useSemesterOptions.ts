@@ -122,6 +122,23 @@ function prettyCode(code: string, fallback?: string): string {
   return m ? `${m[1]} ${m[2]}` : code;
 }
 
+// Render a `semesters/*/courses/*` doc id for display. New canonical ids look
+// like `EEL3111C__10747` (code__classNumber) — show as `EEL 3111C · #10747`.
+// Legacy `EEL3111C : Rambo,Keith Jeffrey` ids are already human-readable, so
+// pass them through as-is.
+export function prettyCourseId(rawId: string): string {
+  if (!rawId) return '';
+  const dunderIdx = rawId.indexOf('__');
+  if (dunderIdx !== -1) {
+    const code = rawId.slice(0, dunderIdx).trim().toUpperCase();
+    const classNumber = rawId.slice(dunderIdx + 2).trim();
+    const display = prettyCode(code);
+    return classNumber ? `${display} · #${classNumber}` : display;
+  }
+  if (rawId.includes(' : ')) return rawId;
+  return prettyCode(rawId.trim().toUpperCase());
+}
+
 export function parseCoursesMinimal(
   courses: CourseMinimalInput[]
 ): CourseOption[] {
