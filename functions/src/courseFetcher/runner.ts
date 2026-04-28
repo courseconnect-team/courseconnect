@@ -57,18 +57,49 @@ function toLegacyMeetingTimes(times: NormalizedMeetingTime[]): Array<{
   }));
 }
 
+// Names that mean "no real instructor on file". Provider data and old Excel
+// rosters use a mix of these — we collapse them all onto 'TBA' so a course
+// has at most one no-instructor doc, and so the run cleanup below can find
+// every legacy placeholder shape under a known set of doc ids.
+const PLACEHOLDER_INSTRUCTOR_LOWER = new Set([
+  'tba',
+  'undef',
+  'undefined',
+  'unknown',
+  '-',
+]);
+
+// All doc-id instructor segments we treat as placeholders during cleanup.
+// 'TBA' is the canonical form we write going forward; the rest are legacy
+// values that older runs / Excel uploads may have left behind.
+const PLACEHOLDER_INSTRUCTOR_DOC_KEYS = [
+  'TBA',
+  'undef',
+  'undefined',
+  'unknown',
+  '-',
+];
+
+function isPlaceholderInstructor(key: string): boolean {
+  return PLACEHOLDER_INSTRUCTOR_LOWER.has(key.toLowerCase());
+}
+
 // Stable instructor key used for both the doc id and section grouping. We
 // normalize the joined name string so two sections of the same course taught
 // by the same prof land on the same doc — auto-fetch's normalize step keeps
 // names consistent within a single run, so a trim/whitespace-collapse is
-// enough. Falls back to 'TBA' when a section has no listed instructor.
+// enough. Falls back to 'TBA' when a section has no listed instructor or
+// when the source data uses a placeholder string ('undef', '-', etc.); see
+// PLACEHOLDER_INSTRUCTOR_LOWER.
 function instructorKeyFromSection(section: NormalizedSection): string {
   const joined = section.instructors
     .map((i) => (i.name ?? '').trim())
     .filter(Boolean)
     .join(', ');
   const cleaned = joined.replace(/\s+/g, ' ').trim();
-  return cleaned || 'TBA';
+  if (!cleaned) return 'TBA';
+  if (isPlaceholderInstructor(cleaned)) return 'TBA';
+  return cleaned;
 }
 
 // Doc id used by the live semester layout. Matches the Excel upload format
@@ -332,6 +363,66 @@ async function commitCoursesAndSections(
         { merge: true }
       )
     );
+  }
+
+  // Stale-placeholder cleanup. A course we just wrote may also have a
+  // legacy `${code} : <placeholder>` doc left over from a prior run when
+  // those sections had no instructor on file. For each course, we know
+  // the set of class numbers that the run wrote under a *real* instructor
+  // — any of those numbers that still appear in a placeholder doc are now
+  // stale and get removed. The placeholder doc is deleted outright when
+  // it's emptied, otherwise updated in place so any sections that still
+  // have no instructor (e.g. a different section of the same course) are
+  // preserved on the canonical 'TBA' doc.
+  const realSectionsByCourse = new Map<string, Set<string>>();
+  for (const [courseCode, byInstructor] of sectionsByCourseInstructor) {
+    const realCns = new Set<string>();
+    for (const [key, sections] of byInstructor) {
+      if (isPlaceholderInstructor(key)) continue;
+      for (const s of sections) {
+        if (s.classNumber) realCns.add(s.classNumber);
+      }
+    }
+    if (realCns.size > 0) realSectionsByCourse.set(courseCode, realCns);
+  }
+  // Flush the main writes first so any same-doc cleanup updates we queue
+  // below see the new state; also keeps the placeholder reads consistent.
+  await flush();
+  for (const [courseCode, realCns] of realSectionsByCourse) {
+    if (cancelled) break;
+    for (const placeholder of PLACEHOLDER_INSTRUCTOR_DOC_KEYS) {
+      const docId = semesterCourseDocId(courseCode, placeholder);
+      const ref = semesterCourses.doc(docId);
+      const snap = await ref.get();
+      if (!snap.exists) continue;
+      const data = snap.data() ?? {};
+      const existing: string[] = Array.isArray(data.class_numbers)
+        ? (data.class_numbers as unknown[]).map((v) => String(v ?? '').trim())
+        : [];
+      // Pre-`class_numbers` data: fall back to splitting class_number.
+      if (existing.length === 0 && typeof data.class_number === 'string') {
+        for (const piece of data.class_number.split(',')) {
+          const p = piece.trim();
+          if (p) existing.push(p);
+        }
+      }
+      const remaining = existing.filter((cn) => !realCns.has(cn));
+      if (existing.length === 0 || remaining.length === 0) {
+        await add(() => batch.delete(ref));
+      } else if (remaining.length < existing.length) {
+        await add(() =>
+          batch.set(
+            ref,
+            {
+              class_numbers: remaining,
+              class_number: remaining.join(', '),
+              section_count: remaining.length,
+            },
+            { merge: true }
+          )
+        );
+      }
+    }
   }
 
   await flush();
