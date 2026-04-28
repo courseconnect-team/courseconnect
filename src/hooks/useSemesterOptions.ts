@@ -103,9 +103,11 @@ export type CourseOption = {
 };
 
 // Input for the course picker. Fields come straight from the semester's course
-// doc (`semesters/{sem}/courses/{id}`) — previously we reconstructed them by
-// splitting the doc id on ":" but the doc id is now `${code}__{classNumber}`
-// (shared with auto-fetch), so structured fields are authoritative.
+// doc (`semesters/{sem}/courses/{id}`). Doc id is `${code} : ${instructor}`
+// (shared between auto-fetch and Excel upload — see
+// `functions/src/courseFetcher/runner.ts::semesterCourseDocId`). `classNumber`
+// is informational only now (a comma-joined list when a prof teaches multiple
+// sections of the same course).
 export type CourseMinimalInput = {
   code: string;
   classNumber: string;
@@ -139,14 +141,23 @@ export function formatInstructor(raw: unknown): string {
   return cleaned.join(', ');
 }
 
-// Render a `semesters/*/courses/*` doc id for display. New canonical ids look
-// like `EEL3111C__10747` (code__classNumber). When an instructor is supplied,
-// prefer "EEL 3111C · Rambo, Keith Jeffrey"; otherwise fall back to the class
-// number (`EEL 3111C · #10747`). Legacy `EEL3111C : Rambo,Keith Jeffrey` ids
-// are already human-readable, so pass them through as-is.
+// Render a `semesters/*/courses/*` doc id for display. Canonical ids look
+// like `EEL3111C : Rambo, Keith Jeffrey` (code + instructor, both written
+// by the auto-fetch and Excel-upload paths). When an explicit instructor
+// is supplied it wins; otherwise we peel the instructor off the doc id.
+// Legacy `EEL3111C__10747` (code + classNumber) ids predating the (code,
+// instructor) unification are still rendered with a `#classNumber` tail.
 export function prettyCourseId(rawId: string, instructor?: unknown): string {
   if (!rawId) return '';
   const instr = formatInstructor(instructor);
+  const colonIdx = rawId.indexOf(' : ');
+  if (colonIdx !== -1) {
+    const code = rawId.slice(0, colonIdx).trim().toUpperCase();
+    const trailing = rawId.slice(colonIdx + 3).trim();
+    const display = prettyCode(code);
+    const finalInstr = instr || trailing;
+    return finalInstr ? `${display} · ${finalInstr}` : display;
+  }
   const dunderIdx = rawId.indexOf('__');
   if (dunderIdx !== -1) {
     const code = rawId.slice(0, dunderIdx).trim().toUpperCase();
@@ -155,7 +166,6 @@ export function prettyCourseId(rawId: string, instructor?: unknown): string {
     if (instr) return `${display} · ${instr}`;
     return classNumber ? `${display} · #${classNumber}` : display;
   }
-  if (rawId.includes(' : ')) return rawId;
   const display = prettyCode(rawId.trim().toUpperCase());
   return instr ? `${display} · ${instr}` : display;
 }
@@ -163,28 +173,31 @@ export function prettyCourseId(rawId: string, instructor?: unknown): string {
 export function parseCoursesMinimal(
   courses: CourseMinimalInput[]
 ): CourseOption[] {
-  return courses.map(
-    ({ code, classNumber, instructor, semester, codeWithSpace }) => {
-      const safeCode = String(code ?? '')
-        .trim()
-        .toUpperCase();
-      const display = prettyCode(safeCode, codeWithSpace);
-      const instrClean = String(instructor ?? '').trim();
-      const safeInstructor =
-        instrClean && instrClean.toLowerCase() !== 'undefined'
-          ? instrClean
-          : 'Instructor Unknown';
-      const department = safeCode.slice(0, 3).toUpperCase();
-      const docId = `${safeCode}__${String(classNumber ?? '').trim()}`;
+  return courses.map(({ code, instructor, semester, codeWithSpace }) => {
+    const safeCode = String(code ?? '')
+      .trim()
+      .toUpperCase();
+    const display = prettyCode(safeCode, codeWithSpace);
+    const instrClean = String(instructor ?? '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const safeInstructor =
+      instrClean && instrClean.toLowerCase() !== 'undefined'
+        ? instrClean
+        : 'Instructor Unknown';
+    const department = safeCode.slice(0, 3).toUpperCase();
+    // Mirror the doc-id format written by the auto-fetch runner and Excel
+    // uploader so picker selections round-trip back to the source doc.
+    const instructorForId = (instrClean || 'TBA').replace(/\//g, '-');
+    const docId = `${safeCode} : ${instructorForId}`;
 
-      return {
-        code: safeCode,
-        instructor: safeInstructor,
-        department,
-        semester,
-        value: `${semester}|||${docId}`,
-        name: `${display} : ${safeInstructor} (${semester})`,
-      };
-    }
-  );
+    return {
+      code: safeCode,
+      instructor: safeInstructor,
+      department,
+      semester,
+      value: `${semester}|||${docId}`,
+      name: `${display} : ${safeInstructor} (${semester})`,
+    };
+  });
 }

@@ -120,18 +120,20 @@ export default function Application() {
               const code = String(d.code ?? '')
                 .trim()
                 .toUpperCase();
+              const instructor = String(
+                d.professor_names ?? d.instructor ?? ''
+              ).trim();
               const classNumber = String(
                 d.class_number ?? d.classNumber ?? ''
               ).trim();
-              // Skip docs missing the canonical fields — the migration script
-              // backfills older Excel rows that predate this schema.
-              if (!code || !classNumber) return;
+              // Doc id is `${code} : ${instructor}`; instructor is the
+              // identifying field. Skip rows missing both code and an
+              // instructor — those can't be picker options.
+              if (!code || !instructor) return;
               allCourses.push({
                 code,
                 classNumber,
-                instructor: String(
-                  d.professor_names ?? d.instructor ?? ''
-                ).trim(),
+                instructor,
                 codeWithSpace: d.codeWithSpace,
                 semester: semesterId,
               });
@@ -156,8 +158,10 @@ export default function Application() {
       try {
         const courseNamesWithSemester = selectedCourses.map((course) => {
           const [semester, raw] = course.split('|||');
-          // New encoding: raw = `${code}__${classNumber}`. Peel off the code.
-          const code = raw.split('__')[0] ?? raw;
+          // Doc id is `${code} : ${instructor}` — peel off the code.
+          // Fall back to legacy `${code}__${classNumber}` for any picker
+          // entries built before the (code, instructor) unification.
+          const code = raw.split(' : ')[0] ?? raw.split('__')[0] ?? raw;
           return `${code.trim()} (${semester})`;
         });
 

@@ -23,15 +23,19 @@ UI edits configs.
 
 Each run writes to two places:
 
-1. **Live semester** — one doc per section at
-   `semesters/{SemesterName}/courses/{code}__{classNumber}`, matching the
-   existing Excel-upload schema (`class_number`, `professor_emails`,
-   `professor_usernames`, `professor_names`, `code`, `credits`,
-   `department`, `enrollment_cap`, `enrolled`, `title`, `semester`,
-   `meeting_times[{day, time, location}]`) plus `source: 'auto-fetch'` +
-   `sourceConfigId`. `SemesterName` comes from the config's term+year,
-   capitalized (e.g. Fall 2026). Using `__` in the doc id guarantees no
-   collision with Excel rows keyed by `{code} : {instructor}`.
+1. **Live semester** — one doc per (course, professor) at
+   `semesters/{SemesterName}/courses/{code} : {instructor}`, matching the
+   Excel-upload schema (`class_number`, `class_numbers`,
+   `professor_emails`, `professor_usernames`, `professor_names`, `code`,
+   `credits`, `department`, `enrollment_cap`, `enrolled`, `title`,
+   `semester`, `meeting_times[{day, time, location}]`, `section_count`)
+   plus `source: 'auto-fetch'` + `sourceConfigId`. `SemesterName` comes
+   from the config's term+year, capitalized (e.g. Fall 2026). Multiple
+   sections of the same course taught by the same prof get merged into a
+   single doc — `class_numbers` lists each section's class number,
+   `enrollment_cap` and `enrolled` are summed, and `meeting_times`
+   concatenates the per-section entries. Excel uploads write into the
+   same docs (same key), so the two paths converge.
 
    `professor_usernames` is the lowercased local part of each entry in
    `professor_emails` (e.g. `john.doe@ece.ufl.edu` →
@@ -94,11 +98,13 @@ department, code)` for catalog queries, and a collection-group index on
 ## Preview (dry run)
 
 `previewCourseFetch` runs the full fetch → filter → normalize pipeline
-without writing anything, then diffs `{code}__{classNumber}` doc ids
-against the target `semesters/{SemesterName}/courses/*` collection.
-Every previewed section is tagged `new` (not in the semester yet) or
-`updated` (exists — Apply will merge in-place). Response is capped at
-1000 courses; rare unfiltered previews set `truncated: true` while Apply
+without writing anything, then groups sections by (course, instructor)
+and diffs each `{code} : {instructor}` doc id against the target
+`semesters/{SemesterName}/courses/*` collection. Every previewed row is
+tagged `new` (not in the semester yet) or `updated` (exists — Apply will
+merge in-place). Multi-section rows show the merged class numbers and
+summed enrollment that Apply will write. Response is capped at 1000
+courses; rare unfiltered previews set `truncated: true` while Apply
 still writes all matching courses.
 
 ## How scheduled refresh works

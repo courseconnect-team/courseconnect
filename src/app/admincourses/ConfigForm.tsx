@@ -125,8 +125,9 @@ export default function ConfigForm({
             {targetSemester}
           </Typography>
           {'. '}
-          Re-runs update in place using <code>{`{code}__{classNumber}`}</code>{' '}
-          doc ids so Excel uploads are never overwritten.
+          Re-runs update in place using <code>{`{code} : {instructor}`}</code>{' '}
+          doc ids — one row per professor + course, with sections taught by the
+          same prof merged together.
         </Alert>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
