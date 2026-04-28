@@ -75,22 +75,49 @@ const applicationsSubcollection = () =>
 
 const applicationDoc = (id: string) => applicationsSubcollection().doc(id);
 
-function flattenCourses(courses: any): Record<string, string> {
-  if (!courses || typeof courses !== 'object') return {};
-  const out: Record<string, string> = {};
+// Walk the canonical nested shape `{ [semester]: { [courseId]: status } }`
+// (and the legacy `${semester}|||${courseId}` flat shape) into a list of
+// per-(semester, course) entries. Returning a list — not a map keyed by
+// courseId — avoids losing the semester scope: the same `(code,
+// instructor)` doc id often appears across multiple semesters now that
+// course doc ids are `${code} : ${instructor}` instead of including the
+// class number, and a map collapse would lose every status but the last.
+interface FlatCourseEntry {
+  semester: string;
+  courseId: string;
+  status: string;
+}
+function flattenCourses(courses: any): FlatCourseEntry[] {
+  if (!courses || typeof courses !== 'object') return [];
+  const out: FlatCourseEntry[] = [];
   for (const [key, val] of Object.entries(courses)) {
     if (val && typeof val === 'object') {
       for (const [courseId, status] of Object.entries(
         val as Record<string, unknown>
       )) {
-        if (typeof status === 'string') out[courseId] = status;
+        if (typeof status === 'string')
+          out.push({ semester: key, courseId, status });
       }
     } else if (typeof val === 'string') {
-      const bare = key.includes('|||') ? key.split('|||').pop() || key : key;
-      out[bare] = val;
+      const sepIdx = key.indexOf('|||');
+      if (sepIdx !== -1) {
+        out.push({
+          semester: key.slice(0, sepIdx),
+          courseId: key.slice(sepIdx + 3),
+          status: val,
+        });
+      } else {
+        out.push({ semester: '', courseId: key, status: val });
+      }
     }
   }
   return out;
+}
+
+// Render a course entry with its semester so users can disambiguate the
+// same (course, instructor) appearing across terms.
+function formatCourseLabel(e: FlatCourseEntry): string {
+  return e.semester ? `${e.courseId} (${e.semester})` : e.courseId;
 }
 
 // ─── status display ─────────────────────────────────────────────────────────
@@ -136,7 +163,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
             const d = doc.data();
             if (d.status === 'Admin_denied') return false;
             const flat = flattenCourses(d.courses);
-            if (d.status === 'Admin_approved' && Object.keys(flat).length < 2) {
+            if (d.status === 'Admin_approved' && flat.length < 2) {
               return false;
             }
             return true;
@@ -147,10 +174,10 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
             return {
               id: doc.id,
               ...d,
-              courses: Object.entries(flat)
-                .filter(([, v]) => v === 'approved')
-                .map(([k]) => k),
-              allcourses: Object.keys(flat),
+              courses: flat
+                .filter((e) => e.status === 'approved')
+                .map(formatCourseLabel),
+              allcourses: flat.map(formatCourseLabel),
             } as Application;
           });
         setApplicationData(data);
@@ -192,8 +219,11 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
     const doc = await applicationDoc(id).get();
     const flat = flattenCourses(doc.data()?.courses);
     // Admin approval supersedes faculty: allow assigning any course the
-    // applicant applied for, even if no faculty member has approved it yet.
-    const courses = Object.keys(flat);
+    // applicant applied for, even if no faculty member has approved it
+    // yet. Labels include the semester so admins can disambiguate the
+    // same (course, instructor) appearing across multiple terms — the
+    // submit handler parses the semester back out of the label.
+    const courses = flat.map(formatCourseLabel);
     setAssignCourses(courses);
     setAssignCourse('');
     setAssignHours('0');
@@ -288,28 +318,38 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
     try {
       const studentUid = selectedId;
       const doc = await applicationDoc(studentUid).get();
+
+      // Assign-dialog options come back as `${courseId} (${semester})` so
+      // the same (course, instructor) appearing in two terms is
+      // distinguishable. Parse the suffix back out — falling through to a
+      // best-effort lookup when the label has no semester (legacy entries).
+      const labelMatch = assignCourse.match(/^(.*) \(([^)]+)\)$/);
+      const courseId = labelMatch ? labelMatch[1] : assignCourse;
+      const labeledSemester = labelMatch ? labelMatch[2] : null;
+
       const courseRef = firebase
         .firestore()
         .collection('courses')
-        .doc(assignCourse);
+        .doc(courseId);
       const courseDoc = await getDoc(courseRef);
 
-      // find the semester bucket holding this course
       const existingCourses = doc.data()?.courses || {};
-      let semesterBucket: string | null = null;
-      for (const [semKey, val] of Object.entries(existingCourses)) {
-        if (
-          val &&
-          typeof val === 'object' &&
-          assignCourse in (val as Record<string, unknown>)
-        ) {
-          semesterBucket = semKey;
-          break;
+      let semesterBucket: string | null = labeledSemester;
+      if (!semesterBucket) {
+        for (const [semKey, val] of Object.entries(existingCourses)) {
+          if (
+            val &&
+            typeof val === 'object' &&
+            courseId in (val as Record<string, unknown>)
+          ) {
+            semesterBucket = semKey;
+            break;
+          }
         }
       }
       const coursePath = semesterBucket
-        ? `courses.${semesterBucket}.${assignCourse}`
-        : `courses.${assignCourse}`;
+        ? `courses.${semesterBucket}.${courseId}`
+        : `courses.${courseId}`;
 
       // Mark the assigned course 'accepted' (admin-assigned), not 'approved'
       // (faculty-approved). The student status page reads per-course state to
@@ -324,7 +364,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       const assignment = {
         date: `${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}`,
         student_uid: studentUid,
-        class_codes: assignCourse,
+        class_codes: courseId,
         email: doc.data()?.email,
         name: `${doc.data()?.firstname ?? ''} ${doc.data()?.lastname ?? ''}`,
         semesters: doc.data()?.available_semesters,
