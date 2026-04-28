@@ -311,9 +311,13 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
         ? `courses.${semesterBucket}.${assignCourse}`
         : `courses.${assignCourse}`;
 
+      // Mark the assigned course 'accepted' (admin-assigned), not 'approved'
+      // (faculty-approved). The student status page reads per-course state to
+      // label "Accepted" — using 'approved' here would flip every other
+      // faculty-approved course to "Accepted" too.
       await applicationDoc(studentUid).update({
         status: 'Admin_approved',
-        [coursePath]: 'approved',
+        [coursePath]: 'accepted',
       });
 
       const now = new Date();

@@ -25,10 +25,6 @@ export default function AppView({
 }: AppViewProps) {
   const [docData, setDocData] = React.useState<any>(null);
 
-  // get application object from uid
-  const applicationsRef = firebase.firestore().collection('applications');
-  const docRef = applicationsRef.doc(uid);
-
   const onThumbUpClick = useCallback(
     (event: any) => {
       event?.stopPropagation();
@@ -46,6 +42,15 @@ export default function AppView({
   );
 
   React.useEffect(() => {
+    // Applications live under `applications/course_assistant/uid/{uid}`,
+    // not at the top level — fetching from `applications/{uid}` returns
+    // a non-existent doc and leaves the view blank.
+    const docRef = firebase
+      .firestore()
+      .collection('applications')
+      .doc('course_assistant')
+      .collection('uid')
+      .doc(uid);
     docRef
       .get()
       .then((doc) => {
@@ -58,7 +63,7 @@ export default function AppView({
       .catch((error) => {
         console.log('Error getting document:', error);
       });
-  }, [uid, docRef]); // Only re-run the effect if uid changes
+  }, [uid]);
   return (
     <Box sx={{}}>
       {docData && (
