@@ -84,16 +84,11 @@ function asArray<T>(v: unknown): T[] {
 }
 
 interface LegacyDoc {
-  ref: FirebaseFirestore.DocumentReference;
+  // Loose-typed to keep this script dependency-free; the rest of the
+  // script only calls .delete() / .set() / .path on the ref.
+  ref: any;
   id: string;
   data: AnyMap;
-}
-
-interface PlannedMerge {
-  semester: string;
-  newDocId: string;
-  sources: LegacyDoc[];
-  merged: AnyMap;
 }
 
 function mergeGroup(
@@ -226,7 +221,10 @@ async function planAndApply(db: any): Promise<{
       `\n[${semester}] ${groupsByKey.size} group(s) from ${legacy} legacy doc(s)`
     );
 
-    for (const [, group] of groupsByKey) {
+    // Materialize entries first — direct Map iteration needs ES2015+ and
+    // the script's effective tsconfig is the Next-app one (target ES5).
+    const groupEntries = Array.from(groupsByKey.values());
+    for (const group of groupEntries) {
       groups++;
       const targetId = newDocId(group.code, group.instructor);
       const targetRef = semDoc.ref.collection('courses').doc(targetId);
@@ -239,7 +237,7 @@ async function planAndApply(db: any): Promise<{
 
       console.log(
         `  ${group.code} : ${group.instructor}  ←  ${group.docs
-          .map((d) => d.id)
+          .map((d: LegacyDoc) => d.id)
           .join(', ')}  → ${targetId}`
       );
 
