@@ -51,7 +51,6 @@ type CoursesShape =
 interface StatusTableProps {
   assignments: string[];
   courses: CoursesShape;
-  adminApproved: boolean;
   adminDenied: boolean;
   position: string;
   dateApplied: string;
@@ -113,7 +112,6 @@ async function fetchCourseInstructor(
 export const StatusTable: React.FC<StatusTableProps> = ({
   assignments,
   courses,
-  adminApproved,
   adminDenied,
   position,
   dateApplied,
@@ -149,7 +147,7 @@ export const StatusTable: React.FC<StatusTableProps> = ({
   /* per-course statuses */
   flattened.forEach(({ courseId, semester, state }, i) => {
     let status: Row['status'] = 'pending';
-    if (state === 'approved' && adminApproved) status = 'accepted';
+    if (state === 'accepted') status = 'accepted';
     else if (state === 'denied') status = 'rejected';
     else if (state === 'applied') status = 'in-progress';
     const pretty = prettyCourseId(courseId, instructorQueries[i]?.data);
