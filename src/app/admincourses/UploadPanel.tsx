@@ -220,7 +220,10 @@ export default function UploadPanel({
         }
       }
 
-      for (const [docId, g] of groups) {
+      // Materialize entries first — direct Map iteration needs ES2015+ and
+      // the Next config still targets ES5. Array.from is the safe bridge.
+      const groupEntries = Array.from(groups.entries());
+      for (const [docId, g] of groupEntries) {
         await firebase
           .firestore()
           .collection('semesters')
