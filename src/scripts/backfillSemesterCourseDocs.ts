@@ -38,7 +38,12 @@ function init() {
       projectId: 'courseconnect-c6a7b',
     });
   }
-  return admin.firestore();
+  const db = admin.firestore();
+  // Legacy docs may not carry every optional field (sourceConfigId,
+  // sourceProvider, etc.). Skipping undefined keeps the merged write
+  // valid without forcing a `?? null` for every optional field.
+  db.settings({ ignoreUndefinedProperties: true });
+  return db;
 }
 
 // Mirror of `instructorKeyFromSection` in
