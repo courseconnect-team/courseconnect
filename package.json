@@ -24,7 +24,11 @@
     "backfill:professor-usernames:dry": "ts-node src/scripts/backfillProfessorUsernames.ts",
     "backfill:professor-usernames": "ts-node src/scripts/backfillProfessorUsernames.ts --execute",
     "migrate:application-course-keys:dry": "ts-node src/scripts/migrateApplicationCourseKeys.ts",
-    "migrate:application-course-keys": "ts-node src/scripts/migrateApplicationCourseKeys.ts --execute"
+    "migrate:application-course-keys": "ts-node src/scripts/migrateApplicationCourseKeys.ts --execute",
+    "migrate:application-course-keys-to-instructor:dry": "ts-node src/scripts/migrateApplicationCourseKeysToInstructor.ts",
+    "migrate:application-course-keys-to-instructor": "ts-node src/scripts/migrateApplicationCourseKeysToInstructor.ts --execute",
+    "backfill:semester-course-docs:dry": "ts-node src/scripts/backfillSemesterCourseDocs.ts",
+    "backfill:semester-course-docs": "ts-node src/scripts/backfillSemesterCourseDocs.ts --execute"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
