@@ -17,6 +17,47 @@ export interface AppViewProps {
   handleOpenAssignmentDialog: (id: GridRowId) => void;
 }
 
+// Walk the canonical nested shape `{ [semester]: { [courseId]: status } }`
+// (and the legacy `${semester}|||${courseId}` flat shape) into a list of
+// per-(semester, course) entries. Iterating Object.entries on the outer
+// shape returns [semester, bucket] pairs — a previous version of this
+// view treated those as [courseId, status], so the "All" column rendered
+// semester names and the "Faculty Approved" column was always empty.
+interface AppViewCourseEntry {
+  semester: string;
+  courseId: string;
+  status: string;
+}
+function flattenAppViewCourses(courses: any): AppViewCourseEntry[] {
+  if (!courses || typeof courses !== 'object') return [];
+  const out: AppViewCourseEntry[] = [];
+  for (const [key, val] of Object.entries(courses)) {
+    if (val && typeof val === 'object') {
+      for (const [courseId, status] of Object.entries(
+        val as Record<string, unknown>
+      )) {
+        if (typeof status === 'string')
+          out.push({ semester: key, courseId, status });
+      }
+    } else if (typeof val === 'string') {
+      const sepIdx = key.indexOf('|||');
+      if (sepIdx !== -1) {
+        out.push({
+          semester: key.slice(0, sepIdx),
+          courseId: key.slice(sepIdx + 3),
+          status: val,
+        });
+      } else {
+        out.push({ semester: '', courseId: key, status: val });
+      }
+    }
+  }
+  return out;
+}
+function formatAppViewLabel(e: AppViewCourseEntry): string {
+  return e.semester ? `${e.courseId} (${e.semester})` : e.courseId;
+}
+
 export default function AppView({
   close,
   uid,
@@ -139,18 +180,18 @@ export default function AppView({
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50"> All Course(s):</div>
                 <div className="availability2">
-                  {Object.entries(docData.courses)
-                    .map(([key, value]) => key)
-                    .join(', ')}
+                  {flattenAppViewCourses(docData.courses)
+                    .map(formatAppViewLabel)
+                    .join(', ') || '—'}
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '75px' }}>
                 <div className="label50">Faculty Approved Course(s):</div>
                 <div className="availability2">
-                  {Object.entries(docData.courses)
-                    .filter(([key, value]) => value === 'accepted')
-                    .map(([key, value]) => key)
-                    .join(', ')}
+                  {flattenAppViewCourses(docData.courses)
+                    .filter((e) => e.status === 'approved')
+                    .map(formatAppViewLabel)
+                    .join(', ') || '—'}
                 </div>
               </div>
 

@@ -31,15 +31,29 @@ function normalizeClassNumber(raw: unknown): string {
   return String(raw ?? '').trim();
 }
 
+// Names that mean "no real instructor on file" — same set the auto-fetch
+// runner collapses (see `functions/src/courseFetcher/runner.ts`). All map
+// to 'TBA' so a course has at most one no-instructor doc per semester.
+const PLACEHOLDER_INSTRUCTOR_LOWER = new Set([
+  'tba',
+  'undef',
+  'undefined',
+  'unknown',
+  '-',
+]);
+
 // Stable instructor key used in the doc id. Mirrors
 // `instructorKeyFromSection` in `functions/src/courseFetcher/runner.ts`:
-// trim + collapse whitespace, fall back to 'TBA' when missing. Keeping the
-// two writers aligned means re-runs and re-uploads merge into the same doc.
+// trim + collapse whitespace, fall back to 'TBA' when missing or when the
+// source uses a placeholder string. Keeping the two writers aligned means
+// re-runs and re-uploads merge into the same doc.
 function instructorKey(raw: unknown): string {
   const cleaned = String(raw ?? '')
     .replace(/\s+/g, ' ')
     .trim();
-  return cleaned || 'TBA';
+  if (!cleaned) return 'TBA';
+  if (PLACEHOLDER_INSTRUCTOR_LOWER.has(cleaned.toLowerCase())) return 'TBA';
+  return cleaned;
 }
 
 // Doc-id shape shared with auto-fetch (`runner.ts::commitCoursesAndSections`).
