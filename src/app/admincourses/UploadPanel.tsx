@@ -31,11 +31,26 @@ function normalizeClassNumber(raw: unknown): string {
   return String(raw ?? '').trim();
 }
 
+// Stable instructor key used in the doc id. Mirrors
+// `instructorKeyFromSection` in `functions/src/courseFetcher/runner.ts`:
+// trim + collapse whitespace, fall back to 'TBA' when missing. Keeping the
+// two writers aligned means re-runs and re-uploads merge into the same doc.
+function instructorKey(raw: unknown): string {
+  const cleaned = String(raw ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned || 'TBA';
+}
+
 // Doc-id shape shared with auto-fetch (`runner.ts::commitCoursesAndSections`).
-// Keeping these aligned means the auto-fetch and Excel paths write into the
-// same doc so re-runs merge in place instead of producing duplicates.
-function semesterCourseDocId(code: string, classNumber: string): string {
-  return `${code}__${classNumber}`;
+// One doc per (course, professor); section-level rows for the same prof get
+// merged on the same doc so re-uploads (and the auto-fetch pipeline) don't
+// produce duplicates.
+function semesterCourseDocId(code: string, instructor: string): string {
+  // Firestore doc ids cannot contain '/'. Other punctuation (commas in
+  // "Smith, John", periods, etc.) is permitted.
+  const safeInstructor = instructor.replace(/\//g, '-');
+  return `${code} : ${safeInstructor}`;
 }
 
 export interface UploadPanelProps {
@@ -108,7 +123,23 @@ export default function UploadPanel({
         sheetData.forEach((row: any) => data.push(row));
       });
 
-      const seen = new Set<string>();
+      // Group rows by (code, instructor) so multiple sections of the same
+      // course taught by the same prof land on a single merged doc instead
+      // of overwriting each other. Matches the auto-fetch grouping.
+      type RowGroup = {
+        code: string;
+        instructor: string;
+        instructorEmails: string[];
+        classNumbers: string[];
+        meetingTimes: Array<{ day: string; time: string; location: string }>;
+        enrollmentCap: number;
+        enrolled: number;
+        anyEnrollmentCap: boolean;
+        anyEnrolled: boolean;
+        credits: unknown;
+        title: unknown;
+      };
+      const groups = new Map<string, RowGroup>();
       let skippedMissingId = 0;
       for (const row of data) {
         const mappedRow: Record<string, any> = {
@@ -131,18 +162,65 @@ export default function UploadPanel({
           skippedMissingId++;
           continue;
         }
-        const docId = semesterCourseDocId(code, classNumber);
-        if (seen.has(docId)) continue;
-        seen.add(docId);
+        const instructor = instructorKey(mappedRow['Instructor']);
+        const docId = semesterCourseDocId(code, instructor);
 
         const rawEmails = mappedRow['Instructor Emails'] ?? 'undef';
-        const emailArray =
+        const emailArray: string[] =
           rawEmails === 'undef'
             ? []
             : rawEmails.split(';').map((e: string) => e.trim());
 
-        const instructor = String(mappedRow['Instructor'] ?? '').trim();
+        const cap = Number(mappedRow['Enr Cap']);
+        const enr = Number(mappedRow['Enrolled']);
 
+        const group = groups.get(docId);
+        if (group) {
+          if (!group.classNumbers.includes(classNumber)) {
+            group.classNumbers.push(classNumber);
+          }
+          for (const e of emailArray) {
+            if (e && !group.instructorEmails.includes(e)) {
+              group.instructorEmails.push(e);
+            }
+          }
+          group.meetingTimes.push({
+            day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
+            time: mappedRow['Time'] ?? 'undef',
+            location: mappedRow['Facility'] ?? 'undef',
+          });
+          if (Number.isFinite(cap)) {
+            group.enrollmentCap += cap;
+            group.anyEnrollmentCap = true;
+          }
+          if (Number.isFinite(enr)) {
+            group.enrolled += enr;
+            group.anyEnrolled = true;
+          }
+        } else {
+          groups.set(docId, {
+            code,
+            instructor,
+            instructorEmails: emailArray.filter(Boolean),
+            classNumbers: [classNumber],
+            meetingTimes: [
+              {
+                day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
+                time: mappedRow['Time'] ?? 'undef',
+                location: mappedRow['Facility'] ?? 'undef',
+              },
+            ],
+            enrollmentCap: Number.isFinite(cap) ? cap : 0,
+            enrolled: Number.isFinite(enr) ? enr : 0,
+            anyEnrollmentCap: Number.isFinite(cap),
+            anyEnrolled: Number.isFinite(enr),
+            credits: mappedRow['Min - Max Cred'],
+            title: mappedRow['Course Title'],
+          });
+        }
+      }
+
+      for (const [docId, g] of groups) {
         await firebase
           .firestore()
           .collection('semesters')
@@ -151,25 +229,23 @@ export default function UploadPanel({
           .doc(docId)
           .set(
             {
-              class_number: classNumber,
-              professor_emails: emailArray,
-              professor_usernames: emailsToUsernames(emailArray),
-              professor_names: instructor || 'undef',
-              code,
-              codeWithSpace: addCodeSpace(code),
-              credits: mappedRow['Min - Max Cred'] ?? 'undef',
+              class_number: g.classNumbers.join(', '),
+              class_numbers: g.classNumbers,
+              professor_emails: g.instructorEmails,
+              professor_usernames: emailsToUsernames(g.instructorEmails),
+              professor_names: g.instructor,
+              code: g.code,
+              codeWithSpace: addCodeSpace(g.code),
+              credits: g.credits ?? 'undef',
               department: uploadDeptCode,
-              enrollment_cap: mappedRow['Enr Cap'] ?? 'undef',
-              enrolled: mappedRow['Enrolled'] ?? 'undef',
-              title: mappedRow['Course Title'] ?? 'undef',
+              enrollment_cap: g.anyEnrollmentCap
+                ? String(g.enrollmentCap)
+                : 'undef',
+              enrolled: g.anyEnrolled ? String(g.enrolled) : 'undef',
+              title: g.title ?? 'undef',
+              section_count: g.classNumbers.length,
               semester,
-              meeting_times: [
-                {
-                  day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
-                  time: mappedRow['Time'] ?? 'undef',
-                  location: mappedRow['Facility'] ?? 'undef',
-                },
-              ],
+              meeting_times: g.meetingTimes,
               source: 'excel-upload',
             },
             { merge: true }
@@ -289,7 +365,7 @@ export default function UploadPanel({
     <Stack spacing={2}>
       <UploadCard
         title="Upload semester course data"
-        description="Import an .xlsx/.xls roster to this semester. Rows are keyed by code + instructor and won't collide with auto-fetch entries."
+        description="Import an .xlsx/.xls roster to this semester. Rows are keyed by code + instructor — multiple sections taught by the same prof are merged into one course row."
         action={
           <Button
             component="label"

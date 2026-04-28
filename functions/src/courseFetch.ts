@@ -266,7 +266,10 @@ export const triggerCourseFetch = functions.https.onRequest(
 // the UI can tag rows as "new" or "updated".
 
 type PreviewSectionRow = {
+  // After grouping by (course, instructor) one preview row may represent
+  // multiple sections taught by the same prof — class numbers are joined.
   classNumber: string;
+  classNumbers: string[];
   sectionNumber?: string;
   instructors: Array<{ name: string; email?: string }>;
   meetingTimes: Array<{
@@ -282,6 +285,7 @@ type PreviewSectionRow = {
   enrolled?: number;
   campus?: string;
   deliveryMode?: string;
+  sectionCount: number;
   diffStatus: 'new' | 'updated';
 };
 
@@ -301,6 +305,32 @@ function semesterNameFrom(
 ): string {
   const cap = term.charAt(0).toUpperCase() + term.slice(1);
   return `${cap} ${year}`;
+}
+
+// Mirror of `instructorKeyFromSection` in `courseFetcher/runner.ts`. Kept
+// inline here so the preview's diff key matches the runner's write key
+// without having to plumb the helper through the pipeline boundary.
+function previewInstructorKey(
+  instructors: Array<{ name: string; email?: string }>
+): string {
+  const joined = instructors
+    .map((i) => (i.name ?? '').trim())
+    .filter(Boolean)
+    .join(', ');
+  const cleaned = joined.replace(/\s+/g, ' ').trim();
+  return cleaned || 'TBA';
+}
+
+function sumNumbers(values: Array<number | undefined>): number | undefined {
+  let total = 0;
+  let any = false;
+  for (const v of values) {
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      total += v;
+      any = true;
+    }
+  }
+  return any ? total : undefined;
 }
 
 // Fetch just the doc ids already present in the target semester so we can
@@ -352,31 +382,54 @@ export const previewCourseFetch = functions
         existingSemesterDocIds(targetSemester),
       ]);
 
-      // Group sections under their course and compute diff status.
+      // Group sections by (course, instructor). One preview row per group
+      // (the doc auto-fetch will write), then diff each row's doc id against
+      // the target semester. Mirrors the runner's `${code} : ${instructor}`
+      // doc-id format and section-merging behavior so the preview accurately
+      // reflects what Apply will write.
+      const grouped = new Map<string, Map<string, typeof result.sections>>();
+      for (const s of result.sections) {
+        const courseKey = s.courseCode;
+        const instructorKey = previewInstructorKey(s.instructors);
+        let byInstructor = grouped.get(courseKey);
+        if (!byInstructor) {
+          byInstructor = new Map();
+          grouped.set(courseKey, byInstructor);
+        }
+        const bucket = byInstructor.get(instructorKey);
+        if (bucket) bucket.push(s);
+        else byInstructor.set(instructorKey, [s]);
+      }
+
       const sectionsByCourse = new Map<string, PreviewSectionRow[]>();
       let newCount = 0;
       let updatedCount = 0;
-      for (const s of result.sections) {
-        const docId = `${s.courseCode}__${s.classNumber}`;
-        const diffStatus: 'new' | 'updated' = existing.has(docId)
-          ? 'updated'
-          : 'new';
-        if (diffStatus === 'new') newCount++;
-        else updatedCount++;
-        const row: PreviewSectionRow = {
-          classNumber: s.classNumber,
-          sectionNumber: s.sectionNumber,
-          instructors: s.instructors,
-          meetingTimes: s.meetingTimes,
-          enrollmentCap: s.enrollmentCap,
-          enrolled: s.enrolled,
-          campus: s.campus,
-          deliveryMode: s.deliveryMode,
-          diffStatus,
-        };
-        const bucket = sectionsByCourse.get(s.courseCode);
-        if (bucket) bucket.push(row);
-        else sectionsByCourse.set(s.courseCode, [row]);
+      for (const [courseCode, byInstructor] of grouped) {
+        const rows: PreviewSectionRow[] = [];
+        for (const [instructorKey, sections] of byInstructor) {
+          const docId = `${courseCode} : ${instructorKey.replace(/\//g, '-')}`;
+          const diffStatus: 'new' | 'updated' = existing.has(docId)
+            ? 'updated'
+            : 'new';
+          if (diffStatus === 'new') newCount++;
+          else updatedCount++;
+          const head = sections[0];
+          const classNumbers = sections.map((s) => s.classNumber);
+          rows.push({
+            classNumber: classNumbers.join(', '),
+            classNumbers,
+            sectionNumber: head.sectionNumber,
+            instructors: head.instructors,
+            meetingTimes: sections.flatMap((s) => s.meetingTimes),
+            enrollmentCap: sumNumbers(sections.map((s) => s.enrollmentCap)),
+            enrolled: sumNumbers(sections.map((s) => s.enrolled)),
+            campus: head.campus,
+            deliveryMode: head.deliveryMode,
+            sectionCount: sections.length,
+            diffStatus,
+          });
+        }
+        sectionsByCourse.set(courseCode, rows);
       }
 
       const courses: PreviewCourseRow[] = result.courses

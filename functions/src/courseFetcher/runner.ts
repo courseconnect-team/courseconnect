@@ -57,26 +57,78 @@ function toLegacyMeetingTimes(times: NormalizedMeetingTime[]): Array<{
   }));
 }
 
+// Stable instructor key used for both the doc id and section grouping. We
+// normalize the joined name string so two sections of the same course taught
+// by the same prof land on the same doc — auto-fetch's normalize step keeps
+// names consistent within a single run, so a trim/whitespace-collapse is
+// enough. Falls back to 'TBA' when a section has no listed instructor.
+function instructorKeyFromSection(section: NormalizedSection): string {
+  const joined = section.instructors
+    .map((i) => (i.name ?? '').trim())
+    .filter(Boolean)
+    .join(', ');
+  const cleaned = joined.replace(/\s+/g, ' ').trim();
+  return cleaned || 'TBA';
+}
+
+// Doc id used by the live semester layout. Matches the Excel upload format
+// (`UploadPanel.tsx`) so re-runs and re-uploads merge into the same doc.
+function semesterCourseDocId(code: string, instructorKey: string): string {
+  // Firestore doc ids cannot contain '/'. Other punctuation in instructor
+  // names (commas, periods) is fine.
+  const safeInstructor = instructorKey.replace(/\//g, '-');
+  return `${code} : ${safeInstructor}`;
+}
+
+function sumNumericStrings(values: Array<string | undefined>): string {
+  let total = 0;
+  let any = false;
+  for (const v of values) {
+    if (v == null || v === '') continue;
+    const n = Number(v);
+    if (Number.isFinite(n)) {
+      total += n;
+      any = true;
+    }
+  }
+  return any ? String(total) : '';
+}
+
 // Build a doc matching the existing semester-course schema used by the
-// Excel upload flow. The `source` + `sourceConfigId` fields let the UI
-// distinguish auto-fetched rows from manually uploaded ones.
+// Excel upload flow. One doc per (course, instructor) — multiple sections
+// taught by the same prof get merged so the catalog isn't fragmented per
+// section. The `source` + `sourceConfigId` fields let the UI distinguish
+// auto-fetched rows from manually uploaded ones.
 function buildSemesterCourseDoc(
   course: NormalizedCourse,
-  section: NormalizedSection,
+  sections: NormalizedSection[],
   semesterName: string,
   configId: string,
   provider: string
 ): Record<string, unknown> {
-  const instructorNames = section.instructors
-    .map((i) => i.name)
-    .filter(Boolean);
-  const instructorEmails = section.instructors
+  // Use the first section as the source of truth for instructor identity —
+  // grouping guarantees they all share the same instructor key.
+  const head = sections[0];
+  const instructorNames = head.instructors.map((i) => i.name).filter(Boolean);
+  const instructorEmails = head.instructors
     .map((i) => i.email)
     .filter((e): e is string => Boolean(e));
 
+  const classNumbers = sections.map((s) => s.classNumber).filter(Boolean);
+  const sectionNumbers = sections
+    .map((s) => s.sectionNumber)
+    .filter((s): s is string => Boolean(s));
+  const meetingTimes = sections.flatMap((s) =>
+    toLegacyMeetingTimes(s.meetingTimes)
+  );
+
   return {
-    class_number: section.classNumber,
+    // Backward-compat single-string field for consumers reading
+    // `class_number`. New code should prefer `class_numbers` (array).
+    class_number: classNumbers.join(', '),
+    class_numbers: classNumbers,
     code: course.code,
+    codeWithSpace: course.codeWithSpace,
     title: course.title,
     credits: course.credits ?? '',
     department: (course.department ?? '').toUpperCase(),
@@ -84,12 +136,18 @@ function buildSemesterCourseDoc(
     professor_names: instructorNames.join(', '),
     professor_emails: instructorEmails,
     professor_usernames: emailsToUsernames(instructorEmails),
-    enrollment_cap:
-      section.enrollmentCap != null ? String(section.enrollmentCap) : '',
-    enrolled: section.enrolled != null ? String(section.enrolled) : '',
-    title_section: section.sectionNumber ?? '',
+    enrollment_cap: sumNumericStrings(
+      sections.map((s) =>
+        s.enrollmentCap != null ? String(s.enrollmentCap) : undefined
+      )
+    ),
+    enrolled: sumNumericStrings(
+      sections.map((s) => (s.enrolled != null ? String(s.enrolled) : undefined))
+    ),
+    title_section: sectionNumbers.join(', '),
+    section_count: sections.length,
     semester: semesterName,
-    meeting_times: toLegacyMeetingTimes(section.meetingTimes),
+    meeting_times: meetingTimes,
     source: 'auto-fetch',
     sourceConfigId: configId,
     sourceProvider: provider,
@@ -155,14 +213,26 @@ async function commitCoursesAndSections(
     ? result.sections.filter((s) => isIncluded(s.courseCode))
     : result.sections;
 
-  // Index sections by courseCode so we can emit one legacy semester-course
-  // doc per (course, section) pair below.
-  const sectionsByCourse = new Map<string, NormalizedSection[]>();
+  // Group sections by (courseCode, instructorKey) so we emit one merged
+  // semester-course doc per (course, professor) pair instead of one per
+  // section. Inner map keys on the instructor key so a 4-section course
+  // taught by 2 profs produces 2 docs (one per prof, with that prof's
+  // sections merged), not 4.
+  const sectionsByCourseInstructor = new Map<
+    string,
+    Map<string, NormalizedSection[]>
+  >();
   for (const section of sectionsToWrite) {
-    const key = section.courseCode;
-    const bucket = sectionsByCourse.get(key);
+    const courseKey = section.courseCode;
+    const instructorKey = instructorKeyFromSection(section);
+    let byInstructor = sectionsByCourseInstructor.get(courseKey);
+    if (!byInstructor) {
+      byInstructor = new Map();
+      sectionsByCourseInstructor.set(courseKey, byInstructor);
+    }
+    const bucket = byInstructor.get(instructorKey);
     if (bucket) bucket.push(section);
-    else sectionsByCourse.set(key, [section]);
+    else byInstructor.set(instructorKey, [section]);
   }
 
   const semesterName = semesterNameFromConfig(config.term, config.year);
@@ -219,16 +289,19 @@ async function commitCoursesAndSections(
       )
     );
 
-    // 2) Live semester-course docs — one per section, matching the existing
-    // schema the app already reads. Doc id uses `__` to avoid colliding
-    // with Excel rows which use `${code} : ${instructor}`.
-    const sections = sectionsByCourse.get(course.code) ?? [];
-    for (const section of sections) {
-      const semDocId = `${course.code}__${section.classNumber}`;
+    // 2) Live semester-course docs — one per (course, professor). Multiple
+    // sections taught by the same prof get merged into a single doc so the
+    // catalog isn't fragmented per section. Matches the Excel upload doc-id
+    // format (`${code} : ${instructor}`) so re-runs and re-uploads converge
+    // on the same row.
+    const byInstructor =
+      sectionsByCourseInstructor.get(course.code) ?? new Map();
+    for (const [instructorKey, sections] of byInstructor) {
+      const semDocId = semesterCourseDocId(course.code, instructorKey);
       const semRef = semesterCourses.doc(semDocId);
       const semPayload = buildSemesterCourseDoc(
         course,
-        section,
+        sections,
         semesterName,
         configId,
         provider
