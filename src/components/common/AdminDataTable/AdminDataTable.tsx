@@ -141,7 +141,7 @@ export function AdminDataTable<TData>({
   tableId,
   exportFilename = 'table.csv',
   minWidth,
-  maxHeight = '70vh',
+  maxHeight = 'calc(100vh - 380px)',
 }: AdminDataTableProps<TData>) {
   // ─── persisted prefs ──────────────────────────────────────────────────────
   const visibilityKey = tableId ? `adt:${tableId}:vis` : undefined;
@@ -624,6 +624,7 @@ export function AdminDataTable<TData>({
       <TableContainer
         sx={{
           maxHeight,
+          minHeight: 260,
           overflowX: 'auto',
           '&::-webkit-scrollbar': { height: 10, width: 10 },
           '&::-webkit-scrollbar-thumb': {
