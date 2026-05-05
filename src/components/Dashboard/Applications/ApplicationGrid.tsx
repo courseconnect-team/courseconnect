@@ -26,6 +26,7 @@ import 'firebase/firestore';
 import { collection, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { emailToUsername } from '@/utils/email';
+import { prettyCourseId } from '@/hooks/useSemesterOptions';
 
 import AppView from './AppView';
 import {
@@ -118,6 +119,16 @@ function flattenCourses(courses: any): FlatCourseEntry[] {
 // same (course, instructor) appearing across terms.
 function formatCourseLabel(e: FlatCourseEntry): string {
   return e.semester ? `${e.courseId} (${e.semester})` : e.courseId;
+}
+
+// Human-readable version of a formatCourseLabel string — runs prettyCourseId
+// on the courseId portion while preserving the " (Semester)" suffix.
+function prettyLabel(label: string): string {
+  const m = label.match(/^(.*) \(([^)]+)\)$/);
+  const courseId = m ? m[1] : label;
+  const semester = m ? m[2] : null;
+  const pretty = prettyCourseId(courseId);
+  return semester ? `${pretty} (${semester})` : pretty;
 }
 
 // ─── status display ─────────────────────────────────────────────────────────
@@ -517,7 +528,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       {
         id: 'allcourses',
         header: 'All Courses',
-        accessorFn: (row) => (row.allcourses || []).join(', '),
+        accessorFn: (row) => (row.allcourses || []).map(prettyLabel).join(', '),
         cell: ({ getValue }) => (getValue() as string) || '—',
         size: 220,
         meta: { maxWidth: 220 },
@@ -525,7 +536,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       {
         id: 'approved_courses',
         header: 'Approved Courses',
-        accessorFn: (row) => (row.courses || []).join(', '),
+        accessorFn: (row) => (row.courses || []).map(prettyLabel).join(', '),
         cell: ({ getValue }) => {
           const v = getValue() as string;
           return v ? (
@@ -606,7 +617,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
         header: 'Courses',
         accessorFn: (row) =>
           Array.isArray(row.courses)
-            ? row.courses.join(', ')
+            ? row.courses.map(prettyLabel).join(', ')
             : row.courses || '',
         size: 180,
         meta: { maxWidth: 180 },
@@ -796,7 +807,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
                         key={code}
                         value={code}
                         control={<Radio size="small" />}
-                        label={code.replace(/,/g, ', ')}
+                        label={prettyLabel(code)}
                         sx={{
                           '& .MuiFormControlLabel-label': { fontSize: 14 },
                         }}
