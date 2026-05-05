@@ -204,6 +204,9 @@ export const CourseApplicationsTable: React.FC<
           documentId: confirm.row.id,
           classCode: courseId,
           semester,
+          name: confirm.row.applicantName,
+          uf_email: confirm.row.uf_email,
+          position: confirm.row.position,
         });
       } else {
         await denyApplication({
