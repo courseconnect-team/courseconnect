@@ -7,12 +7,15 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import TableViewOutlinedIcon from '@mui/icons-material/TableViewOutlined';
 import type { ColumnDef, VisibilityState } from '@tanstack/react-table';
+import * as XLSX from 'xlsx';
 
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
@@ -113,6 +116,43 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [viewId, setViewId] = React.useState<string | null>(null);
   const [editId, setEditId] = React.useState<string | null>(null);
+
+  const handleExportExcel = () => {
+    const rows = assignments.map((a) => ({
+      UFID: a.ufid ?? '',
+      Name: a.name ?? '',
+      Email: a.email ?? '',
+      Course: a.class_codes ?? '',
+      Position: 'TA',
+      Semester: parseSemester(a.semesters).term,
+      Year: parseSemester(a.semesters).year,
+      Hours: Array.isArray(a.hours) ? a.hours[0] ?? '' : '',
+      Degree: a.degree ?? '',
+      Department: a.department ?? '',
+      'Start Date': a.start_date ?? '',
+      'End Date': a.end_date ?? '',
+      'Working Title': a.title ?? '',
+      Percentage: a.percentage ?? '',
+      'Annual Rate': a.annual_rate ?? '',
+      'Biweekly Rate': a.biweekly_rate ?? '',
+      'Target Amount': a.target_amount ?? '',
+      'Supervisor UFID': a.supervisor_ufid ?? '',
+      Remote: a.remote ?? '',
+      Timestamp: a.date ?? '',
+      'Project ID': '000108927',
+      'Project Name': 'DEPARTMENT TA/UPIS',
+      FTE:
+        Array.isArray(a.hours) && typeof a.hours[0] === 'number'
+          ? Math.floor((a.hours[0] / 1.029411 / 40) * 100) / 100
+          : '',
+      'Proxy Name': 'Christophe Bobda',
+      'Proxy Email': 'cbobda@ufl.edu',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Assignments');
+    XLSX.writeFile(wb, 'assignments.xlsx');
+  };
 
   React.useEffect(() => {
     const ref = firebase.firestore().collection('assignments');
@@ -393,6 +433,23 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
         searchPlaceholder="Search assignments by name, UFID, course…"
         tableId="assignments"
         exportFilename="assignments.csv"
+        toolbarRight={
+          <Tooltip title="Export Excel (.xlsx)">
+            <IconButton
+              size="small"
+              onClick={handleExportExcel}
+              sx={{
+                border: '1px solid #E5E7EB',
+                borderRadius: '8px',
+                color: '#6B7280',
+                '&:hover': { backgroundColor: '#F9FAFB' },
+              }}
+              aria-label="Export Excel"
+            >
+              <TableViewOutlinedIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
+        }
         rowActions={(row) => (
           <>
             <RowActionButton
