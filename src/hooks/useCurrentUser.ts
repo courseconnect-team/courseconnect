@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
+import { emailToUsername } from '@/utils/email';
 
 // Unified identity hook — introduced in Unit 3 of multi-department support.
 // Replaces the scattered `useAuth() + GetUserRole()` pattern with a single
@@ -32,6 +33,8 @@ export interface CurrentUser {
   facultyOfDepartmentIds: string[];
   departmentIds: string[];
   activeDeptId: string | null; // the single admin dept if any; null for faculty-only / super-only
+  aliasEmails: string[];
+  aliasUsernames: string[]; // derived from aliasEmails via emailToUsername
   // Legacy fields — read during transition; dropped in cleanup PR.
   legacyRole: string;
   legacyDepartment: string;
@@ -51,6 +54,8 @@ const EMPTY: CurrentUser = {
   facultyOfDepartmentIds: [],
   departmentIds: [],
   activeDeptId: null,
+  aliasEmails: [],
+  aliasUsernames: [],
   legacyRole: '',
   legacyDepartment: '',
 };
@@ -121,6 +126,10 @@ export function useCurrentUser(): UseCurrentUserResult {
       docData.facultyOfDepartmentIds
     );
     const departmentIds = sanitizeStringArray(docData.departmentIds);
+    const aliasEmails = sanitizeStringArray(docData.aliasEmails);
+    const aliasUsernames = [
+      ...new Set(aliasEmails.map(emailToUsername).filter(Boolean)),
+    ];
 
     return {
       firebaseUser,
@@ -135,6 +144,8 @@ export function useCurrentUser(): UseCurrentUserResult {
               new Set([...adminOfDepartmentIds, ...facultyOfDepartmentIds])
             ),
       activeDeptId: adminOfDepartmentIds[0] ?? null,
+      aliasEmails,
+      aliasUsernames,
       legacyRole:
         typeof docData.role === 'string' ? (docData.role as string) : '',
       legacyDepartment:

@@ -26,17 +26,25 @@ interface CourseDoc {
 /** ----- Per-term (new schema) ----- */
 export async function getFacultyCourses(
   semester: SemesterName,
-  uemail: string
+  uemail: string,
+  aliasUsernames: string[] = []
 ): Promise<CourseTuple[]> {
   // semesters/{termId}/courses
   const db = firebase.firestore();
   const username = emailToUsername(uemail);
   if (!username) return [];
   const col = collection(db, 'semesters', semester, 'courses');
-  const q = query(
-    col,
-    where('professor_usernames', 'array-contains', username)
-  );
+  const allUsernames = [...new Set([username, ...aliasUsernames])];
+  const q =
+    allUsernames.length === 1
+      ? query(
+          col,
+          where('professor_usernames', 'array-contains', allUsernames[0])
+        )
+      : query(
+          col,
+          where('professor_usernames', 'array-contains-any', allUsernames)
+        );
 
   const snap = await getDocs(q);
   const rows: CourseTuple[] = [];
@@ -77,11 +85,12 @@ export async function getFacultyCoursesAllTerms(
 export function useFacultyCourses(
   semester?: SemesterName,
   uemail?: string,
+  aliasUsernames: string[] = [],
   enabled = true
 ): UseQueryResult<CourseTuple[], Error> {
   return useQuery<CourseTuple[], Error>({
-    queryKey: ['facultyCourses', uemail, semester], // include semester in the key
-    queryFn: () => getFacultyCourses(semester!, uemail!),
+    queryKey: ['facultyCourses', uemail, semester, ...aliasUsernames],
+    queryFn: () => getFacultyCourses(semester!, uemail!, aliasUsernames),
     enabled: enabled && !!semester && !!uemail,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
