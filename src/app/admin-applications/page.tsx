@@ -9,7 +9,6 @@ import 'firebase/firestore';
 import Applications from '@/components/Dashboard/Applications/Applications';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { CssBaseline } from '@mui/material';
-import { getNavItems } from '@/hooks/useGetItems';
 
 export default function AdminApplications() {
   let { user } = useAuth();
@@ -19,7 +18,7 @@ export default function AdminApplications() {
   if (role !== 'admin') return <div> Forbidden </div>;
 
   return (
-    <PageLayout mainTitle="Applications" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Applications">
       <CssBaseline />
       <Toaster />
       <Applications userRole={role as string} />

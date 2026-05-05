@@ -1,6 +1,5 @@
 'use client';
 
-import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { FC } from 'react';
@@ -13,7 +12,7 @@ const AnnouncementsPage: FC = () => {
   if (error) return <div>Error loading user info</div>;
 
   return (
-    <PageLayout mainTitle="Announcements" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Announcements">
       <AnnouncementSections role={role} />
     </PageLayout>
   );

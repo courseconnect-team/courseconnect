@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Box, Tabs, Tab } from '@mui/material';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
-import { getNavItems } from '@/hooks/useGetItems';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import StudentResearchView from '@/components/Research/StudentResearchView';
 import FacultyResearchView from '@/components/Research/FacultyResearchView';
@@ -66,10 +65,7 @@ const ResearchPage: React.FC = () => {
   return (
     <>
       <Toaster />
-      <PageLayout
-        mainTitle="Research Applications"
-        navItems={getNavItems(role)}
-      >
+      <PageLayout mainTitle="Research Applications">
         {(role === 'student_applying' || role === 'student_applied') && (
           <StudentResearchView
             researchListings={researchListings}

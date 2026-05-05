@@ -2,7 +2,6 @@
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { LinearProgress } from '@mui/material';
@@ -53,11 +52,11 @@ export default function AnnouncementPage({}: {}) {
 
   if (loading || appLoading) return <LinearProgress />;
   if (appError || !data) {
-    return <PageLayout mainTitle="Error" navItems={getNavItems(role)} />;
+    return <PageLayout mainTitle="Error" />;
   }
 
   return (
-    <PageLayout navItems={getNavItems(role)}>
+    <PageLayout>
       <AnnouncementView
         announcement={data}
         ackedAt={state?.ackedAt ?? null}

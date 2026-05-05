@@ -7,7 +7,6 @@ import { LinearProgress } from '@mui/material';
 import { useCourseDetails } from '@/hooks/Courses/useFetchCourse';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import PageLayout from '@/components/PageLayout/PageLayout';
-import { getNavItems } from '@/hooks/useGetItems';
 import { SemesterName } from '@/hooks/useSemesterOptions';
 
 const StatisticsPage: FC = () => {
@@ -35,15 +34,11 @@ const StatisticsPage: FC = () => {
   if (role !== 'faculty' && role !== 'admin') return <p>Not authorized.</p>;
 
   if (isLoading || loading) return <LinearProgress />;
-  if (error || roleError)
-    return <PageLayout mainTitle="Error" navItems={getNavItems(role)} />;
-  if (!course)
-    return (
-      <PageLayout mainTitle="Course not Found" navItems={getNavItems(role)} />
-    );
+  if (error || roleError) return <PageLayout mainTitle="Error" />;
+  if (!course) return <PageLayout mainTitle="Course not Found" />;
 
   return (
-    <PageLayout mainTitle={''} navItems={getNavItems(role)}>
+    <PageLayout mainTitle={''}>
       <CourseDetails {...course} schedule={course.meetingTimes} />
     </PageLayout>
   );

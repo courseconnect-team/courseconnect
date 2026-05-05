@@ -12,7 +12,6 @@ import Typography from '@mui/material/Typography';
 import { Toaster } from 'react-hot-toast';
 
 import PageLayout from '@/components/PageLayout/PageLayout';
-import { getNavItems } from '@/hooks/useGetItems';
 
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserRole from '@/firebase/util/GetUserRole';
@@ -33,7 +32,7 @@ const User: FC<PageProps> = () => {
   if (role !== 'admin') return <div>Forbidden</div>;
 
   return (
-    <PageLayout mainTitle="Users" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Users">
       <CssBaseline />
       <Toaster />
 

@@ -5,10 +5,9 @@ import PageLayout from '@/components/PageLayout/PageLayout';
 import { StatusTable } from '@/components/StatusTable/StatusTable';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { useFetchAssignments } from '@/hooks/Applications/useFetchStudentApplications';
-import { getNavItems } from '@/hooks/useGetItems';
 
 const StatusPage: FC = () => {
-  const [user, role, userLoading, userError] = useUserInfo();
+  const [user, , userLoading, userError] = useUserInfo();
   const {
     assignments,
     courses,
@@ -24,7 +23,7 @@ const StatusPage: FC = () => {
   if (assignmentsError) return <p>{assignmentsError}</p>;
 
   return (
-    <PageLayout mainTitle="Status" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Status">
       {courses ? (
         <StatusTable
           assignments={assignments}

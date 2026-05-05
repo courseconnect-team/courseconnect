@@ -7,7 +7,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { useAuth } from '@/firebase/auth/auth_context';
 import GetUserRole from '@/firebase/util/GetUserRole';
 import PageLayout from '@/components/PageLayout/PageLayout';
-import { getNavItems } from '@/hooks/useGetItems';
 import AdminStats from '@/components/Dashboard/AdminStats/AdminStats';
 
 export default function AdminStatsPage() {
@@ -19,7 +18,7 @@ export default function AdminStatsPage() {
   if (role !== 'admin') return <div>Forbidden</div>;
 
   return (
-    <PageLayout mainTitle="Admin Dashboard" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Admin Dashboard">
       <CssBaseline />
       <Toaster />
       <AdminStats />
