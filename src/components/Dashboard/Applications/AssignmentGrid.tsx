@@ -7,6 +7,8 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  MenuItem,
+  Select,
   Tooltip,
 } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -64,6 +66,7 @@ interface Assignment {
   target_amount?: string;
   title?: string;
   remote?: string;
+  requested_action?: string;
 }
 
 interface AssignmentGridProps {
@@ -92,7 +95,7 @@ const DEFAULT_HIDDEN: VisibilityState = {
   proxyFirstName: false,
   proxyLastName: false,
   proxyEmail: false,
-  action: false,
+  action: true,
   pid: false,
   pname: false,
   start_date: false,
@@ -141,6 +144,7 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
       'Biweekly Rate': a.biweekly_rate ?? '',
       'Target Amount': a.target_amount ?? '',
       'Supervisor UFID': a.supervisor_ufid ?? '',
+      'Requested Action': a.requested_action ?? 'NEW HIRE',
       Remote: a.remote ?? '',
       Timestamp: a.date ?? '',
       'Project ID': '000108927',
@@ -354,8 +358,47 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
       {
         id: 'action',
         header: 'Requested Action',
-        accessorFn: () => 'NEW HIRE',
-        size: 140,
+        accessorFn: (r) => r.requested_action ?? 'NEW HIRE',
+        cell: ({ row }) => {
+          const current = row.original.requested_action ?? 'NEW HIRE';
+          return (
+            <Select
+              value={current}
+              size="small"
+              variant="standard"
+              disableUnderline
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                const next = e.target.value as string;
+                firebase
+                  .firestore()
+                  .collection('assignments')
+                  .doc(row.original.id)
+                  .update({ requested_action: next })
+                  .catch(console.error);
+                setAssignments((prev) =>
+                  prev.map((a) =>
+                    a.id === row.original.id
+                      ? { ...a, requested_action: next }
+                      : a
+                  )
+                );
+              }}
+              sx={{
+                fontSize: 13,
+                fontWeight: 500,
+                '& .MuiSelect-select': { py: 0.25 },
+              }}
+            >
+              {['NEW HIRE', 'REAPPOINT', 'TERMINATE', 'LEAVE'].map((opt) => (
+                <MenuItem key={opt} value={opt} sx={{ fontSize: 13 }}>
+                  {opt}
+                </MenuItem>
+              ))}
+            </Select>
+          );
+        },
+        size: 160,
       },
       { id: 'pid', header: 'Project ID', accessorKey: 'pid', size: 110 },
       {

@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { Button, Grid, Input } from '@mui/material';
+import { Button, Grid, Input, MenuItem, Select } from '@mui/material';
 import Paper from '@mui/material/Paper';
 
 import { setDoc } from 'firebase/firestore';
@@ -29,6 +29,7 @@ export default function AppView({ uid }: AppViewProps) {
   const [biweeklyRate, setBiweeklyRate] = React.useState('');
   const [targetAmt, setTargetAmt] = React.useState('');
   const [remote, setRemote] = React.useState('');
+  const [requestedAction, setRequestedAction] = React.useState('NEW HIRE');
 
   // get application object from uid
   const applicationsRef = firebase.firestore().collection('assignments');
@@ -56,6 +57,7 @@ export default function AppView({ uid }: AppViewProps) {
       biweekly_rate: biweeklyRate,
       target_amount: targetAmt,
       remote: remote,
+      requested_action: requestedAction,
     });
   }
 
@@ -130,6 +132,8 @@ export default function AppView({ uid }: AppViewProps) {
           } else {
             setRemote(data.remote);
           }
+
+          setRequestedAction(data.requested_action ?? 'NEW HIRE');
           console.log(studentName);
         } else {
           console.log('No such document!');
@@ -373,8 +377,32 @@ export default function AppView({ uid }: AppViewProps) {
                           marginLeft="20px"
                           marginBottom="10px"
                           fontSize="15px"
+                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                         >
-                          Requested Action: NEW HIRE
+                          Requested Action:{' '}
+                          <Select
+                            value={requestedAction}
+                            size="small"
+                            onChange={(e) =>
+                              setRequestedAction(e.target.value as string)
+                            }
+                            sx={{ fontSize: 13, minWidth: 120 }}
+                          >
+                            {[
+                              'NEW HIRE',
+                              'REAPPOINT',
+                              'TERMINATE',
+                              'LEAVE',
+                            ].map((opt) => (
+                              <MenuItem
+                                key={opt}
+                                value={opt}
+                                sx={{ fontSize: 13 }}
+                              >
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
                         </Typography>
 
                         <Typography
