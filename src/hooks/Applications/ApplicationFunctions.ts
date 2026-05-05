@@ -7,12 +7,11 @@ type ApproveParams = {
   documentId: string;
   classCode: string;
   semester?: string;
-};
-type DenyParams = ApproveParams & {
   name: string;
   uf_email: string;
   position: string;
 };
+type DenyParams = ApproveParams;
 
 const db = getFirestore();
 const repo = new ApplicationRepository(db);
@@ -30,13 +29,30 @@ async function setCourseStatusAtomic(
   await repo.updateCourseStatusLatest(documentId, classCode, status, semester);
 }
 
-/** Approve: only sets the flag atomically */
+/** Approve: sets the flag atomically then sends a best-effort notification */
 export async function approveApplication({
   documentId,
   classCode,
   semester,
+  name,
+  uf_email,
+  position,
 }: ApproveParams) {
   await setCourseStatusAtomic(documentId, classCode, 'approved', semester);
+
+  try {
+    await callFunction('sendEmail', {
+      type: 'applicationStatusApproved',
+      data: {
+        user: { name, email: uf_email },
+        position,
+        classCode,
+      },
+    });
+  } catch (err) {
+    console.error('Failed to send approval email:', err);
+  }
+
   return { ok: true as const };
 }
 

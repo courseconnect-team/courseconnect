@@ -12,6 +12,7 @@ import {
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import TableViewOutlinedIcon from '@mui/icons-material/TableViewOutlined';
 import type { ColumnDef, VisibilityState } from '@tanstack/react-table';
@@ -19,6 +20,7 @@ import * as XLSX from 'xlsx';
 
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
+import { callFunction } from '@/firebase/functions/callFunction';
 
 import AssignView from './AssignView';
 import AssignViewOnly from './AssignViewOnly';
@@ -116,6 +118,8 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [viewId, setViewId] = React.useState<string | null>(null);
   const [editId, setEditId] = React.useState<string | null>(null);
+  const [emailRow, setEmailRow] = React.useState<Assignment | null>(null);
+  const [emailSending, setEmailSending] = React.useState(false);
 
   const handleExportExcel = () => {
     const rows = assignments.map((a) => ({
@@ -194,6 +198,26 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
     } finally {
       setLoading(false);
       setDeleteId(null);
+    }
+  };
+
+  const handleConfirmEmail = async () => {
+    if (!emailRow) return;
+    setEmailSending(true);
+    try {
+      await callFunction('sendEmail', {
+        type: 'applicationStatusApproved',
+        data: {
+          user: { name: emailRow.name ?? '', email: emailRow.email ?? '' },
+          position: emailRow.position ?? 'TA',
+          classCode: emailRow.class_codes ?? '',
+        },
+      });
+    } catch (err) {
+      console.error('Failed to send assignment email:', err);
+    } finally {
+      setEmailSending(false);
+      setEmailRow(null);
     }
   };
 
@@ -466,6 +490,14 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
             />
             <RowActionButton
               variant="icon"
+              icon={<EmailOutlinedIcon sx={{ fontSize: 16 }} />}
+              label="Send notification email"
+              onClick={() =>
+                setEmailRow(assignments.find((a) => a.id === row.id) ?? null)
+              }
+            />
+            <RowActionButton
+              variant="icon"
               icon={<DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />}
               label="Delete"
               onClick={() => setDeleteId(row.id)}
@@ -548,6 +580,22 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
         onCancel={() => setDeleteId(null)}
         onConfirm={handleConfirmDelete}
         loading={loading}
+      />
+
+      <ConfirmDialog
+        open={Boolean(emailRow)}
+        title="Send notification email"
+        description={
+          emailRow
+            ? `Send the assignment notification email to ${
+                emailRow.name ?? emailRow.email ?? 'this student'
+              }?`
+            : ''
+        }
+        confirmLabel="Send email"
+        onCancel={() => setEmailRow(null)}
+        onConfirm={handleConfirmEmail}
+        loading={emailSending}
       />
     </Box>
   );

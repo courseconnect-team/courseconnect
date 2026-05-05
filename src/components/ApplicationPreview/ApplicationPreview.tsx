@@ -68,6 +68,9 @@ export function ApplicationPreview({
           documentId: documentId,
           classCode: courseId,
           semester,
+          name,
+          uf_email: email,
+          position: position ?? '',
         });
       } else {
         await denyApplication({
