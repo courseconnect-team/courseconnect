@@ -133,7 +133,7 @@ export async function sendApplicationStatusApprovedEmail(
       subject: 'Student Application Status',
       text: `Hi ${displayName(
         user
-      )},\n\nCongratulations! Your application for the ${position} role in ${classCode} has been approved. To proceed, please provide your UFID to cbobda@ece.ufl.edu. Include your position, course code, instructor, and UFID.\n\nBest regards,\nCourse Connect Team`,
+      )},\n\nCongratulations! Your application for the ${position} role in ${classCode} has been approved. To proceed, please provide your UFID to cbobda@ece.ufl.edu. Include your position, course code, instructor, and UFID.\n\nPlease note that, if selected for hire, you will be required to complete all necessary payroll and onboarding documentation. You may not begin working until all required documents have been submitted to the ECE HR Office and your official start date has been confirmed.\n\nIn addition, you must present your original I-9 documents either virtually or in person on or before your first day of employment to comply with federal employment eligibility verification requirements. A list of acceptable I-9 documents is available here: https://www.uscis.gov/i-9-central/form-i-9-acceptable-documents\n\nBest regards,\nCourse Connect Team`,
     },
     'Application status approved email sent:'
   );
