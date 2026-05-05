@@ -238,6 +238,16 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
         header: 'Timestamp',
         accessorKey: 'date',
         cell: ({ getValue }) => (getValue() as string) || '—',
+        sortingFn: (rowA, rowB, columnId) => {
+          const parse = (v: unknown) => {
+            if (typeof v !== 'string' || !v) return 0;
+            const [m, d, y] = v.split('-').map(Number);
+            return new Date(y, m - 1, d).getTime();
+          };
+          return (
+            parse(rowA.getValue(columnId)) - parse(rowB.getValue(columnId))
+          );
+        },
         size: 130,
       },
       {
