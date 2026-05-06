@@ -1,7 +1,6 @@
 'use client';
 import { FC, useMemo, useState } from 'react';
 import PageLayout from '@/components/PageLayout/PageLayout';
-import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import {
   useParams,
@@ -87,19 +86,14 @@ const ApplicationsPage: FC = () => {
   if (!user) return <p>Please sign in.</p>;
 
   if (isLoading || loading || isFetching) return <LinearProgress />;
-  if (error || roleError)
-    return <PageLayout mainTitle="Error" navItems={getNavItems(role)} />;
+  if (error || roleError) return <PageLayout mainTitle="Error" />;
 
-  if (!data)
-    return (
-      <PageLayout mainTitle="Course not Found" navItems={getNavItems(role)} />
-    );
+  if (!data) return <PageLayout mainTitle="Course not Found" />;
   if (role !== 'faculty' && role !== 'admin') return <p>Not authorized.</p>;
 
   return (
     <PageLayout
       mainTitle={`${prettyCourseId(courseId, instructor)} - ${semesterId}`}
-      navItems={getNavItems(role)}
     >
       <div className="mb-6">
         <ApplicationStatusFilter

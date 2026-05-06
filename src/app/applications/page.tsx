@@ -1,6 +1,6 @@
 'use client';
 
-import { getNavItems, getApplications } from '@/hooks/useGetItems';
+import { getApplications } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { FC } from 'react';
@@ -16,7 +16,7 @@ const ApplicationPage: FC<pageProps> = () => {
   if (error) return <div>Error loading user info</div>;
 
   return (
-    <PageLayout mainTitle="Applications" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Applications">
       <ApplicationSections
         role={role}
         uemail={uemail}

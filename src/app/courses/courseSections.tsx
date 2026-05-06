@@ -8,6 +8,7 @@ import SemesterMultiSelect from '@/components/SemesterMultiSelect/SemesterMultiS
 import { getCurrentSemester, SemesterName } from '@/hooks/useSemesterOptions';
 import { useState } from 'react';
 import { useMemo, useEffect } from 'react';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 export default function CourseSections({
   role,
   navItems,
@@ -17,6 +18,8 @@ export default function CourseSections({
   navItems: NavbarItem[];
   uemail: string;
 }) {
+  const { user: currentUser } = useCurrentUser();
+  const aliasUsernames = currentUser.aliasUsernames;
   const [semesters, setSemesters] = useState<SemesterName[]>(() => {
     const stored = localStorage.getItem('selectedSemesters');
     return stored ? JSON.parse(stored) : [];
@@ -35,7 +38,7 @@ export default function CourseSections({
     error,
     showSkeletons,
     skeletonCount,
-  } = useSemesterData(role, uemail, semesters);
+  } = useSemesterData(role, uemail, semesters, aliasUsernames);
 
   const currentSemArray = useMemo(
     () => (currentSemester ? [currentSemester] : []),
@@ -48,7 +51,7 @@ export default function CourseSections({
     error: currentError,
     showSkeletons: showCurrentSkeletons,
     skeletonCount: currentSkeletonCount,
-  } = useSemesterData(role, uemail, currentSemArray);
+  } = useSemesterData(role, uemail, currentSemArray, aliasUsernames);
 
   return (
     <>

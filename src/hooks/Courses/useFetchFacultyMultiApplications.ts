@@ -25,12 +25,14 @@ export interface CourseRow {
 /** Multi-semester fetcher (chunks by 10 due to Firestore `in` limit). */
 export async function getFacultyCoursesMany(
   semesters: string[],
-  uemail: string
+  uemail: string,
+  aliasUsernames: string[] = []
 ): Promise<CourseRow[]> {
   if (!semesters.length) return [];
   const username = emailToUsername(uemail);
   if (!username) return [];
   const db = firebase.firestore();
+  const allUsernames = [...new Set([username, ...aliasUsernames])];
 
   const chunks: string[][] = [];
   for (let i = 0; i < semesters.length; i += 10)
@@ -38,10 +40,14 @@ export async function getFacultyCoursesMany(
 
   const results = await Promise.all(
     chunks.map(async (semChunk) => {
+      const usernameFilter =
+        allUsernames.length === 1
+          ? where('professor_usernames', 'array-contains', allUsernames[0])
+          : where('professor_usernames', 'array-contains-any', allUsernames);
       const q = query(
         collection(db, 'courses'),
         where('semester', 'in', semChunk),
-        where('professor_usernames', 'array-contains', username)
+        usernameFilter
       );
       const snap = await getDocs(q);
       const rows: CourseRow[] = [];
@@ -83,6 +89,7 @@ export async function getFacultyCoursesMany(
 export function useFacultyCoursesMany(
   semesters?: string[],
   uemail?: string,
+  aliasUsernames: string[] = [],
   enabled = true
 ): UseQueryResult<CourseRow[], Error> {
   const semesterKey = semesters?.join('|');
@@ -91,8 +98,8 @@ export function useFacultyCoursesMany(
     [semesterKey]
   );
   return useQuery<CourseRow[], Error>({
-    queryKey: ['facultyCoursesMany', uemail, ...sorted],
-    queryFn: () => getFacultyCoursesMany(sorted!, uemail!),
+    queryKey: ['facultyCoursesMany', uemail, ...aliasUsernames, ...sorted],
+    queryFn: () => getFacultyCoursesMany(sorted!, uemail!, aliasUsernames),
     enabled: enabled && !!uemail && sorted.length > 0,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,

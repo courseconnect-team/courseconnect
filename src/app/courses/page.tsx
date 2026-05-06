@@ -1,6 +1,6 @@
 'use client';
 
-import { getNavItems, getCourses } from '@/hooks/useGetItems';
+import { getCourses } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ const CoursesPage: FC<pageProps> = () => {
   if (error) return <div>Error loading user info</div>;
   if (role !== 'faculty' && role !== 'admin') return <div> Forbidden </div>;
   return (
-    <PageLayout mainTitle="Courses" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Courses">
       <CourseSections role={role} uemail={uemail} navItems={getCourses(role)} />
     </PageLayout>
   );

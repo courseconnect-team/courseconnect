@@ -5,7 +5,6 @@ import PageLayout from '@/components/PageLayout/PageLayout';
 import { ApplicationPreview } from '@/components/ApplicationPreview/ApplicationPreview';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import { useFetchApplicationById } from '@/hooks/Applications/useFetchApplicationById';
-import { getNavItems } from '@/hooks/useGetItems';
 import { useParams } from 'next/navigation';
 
 export default function ApplicationPage({}: {}) {
@@ -35,22 +34,17 @@ export default function ApplicationPage({}: {}) {
   if (loading || appLoading) return <LinearProgress />;
 
   if (appError) {
-    return <PageLayout mainTitle="Error" navItems={getNavItems(role)} />;
+    return <PageLayout mainTitle="Error" />;
   }
 
   if (!data) {
-    return (
-      <PageLayout
-        mainTitle="Application not found"
-        navItems={getNavItems(role)}
-      />
-    );
+    return <PageLayout mainTitle="Application not found" />;
   }
   if (!canView) return <p>Not authorized.</p>;
   if (roleError) return <p>Error loading role</p>;
   if (!user) return <p>Please sign in.</p>;
   return (
-    <PageLayout mainTitle={cleanClassName} navItems={getNavItems(role)}>
+    <PageLayout mainTitle={cleanClassName}>
       <ApplicationPreview
         documentId={params.id}
         data={data}

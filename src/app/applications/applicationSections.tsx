@@ -10,6 +10,7 @@ import { type SemesterName } from '@/hooks/useSemesterOptions';
 import ApplicationCard from '@/components/Research/ApplicationCard';
 import firebase from '@/firebase/firebase_config';
 import { useAuth } from '@/firebase/auth/auth_context';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 
 function ResearchApplicationsList() {
   const { user } = useAuth();
@@ -112,6 +113,7 @@ export default function ApplicationSections({
   navItems: NavbarItem[];
   uemail: string;
 }) {
+  const { user: currentUser } = useCurrentUser();
   const [semester, setSemester] = useState<SemesterName | undefined>();
   const semesterArray = semester ? [semester] : undefined;
   const {
@@ -123,7 +125,7 @@ export default function ApplicationSections({
     error,
     showSkeletons,
     skeletonCount,
-  } = useSemesterData(role, uemail, semesterArray);
+  } = useSemesterData(role, uemail, semesterArray, currentUser.aliasUsernames);
 
   switch (role) {
     case 'Student':

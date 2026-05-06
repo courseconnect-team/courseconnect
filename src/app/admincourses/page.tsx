@@ -12,7 +12,6 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import Courses from '@/component/Dashboard/AdminCourses/Courses';
 import PageLayout from '@/components/PageLayout/PageLayout';
-import { getNavItems } from '@/hooks/useGetItems';
 import { isE2EMode } from '@/utils/featureFlags';
 import { useSemesters } from '@/hooks/useSemesterOptions';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -91,7 +90,7 @@ export default function AdminCoursesPage() {
   if (role !== 'admin') return <div>Forbidden</div>;
 
   return (
-    <PageLayout mainTitle="Courses" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Courses">
       <Toaster />
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pb: 4 }}>
         <SemesterStatus

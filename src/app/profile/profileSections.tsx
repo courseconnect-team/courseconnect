@@ -8,6 +8,10 @@ import ConfirmDialog from '@/components/ConfirmDialog/ConfirmDialog';
 import { HandleDeleteUser } from '@/firebase/auth/auth_delete_prompt';
 import { PrimaryButton } from '@/components/Buttons/PrimaryButton';
 import { GhostButton } from '@/components/Buttons/PrimaryButton';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { emailToUsername } from '@/utils/email';
+import firebase from '@/firebase/firebase_config';
+import 'firebase/firestore';
 /* ---------- helpers ---------- */
 const display = (v: unknown, fallback = 'Not listed'): string => {
   if (v == null) return fallback;
@@ -207,6 +211,11 @@ export default function ProfileSection({
 
           {/* Email */}
           <InfoRow title="Email" value={display(email)} />
+
+          {/* Linked aliases — faculty/admin only */}
+          {(role === 'faculty' || role === 'admin') && user?.uid && (
+            <LinkedEmails uid={user.uid} />
+          )}
         </div>
       </section>
 
@@ -266,6 +275,108 @@ function InfoRow({ title, value }: { title: string; value: string }) {
     <div>
       <h2 className="text-h4">{title}</h2>
       <p className="mt-2 text-body1">{value}</p>
+    </div>
+  );
+}
+
+/* ---------- linked email aliases ---------- */
+function LinkedEmails({ uid }: { uid: string }) {
+  const { user: currentUser } = useCurrentUser();
+  const [input, setInput] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const aliases = currentUser.aliasEmails;
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr(null);
+    const email = input.trim().toLowerCase();
+    if (!email) return;
+    if (!email.includes('@')) {
+      setErr('Enter a full email address.');
+      return;
+    }
+    const username = emailToUsername(email);
+    if (currentUser.aliasUsernames.includes(username)) {
+      setErr('That email (or one with the same username) is already linked.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await firebase
+        .firestore()
+        .collection('users')
+        .doc(uid)
+        .update({
+          aliasEmails: firebase.firestore.FieldValue.arrayUnion(email),
+        });
+      setInput('');
+    } catch {
+      setErr('Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemove = async (email: string) => {
+    try {
+      await firebase
+        .firestore()
+        .collection('users')
+        .doc(uid)
+        .update({
+          aliasEmails: firebase.firestore.FieldValue.arrayRemove(email),
+        });
+    } catch {
+      setErr('Failed to remove alias.');
+    }
+  };
+
+  return (
+    <div className="mt-8">
+      <h2 className="text-h4">Linked Email Aliases</h2>
+      <p className="mt-1 text-sm text-gray-500">
+        Courses set up under a different email address will appear automatically
+        once you link that address here.
+      </p>
+
+      {aliases.length > 0 && (
+        <ul className="mt-3 space-y-2">
+          {aliases.map((email) => (
+            <li key={email} className="flex items-center gap-3">
+              <span className="text-body1">{email}</span>
+              <button
+                type="button"
+                onClick={() => handleRemove(email)}
+                className="text-xs text-red-500 hover:underline"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <form onSubmit={handleAdd} className="mt-3 flex gap-2 items-start">
+        <input
+          type="email"
+          placeholder="alias@ece.ufl.edu"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="h-10 w-64 border border-[#D3D3D3] px-4 text-sm rounded-none focus:outline-none focus:ring-2 focus:ring-primary"
+          autoComplete="off"
+        />
+        <button
+          type="submit"
+          disabled={saving}
+          className="h-10 px-5 text-sm font-semibold text-white rounded-none"
+          style={{ backgroundColor: '#522DA8' }}
+        >
+          {saving ? 'Linking…' : 'Link'}
+        </button>
+      </form>
+      {err && <p className="mt-2 text-sm text-red-600">{err}</p>}
     </div>
   );
 }

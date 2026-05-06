@@ -3,7 +3,6 @@
 import { FC } from 'react';
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
-import { getNavItems } from '@/hooks/useGetItems';
 import HelpView from './HelpView';
 
 const HelpPage: FC = () => {
@@ -13,7 +12,7 @@ const HelpPage: FC = () => {
   if (error) return <div>Error loading user info</div>;
 
   return (
-    <PageLayout mainTitle="Help Center" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="Help Center">
       <HelpView role={role} />
     </PageLayout>
   );

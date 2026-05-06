@@ -2,7 +2,6 @@
 
 import PageLayout from '@/components/PageLayout/PageLayout';
 import { FC, useEffect, useState } from 'react';
-import { getNavItems } from '@/hooks/useGetItems';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
 import ProfileSection from './profileSections';
 interface pageProps {}
@@ -15,7 +14,7 @@ const ProfilePage: FC<pageProps> = () => {
   if (loading) return <div>Loading…</div>;
   if (error) return <div>Error loading user info</div>;
   return (
-    <PageLayout mainTitle="User Profile" navItems={getNavItems(role)}>
+    <PageLayout mainTitle="User Profile">
       <ProfileSection
         user={user}
         role={role}
