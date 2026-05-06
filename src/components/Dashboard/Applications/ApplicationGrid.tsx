@@ -372,13 +372,20 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       });
 
       const now = new Date();
+      // Record the specific semester the admin picked in the assign dialog —
+      // not the application's submission-time `available_semesters`, which
+      // spans the next 3 terms and would mis-label a Summer hire as Spring
+      // when the student applied in the prior term.
+      const assignmentSemesters = semesterBucket
+        ? [semesterBucket]
+        : doc.data()?.available_semesters;
       const assignment = {
         date: `${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}`,
         student_uid: studentUid,
         class_codes: courseId,
         email: doc.data()?.email,
         name: `${doc.data()?.firstname ?? ''} ${doc.data()?.lastname ?? ''}`,
-        semesters: doc.data()?.available_semesters,
+        semesters: assignmentSemesters,
         department: doc.data()?.department,
         hours: [Number(assignHours) || 0],
         position: doc.data()?.position,
