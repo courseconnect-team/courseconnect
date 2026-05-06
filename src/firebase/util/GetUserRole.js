@@ -38,7 +38,7 @@ const GetUserRole = (userId) => {
   useEffect(() => {
     if (e2e) return;
     const data = snapshot?.data();
-    if (data?.role) setRole(data.role);
+    if (data?.role) setRole(normalizeRole(data.role));
   }, [e2e, snapshot]);
 
   if (e2e) return STUB;
