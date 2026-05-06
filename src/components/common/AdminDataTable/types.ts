@@ -1,4 +1,4 @@
-import type { ColumnDef, Row, Table } from '@tanstack/react-table';
+import type { ColumnDef, Row, SortingState, Table } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 
 export type AdminDataTableDensity = 'comfortable' | 'compact';
@@ -36,6 +36,7 @@ export interface AdminDataTableProps<TData> {
   };
 
   densityDefault?: AdminDataTableDensity;
+  initialSorting?: SortingState;
   initialPageSize?: number;
   pageSizeOptions?: number[];
   stickyHeader?: boolean;

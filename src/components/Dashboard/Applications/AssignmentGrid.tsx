@@ -499,6 +499,7 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
         getRowId={(r) => r.id}
         searchPlaceholder="Search assignments by name, UFID, course…"
         tableId="assignments"
+        initialSorting={[{ id: 'date', desc: true }]}
         exportFilename="assignments.csv"
         toolbarRight={
           <Tooltip title="Export Excel (.xlsx)">
