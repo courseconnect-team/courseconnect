@@ -135,6 +135,7 @@ export function AdminDataTable<TData>({
   onRowClick,
   emptyState,
   densityDefault = 'comfortable',
+  initialSorting = [],
   initialPageSize = 25,
   pageSizeOptions = [10, 25, 50, 100],
   stickyHeader = true,
@@ -152,7 +153,7 @@ export function AdminDataTable<TData>({
     loadLs<AdminDataTableDensity>(densityKey, densityDefault)
   );
   const [globalFilter, setGlobalFilter] = React.useState('');
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>(initialSorting);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
