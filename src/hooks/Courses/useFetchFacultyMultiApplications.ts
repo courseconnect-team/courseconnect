@@ -32,7 +32,7 @@ export async function getFacultyCoursesMany(
   const username = emailToUsername(uemail);
   if (!username) return [];
   const db = firebase.firestore();
-  const allUsernames = [...new Set([username, ...aliasUsernames])];
+  const allUsernames = Array.from(new Set([username, ...aliasUsernames]));
 
   const chunks: string[][] = [];
   for (let i = 0; i < semesters.length; i += 10)

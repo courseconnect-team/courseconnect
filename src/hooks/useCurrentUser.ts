@@ -127,9 +127,9 @@ export function useCurrentUser(): UseCurrentUserResult {
     );
     const departmentIds = sanitizeStringArray(docData.departmentIds);
     const aliasEmails = sanitizeStringArray(docData.aliasEmails);
-    const aliasUsernames = [
-      ...new Set(aliasEmails.map(emailToUsername).filter(Boolean)),
-    ];
+    const aliasUsernames = Array.from(
+      new Set(aliasEmails.map(emailToUsername).filter(Boolean))
+    );
 
     return {
       firebaseUser,

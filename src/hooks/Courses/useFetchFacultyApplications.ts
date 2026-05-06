@@ -34,7 +34,7 @@ export async function getFacultyCourses(
   const username = emailToUsername(uemail);
   if (!username) return [];
   const col = collection(db, 'semesters', semester, 'courses');
-  const allUsernames = [...new Set([username, ...aliasUsernames])];
+  const allUsernames = Array.from(new Set([username, ...aliasUsernames]));
   const q =
     allUsernames.length === 1
       ? query(
