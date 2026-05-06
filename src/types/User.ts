@@ -35,7 +35,8 @@ export type Role =
   | 'student_applying'
   | 'student_applied'
   | 'student_accepted'
-  | 'student_denied';
+  | 'student_denied'
+  | 'student_assigned';
 
 export const roleMapping: Record<Role, string> = {
   Student: 'Student',
@@ -46,4 +47,5 @@ export const roleMapping: Record<Role, string> = {
   student_applied: 'Student',
   student_accepted: 'Student (Accepted)',
   student_denied: 'Student (Denied)',
+  student_assigned: 'Student (Assigned)',
 };

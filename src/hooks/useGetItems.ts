@@ -53,7 +53,8 @@ export const getNavItems = (userRole: Role): NavbarItem[] => {
     /* ─────────────────────────────── Student buckets ───────────────────────────── */
     case 'Student':
     case 'student_applied':
-    case 'student_applying': // <- you had "student_applying" in code
+    case 'student_applying':
+    case 'student_assigned':
       return [
         {
           label: 'Applications',
@@ -137,6 +138,7 @@ export const getApplications = (userRole: Role): NavbarItem[] => {
     case 'Student':
     case 'student_applied':
     case 'student_applying':
+    case 'student_assigned':
       return [
         {
           label: 'Course Assistant',
@@ -204,6 +206,7 @@ export const getCourses = (userRole: Role): NavbarItem[] => {
     case 'Student':
     case 'student_applied':
     case 'student_applying':
+    case 'student_assigned':
       return [];
     case 'faculty':
       return [

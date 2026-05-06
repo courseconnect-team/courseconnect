@@ -13,6 +13,7 @@ const normalizeRole = (value) => {
   if (lower === 'student_applied') return 'student_applied';
   if (lower === 'student_accepted') return 'student_accepted';
   if (lower === 'student_denied') return 'student_denied';
+  if (lower === 'student_assigned') return 'student_assigned';
   if (lower === 'faculty') return 'faculty';
   if (lower === 'admin') return 'admin';
   return raw;
