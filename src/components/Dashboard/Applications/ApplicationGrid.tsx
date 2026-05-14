@@ -45,6 +45,8 @@ interface Application {
   available_semesters?: string | string[];
   courses?: string[];
   allcourses?: string[];
+  assignedCourses?: string;
+  assignedSemesters?: string;
   date?: string;
   degree?: string;
   department?: string;
@@ -209,10 +211,45 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       );
       getDocs(q).catch(() => undefined);
 
-      ref.get().then((snap) => {
-        const data = snap.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() } as Application)
-        );
+      Promise.all([
+        ref.get(),
+        firebase.firestore().collection('assignments').get(),
+      ]).then(([appSnap, assignSnap]) => {
+        const assignByUid: Record<
+          string,
+          { class_codes?: string; semesters?: string[] }[]
+        > = {};
+        assignSnap.docs.forEach((doc) => {
+          const d = doc.data();
+          const uid = d.student_uid as string;
+          if (uid) {
+            if (!assignByUid[uid]) assignByUid[uid] = [];
+            assignByUid[uid].push({
+              class_codes: d.class_codes,
+              semesters: d.semesters,
+            });
+          }
+        });
+
+        const data = appSnap.docs.map((doc) => {
+          const d = doc.data();
+          const assigns = assignByUid[doc.id] ?? [];
+          const assignedCourses = assigns
+            .map((a) => a.class_codes)
+            .filter(Boolean)
+            .join(', ');
+          const seenSemesters = new Set<string>();
+          assigns.forEach((a) =>
+            (a.semesters ?? []).forEach((s) => seenSemesters.add(s))
+          );
+          const assignedSemesters = Array.from(seenSemesters).join(', ');
+          return {
+            id: doc.id,
+            ...d,
+            assignedCourses,
+            assignedSemesters,
+          } as Application;
+        });
         setApplicationData(data);
         setListLoading(false);
       });
@@ -647,6 +684,28 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
           );
         },
         size: 140,
+      },
+      {
+        id: 'assignedCourses',
+        header: 'Admin Approved Course',
+        accessorKey: 'assignedCourses',
+        cell: ({ getValue }) => {
+          const v = getValue() as string;
+          return v ? (
+            <Box sx={{ color: '#065F46', fontWeight: 500 }}>{v}</Box>
+          ) : (
+            <span style={{ color: '#9CA3AF' }}>—</span>
+          );
+        },
+        size: 260,
+        meta: { maxWidth: 260 },
+      },
+      {
+        id: 'assignedSemesters',
+        header: 'Assigned Semester',
+        accessorKey: 'assignedSemesters',
+        cell: ({ getValue }) => (getValue() as string) || '—',
+        size: 150,
       },
     ],
     []

@@ -10,6 +10,8 @@ import {
 } from '@/hooks/Applications/ApplicationFunctions';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 import { SemesterName, prettyCourseId } from '@/hooks/useSemesterOptions';
+import firebase from '@/firebase/firebase_config';
+import 'firebase/compat/firestore';
 type AdminStatus = 'approved' | 'pending' | 'denied';
 
 export type UIRow = {
@@ -189,6 +191,33 @@ export const CourseApplicationsTable: React.FC<
 
   const [pending, setPending] = React.useState(false);
 
+  const [assignByUid, setAssignByUid] = React.useState<
+    Record<string, { class_codes?: string; semesters?: string[] }[]>
+  >({});
+
+  React.useEffect(() => {
+    firebase
+      .firestore()
+      .collection('assignments')
+      .get()
+      .then((snap) => {
+        const map: Record<
+          string,
+          { class_codes?: string; semesters?: string[] }[]
+        > = {};
+        snap.docs.forEach((doc) => {
+          const d = doc.data();
+          const uid = d.student_uid as string;
+          if (uid) {
+            if (!map[uid]) map[uid] = [];
+            map[uid].push({ class_codes: d.class_codes, semesters: d.semesters });
+          }
+        });
+        setAssignByUid(map);
+      })
+      .catch(() => undefined);
+  }, []);
+
   const openConfirm = (kind: 'approve' | 'deny', row: UIRow) =>
     setConfirm({ open: true, kind, row });
 
@@ -260,6 +289,7 @@ export const CourseApplicationsTable: React.FC<
               <th className="px-4 py-3">Employment Action</th>
               <th className="px-4 py-3">Faculty Approval</th>
               <th className="px-4 py-3">Admin Approval</th>
+              <th className="px-4 py-3">Admin Approved Course &amp; Semester</th>
             </tr>
           </thead>
 
@@ -402,6 +432,32 @@ export const CourseApplicationsTable: React.FC<
                       ) : (
                         <Pill variant="pending">Pending</Pill>
                       )}
+                    </td>
+
+                    {/* admin approved course & semester */}
+                    <td className="px-4 py-3">
+                      {(() => {
+                        const assigns = assignByUid[ui.id] ?? [];
+                        if (assigns.length === 0)
+                          return <span className="text-gray-400">—</span>;
+                        return (
+                          <div className="flex flex-col gap-1">
+                            {assigns.map((a, i) => {
+                              const semStr = (a.semesters ?? []).join(', ');
+                              const label = a.class_codes
+                                ? semStr
+                                  ? `${prettyCourseId(a.class_codes)} (${semStr})`
+                                  : prettyCourseId(a.class_codes)
+                                : '—';
+                              return (
+                                <span key={i}>
+                                  {label}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </td>
                   </tr>
                 );
