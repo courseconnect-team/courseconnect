@@ -73,6 +73,12 @@ interface AssignmentGridProps {
   userRole: string;
 }
 
+// Returns the course doc ID stored in class_codes (e.g. "EEL3135 : Wong,Tan Foon")
+function parseCourseKey(classCodes: string | undefined): string | null {
+  if (!classCodes) return null;
+  return classCodes.trim();
+}
+
 function parseSemester(semesters: string[] | undefined) {
   if (!semesters || !semesters.length) return { term: '—', year: '' };
   const first = semesters[0];
@@ -91,6 +97,9 @@ function parseSemester(semesters: string[] | undefined) {
 // CSV-exportable via the column-visibility menu.
 const DEFAULT_HIDDEN: VisibilityState = {
   supervisor_ufid: false,
+  supervisorFirstName: false,
+  supervisorLastName: false,
+  supervisorEmail: false,
   proxyUfid: false,
   proxyFirstName: false,
   proxyLastName: false,
@@ -117,6 +126,22 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
   const [loading, setLoading] = React.useState(false);
   const [listLoading, setListLoading] = React.useState(true);
   const [assignments, setAssignments] = React.useState<Assignment[]>([]);
+  const [courseMap, setCourseMap] = React.useState<
+    Record<string, { supervisorFirst: string; supervisorLast: string; supervisorEmail: string }>
+  >({});
+
+  const enrichedAssignments = React.useMemo(() => {
+    return assignments.map((a) => {
+      const key = parseCourseKey(a.class_codes);
+      const sup = key ? courseMap[key] : undefined;
+      return {
+        ...a,
+        supervisorFirst: sup?.supervisorFirst ?? 'unknown',
+        supervisorLast: sup?.supervisorLast ?? 'unknown',
+        supervisorEmail: sup?.supervisorEmail ?? 'unknown',
+      };
+    });
+  }, [assignments, courseMap]);
 
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [viewId, setViewId] = React.useState<string | null>(null);
@@ -125,37 +150,44 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
   const [emailSending, setEmailSending] = React.useState(false);
 
   const handleExportExcel = () => {
-    const rows = assignments.map((a) => ({
-      UFID: a.ufid ?? '',
-      Name: a.name ?? '',
-      Email: a.email ?? '',
-      Course: a.class_codes ?? '',
-      Position: 'TA',
-      Semester: parseSemester(a.semesters).term,
-      Year: parseSemester(a.semesters).year,
-      Hours: Array.isArray(a.hours) ? a.hours[0] ?? '' : '',
-      Degree: a.degree ?? '',
-      Department: a.department ?? '',
-      'Start Date': a.start_date ?? '',
-      'End Date': a.end_date ?? '',
-      'Working Title': a.title ?? '',
-      Percentage: a.percentage ?? '',
-      'Annual Rate': a.annual_rate ?? '',
-      'Biweekly Rate': a.biweekly_rate ?? '',
-      'Target Amount': a.target_amount ?? '',
-      'Supervisor UFID': a.supervisor_ufid ?? '',
-      'Requested Action': a.requested_action ?? 'NEW HIRE',
-      Remote: a.remote ?? '',
-      Timestamp: a.date ?? '',
-      'Project ID': '000108927',
-      'Project Name': 'DEPARTMENT TA/UPIS',
-      FTE:
-        Array.isArray(a.hours) && typeof a.hours[0] === 'number'
-          ? Math.floor((a.hours[0] / 1.029411 / 40) * 100) / 100
-          : '',
-      'Proxy Name': 'Christophe Bobda',
-      'Proxy Email': 'cbobda@ufl.edu',
-    }));
+    const rows = assignments.map((a) => {
+      const courseKey = parseCourseKey(a.class_codes);
+      const sup = courseKey ? courseMap[courseKey] : undefined;
+      return {
+        UFID: a.ufid ?? '',
+        Name: a.name ?? '',
+        Email: a.email ?? '',
+        Course: a.class_codes ?? '',
+        Position: 'TA',
+        Semester: parseSemester(a.semesters).term,
+        Year: parseSemester(a.semesters).year,
+        Hours: Array.isArray(a.hours) ? a.hours[0] ?? '' : '',
+        Degree: a.degree ?? '',
+        Department: a.department ?? '',
+        'Start Date': a.start_date ?? '',
+        'End Date': a.end_date ?? '',
+        'Working Title': a.title ?? '',
+        Percentage: a.percentage ?? '',
+        'Annual Rate': a.annual_rate ?? '',
+        'Biweekly Rate': a.biweekly_rate ?? '',
+        'Target Amount': a.target_amount ?? '',
+        'Supervisor UFID': a.supervisor_ufid ?? '',
+        'Supervisor First Name': sup?.supervisorFirst ?? 'unknown',
+        'Supervisor Last Name': sup?.supervisorLast ?? 'unknown',
+        'Supervisor Email': sup?.supervisorEmail ?? 'unknown',
+        'Requested Action': a.requested_action ?? 'NEW HIRE',
+        Remote: a.remote ?? '',
+        Timestamp: a.date ?? '',
+        'Project ID': '000108927',
+        'Project Name': 'DEPARTMENT TA/UPIS',
+        FTE:
+          Array.isArray(a.hours) && typeof a.hours[0] === 'number'
+            ? Math.floor((a.hours[0] / 1.029411 / 40) * 100) / 100
+            : '',
+        'Proxy Name': 'Christophe Bobda',
+        'Proxy Email': 'cbobda@ufl.edu',
+      };
+    });
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Assignments');
@@ -185,6 +217,36 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
       setListLoading(false);
     });
     return () => unsubscribe();
+  }, []);
+
+  React.useEffect(() => {
+    const db = firebase.firestore();
+    db.collection('semesters')
+      .get()
+      .then(async (semSnap) => {
+        const map: Record<string, { supervisorFirst: string; supervisorLast: string; supervisorEmail: string }> = {};
+        await Promise.all(
+          semSnap.docs.map(async (semDoc) => {
+            const coursesSnap = await semDoc.ref.collection('courses').get();
+            coursesSnap.docs.forEach((courseDoc) => {
+              const d = courseDoc.data();
+              const key = courseDoc.id;
+              const profName: string = Array.isArray(d.professor_names)
+                ? (d.professor_names[0] as string) ?? ''
+                : (d.professor_names as string) ?? '';
+              const comma = profName.indexOf(',');
+              const last = comma >= 0 ? profName.substring(0, comma).trim() : profName.trim();
+              const first = comma >= 0 ? profName.substring(comma + 1).trim() : '';
+              const email: string = Array.isArray(d.professor_emails)
+                ? (d.professor_emails[0] as string) ?? ''
+                : (d.professor_emails as string) ?? '';
+              map[key] = { supervisorFirst: first, supervisorLast: last, supervisorEmail: email };
+            });
+          })
+        );
+        setCourseMap(map);
+      })
+      .catch(console.error);
   }, []);
 
   const handleConfirmDelete = async () => {
@@ -330,6 +392,24 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
         header: 'Supervisor UFID',
         accessorKey: 'supervisor_ufid',
         size: 150,
+      },
+      {
+        id: 'supervisorFirstName',
+        header: 'Supervisor First',
+        accessorKey: 'supervisorFirst',
+        size: 150,
+      },
+      {
+        id: 'supervisorLastName',
+        header: 'Supervisor Last',
+        accessorKey: 'supervisorLast',
+        size: 150,
+      },
+      {
+        id: 'supervisorEmail',
+        header: 'Supervisor Email',
+        accessorKey: 'supervisorEmail',
+        size: 200,
       },
       {
         id: 'proxyUfid',
@@ -493,7 +573,7 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
   return (
     <Box>
       <AdminDataTable
-        data={assignments}
+        data={enrichedAssignments}
         columns={columns}
         loading={loading || listLoading}
         getRowId={(r) => r.id}
