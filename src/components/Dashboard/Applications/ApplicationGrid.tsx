@@ -532,18 +532,26 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
   const adminColumns = React.useMemo<ColumnDef<Application, any>[]>(
     () => [
       {
-        id: 'fullname',
-        header: 'Name',
-        accessorFn: (row) =>
-          `${row.firstname ?? ''} ${row.lastname ?? ''}`.trim(),
-        cell: ({ row }) => (
+        id: 'firstName',
+        header: 'First Name',
+        accessorFn: (row) => row.firstname ?? '',
+        cell: ({ getValue }) => (
           <Box sx={{ fontWeight: 500, color: '#111827' }}>
-            {`${row.original.firstname ?? ''} ${
-              row.original.lastname ?? ''
-            }`.trim() || '—'}
+            {(getValue() as string) || '—'}
           </Box>
         ),
-        size: 180,
+        size: 130,
+      },
+      {
+        id: 'lastName',
+        header: 'Last Name',
+        accessorFn: (row) => row.lastname ?? '',
+        cell: ({ getValue }) => (
+          <Box sx={{ fontWeight: 500, color: '#111827' }}>
+            {(getValue() as string) || '—'}
+          </Box>
+        ),
+        size: 130,
       },
       {
         id: 'email',
@@ -625,18 +633,26 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
   const facultyColumns = React.useMemo<ColumnDef<Application, any>[]>(
     () => [
       {
-        id: 'fullname',
-        header: 'Name',
-        accessorFn: (row) =>
-          `${row.firstname ?? ''} ${row.lastname ?? ''}`.trim(),
-        cell: ({ row }) => (
+        id: 'firstName',
+        header: 'First Name',
+        accessorFn: (row) => row.firstname ?? '',
+        cell: ({ getValue }) => (
           <Box sx={{ fontWeight: 500, color: '#111827' }}>
-            {`${row.original.firstname ?? ''} ${
-              row.original.lastname ?? ''
-            }`.trim() || '—'}
+            {(getValue() as string) || '—'}
           </Box>
         ),
-        size: 170,
+        size: 120,
+      },
+      {
+        id: 'lastName',
+        header: 'Last Name',
+        accessorFn: (row) => row.lastname ?? '',
+        cell: ({ getValue }) => (
+          <Box sx={{ fontWeight: 500, color: '#111827' }}>
+            {(getValue() as string) || '—'}
+          </Box>
+        ),
+        size: 120,
       },
       { id: 'ufid', header: 'UFID', accessorKey: 'ufid', size: 110 },
       { id: 'email', header: 'Email', accessorKey: 'email', size: 200 },

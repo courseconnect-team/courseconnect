@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
-import { Button, Grid, Input, MenuItem, Select } from '@mui/material';
+import { Grid, Input, MenuItem, Select } from '@mui/material';
 import Paper from '@mui/material/Paper';
 
 import { setDoc } from 'firebase/firestore';
@@ -14,7 +14,11 @@ export interface AppViewProps {
   uid: string;
 }
 
-export default function AppView({ uid }: AppViewProps) {
+export interface AppViewHandle {
+  save: () => void;
+}
+
+const AppView = React.forwardRef<AppViewHandle, AppViewProps>(function AppView({ uid }, ref) {
   const [docData, setDocData] = React.useState<any>(null);
   const [studentName, setStudentName] = React.useState('');
   const [studentEmail, setStudentEmail] = React.useState('');
@@ -30,12 +34,16 @@ export default function AppView({ uid }: AppViewProps) {
   const [targetAmt, setTargetAmt] = React.useState('');
   const [remote, setRemote] = React.useState('');
   const [requestedAction, setRequestedAction] = React.useState('NEW HIRE');
+  const [eceSpecialInstructions, setEceSpecialInstructions] = React.useState('');
+  const [ecePayrollNotes, setEcePayrollNotes] = React.useState('');
 
   // get application object from uid
   const applicationsRef = firebase.firestore().collection('assignments');
   const docRef = applicationsRef.doc(uid);
 
-  function handleSave(event: any) {
+  React.useImperativeHandle(ref, () => ({ save: handleSave }));
+
+  function handleSave(event?: any) {
     setDoc(docRef, {
       name: studentName,
       email: studentEmail,
@@ -58,6 +66,8 @@ export default function AppView({ uid }: AppViewProps) {
       target_amount: targetAmt,
       remote: remote,
       requested_action: requestedAction,
+      ece_special_instructions: eceSpecialInstructions,
+      ece_payroll_notes: ecePayrollNotes,
     });
   }
 
@@ -134,6 +144,8 @@ export default function AppView({ uid }: AppViewProps) {
           }
 
           setRequestedAction(data.requested_action ?? 'NEW HIRE');
+          setEceSpecialInstructions(data.ece_special_instructions ?? '');
+          setEcePayrollNotes(data.ece_payroll_notes ?? '');
           console.log(studentName);
         } else {
           console.log('No such document!');
@@ -150,7 +162,7 @@ export default function AppView({ uid }: AppViewProps) {
         <Grid sx={{ flexGrow: 1 }} spacing={4}>
           <Grid item xs={22}>
             <Grid container justifyContent="left" spacing={4}>
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((value) => {
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((value) => {
                 if (value == 0) {
                   return (
                     <Grid key={value} item>
@@ -393,6 +405,7 @@ export default function AppView({ uid }: AppViewProps) {
                               'REAPPOINT',
                               'TERMINATE',
                               'LEAVE',
+                              'OPS SEMESTER BREAK',
                             ].map((opt) => (
                               <MenuItem
                                 key={opt}
@@ -767,30 +780,75 @@ export default function AppView({ uid }: AppViewProps) {
                       </Paper>
                     </Grid>
                   );
-                } else {
+                } else if (value == 8) {
                   return (
                     <Grid key={value} item>
-                      <Button
-                        variant="contained"
-                        size="large"
-                        sx={{ top: 180, left: 180 }}
-                        onClick={handleSave}
+                      <Paper
+                        elevation={3}
+                        sx={{
+                          height: 220,
+                          width: 300,
+                          backgroundColor: (theme) =>
+                            theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+                          borderRadius: 4,
+                        }}
                       >
-                        Save Edits
-                      </Button>
+                        <Typography
+                          variant="h6"
+                          paddingTop="10px"
+                          fontWeight="bold"
+                          marginLeft="20px"
+                          marginBottom="10px"
+                        >
+                          ECE Details:
+                        </Typography>
 
-                      {/* <Paper */}
-                      {/*   elevation={3} */}
-                      {/*   sx={{ */}
-                      {/*     height: 220, */}
-                      {/*     width: 300, */}
-                      {/*     backgroundColor: (theme) => */}
-                      {/*       theme.palette.mode === 'dark' ? '#1A2027' : '#fff', */}
-                      {/*     borderRadius: 4, */}
-                      {/*   }} */}
-                      {/* /> */}
+                        <Typography
+                          marginLeft="20px"
+                          marginBottom="10px"
+                          fontSize="15px"
+                        >
+                          Special Instructions:{' '}
+                          <TextField
+                            size="small"
+                            multiline
+                            maxRows={2}
+                            sx={{
+                              width: '20ch',
+                              '& .MuiInputBase-input': { fontSize: '12px' },
+                            }}
+                            value={eceSpecialInstructions}
+                            onChange={(event) =>
+                              setEceSpecialInstructions(event.target.value)
+                            }
+                          />
+                        </Typography>
+
+                        <Typography
+                          marginLeft="20px"
+                          marginBottom="10px"
+                          fontSize="15px"
+                        >
+                          Payroll Notes:{' '}
+                          <TextField
+                            size="small"
+                            multiline
+                            maxRows={2}
+                            sx={{
+                              width: '20ch',
+                              '& .MuiInputBase-input': { fontSize: '12px' },
+                            }}
+                            value={ecePayrollNotes}
+                            onChange={(event) =>
+                              setEcePayrollNotes(event.target.value)
+                            }
+                          />
+                        </Typography>
+                      </Paper>
                     </Grid>
                   );
+                } else {
+                  return null;
                 }
               })}
             </Grid>
@@ -799,4 +857,6 @@ export default function AppView({ uid }: AppViewProps) {
       )}
     </Box>
   );
-}
+});
+
+export default AppView;

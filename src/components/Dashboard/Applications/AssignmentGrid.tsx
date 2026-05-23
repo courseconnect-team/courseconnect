@@ -3,12 +3,14 @@
 import * as React from 'react';
 import {
   Box,
+  Button,
   Dialog,
   DialogContent,
   DialogTitle,
   IconButton,
   MenuItem,
   Select,
+  TextField,
   Tooltip,
 } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -24,7 +26,7 @@ import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { callFunction } from '@/firebase/functions/callFunction';
 
-import AssignView from './AssignView';
+import AssignView, { type AppViewHandle } from './AssignView';
 import AssignViewOnly from './AssignViewOnly';
 
 import {
@@ -67,6 +69,8 @@ interface Assignment {
   title?: string;
   remote?: string;
   requested_action?: string;
+  ece_special_instructions?: string;
+  ece_payroll_notes?: string;
 }
 
 interface AssignmentGridProps {
@@ -91,6 +95,31 @@ function parseSemester(semesters: string[] | undefined) {
     : '—';
   const year = first.split(' ')[1] || '';
   return { term, year };
+}
+
+function EditableTextField({
+  value: initialValue,
+  onCommit,
+}: {
+  value: string;
+  onCommit: (v: string) => void;
+}) {
+  const [val, setVal] = React.useState(initialValue);
+  React.useEffect(() => {
+    setVal(initialValue);
+  }, [initialValue]);
+  return (
+    <TextField
+      value={val}
+      size="small"
+      variant="standard"
+      InputProps={{ disableUnderline: true, sx: { fontSize: 13 } }}
+      onClick={(e) => e.stopPropagation()}
+      onChange={(e) => setVal(e.target.value)}
+      onBlur={() => onCommit(val)}
+      sx={{ minWidth: 100, width: '100%' }}
+    />
+  );
 }
 
 // By default, show only the high-signal columns. Everything else is still
@@ -146,6 +175,7 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [viewId, setViewId] = React.useState<string | null>(null);
   const [editId, setEditId] = React.useState<string | null>(null);
+  const editViewRef = React.useRef<AppViewHandle>(null);
   const [emailRow, setEmailRow] = React.useState<Assignment | null>(null);
   const [emailSending, setEmailSending] = React.useState(false);
 
@@ -155,12 +185,12 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
       const sup = courseKey ? courseMap[courseKey] : undefined;
       return {
         UFID: a.ufid ?? '',
-        Name: a.name ?? '',
+        'First Name': (a.name || '').split(' ')[0] ?? '',
+        'Last Name': (a.name || '').split(' ')[1] ?? '',
         Email: a.email ?? '',
         Course: a.class_codes ?? '',
         Position: 'TA',
-        Semester: parseSemester(a.semesters).term,
-        Year: parseSemester(a.semesters).year,
+        Semester: a.semesters?.[0] ?? '',
         Hours: Array.isArray(a.hours) ? a.hours[0] ?? '' : '',
         Degree: a.degree ?? '',
         Department: a.department ?? '',
@@ -176,6 +206,8 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
         'Supervisor Last Name': sup?.supervisorLast ?? 'unknown',
         'Supervisor Email': sup?.supervisorEmail ?? 'unknown',
         'Requested Action': a.requested_action ?? 'NEW HIRE',
+        'ECE - Special Instructions': a.ece_special_instructions ?? '',
+        'ECE - Payroll Notes': a.ece_payroll_notes ?? '',
         Remote: a.remote ?? '',
         Timestamp: a.date ?? '',
         'Project ID': '000108927',
@@ -309,15 +341,26 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
         size: 140,
       },
       {
-        id: 'fullname',
-        header: 'Name',
-        accessorFn: (r) => `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim(),
+        id: 'firstName',
+        header: 'First Name',
+        accessorKey: 'firstName',
         cell: ({ getValue }) => (
           <Box sx={{ fontWeight: 500, color: '#111827' }}>
-            {(getValue() as string) || '—'}
+            {(getValue() as string)?.trim() || '—'}
           </Box>
         ),
-        size: 200,
+        size: 130,
+      },
+      {
+        id: 'lastName',
+        header: 'Last Name',
+        accessorKey: 'lastName',
+        cell: ({ getValue }) => (
+          <Box sx={{ fontWeight: 500, color: '#111827' }}>
+            {(getValue() as string)?.trim() || '—'}
+          </Box>
+        ),
+        size: 130,
       },
       {
         id: 'email',
@@ -348,12 +391,11 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
         size: 90,
       },
       {
-        id: 'semesters_display',
+        id: 'semester',
         header: 'Semester',
-        accessorFn: (r) => parseSemester(r.semesters).term,
-        size: 110,
+        accessorFn: (r) => r.semesters?.[0] ?? '—',
+        size: 140,
       },
-      { id: 'year', header: 'Year', accessorKey: 'year', size: 90 },
       {
         id: 'hours',
         header: 'Hours',
@@ -470,7 +512,7 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
                 '& .MuiSelect-select': { py: 0.25 },
               }}
             >
-              {['NEW HIRE', 'REAPPOINT', 'TERMINATE', 'LEAVE'].map((opt) => (
+              {['NEW HIRE', 'REAPPOINT', 'TERMINATE', 'LEAVE', 'OPS SEMESTER BREAK'].map((opt) => (
                 <MenuItem key={opt} value={opt} sx={{ fontSize: 13 }}>
                   {opt}
                 </MenuItem>
@@ -479,6 +521,58 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
           );
         },
         size: 160,
+      },
+      {
+        id: 'ece_special_instructions',
+        header: 'ECE - Special Instructions',
+        accessorKey: 'ece_special_instructions',
+        cell: ({ row }) => (
+          <EditableTextField
+            value={row.original.ece_special_instructions ?? ''}
+            onCommit={(v) => {
+              firebase
+                .firestore()
+                .collection('assignments')
+                .doc(row.original.id)
+                .update({ ece_special_instructions: v })
+                .catch(console.error);
+              setAssignments((prev) =>
+                prev.map((a) =>
+                  a.id === row.original.id
+                    ? { ...a, ece_special_instructions: v }
+                    : a
+                )
+              );
+            }}
+          />
+        ),
+        size: 220,
+      },
+      {
+        id: 'ece_payroll_notes',
+        header: 'ECE - Payroll Notes',
+        accessorKey: 'ece_payroll_notes',
+        cell: ({ row }) => (
+          <EditableTextField
+            value={row.original.ece_payroll_notes ?? ''}
+            onCommit={(v) => {
+              firebase
+                .firestore()
+                .collection('assignments')
+                .doc(row.original.id)
+                .update({ ece_payroll_notes: v })
+                .catch(console.error);
+              setAssignments((prev) =>
+                prev.map((a) =>
+                  a.id === row.original.id
+                    ? { ...a, ece_payroll_notes: v }
+                    : a
+                )
+              );
+            }}
+          />
+        ),
+        size: 220,
       },
       { id: 'pid', header: 'Project ID', accessorKey: 'pid', size: 110 },
       {
@@ -687,12 +781,27 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
           }}
         >
           <Box sx={{ flex: 1 }}>Edit assignment</Box>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => editViewRef.current?.save()}
+            sx={{
+              mr: 1.5,
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: 13,
+              backgroundColor: '#0021A5',
+              '&:hover': { backgroundColor: '#001A85' },
+            }}
+          >
+            Save edits
+          </Button>
           <IconButton size="small" onClick={() => setEditId(null)}>
             <CloseRoundedIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers>
-          {editId && <AssignView uid={editId} />}
+          {editId && <AssignView ref={editViewRef} uid={editId} />}
         </DialogContent>
       </Dialog>
 
