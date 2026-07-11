@@ -36,10 +36,10 @@ export default function SideNav({ navItems }: SideNavProps) {
   return (
     <aside
       data-tour="sidebar"
-      className="relative w-20 md:w-24 h-screen bg-[#6C37D8] flex flex-col justify-between pt-20 pb-4 shadow-[4px_0_16px_-6px_rgba(45,15,131,0.35)]"
+      className="relative w-20 md:w-24 h-screen bg-[#6C37D8] flex flex-col pt-20 pb-4 shadow-[4px_0_16px_-6px_rgba(45,15,131,0.35)]"
     >
       {/* top + middle items */}
-      <nav className="flex flex-col gap-1.5 px-2">
+      <nav className="flex flex-col gap-1 px-2 flex-1 min-h-0 overflow-y-auto">
         {navItems.map(({ label, to, icon: Icon }: NavbarItem) => {
           const isActive = pathname === to;
           return (
@@ -48,7 +48,7 @@ export default function SideNav({ navItems }: SideNavProps) {
               href={to}
               data-testid={`nav-${label}`}
               aria-current={isActive ? 'page' : undefined}
-              className={`group relative flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl transition-all duration-200 ease-out ${
+              className={`group relative flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl transition-all duration-200 ease-out ${
                 isActive
                   ? 'bg-white text-[#6C37D8] shadow-sm'
                   : 'text-white/85 hover:bg-white/10 hover:text-white'
@@ -72,12 +72,12 @@ export default function SideNav({ navItems }: SideNavProps) {
       </nav>
 
       {/* bottom: report a bug + logout */}
-      <div className="px-2 flex flex-col gap-1.5">
+      <div className="px-2 flex flex-col gap-1 mt-2 flex-shrink-0">
         <button
           onClick={openBugReport}
           aria-label="Report a bug"
           data-tour="report-bug"
-          className="w-full flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl text-white/80 hover:bg-white/10 hover:text-white cursor-pointer transition-all duration-200 ease-out"
+          className="w-full flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl text-white/80 hover:bg-white/10 hover:text-white cursor-pointer transition-all duration-200 ease-out"
         >
           <BugReportOutlinedIcon fontSize="inherit" className="!text-[26px]" />
           <span className="text-[10.5px] leading-[1.15] tracking-wide font-medium">
@@ -87,7 +87,7 @@ export default function SideNav({ navItems }: SideNavProps) {
         <button
           onClick={handleOpen}
           aria-label="Logout"
-          className="w-full flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl text-white/80 hover:bg-white/10 hover:text-white cursor-pointer transition-all duration-200 ease-out"
+          className="w-full flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl text-white/80 hover:bg-white/10 hover:text-white cursor-pointer transition-all duration-200 ease-out"
         >
           <LogoutOutlinedIcon fontSize="inherit" className="!text-[26px]" />
           <span className="text-[10.5px] leading-[1.15] tracking-wide font-medium">

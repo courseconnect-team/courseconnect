@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import Fuse from 'fuse.js';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   Box,
   FormControl,
@@ -54,6 +56,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   const [originalListings, setOriginalListings] = useState<any[]>([]);
   const [myPostingsOnly, setMyPostingsOnly] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const debouncedSearch = useDebounce(searchText);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const isFacultyOrAdmin = role === 'faculty' || role === 'admin';
@@ -63,6 +66,17 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
       setOriginalListings([...researchListings]);
     }
   }, [researchListings, originalListings.length]);
+
+  const fuse = useMemo(
+    () =>
+      new Fuse(originalListings.length > 0 ? originalListings : researchListings, {
+        keys: ['project_title', 'project_description', 'faculty_contact'],
+        threshold: 0.35,
+        ignoreLocation: true,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [originalListings]
+  );
 
   const applyFilters = (
     searchOverride?: string,
@@ -89,19 +103,9 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
     }
 
     if (search) {
-      const lower = search.toLowerCase();
-      filtered = filtered.filter((item) => {
-        const t =
-          typeof item.project_title === 'string' &&
-          item.project_title.toLowerCase().includes(lower);
-        const d =
-          typeof item.project_description === 'string' &&
-          item.project_description.toLowerCase().includes(lower);
-        const m =
-          typeof item.faculty_contact === 'string' &&
-          item.faculty_contact.toLowerCase().includes(lower);
-        return t || d || m;
-      });
+      const fuseResults = fuse.search(search).map((r) => r.item);
+      const fuseIds = new Set(fuseResults.map((item: any) => item.docID));
+      filtered = filtered.filter((item) => fuseIds.has(item.docID));
     }
 
     if (department) {
@@ -130,9 +134,13 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
     setResearchListings(filtered);
   };
 
+  useEffect(() => {
+    applyFilters(debouncedSearch);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
   const handleSearchChange = (value: string) => {
     setSearchText(value);
-    if (value === '') applyFilters('');
   };
 
   const handleDepartmentChange = (value: string) => {

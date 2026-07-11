@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Fuse from 'fuse.js';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   Box,
   Typography,
@@ -15,12 +17,14 @@ import {
   MenuItem,
   IconButton,
   Tooltip,
+  InputBase,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import SearchIcon from '@mui/icons-material/Search';
 import ResearchModal from '@/components/Research/Modal';
 import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
 import { deleteResearchListing } from '@/services/researchService';
@@ -52,6 +56,8 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   );
   const [selectedSemester, setSelectedSemester] = useState('Spring 2026');
   const [showAll, setShowAll] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const debouncedSearch = useDebounce(searchText);
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteDocID, setDeleteDocID] = useState<string | null>(null);
@@ -82,7 +88,23 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
     ? researchListings
     : researchListings.filter((item) => item.faculty_members?.includes(uid));
 
-  const displayedPositions = showAll ? myPositions : myPositions.slice(0, 6);
+  const fuse = useMemo(
+    () =>
+      new Fuse(myPositions, {
+        keys: ['project_title', 'department', 'project_description'],
+        threshold: 0.35,
+        ignoreLocation: true,
+      }),
+    [myPositions]
+  );
+
+  const filteredPositions = debouncedSearch
+    ? fuse.search(debouncedSearch).map((r) => r.item)
+    : myPositions;
+
+  const displayedPositions = showAll
+    ? filteredPositions
+    : filteredPositions.slice(0, 6);
 
   const handleBackToListings = () => {
     setSelectedResearchId(null);
@@ -120,9 +142,42 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                   My Positions
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#6B6B78' }}>
-                  {myPositions.length}{' '}
-                  {myPositions.length === 1 ? 'position' : 'positions'} posted
+                  {filteredPositions.length}{' '}
+                  {filteredPositions.length === 1 ? 'position' : 'positions'}{' '}
+                  {debouncedSearch ? 'found' : 'posted'}
                 </Typography>
+              </Box>
+              {/* Search bar */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 1.5,
+                  py: 0.75,
+                  border: '1.5px solid #E8E0FA',
+                  borderRadius: '999px',
+                  backgroundColor: '#FAFAFE',
+                  minWidth: 220,
+                  '&:focus-within': {
+                    borderColor: '#5A41D8',
+                    backgroundColor: '#fff',
+                    boxShadow: '0 0 0 3px rgba(90,65,216,0.1)',
+                  },
+                }}
+              >
+                <SearchIcon sx={{ color: '#9A91B8', fontSize: 18 }} />
+                <InputBase
+                  placeholder="Search positions…"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  sx={{
+                    fontSize: '0.85rem',
+                    color: '#1F1B2E',
+                    flex: 1,
+                    '& input::placeholder': { color: '#9A91B8' },
+                  }}
+                />
               </Box>
               <FormControl
                 size="small"
@@ -166,7 +221,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
             </Button>
           </Box>
 
-          {myPositions.length === 0 ? (
+          {filteredPositions.length === 0 ? (
             <Box
               sx={{
                 display: 'flex',
@@ -199,35 +254,40 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                 variant="h6"
                 sx={{ fontWeight: 700, color: '#1F1B2E', mb: 0.5 }}
               >
-                No research positions yet
+                {debouncedSearch
+                  ? 'No positions match your search'
+                  : 'No research positions yet'}
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ color: '#6B6B78', maxWidth: 520, mb: 3 }}
               >
-                Get started by creating your first position. Students will be
-                able to discover and apply right away.
+                {searchText
+                  ? 'Try different keywords or clear the search to see all positions.'
+                  : 'Get started by creating your first position. Students will be able to discover and apply right away.'}
               </Typography>
-              <Button
-                startIcon={<AddIcon />}
-                variant="contained"
-                onClick={() => setCreateModalOpen(true)}
-                sx={{
-                  backgroundColor: '#5A41D8',
-                  color: '#fff',
-                  textTransform: 'none',
-                  borderRadius: '999px',
-                  fontWeight: 600,
-                  px: 3,
-                  boxShadow: 'none',
-                  '&:hover': {
-                    backgroundColor: '#4A35B8',
-                    boxShadow: '0 6px 18px rgba(90, 65, 216, 0.28)',
-                  },
-                }}
-              >
-                Create your first position
-              </Button>
+              {!debouncedSearch && (
+                <Button
+                  startIcon={<AddIcon />}
+                  variant="contained"
+                  onClick={() => setCreateModalOpen(true)}
+                  sx={{
+                    backgroundColor: '#5A41D8',
+                    color: '#fff',
+                    textTransform: 'none',
+                    borderRadius: '999px',
+                    fontWeight: 600,
+                    px: 3,
+                    boxShadow: 'none',
+                    '&:hover': {
+                      backgroundColor: '#4A35B8',
+                      boxShadow: '0 6px 18px rgba(90, 65, 216, 0.28)',
+                    },
+                  }}
+                >
+                  Create your first position
+                </Button>
+              )}
             </Box>
           ) : (
             <>
@@ -363,7 +423,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                 })}
               </Grid>
 
-              {myPositions.length > 6 && !showAll && (
+              {filteredPositions.length > 6 && !showAll && (
                 <Box textAlign="right" mt={2}>
                   <Button
                     sx={{
@@ -374,7 +434,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                     }}
                     onClick={() => setShowAll(true)}
                   >
-                    See all {myPositions.length}
+                    See all {filteredPositions.length}
                   </Button>
                 </Box>
               )}
