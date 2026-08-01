@@ -26,6 +26,7 @@ import 'firebase/firestore';
 import { collection, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { emailToUsername } from '@/utils/email';
+import { semesterRank, normalizeSemesters } from '@/utils/semester';
 import { prettyCourseId } from '@/hooks/useSemesterOptions';
 
 import AppView from './AppView';
@@ -416,6 +417,51 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       const assignmentSemesters = semesterBucket
         ? [semesterBucket]
         : doc.data()?.available_semesters;
+
+      // Returning-hire detection: if this person already holds an assignment
+      // from an earlier semester, this is a re-appointment, not a new hire.
+      // Match on student_uid (how docs are keyed here) and ufid (covers rows
+      // imported from HR that carry a ufid but no student_uid). Only semesters
+      // strictly earlier than the one being assigned count — a second course in
+      // the same term is still a new hire.
+      const thisUfid = String(doc.data()?.ufid ?? '').trim();
+      const newRank = Math.max(
+        ...normalizeSemesters(assignmentSemesters)
+          .map((s) => semesterRank(s))
+          .filter((r): r is number => r != null),
+        -Infinity
+      );
+      let hasEarlierSemester = false;
+      try {
+        const assignmentsColRef = collection(
+          firebase.firestore(),
+          'assignments'
+        );
+        const priorSnaps = await Promise.all([
+          getDocs(query(assignmentsColRef, where('student_uid', '==', studentUid))),
+          thisUfid
+            ? getDocs(query(assignmentsColRef, where('ufid', '==', thisUfid)))
+            : Promise.resolve(null),
+        ]);
+        for (const snap of priorSnaps) {
+          if (!snap) continue;
+          for (const priorDoc of snap.docs) {
+            const priorRanks = normalizeSemesters(priorDoc.data()?.semesters)
+              .map((s) => semesterRank(s))
+              .filter((r): r is number => r != null);
+            if (priorRanks.some((r) => r < newRank)) {
+              hasEarlierSemester = true;
+              break;
+            }
+          }
+          if (hasEarlierSemester) break;
+        }
+      } catch (err) {
+        // Non-fatal: fall back to NEW HIRE if the lookup fails.
+        console.error('Reappoint lookup failed; defaulting to NEW HIRE:', err);
+      }
+      const requestedAction = hasEarlierSemester ? 'REAPPOINT' : 'NEW HIRE';
+
       const assignment = {
         date: `${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}`,
         student_uid: studentUid,
@@ -428,6 +474,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
         position: doc.data()?.position,
         degree: doc.data()?.degree,
         ufid: doc.data()?.ufid,
+        requested_action: requestedAction,
       };
 
       const assignmentsCol = firebase.firestore().collection('assignments');

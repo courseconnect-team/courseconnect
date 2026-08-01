@@ -28,7 +28,9 @@
     "migrate:application-course-keys-to-instructor:dry": "ts-node src/scripts/migrateApplicationCourseKeysToInstructor.ts",
     "migrate:application-course-keys-to-instructor": "ts-node src/scripts/migrateApplicationCourseKeysToInstructor.ts --execute",
     "backfill:semester-course-docs:dry": "ts-node src/scripts/backfillSemesterCourseDocs.ts",
-    "backfill:semester-course-docs": "ts-node src/scripts/backfillSemesterCourseDocs.ts --execute"
+    "backfill:semester-course-docs": "ts-node src/scripts/backfillSemesterCourseDocs.ts --execute",
+    "backfill:reappoint-status:dry": "ts-node src/scripts/backfillReappointStatus.ts",
+    "backfill:reappoint-status": "ts-node src/scripts/backfillReappointStatus.ts --execute"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
