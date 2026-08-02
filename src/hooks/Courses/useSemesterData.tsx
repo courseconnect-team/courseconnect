@@ -11,7 +11,7 @@ export function useSemesterData(
   role: Role,
   uemail?: string,
   semesters?: SemesterName[],
-  aliasUsernames: string[] = []
+  aliasEmails: string[] = []
 ) {
   const { currentSemester, options } = useSemesters();
   const e2e = isE2EMode();
@@ -25,8 +25,8 @@ export function useSemesterData(
     names.length > 0;
   const result = useQueries({
     queries: names.map((sem: SemesterName) => ({
-      queryKey: ['facultyCourses', uemail, sem, ...aliasUsernames],
-      queryFn: () => getFacultyCourses(sem, uemail!, aliasUsernames),
+      queryKey: ['facultyCourses', uemail, sem, ...aliasEmails],
+      queryFn: () => getFacultyCourses(sem, uemail!, aliasEmails),
       enabled,
       staleTime: 5 * 60 * 1000,
       gcTime: 30 * 60 * 1000,

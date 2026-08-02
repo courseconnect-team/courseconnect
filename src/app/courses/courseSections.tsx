@@ -19,7 +19,7 @@ export default function CourseSections({
   uemail: string;
 }) {
   const { user: currentUser } = useCurrentUser();
-  const aliasUsernames = currentUser.aliasUsernames;
+  const aliasEmails = currentUser.aliasEmails;
   const [semesters, setSemesters] = useState<SemesterName[]>(() => {
     const stored = localStorage.getItem('selectedSemesters');
     return stored ? JSON.parse(stored) : [];
@@ -38,7 +38,7 @@ export default function CourseSections({
     error,
     showSkeletons,
     skeletonCount,
-  } = useSemesterData(role, uemail, semesters, aliasUsernames);
+  } = useSemesterData(role, uemail, semesters, aliasEmails);
 
   const currentSemArray = useMemo(
     () => (currentSemester ? [currentSemester] : []),
@@ -51,7 +51,7 @@ export default function CourseSections({
     error: currentError,
     showSkeletons: showCurrentSkeletons,
     skeletonCount: currentSkeletonCount,
-  } = useSemesterData(role, uemail, currentSemArray, aliasUsernames);
+  } = useSemesterData(role, uemail, currentSemArray, aliasEmails);
 
   return (
     <>

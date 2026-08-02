@@ -27,24 +27,25 @@ interface CourseDoc {
 export async function getFacultyCourses(
   semester: SemesterName,
   uemail: string,
-  aliasUsernames: string[] = []
+  aliasEmails: string[] = []
 ): Promise<CourseTuple[]> {
-  // semesters/{termId}/courses
+  // A course belongs to a professor when their email is listed in the course
+  // doc's `professor_emails`. Match on the full address (lowercased) — the
+  // login email plus any linked alias emails.
   const db = firebase.firestore();
-  const username = emailToUsername(uemail);
-  if (!username) return [];
+  const emails = Array.from(
+    new Set(
+      [uemail, ...aliasEmails]
+        .map((e) => (e ?? '').trim().toLowerCase())
+        .filter(Boolean)
+    )
+  );
+  if (emails.length === 0) return [];
   const col = collection(db, 'semesters', semester, 'courses');
-  const allUsernames = Array.from(new Set([username, ...aliasUsernames]));
   const q =
-    allUsernames.length === 1
-      ? query(
-          col,
-          where('professor_usernames', 'array-contains', allUsernames[0])
-        )
-      : query(
-          col,
-          where('professor_usernames', 'array-contains-any', allUsernames)
-        );
+    emails.length === 1
+      ? query(col, where('professor_emails', 'array-contains', emails[0]))
+      : query(col, where('professor_emails', 'array-contains-any', emails));
 
   const snap = await getDocs(q);
   const rows: CourseTuple[] = [];
@@ -85,12 +86,12 @@ export async function getFacultyCoursesAllTerms(
 export function useFacultyCourses(
   semester?: SemesterName,
   uemail?: string,
-  aliasUsernames: string[] = [],
+  aliasEmails: string[] = [],
   enabled = true
 ): UseQueryResult<CourseTuple[], Error> {
   return useQuery<CourseTuple[], Error>({
-    queryKey: ['facultyCourses', uemail, semester, ...aliasUsernames],
-    queryFn: () => getFacultyCourses(semester!, uemail!, aliasUsernames),
+    queryKey: ['facultyCourses', uemail, semester, ...aliasEmails],
+    queryFn: () => getFacultyCourses(semester!, uemail!, aliasEmails),
     enabled: enabled && !!semester && !!uemail,
     placeholderData: keepPreviousData,
     staleTime: 5 * 60 * 1000,
