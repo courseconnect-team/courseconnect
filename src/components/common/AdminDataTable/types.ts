@@ -42,6 +42,13 @@ export interface AdminDataTableProps<TData> {
   stickyHeader?: boolean;
   tableId?: string;
   exportFilename?: string;
+  /**
+   * Replaces the default CSV export, which derives its header from the columns
+   * currently visible on screen. Tables whose export has to satisfy a fixed
+   * external schema must pass this, so toggling a column can't change the file.
+   * Receives the rows surviving the active search/filters, in display order.
+   */
+  onExport?: (rows: TData[]) => void;
   minWidth?: number | string;
   maxHeight?: number | string;
 }

@@ -141,6 +141,7 @@ export function AdminDataTable<TData>({
   stickyHeader = true,
   tableId,
   exportFilename = 'table.csv',
+  onExport,
   minWidth,
   maxHeight = 'calc(100vh - 380px)',
 }: AdminDataTableProps<TData>) {
@@ -273,6 +274,13 @@ export function AdminDataTable<TData>({
     React.useState<HTMLElement | null>(null);
 
   const handleExport = () => {
+    // A table bound to an external schema owns its own writer; the
+    // visibility-derived export below would leak screen state into the file.
+    if (onExport) {
+      onExport(table.getFilteredRowModel().rows.map((r) => r.original));
+      return;
+    }
+
     const visibleLeafCols = table
       .getVisibleLeafColumns()
       .filter((c) => c.id !== '__select' && c.id !== '__actions');
@@ -434,8 +442,6 @@ export function AdminDataTable<TData>({
 
         {toolbarLeft}
 
-        <Box sx={{ flex: 1 }} />
-
         {toolbarRight}
 
         {enableDensityToggle && (
@@ -572,6 +578,10 @@ export function AdminDataTable<TData>({
             </IconButton>
           </Tooltip>
         )}
+
+        {/* Trailing spacer: controls group at the left, next to the search box,
+            rather than being pushed to the far edge of a wide table. */}
+        <Box sx={{ flex: 1 }} />
       </Box>
 
       {/* bulk action bar */}

@@ -52,3 +52,6 @@ playwright.accounts.json
 .claude/
 CLAUDE.md
 .worktrees
+
+# Generated OnBase sample export
+onbase-sample.csv

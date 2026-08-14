@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky install",
+    "test:unit": "ts-node --compilerOptions '{\"module\":\"commonjs\",\"target\":\"es2020\"}' tests/unit/index.ts",
+    "onbase:sample": "ts-node --compilerOptions '{\"module\":\"commonjs\",\"target\":\"es2020\"}' src/scripts/generateOnBaseSample.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",

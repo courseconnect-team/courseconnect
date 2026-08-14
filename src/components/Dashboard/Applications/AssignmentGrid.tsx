@@ -34,6 +34,28 @@ import {
   ConfirmDialog,
   RowActionButton,
 } from '@/components/common/AdminDataTable';
+import {
+  ONBASE_COLUMNS,
+  buildOnBaseRows,
+  collectSemesterWarnings,
+  toOnBaseCsv,
+  type SemesterWarning,
+} from '@/utils/onbaseExport';
+import {
+  isResolved,
+  normalizeCourseKey,
+  resolveSupervisor,
+  splitCourseKey,
+  supervisorFromCourseDoc,
+  type CourseCandidate,
+  type SupervisorInfo,
+} from '@/utils/courseSupervisor';
+import {
+  ALL_SEMESTERS,
+  buildSemesterOptions,
+  filterBySemester,
+  semesterFilenameSlug,
+} from '@/utils/semesterFilter';
 
 interface Assignment {
   id: string;
@@ -75,12 +97,6 @@ interface Assignment {
 
 interface AssignmentGridProps {
   userRole: string;
-}
-
-// Returns the course doc ID stored in class_codes (e.g. "EEL3135 : Wong,Tan Foon")
-function parseCourseKey(classCodes: string | undefined): string | null {
-  if (!classCodes) return null;
-  return classCodes.trim();
 }
 
 function parseSemester(semesters: string[] | undefined) {
@@ -156,21 +172,55 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
   const [listLoading, setListLoading] = React.useState(true);
   const [assignments, setAssignments] = React.useState<Assignment[]>([]);
   const [courseMap, setCourseMap] = React.useState<
-    Record<string, { supervisorFirst: string; supervisorLast: string; supervisorEmail: string }>
+    Record<string, SupervisorInfo>
   >({});
+  const [courseMapLoaded, setCourseMapLoaded] = React.useState(false);
+  // Populated only when the canonical map misses — see the fallback effect.
+  const [fallbackMap, setFallbackMap] = React.useState<
+    Record<string, SupervisorInfo>
+  >({});
+  const [fallbackCandidates, setFallbackCandidates] = React.useState<
+    CourseCandidate[]
+  >([]);
 
   const enrichedAssignments = React.useMemo(() => {
     return assignments.map((a) => {
-      const key = parseCourseKey(a.class_codes);
-      const sup = key ? courseMap[key] : undefined;
-      return {
-        ...a,
-        supervisorFirst: sup?.supervisorFirst ?? 'unknown',
-        supervisorLast: sup?.supervisorLast ?? 'unknown',
-        supervisorEmail: sup?.supervisorEmail ?? 'unknown',
-      };
+      const { supervisor } = resolveSupervisor(
+        a.class_codes,
+        courseMap,
+        fallbackMap,
+        fallbackCandidates
+      );
+      return { ...a, ...supervisor };
     });
-  }, [assignments, courseMap]);
+  }, [assignments, courseMap, fallbackMap, fallbackCandidates]);
+
+  // Semester filter. Applied to the data handed to the table, so the grid and
+  // both export buttons always agree on which rows are in scope — an export
+  // can't include a semester the admin has filtered out.
+  const [semesterFilter, setSemesterFilter] =
+    React.useState<string>(ALL_SEMESTERS);
+
+  const semesterOptions = React.useMemo(
+    () => buildSemesterOptions(enrichedAssignments),
+    [enrichedAssignments]
+  );
+
+  const visibleAssignments = React.useMemo(
+    () => filterBySemester(enrichedAssignments, semesterFilter),
+    [enrichedAssignments, semesterFilter]
+  );
+
+  // A filter can outlive its rows (last assignment for a semester deleted).
+  // Fall back to "all" so the grid never sits empty with no explanation.
+  React.useEffect(() => {
+    if (
+      semesterFilter !== ALL_SEMESTERS &&
+      !semesterOptions.some((o) => o.value === semesterFilter)
+    ) {
+      setSemesterFilter(ALL_SEMESTERS);
+    }
+  }, [semesterOptions, semesterFilter]);
 
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [viewId, setViewId] = React.useState<string | null>(null);
@@ -178,52 +228,54 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
   const editViewRef = React.useRef<AppViewHandle>(null);
   const [emailRow, setEmailRow] = React.useState<Assignment | null>(null);
   const [emailSending, setEmailSending] = React.useState(false);
+  const [semesterWarnings, setSemesterWarnings] = React.useState<
+    SemesterWarning[]
+  >([]);
 
-  const handleExportExcel = () => {
-    const rows = assignments.map((a) => {
-      const courseKey = parseCourseKey(a.class_codes);
-      const sup = courseKey ? courseMap[courseKey] : undefined;
-      return {
-        UFID: a.ufid ?? '',
-        'First Name': (a.name || '').split(' ')[0] ?? '',
-        'Last Name': (a.name || '').split(' ')[1] ?? '',
-        Email: a.email ?? '',
-        Course: a.class_codes ?? '',
-        Position: 'TA',
-        Semester: a.semesters?.[0] ?? '',
-        Hours: Array.isArray(a.hours) ? a.hours[0] ?? '' : '',
-        Degree: a.degree ?? '',
-        Department: a.department ?? '',
-        'Start Date': a.start_date ?? '',
-        'End Date': a.end_date ?? '',
-        'Working Title': a.title ?? '',
-        Percentage: a.percentage ?? '',
-        'Annual Rate': a.annual_rate ?? '',
-        'Biweekly Rate': a.biweekly_rate ?? '',
-        'Target Amount': a.target_amount ?? '',
-        'Supervisor UFID': a.supervisor_ufid ?? '',
-        'Supervisor First Name': sup?.supervisorFirst ?? 'unknown',
-        'Supervisor Last Name': sup?.supervisorLast ?? 'unknown',
-        'Supervisor Email': sup?.supervisorEmail ?? 'unknown',
-        'Requested Action': a.requested_action ?? 'NEW HIRE',
-        'ECE - Special Instructions': a.ece_special_instructions ?? '',
-        'ECE - Payroll Notes': a.ece_payroll_notes ?? '',
-        Remote: a.remote ?? '',
-        Timestamp: a.date ?? '',
-        'Project ID': '000108927',
-        'Project Name': 'DEPARTMENT TA/UPIS',
-        FTE:
-          Array.isArray(a.hours) && typeof a.hours[0] === 'number'
-            ? Math.floor((a.hours[0] / 1.029411 / 40) * 100) / 100
-            : '',
-        'Proxy Name': 'Christophe Bobda',
-        'Proxy Email': 'cbobda@ufl.edu',
-      };
+  // Both export buttons on this table write the OnBase schema. Column set and
+  // order come from ONBASE_COLUMNS, never from the on-screen table — hiding a
+  // column here must not change what OnBase receives.
+  const reportSemesterWarnings = (rows: Assignment[]) => {
+    const warnings = collectSemesterWarnings(rows);
+    if (warnings.length) {
+      console.warn(
+        `[OnBase export] ${warnings.length} row(s) have an unparseable semester; ` +
+          'Semester/Year left blank rather than guessed:',
+        warnings
+      );
+    }
+    setSemesterWarnings(warnings);
+  };
+
+  // Exports carry the semester in the filename so a file sitting in Downloads
+  // is still identifiable as "the Fall 2026 batch".
+  const exportBasename = `onbase-assignments-${semesterFilenameSlug(
+    semesterFilter
+  )}`;
+
+  const handleExportOnBaseExcel = () => {
+    reportSemesterWarnings(visibleAssignments);
+    const ws = XLSX.utils.json_to_sheet(buildOnBaseRows(visibleAssignments), {
+      header: ONBASE_COLUMNS as unknown as string[],
     });
-    const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Assignments');
-    XLSX.writeFile(wb, 'assignments.xlsx');
+    XLSX.writeFile(wb, `${exportBasename}.xlsx`);
+  };
+
+  // Overrides AdminDataTable's default CSV export, which builds its header from
+  // whichever columns happen to be visible. Receives the search/filter result
+  // so the search box narrows the file too, on top of the semester filter.
+  const handleExportOnBaseCsv = (rows: Assignment[]) => {
+    reportSemesterWarnings(rows);
+    const csv = toOnBaseCsv(buildOnBaseRows(rows));
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${exportBasename}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   React.useEffect(() => {
@@ -251,35 +303,93 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
     return () => unsubscribe();
   }, []);
 
+  // Canonical source: semesters/{Sem}/courses, keyed by "${code} : ${instructor}".
   React.useEffect(() => {
     const db = firebase.firestore();
     db.collection('semesters')
       .get()
       .then(async (semSnap) => {
-        const map: Record<string, { supervisorFirst: string; supervisorLast: string; supervisorEmail: string }> = {};
+        const map: Record<string, SupervisorInfo> = {};
         await Promise.all(
           semSnap.docs.map(async (semDoc) => {
             const coursesSnap = await semDoc.ref.collection('courses').get();
             coursesSnap.docs.forEach((courseDoc) => {
-              const d = courseDoc.data();
-              const key = courseDoc.id;
-              const profName: string = Array.isArray(d.professor_names)
-                ? (d.professor_names[0] as string) ?? ''
-                : (d.professor_names as string) ?? '';
-              const comma = profName.indexOf(',');
-              const last = comma >= 0 ? profName.substring(0, comma).trim() : profName.trim();
-              const first = comma >= 0 ? profName.substring(comma + 1).trim() : '';
-              const email: string = Array.isArray(d.professor_emails)
-                ? (d.professor_emails[0] as string) ?? ''
-                : (d.professor_emails as string) ?? '';
-              map[key] = { supervisorFirst: first, supervisorLast: last, supervisorEmail: email };
+              const sup = supervisorFromCourseDoc(courseDoc.data());
+              if (sup) map[normalizeCourseKey(courseDoc.id)] = sup;
             });
           })
         );
         setCourseMap(map);
       })
-      .catch(console.error);
+      .catch(console.error)
+      .then(() => setCourseMapLoaded(true));
   }, []);
+
+  // Fallback: the top-level `courses` collection still holds rows the semester
+  // backfill never reached, so a miss above isn't proof the course is unknown.
+  // Only runs when something actually failed to resolve, and only fetches the
+  // codes involved rather than the whole collection.
+  const fallbackFetched = React.useRef(false);
+  React.useEffect(() => {
+    if (!courseMapLoaded || fallbackFetched.current) return;
+
+    const unresolvedCodes = Array.from(
+      new Set(
+        assignments
+          .filter(
+            (a) =>
+              a.class_codes &&
+              !isResolved(courseMap[normalizeCourseKey(a.class_codes)])
+          )
+          .map((a) => splitCourseKey(a.class_codes).code)
+          .filter(Boolean)
+      )
+    );
+    if (!unresolvedCodes.length) return;
+
+    fallbackFetched.current = true;
+    const db = firebase.firestore();
+
+    // `in` caps out at 30 values per query.
+    const batches: string[][] = [];
+    for (let i = 0; i < unresolvedCodes.length; i += 30) {
+      batches.push(unresolvedCodes.slice(i, i + 30));
+    }
+
+    Promise.all(
+      batches.map((codes) =>
+        db.collection('courses').where('code', 'in', codes).get()
+      )
+    )
+      .then((snaps) => {
+        const map: Record<string, SupervisorInfo> = {};
+        const candidates: CourseCandidate[] = [];
+        snaps.forEach((snap) => {
+          snap.docs.forEach((doc) => {
+            const data = doc.data();
+            const sup = supervisorFromCourseDoc(data);
+            if (!sup) return;
+            // Legacy docs are keyed by class number, so index by both the doc
+            // id and the reconstructed "code : instructor" key.
+            map[normalizeCourseKey(doc.id)] = sup;
+            const code = String(data.code ?? '').trim();
+            const instructor = Array.isArray(data.professor_names)
+              ? String(data.professor_names[0] ?? '')
+              : String(data.professor_names ?? '');
+            if (code && instructor) {
+              map[normalizeCourseKey(`${code} : ${instructor}`)] = sup;
+              candidates.push({ code, instructor, supervisor: sup });
+            }
+          });
+        });
+        setFallbackMap(map);
+        setFallbackCandidates(candidates);
+      })
+      .catch((err) => {
+        console.error('Supervisor fallback lookup failed:', err);
+        fallbackFetched.current = false; // allow a retry on the next snapshot
+      });
+  }, [assignments, courseMap, courseMapLoaded]);
 
   const handleConfirmDelete = async () => {
     if (!deleteId) return;
@@ -666,27 +776,83 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
 
   return (
     <Box>
+      {semesterWarnings.length > 0 && (
+        <Box
+          sx={{
+            mb: 1.5,
+            p: 1.5,
+            border: '1px solid #FCD34D',
+            backgroundColor: '#FFFBEB',
+            borderRadius: '8px',
+            fontSize: 13,
+            color: '#92400E',
+          }}
+        >
+          <Box sx={{ fontWeight: 600, mb: 0.5 }}>
+            {semesterWarnings.length} row(s) exported with a blank
+            Semester/Year
+          </Box>
+          The stored value could not be split into a term and a four-digit
+          year, so both fields were left empty rather than guessed. Fix these
+          rows and re-export before sending to OnBase:{' '}
+          {semesterWarnings
+            .slice(0, 5)
+            .map((w) => `${w.name || w.ufid || 'unknown'} (${w.raw || 'blank'})`)
+            .join(', ')}
+          {semesterWarnings.length > 5 &&
+            `, +${semesterWarnings.length - 5} more`}
+        </Box>
+      )}
       <AdminDataTable
-        data={enrichedAssignments}
+        data={visibleAssignments}
         columns={columns}
         loading={loading || listLoading}
         getRowId={(r) => r.id}
         searchPlaceholder="Search assignments by name, UFID, course…"
         tableId="assignments"
         initialSorting={[{ id: 'date', desc: true }]}
-        exportFilename="assignments.csv"
+        exportFilename={`${exportBasename}.csv`}
+        onExport={handleExportOnBaseCsv}
+        toolbarLeft={
+          <Select
+            value={semesterFilter}
+            onChange={(e) => setSemesterFilter(e.target.value as string)}
+            size="small"
+            displayEmpty
+            aria-label="Filter by semester"
+            sx={{
+              minWidth: 190,
+              fontSize: 13,
+              backgroundColor: '#FFFFFF',
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E5E7EB' },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#D1D5DB',
+              },
+              '& .MuiSelect-select': { py: '7px' },
+            }}
+          >
+            {semesterOptions.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: 13 }}>
+                {opt.label}
+                <Box component="span" sx={{ ml: 1, color: '#9CA3AF' }}>
+                  ({opt.count})
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        }
         toolbarRight={
-          <Tooltip title="Export Excel (.xlsx)">
+          <Tooltip title="Export OnBase import file (.xlsx)">
             <IconButton
               size="small"
-              onClick={handleExportExcel}
+              onClick={handleExportOnBaseExcel}
               sx={{
                 border: '1px solid #E5E7EB',
                 borderRadius: '8px',
                 color: '#6B7280',
                 '&:hover': { backgroundColor: '#F9FAFB' },
               }}
-              aria-label="Export Excel"
+              aria-label="Export OnBase import file"
             >
               <TableViewOutlinedIcon sx={{ fontSize: 18 }} />
             </IconButton>
