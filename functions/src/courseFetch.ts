@@ -12,6 +12,7 @@ import {
   fail,
   getRole,
   handleMethod,
+  readBool,
   readString,
   setCors,
   verifyAuth,
@@ -36,6 +37,33 @@ async function ensureAdmin(uid: string, res: Response): Promise<boolean> {
 
 function now(): FirebaseFirestore.FieldValue {
   return admin.firestore.FieldValue.serverTimestamp();
+}
+
+// Must match `runWith({ timeoutSeconds })` on triggerCourseFetch and
+// scheduledCourseFetchRefresh, and RUN_TIME_LIMIT_MS in
+// src/utils/fetchRunStatus.ts (the client's copy — separate package, so the
+// value is duplicated rather than imported). Raising the function timeout
+// means raising this too, or reaping will kill live runs.
+export const RUN_TIME_LIMIT_MS = 540_000;
+
+/** Grace for clock skew and the gap between the last write and the kill. */
+const RUN_STALE_GRACE_MS = 120_000;
+
+export const RUN_STALE_AFTER_MS = RUN_TIME_LIMIT_MS + RUN_STALE_GRACE_MS;
+
+/** Firestore Timestamp | Date | null -> Date | null. */
+function toDateOrNullTs(value: unknown): Date | null {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  const maybe = value as { toDate?: unknown };
+  if (typeof maybe.toDate === 'function') {
+    try {
+      return (maybe as { toDate: () => Date }).toDate();
+    } catch {
+      return null;
+    }
+  }
+  return null;
 }
 
 function configFromDoc(
@@ -213,8 +241,14 @@ async function loadValidatedConfig(id: string): Promise<{
   return { config: result.value, doc: snap };
 }
 
-export const triggerCourseFetch = functions.https.onRequest(
-  async (req: Request, res: Response) => {
+// A full-semester pull (Fall especially) runs well past the 60s Cloud
+// Functions v1 DEFAULT, so the timeout has to be raised explicitly — 540s is
+// the v1 maximum. Without this the platform kills the process mid-run, and
+// because nothing gets to write a terminal status the run doc is stranded at
+// `status: 'running'` forever.
+export const triggerCourseFetch = functions
+  .runWith({ timeoutSeconds: 540, memory: '1GB' })
+  .https.onRequest(async (req: Request, res: Response) => {
     setCors(req, res);
     if (!handleMethod(req, res)) return;
     const caller = await verifyAuth(req, res);
@@ -240,8 +274,8 @@ export const triggerCourseFetch = functions.https.onRequest(
             .map((v) => v.trim().toUpperCase())
             .filter(Boolean)
         : undefined;
-      // Run synchronously. Cloud Functions v1 has a 540s timeout; a single
-      // config shouldn't exceed that. If it does we'll split into shards.
+      // Run synchronously, within the 540s configured above. If a single
+      // config ever exceeds that we'll split into shards.
       const outcome = await runAndPersist({
         db,
         configId: id,
@@ -516,6 +550,71 @@ export const cancelCourseFetchRun = functions.https.onRequest(
           .json({ configId, runId, cancelled: false, alreadyTerminal: true });
         return;
       }
+
+      // Reap path. Normal cancellation is cooperative: we set a flag and the
+      // running process notices it and writes its own terminal status. That
+      // only works while a process is alive. If the platform killed it (say it
+      // blew the function time limit) nothing is left to observe the flag or
+      // report an ending, so the run is stranded at 'running' and the UI has no
+      // way out — the Cancel button disables itself once cancelRequested is set.
+      //
+      // Past the time limit the run cannot still be alive, so writing the
+      // terminal status on its behalf is safe rather than racy.
+      const startedAt = toDateOrNullTs(data.startedAt);
+      const elapsedMs = startedAt ? Date.now() - startedAt.getTime() : null;
+      const eligibleForReap =
+        elapsedMs !== null && elapsedMs > RUN_STALE_AFTER_MS;
+
+      if (readBool(body, 'force') && eligibleForReap) {
+        const message =
+          `Run exceeded the ${Math.round(
+            RUN_TIME_LIMIT_MS / 1000
+          )}s time limit and stopped reporting; ` +
+          `marked failed by ${caller.uid} after ${Math.round(
+            (elapsedMs as number) / 1000
+          )}s.`;
+
+        const existingErrors = Array.isArray(data.errors)
+          ? (data.errors as unknown[]).filter(
+              (e): e is string => typeof e === 'string'
+            )
+          : [];
+
+        await runRef.set(
+          {
+            status: 'failed',
+            finishedAt: now(),
+            durationMs: elapsedMs,
+            errors: [...existingErrors, message].slice(0, 50),
+            reapedBy: caller.uid,
+            reapedAt: now(),
+          },
+          { merge: true }
+        );
+
+        // Clear the parent config too, otherwise the card still reads "running"
+        // and the run buttons stay hidden.
+        const configRef = db.collection('courseFetchConfigs').doc(configId);
+        const configSnap = await configRef.get();
+        const configData = configSnap.data() ?? {};
+        // Only claim the config if it still points at this run — a newer run
+        // may have started since.
+        if (configData.lastRunId === runId) {
+          await configRef.set(
+            { lastStatus: 'failed', lastError: message },
+            { merge: true }
+          );
+        }
+
+        console.warn(
+          `cancelCourseFetchRun: reaped stranded run ${runId} on ${configId} — ${message}`
+        );
+        res
+          .status(200)
+          .json({ configId, runId, cancelled: true, reaped: true });
+        return;
+      }
+
       await runRef.set(
         {
           cancelRequested: true,
@@ -524,7 +623,9 @@ export const cancelCourseFetchRun = functions.https.onRequest(
         },
         { merge: true }
       );
-      res.status(200).json({ configId, runId, cancelled: true });
+      res
+        .status(200)
+        .json({ configId, runId, cancelled: true, reaped: false });
     } catch (error) {
       console.error('cancelCourseFetchRun failed:', error);
       fail(res, 'Failed to cancel run', 500);
@@ -576,8 +677,11 @@ export const listCourseFetchRuns = functions.https.onRequest(
 // run the same config because the second one's transaction sees the updated
 // lease and skips.
 
-export const scheduledCourseFetchRefresh = functions.pubsub
-  .schedule('every 30 minutes')
+// Same reasoning as triggerCourseFetch: this calls runAndPersist too, and a
+// scheduled Fall refresh is exactly as long-running as a manual one.
+export const scheduledCourseFetchRefresh = functions
+  .runWith({ timeoutSeconds: 540, memory: '1GB' })
+  .pubsub.schedule('every 30 minutes')
   .onRun(async () => {
     const nowDate = new Date();
     const snap = await db

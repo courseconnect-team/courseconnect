@@ -77,6 +77,16 @@ export function readString(
   return trimmed.length ? trimmed : undefined;
 }
 
+export function readBool(
+  source: Record<string, unknown>,
+  key: string
+): boolean {
+  const value = source[key];
+  if (typeof value === 'boolean') return value;
+  // JSON bodies from form-ish clients may send the string form.
+  return value === 'true';
+}
+
 export async function verifyAuth(
   req: Request,
   res: Response

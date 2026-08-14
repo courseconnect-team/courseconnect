@@ -23,6 +23,7 @@ import EastRoundedIcon from '@mui/icons-material/EastRounded';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { toast } from 'react-hot-toast';
@@ -35,6 +36,7 @@ import type {
   CoursePreview,
 } from '@/types/courseFetch';
 import { toDateOrNull } from '@/types/courseFetch';
+import { describeIdleStatus, describeRun } from '@/utils/fetchRunStatus';
 import ConfigForm, { semesterNameFromTermYear } from './ConfigForm';
 import RunHistoryDialog from './RunHistoryDialog';
 import PreviewDialog from './PreviewDialog';
@@ -56,21 +58,24 @@ function relativeTime(date: Date | null): string {
   return date.toLocaleDateString();
 }
 
+// Colour only — the wording comes from describeIdleStatus so the chip and the
+// sentence beneath it can't drift apart.
 function statusColor(status?: string): {
   color: 'default' | 'success' | 'warning' | 'error' | 'info';
   label: string;
 } {
+  const { label } = describeIdleStatus(status);
   switch (status) {
     case 'success':
-      return { color: 'success', label: 'ok' };
+      return { color: 'success', label };
     case 'partial_success':
-      return { color: 'warning', label: 'partial' };
+      return { color: 'warning', label };
     case 'failed':
-      return { color: 'error', label: 'failed' };
+      return { color: 'error', label };
     case 'running':
-      return { color: 'info', label: 'running' };
+      return { color: 'info', label };
     default:
-      return { color: 'default', label: 'idle' };
+      return { color: 'default', label };
   }
 }
 
@@ -181,6 +186,8 @@ interface ActiveRunState {
   phase?: CourseFetchPhase;
   cancelling?: boolean;
   triggeredBy?: 'manual' | 'scheduled';
+  /** Needed to tell "still working" from "died without reporting". */
+  startedAt?: Date | null;
 }
 
 function ConfigCard(props: {
@@ -191,12 +198,32 @@ function ConfigCard(props: {
   onToggle: (enabled: boolean) => void;
   onPreview: () => void;
   onCancel: () => void;
+  onForceStop: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onHistory: () => void;
 }) {
   const { config: c } = props;
   const status = statusColor(c.lastStatus);
+
+  // Re-render on a timer while a run is active so the elapsed count stays
+  // truthful and the card flips to "No response" on its own once the job has
+  // outlived its time limit — without this an abandoned run looks healthy
+  // forever, since a killed function never writes a terminal status.
+  const [, setTick] = React.useState(0);
+  const running = Boolean(props.activeRun);
+  React.useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => window.clearInterval(id);
+  }, [running]);
+
+  const runDescription = describeRun({
+    phase: props.activeRun?.phase,
+    startedAt: props.activeRun?.startedAt ?? null,
+    cancelling: props.activeRun?.cancelling,
+  });
+  const idleStatus = describeIdleStatus(c.lastStatus);
   const lastAttempt = toDateOrNull(c.lastAttemptAt ?? null);
   const lastSuccess = toDateOrNull(c.lastSuccessAt ?? null);
   const shownTime = lastSuccess ?? lastAttempt;
@@ -311,14 +338,28 @@ function ConfigCard(props: {
           bgcolor: '#fafafa',
         }}
       >
-        <Typography variant="caption" color="text.secondary">
-          {shownTime ? (
+        {/* While a run is going, this line explains what "running" means in
+            plain terms — the job is continuous and minutes-long, so silence
+            here reads as a hang. Otherwise it reports the last result. */}
+        <Typography
+          variant="caption"
+          color={
+            props.activeRun && runDescription.tone === 'stale'
+              ? 'error.main'
+              : 'text.secondary'
+          }
+          sx={{ maxWidth: 520 }}
+        >
+          {props.activeRun ? (
+            runDescription.help
+          ) : shownTime ? (
             <>
-              Last run <strong>{relativeTime(shownTime)}</strong>
+              Last run <strong>{relativeTime(shownTime)}</strong> ·{' '}
+              {idleStatus.help}
               {c.lastError ? ` · ${c.lastError.slice(0, 60)}` : ''}
             </>
           ) : (
-            'Never run'
+            idleStatus.help
           )}
         </Typography>
         <Stack direction="row" spacing={0.5} alignItems="center">
@@ -326,16 +367,29 @@ function ConfigCard(props: {
             <>
               <Chip
                 size="small"
-                icon={<CircularProgress size={12} thickness={5} />}
-                label={
-                  props.activeRun.phase === 'writing' ? 'Writing…' : 'Fetching…'
+                icon={
+                  runDescription.tone === 'stale' ? (
+                    <ErrorOutlineIcon sx={{ fontSize: 14 }} />
+                  ) : (
+                    <CircularProgress size={12} thickness={5} />
+                  )
                 }
-                sx={{
-                  bgcolor: 'rgba(86,46,186,0.08)',
-                  color: PURPLE,
-                  fontWeight: 600,
-                  '& .MuiChip-icon': { color: PURPLE, ml: '6px' },
-                }}
+                label={runDescription.label}
+                sx={
+                  runDescription.tone === 'stale'
+                    ? {
+                        bgcolor: 'rgba(211,47,47,0.08)',
+                        color: 'error.main',
+                        fontWeight: 600,
+                        '& .MuiChip-icon': { color: 'error.main', ml: '6px' },
+                      }
+                    : {
+                        bgcolor: 'rgba(86,46,186,0.08)',
+                        color: PURPLE,
+                        fontWeight: 600,
+                        '& .MuiChip-icon': { color: PURPLE, ml: '6px' },
+                      }
+                }
               />
               {props.activeRun.triggeredBy === 'scheduled' && (
                 <Chip
@@ -345,23 +399,43 @@ function ConfigCard(props: {
                   sx={{ borderColor: 'divider', color: 'text.secondary' }}
                 />
               )}
-              <Button
-                size="small"
-                variant="outlined"
-                color="error"
-                startIcon={
-                  props.activeRun.cancelling ? (
-                    <CircularProgress size={14} color="inherit" />
-                  ) : (
-                    <StopCircleOutlinedIcon fontSize="small" />
-                  )
-                }
-                disabled={props.activeRun.cancelling}
-                onClick={props.onCancel}
-                sx={{ textTransform: 'none' }}
-              >
-                {props.activeRun.cancelling ? 'Cancelling…' : 'Cancel run'}
-              </Button>
+              {/* Once a run is past its time limit the ordinary Cancel is
+                  useless — it asks a dead process to stop itself, then disables
+                  itself waiting for an answer that never comes. Force stop
+                  writes the ending directly so the card can be used again. */}
+              {runDescription.tone === 'stale' ? (
+                <Tooltip title="Mark this run as failed so you can start a new one">
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="error"
+                    disableElevation
+                    startIcon={<StopCircleOutlinedIcon fontSize="small" />}
+                    onClick={props.onForceStop}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Force stop
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  startIcon={
+                    props.activeRun.cancelling ? (
+                      <CircularProgress size={14} color="inherit" />
+                    ) : (
+                      <StopCircleOutlinedIcon fontSize="small" />
+                    )
+                  }
+                  disabled={props.activeRun.cancelling}
+                  onClick={props.onCancel}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {props.activeRun.cancelling ? 'Cancelling…' : 'Cancel run'}
+                </Button>
+              )}
             </>
           ) : (
             <Button
@@ -532,6 +606,9 @@ export default function AutoFetchPanel({
                 triggeredBy:
                   (data.triggeredBy as 'manual' | 'scheduled' | undefined) ??
                   'manual',
+                startedAt: toDateOrNull(
+                  (data.startedAt as Parameters<typeof toDateOrNull>[0]) ?? null
+                ),
               },
             }));
             return;
@@ -657,18 +734,55 @@ export default function AutoFetchPanel({
     });
   };
 
-  const handleCancel = async (c: CourseFetchConfig) => {
+  const handleCancel = async (c: CourseFetchConfig, force = false) => {
     const active = activeRuns[c.id];
     if (!active || !active.runId) return;
-    setActiveRuns((prev) =>
-      prev[c.id]
-        ? { ...prev, [c.id]: { ...prev[c.id], cancelling: true } }
-        : prev
-    );
+    // Force stop is for a run that has already stopped answering, so don't show
+    // the "Stopping…" spinner — there's nothing left to wait on.
+    if (!force) {
+      setActiveRuns((prev) =>
+        prev[c.id]
+          ? { ...prev, [c.id]: { ...prev[c.id], cancelling: true } }
+          : prev
+      );
+    }
     try {
-      await api.cancelRun(c.id, active.runId);
+      const res = await api.cancelRun(c.id, active.runId, force);
+      if (force) {
+        if (res.reaped === true) {
+          // Reaping flips the run doc to 'failed', which the run listener would
+          // otherwise announce a second time as a failure. Claim the toast slot
+          // so the admin gets one message, and the accurate one.
+          toastedRunIdsRef.current.add(active.runId);
+          toast.success(`${c.label}: marked as failed. You can run it again.`);
+        } else if (res.alreadyTerminal) {
+          toast(`${c.label}: this run had already finished.`, { icon: 'ℹ️' });
+        } else if (res.reaped === false) {
+          // Server understood the request and declined: the run is inside its
+          // time limit, so it was treated as an ordinary stop request.
+          toast(
+            `${c.label}: the run is still within its time limit, so it was asked to stop normally.`,
+            { icon: 'ℹ️' }
+          );
+          setActiveRuns((prev) =>
+            prev[c.id]
+              ? { ...prev, [c.id]: { ...prev[c.id], cancelling: true } }
+              : prev
+          );
+        } else {
+          // No `reaped` field at all — the deployed function predates force
+          // stop. Say so rather than inventing a reason: the run is still
+          // stuck and the admin needs to know why nothing changed.
+          toast.error(
+            `${c.label}: force stop isn't available on the server yet. Deploy the functions, then try again.`,
+            { duration: 8000 }
+          );
+        }
+      }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Cancel failed');
+      toast.error(
+        e instanceof Error ? e.message : force ? 'Force stop failed' : 'Cancel failed'
+      );
       setActiveRuns((prev) =>
         prev[c.id]
           ? { ...prev, [c.id]: { ...prev[c.id], cancelling: false } }
@@ -867,6 +981,7 @@ export default function AutoFetchPanel({
             onToggle={(enabled) => handleToggle(c, enabled)}
             onPreview={() => handlePreview(c)}
             onCancel={() => handleCancel(c)}
+            onForceStop={() => handleCancel(c, true)}
             onEdit={() => handleEdit(c)}
             onDelete={() => handleDelete(c)}
             onHistory={() => setHistoryId(c.id)}

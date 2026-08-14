@@ -81,12 +81,21 @@ export function useCourseFetchApi() {
     []
   );
 
+  // `force` asks the server to write the terminal status itself instead of
+  // waiting for the run to acknowledge. The server honours it only for a run
+  // past its time limit, so a live run can never be killed out from under its
+  // own writes — see cancelCourseFetchRun.
   const cancelRun = useCallback(
     async (
       configId: string,
-      runId: string
-    ): Promise<{ cancelled: boolean; alreadyTerminal?: boolean }> => {
-      return callFunction('cancelCourseFetchRun', { configId, runId });
+      runId: string,
+      force = false
+    ): Promise<{
+      cancelled: boolean;
+      alreadyTerminal?: boolean;
+      reaped?: boolean;
+    }> => {
+      return callFunction('cancelCourseFetchRun', { configId, runId, force });
     },
     []
   );
