@@ -9,63 +9,15 @@ import { read, utils } from 'xlsx';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/firestore';
 import { emailsToUsernames } from '@/utils/email';
+import {
+  parseScheduleOfClasses,
+  type ScheduleCourseGroup,
+} from '@/utils/scheduleOfClasses';
 
 const PURPLE = '#562EBA';
 
-// Normalize a course code the same way the auto-fetch pipeline does
-// (`functions/.../normalize.ts`): strip whitespace, uppercase. The result is
-// the bare "COP3502" form used inside doc ids.
-function normalizeCode(raw: unknown): string {
-  return String(raw ?? '')
-    .replace(/\s+/g, '')
-    .trim()
-    .toUpperCase();
-}
-
-function addCodeSpace(code: string): string {
-  const m = code.match(/^([A-Z]{2,4})(\d{3,4}[A-Z]?)$/);
-  return m ? `${m[1]} ${m[2]}` : code;
-}
-
-function normalizeClassNumber(raw: unknown): string {
-  return String(raw ?? '').trim();
-}
-
-// Names that mean "no real instructor on file" — same set the auto-fetch
-// runner collapses (see `functions/src/courseFetcher/runner.ts`). All map
-// to 'TBA' so a course has at most one no-instructor doc per semester.
-const PLACEHOLDER_INSTRUCTOR_LOWER = new Set([
-  'tba',
-  'undef',
-  'undefined',
-  'unknown',
-  '-',
-]);
-
-// Stable instructor key used in the doc id. Mirrors
-// `instructorKeyFromSection` in `functions/src/courseFetcher/runner.ts`:
-// trim + collapse whitespace, fall back to 'TBA' when missing or when the
-// source uses a placeholder string. Keeping the two writers aligned means
-// re-runs and re-uploads merge into the same doc.
-function instructorKey(raw: unknown): string {
-  const cleaned = String(raw ?? '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (!cleaned) return 'TBA';
-  if (PLACEHOLDER_INSTRUCTOR_LOWER.has(cleaned.toLowerCase())) return 'TBA';
-  return cleaned;
-}
-
-// Doc-id shape shared with auto-fetch (`runner.ts::commitCoursesAndSections`).
-// One doc per (course, professor); section-level rows for the same prof get
-// merged on the same doc so re-uploads (and the auto-fetch pipeline) don't
-// produce duplicates.
-function semesterCourseDocId(code: string, instructor: string): string {
-  // Firestore doc ids cannot contain '/'. Other punctuation (commas in
-  // "Smith, John", periods, etc.) is permitted.
-  const safeInstructor = instructor.replace(/\//g, '-');
-  return `${code} : ${safeInstructor}`;
-}
+// Firestore caps a WriteBatch at 500 operations.
+const BATCH_LIMIT = 500;
 
 export interface UploadPanelProps {
   semester: string;
@@ -131,156 +83,108 @@ export default function UploadPanel({
       }
       const arrayBuffer = await file.arrayBuffer();
       const workbook = read(arrayBuffer);
-      const data: any[] = [];
+
+      // Read as arrays-of-cells rather than objects: the Schedule of Classes
+      // report buries its header several rows down under a title/legend
+      // block, so there is no usable object key until we find that row
+      // ourselves. `raw: false` keeps class numbers and section numbers as
+      // the source's zero-padded strings.
+      const rows: unknown[][] = [];
       workbook.SheetNames.forEach((sheetName) => {
-        const sheetData = utils.sheet_to_json(workbook.Sheets[sheetName]);
-        sheetData.forEach((row: any) => data.push(row));
+        const sheetRows = utils.sheet_to_json<unknown[]>(
+          workbook.Sheets[sheetName],
+          { header: 1, raw: false, defval: null, blankrows: false }
+        );
+        sheetRows.forEach((row) => rows.push(row));
       });
 
-      // Group rows by (code, instructor) so multiple sections of the same
-      // course taught by the same prof land on a single merged doc instead
-      // of overwriting each other. Matches the auto-fetch grouping.
-      type RowGroup = {
-        code: string;
-        instructor: string;
-        instructorEmails: string[];
-        classNumbers: string[];
-        meetingTimes: Array<{ day: string; time: string; location: string }>;
-        enrollmentCap: number;
-        enrolled: number;
-        anyEnrollmentCap: boolean;
-        anyEnrolled: boolean;
-        credits: unknown;
-        title: unknown;
-      };
-      const groups = new Map<string, RowGroup>();
-      let skippedMissingId = 0;
-      for (const row of data) {
-        const mappedRow: Record<string, any> = {
-          Course: row['__EMPTY_1'],
-          'Course Title': row['__EMPTY_23'],
-          Instructor: row['__EMPTY_24'],
-          'Instructor Emails': row['__EMPTY_25'],
-          'Class Nbr': row['__EMPTY_6'],
-          'Min - Max Cred': row['__EMPTY_11'],
-          'Day/s': row['__EMPTY_12'],
-          Time: row['__EMPTY_13'],
-          Facility: row['__EMPTY_15'],
-          'Enr Cap': row['__EMPTY_26'],
-          Enrolled: row['__EMPTY_28'],
-        };
-
-        const code = normalizeCode(mappedRow['Course']);
-        const classNumber = normalizeClassNumber(mappedRow['Class Nbr']);
-        if (!code || !classNumber) {
-          skippedMissingId++;
-          continue;
-        }
-        const instructor = instructorKey(mappedRow['Instructor']);
-        const docId = semesterCourseDocId(code, instructor);
-
-        const rawEmails = mappedRow['Instructor Emails'] ?? 'undef';
-        const emailArray: string[] =
-          rawEmails === 'undef'
-            ? []
-            : rawEmails.split(';').map((e: string) => e.trim());
-
-        const cap = Number(mappedRow['Enr Cap']);
-        const enr = Number(mappedRow['Enrolled']);
-
-        const group = groups.get(docId);
-        if (group) {
-          if (!group.classNumbers.includes(classNumber)) {
-            group.classNumbers.push(classNumber);
-          }
-          for (const e of emailArray) {
-            if (e && !group.instructorEmails.includes(e)) {
-              group.instructorEmails.push(e);
-            }
-          }
-          group.meetingTimes.push({
-            day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
-            time: mappedRow['Time'] ?? 'undef',
-            location: mappedRow['Facility'] ?? 'undef',
-          });
-          if (Number.isFinite(cap)) {
-            group.enrollmentCap += cap;
-            group.anyEnrollmentCap = true;
-          }
-          if (Number.isFinite(enr)) {
-            group.enrolled += enr;
-            group.anyEnrolled = true;
-          }
-        } else {
-          groups.set(docId, {
-            code,
-            instructor,
-            instructorEmails: emailArray.filter(Boolean),
-            classNumbers: [classNumber],
-            meetingTimes: [
-              {
-                day: mappedRow['Day/s']?.replaceAll(' ', '') ?? 'undef',
-                time: mappedRow['Time'] ?? 'undef',
-                location: mappedRow['Facility'] ?? 'undef',
-              },
-            ],
-            enrollmentCap: Number.isFinite(cap) ? cap : 0,
-            enrolled: Number.isFinite(enr) ? enr : 0,
-            anyEnrollmentCap: Number.isFinite(cap),
-            anyEnrolled: Number.isFinite(enr),
-            credits: mappedRow['Min - Max Cred'],
-            title: mappedRow['Course Title'],
-          });
-        }
-      }
-
-      // Materialize entries first — direct Map iteration needs ES2015+ and
-      // the Next config still targets ES5. Array.from is the safe bridge.
-      const groupEntries = Array.from(groups.entries());
-      for (const [docId, g] of groupEntries) {
-        await firebase
-          .firestore()
-          .collection('semesters')
-          .doc(semester)
-          .collection('courses')
-          .doc(docId)
-          .set(
-            {
-              class_number: g.classNumbers.join(', '),
-              class_numbers: g.classNumbers,
-              professor_emails: g.instructorEmails,
-              professor_usernames: emailsToUsernames(g.instructorEmails),
-              professor_names: g.instructor,
-              code: g.code,
-              codeWithSpace: addCodeSpace(g.code),
-              credits: g.credits ?? 'undef',
-              department: uploadDeptCode,
-              enrollment_cap: g.anyEnrollmentCap
-                ? String(g.enrollmentCap)
-                : 'undef',
-              enrolled: g.anyEnrolled ? String(g.enrolled) : 'undef',
-              title: g.title ?? 'undef',
-              section_count: g.classNumbers.length,
-              semester,
-              meeting_times: g.meetingTimes,
-              source: 'excel-upload',
-            },
-            { merge: true }
-          );
-      }
-
-      if (skippedMissingId > 0) {
-        toast(
-          `${skippedMissingId} row${
-            skippedMissingId === 1 ? '' : 's'
-          } skipped: missing course code or class number.`,
-          { icon: '⚠️', duration: 4000 }
+      const parsed = parseScheduleOfClasses(rows);
+      if (parsed.headerRowIndex === -1 || parsed.missingColumns.length > 0) {
+        setProcessing(false);
+        toast.dismiss(toastId);
+        toast.error(
+          `Could not read this file: no header row with ${parsed.missingColumns.join(
+            ' and '
+          )}. Export the Department View Schedule of Classes as .xlsx and retry.`,
+          { duration: 8000 }
         );
+        return;
+      }
+      if (parsed.groups.length === 0) {
+        setProcessing(false);
+        toast.dismiss(toastId);
+        toast.error('No course rows found in this file.', { duration: 5000 });
+        return;
+      }
+
+      const db = firebase.firestore();
+      const coursesRef = db
+        .collection('semesters')
+        .doc(semester)
+        .collection('courses');
+
+      // Chunked batches instead of one round trip per doc — a full
+      // department export is a few hundred courses.
+      for (let i = 0; i < parsed.groups.length; i += BATCH_LIMIT) {
+        const batch = db.batch();
+        parsed.groups
+          .slice(i, i + BATCH_LIMIT)
+          .forEach((g: ScheduleCourseGroup) => {
+            batch.set(
+              coursesRef.doc(g.docId),
+              {
+                // Back-compat single string; new code reads `class_numbers`.
+                class_number: g.classNumbers.join(', '),
+                class_numbers: g.classNumbers,
+                professor_emails: g.instructorEmails,
+                professor_usernames: emailsToUsernames(g.instructorEmails),
+                professor_names: g.instructor,
+                code: g.code,
+                codeWithSpace: g.codeWithSpace,
+                credits: g.credits || 'undef',
+                department: uploadDeptCode,
+                enrollment_cap: g.enrollmentCap || 'undef',
+                enrolled: g.enrolled || 'undef',
+                title: g.title || 'undef',
+                title_section: g.sectionNumbers.join(', '),
+                section_count: g.classNumbers.length,
+                semester,
+                meeting_times: g.meetingTimes,
+                source: 'excel-upload',
+                updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            );
+          });
+        await batch.commit();
       }
 
       setProcessing(false);
       toast.dismiss(toastId);
-      toast.success('Data upload complete!', { duration: 2000 });
+      toast.success(
+        `Uploaded ${parsed.groups.length} course${
+          parsed.groups.length === 1 ? '' : 's'
+        } from ${parsed.dataRowCount} row${
+          parsed.dataRowCount === 1 ? '' : 's'
+        }.`,
+        { duration: 4000 }
+      );
+      if (parsed.skippedCancelled > 0) {
+        toast(
+          `${parsed.skippedCancelled} cancelled section${
+            parsed.skippedCancelled === 1 ? '' : 's'
+          } skipped.`,
+          { icon: 'ℹ️', duration: 4000 }
+        );
+      }
+      if (parsed.skippedMissingId > 0) {
+        toast(
+          `${parsed.skippedMissingId} row${
+            parsed.skippedMissingId === 1 ? '' : 's'
+          } skipped: missing course code or class number.`,
+          { icon: '⚠️', duration: 4000 }
+        );
+      }
     } catch (err) {
       console.error(err);
       setProcessing(false);
@@ -382,7 +286,7 @@ export default function UploadPanel({
     <Stack spacing={2}>
       <UploadCard
         title="Upload semester course data"
-        description="Import an .xlsx/.xls roster to this semester. Rows are keyed by code + instructor — multiple sections taught by the same prof are merged into one course row."
+        description="Import a Department View Schedule of Classes export (.xlsx/.xls/.csv) to this semester. Columns are matched by header name, so column order can change between exports. Rows are keyed by code + instructor — multiple sections taught by the same prof are merged into one course row."
         action={
           <Button
             component="label"

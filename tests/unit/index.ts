@@ -8,3 +8,4 @@ import './onbaseExport.test';
 import './courseSupervisor.test';
 import './semesterFilter.test';
 import './fetchRunStatus.test';
+import './scheduleOfClasses.test';
