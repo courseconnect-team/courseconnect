@@ -464,6 +464,13 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
 
       const assignment = {
         date: `${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}`,
+        // Full approval instant, ISO-8601 UTC. `date` above is the same moment
+        // truncated to a day and is what the rest of the app has always read;
+        // this keeps the time of day, which `date` throws away. Stored as a
+        // string rather than a Firestore Timestamp so the value survives the
+        // plain-object round trip in AssignView's setDoc and can never leak a
+        // Timestamp instance into an export writer.
+        approved_at: now.toISOString(),
         student_uid: studentUid,
         class_codes: courseId,
         email: doc.data()?.email,

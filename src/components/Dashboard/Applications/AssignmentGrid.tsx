@@ -63,6 +63,8 @@ interface Assignment {
   approver_role?: string;
   approver_uid?: string;
   date?: string;
+  /** ISO-8601 instant the application was approved. Absent on legacy rows. */
+  approved_at?: string;
   firstName?: string;
   lastName?: string;
   year?: string;
@@ -531,6 +533,40 @@ export default function AssignmentGrid({ userRole }: AssignmentGridProps) {
           );
         },
         size: 130,
+      },
+      {
+        id: 'approved_at',
+        header: 'Approved At',
+        accessorKey: 'approved_at',
+        // Sorting works off the raw ISO string the accessor returns, which
+        // orders correctly lexicographically, so the display format below is
+        // free to be human-readable without breaking the sort.
+        cell: ({ getValue }) => {
+          const raw = getValue() as string | undefined;
+          if (!raw) return <span style={{ color: '#9CA3AF' }}>—</span>;
+          const d = new Date(raw);
+          if (Number.isNaN(d.getTime())) {
+            return <span style={{ color: '#9CA3AF' }}>—</span>;
+          }
+          return (
+            <Tooltip
+              title={d.toLocaleString(undefined, { timeZoneName: 'short' })}
+            >
+              <Box
+                sx={{ fontSize: 13, color: '#374151', whiteSpace: 'nowrap' }}
+              >
+                {d.toLocaleString(undefined, {
+                  month: 'numeric',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </Box>
+            </Tooltip>
+          );
+        },
+        size: 180,
       },
       {
         id: 'degree',

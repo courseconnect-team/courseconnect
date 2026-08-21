@@ -52,6 +52,10 @@ const AppView = React.forwardRef<AppViewHandle, AppViewProps>(function AppView({
       start_date: startDate,
       end_date: endDate,
       date: docData.date,
+      // setDoc without merge replaces the whole document, so any field the
+      // edit form does not render has to be written back explicitly or it is
+      // dropped. approved_at is set once at approval and is never editable.
+      ...(docData.approved_at ? { approved_at: docData.approved_at } : {}),
       class_codes: docData.class_codes,
       degree: docData.degree,
       department: docData.department,

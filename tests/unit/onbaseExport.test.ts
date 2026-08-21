@@ -272,3 +272,22 @@ test('every data row has the same field count as the header', () => {
     assert.equal(line.split(',').length, 33);
   }
 });
+
+test('approved_at never reaches the OnBase file', () => {
+  // The approval timestamp is an internal audit field shown in the admin grid.
+  // OnBase rejects the import on any unexpected header, and the writer works
+  // off ONBASE_COLUMNS, so an extra key on the assignment must be dropped —
+  // this pins that behaviour rather than leaving it to construction.
+  const withApproval = {
+    ...sample,
+    approved_at: '2026-08-21T15:04:05.000Z',
+  } as OnBaseAssignment;
+
+  const row = buildOnBaseRow(withApproval) as Record<string, unknown>;
+  assert.deepEqual(Object.keys(row).sort(), [...EXPECTED_HEADER].sort());
+  assert.ok(!('approved_at' in row));
+
+  const csv = toOnBaseCsv(buildOnBaseRows([withApproval]));
+  assert.ok(!csv.includes('approved_at'));
+  assert.ok(!csv.includes('2026-08-21T15:04:05.000Z'));
+});
