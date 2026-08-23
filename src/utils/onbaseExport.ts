@@ -7,6 +7,11 @@
  * Do not reorder to match the on-screen table; the table is free to change.
  *
  * Confirmed against the field list from Jen Rickerson (OnBase admin), 7/29/26.
+ *
+ * 'Timestamp' is appended past the confirmed 33: it is the assignment's
+ * submission date, requested for the exported sheets. It is not part of the
+ * OnBase field list, so it stays last — an importer that reads the columns
+ * positionally still sees the 33 it expects in the order it expects them.
  */
 export const ONBASE_COLUMNS = [
   'Student UFID',
@@ -42,6 +47,7 @@ export const ONBASE_COLUMNS = [
   'Imported',
   'Remote',
   'ECE - Special Instructions',
+  'Timestamp',
 ] as const;
 
 export type OnBaseColumn = (typeof ONBASE_COLUMNS)[number];
@@ -97,6 +103,8 @@ export interface OnBaseAssignment {
   class_codes?: string;
   remote?: string;
   ece_special_instructions?: string;
+  /** Submission date, stored as MM-DD-YYYY — the grid's "Timestamp" column. */
+  date?: string;
 }
 
 export type SemesterParseReason =
@@ -230,6 +238,7 @@ export function buildOnBaseRow(a: OnBaseAssignment): OnBaseRow {
     Imported: 'YES',
     Remote: a.remote ?? 'No',
     'ECE - Special Instructions': a.ece_special_instructions ?? '',
+    Timestamp: a.date ?? '',
   };
 }
 

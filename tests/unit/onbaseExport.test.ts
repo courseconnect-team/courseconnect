@@ -51,6 +51,7 @@ const EXPECTED_HEADER = [
   'Imported',
   'Remote',
   'ECE - Special Instructions',
+  'Timestamp',
 ];
 
 const sample: OnBaseAssignment = {
@@ -80,9 +81,11 @@ const sample: OnBaseAssignment = {
   ece_special_instructions: 'Split appointment',
 };
 
-test('header row matches the 33 OnBase fields in order', () => {
+test('header row matches the 33 OnBase fields in order, Timestamp appended', () => {
   assert.deepEqual([...ONBASE_COLUMNS], EXPECTED_HEADER);
-  assert.equal(ONBASE_COLUMNS.length, 33);
+  assert.equal(ONBASE_COLUMNS.length, 34);
+  // The confirmed OnBase fields keep their exact order and position.
+  assert.deepEqual(ONBASE_COLUMNS.slice(0, 33), EXPECTED_HEADER.slice(0, 33));
 });
 
 test('CSV header row matches the OnBase field list', () => {
@@ -104,8 +107,14 @@ test('renamed fields carry the old values', () => {
   assert.equal(row['Starting Date'], '08-16-2026');
 });
 
-test('ECE - Special Instructions is last, not 19th', () => {
-  assert.equal(ONBASE_COLUMNS[ONBASE_COLUMNS.length - 1], 'ECE - Special Instructions');
+test('ECE - Special Instructions ends the OnBase fields, not 19th', () => {
+  assert.equal(ONBASE_COLUMNS[32], 'ECE - Special Instructions');
+});
+
+test('Timestamp carries the assignment date and stays last', () => {
+  assert.equal(ONBASE_COLUMNS[ONBASE_COLUMNS.length - 1], 'Timestamp');
+  assert.equal(buildOnBaseRow({ ...sample, date: '07-14-2026' }).Timestamp, '07-14-2026');
+  assert.equal(buildOnBaseRow({}).Timestamp, '');
 });
 
 // ─── semester split ─────────────────────────────────────────────────────────
@@ -269,6 +278,6 @@ test('every data row has the same field count as the header', () => {
   assert.equal(lines.length, 3);
   for (const line of lines) {
     // naive count is safe here: the fixture's quoted fields contain no commas
-    assert.equal(line.split(',').length, 33);
+    assert.equal(line.split(',').length, ONBASE_COLUMNS.length);
   }
 });

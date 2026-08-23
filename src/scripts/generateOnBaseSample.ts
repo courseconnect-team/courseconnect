@@ -58,6 +58,7 @@ const FIXTURES: OnBaseAssignment[] = [
     class_codes: 'EEL3135 : Wong,Tan Foon',
     remote: 'No',
     ece_special_instructions: 'Split appointment, 50/50',
+    date: '07-14-2026',
   },
   {
     ufid: '23456789',
@@ -80,6 +81,7 @@ const FIXTURES: OnBaseAssignment[] = [
     title: 'Grader',
     class_codes: 'EEL4837 : Bobda,Christophe',
     remote: 'Yes',
+    date: '03-02-2026',
   },
   {
     ufid: '34567890',
