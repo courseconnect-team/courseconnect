@@ -19,6 +19,7 @@ import {
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 import firebase from '@/firebase/firebase_config';
+import { StatusPill } from '@/components/common/AdminDataTable';
 import 'firebase/firestore';
 import {
   buildApprovalEntries,
@@ -26,6 +27,16 @@ import {
   type ApprovalEntry,
   type AssignmentRef,
 } from '@/utils/approvalAssignments';
+import { facultyApprovalPill } from './courseStatus';
+
+/** Why a row carries the approval pill it does. */
+function verdictHelp(facultyApproved: boolean | null): string {
+  if (facultyApproved === true)
+    return 'A professor approved this student for this course.';
+  if (facultyApproved === false)
+    return 'An admin assigned this course without a faculty approval on file.';
+  return 'This course was assigned before the faculty verdict was recorded, so it cannot be shown.';
+}
 
 export interface ApplyAssignmentChange {
   studentUid: string;
@@ -118,6 +129,7 @@ export default function ApprovedInstructorsDialog({
           id: d.id,
           class_codes: d.data()?.class_codes,
           semesters: d.data()?.semesters,
+          prior_course_status: d.data()?.prior_course_status,
         }));
         const built = buildApprovalEntries(
           appSnap.data()?.courses,
@@ -239,6 +251,7 @@ export default function ApprovedInstructorsDialog({
           <Stack sx={{ mt: 2.5 }} spacing={0.5}>
             {entries.map((entry) => {
               const isSelected = selectedKeys.has(entry.key);
+              const pill = facultyApprovalPill(entry.facultyApproved);
               return (
                 // The row is the click target; the checkbox inside carries the
                 // accessible name and keeps keyboard toggling working, since a
@@ -277,29 +290,33 @@ export default function ApprovedInstructorsDialog({
                   <Box sx={{ minWidth: 0 }}>
                     <Box
                       sx={{
-                        fontWeight: 600,
-                        fontSize: 15,
-                        color: '#111827',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        flexWrap: 'wrap',
                       }}
                     >
-                      {entry.instructor || 'Instructor unknown'}
+                      <Box
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: 15,
+                          color: '#111827',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {entry.instructor || 'Instructor unknown'}
+                      </Box>
+                      <Tooltip title={verdictHelp(entry.facultyApproved)}>
+                        <Box component="span" sx={{ display: 'inline-flex' }}>
+                          <StatusPill label={pill.label} tone={pill.tone} />
+                        </Box>
+                      </Tooltip>
                     </Box>
                     <Box sx={{ fontSize: 13, color: '#6B7280' }}>
                       {formatCourseCode(entry.code)}
                       {entry.semester ? ` · ${entry.semester}` : ''}
-                      {!entry.approved && (
-                        <Tooltip title="Assigned by an admin without a faculty approval on file.">
-                          <Box
-                            component="span"
-                            sx={{ ml: 1, color: '#B45309', fontWeight: 500 }}
-                          >
-                            no faculty approval
-                          </Box>
-                        </Tooltip>
-                      )}
                     </Box>
                   </Box>
                 </Box>

@@ -81,6 +81,13 @@ export interface AssignmentRef {
   id: string;
   class_codes?: unknown;
   semesters?: unknown;
+  /**
+   * The per-course status this assignment overwrote, recorded when it was
+   * created. Assignment flips the course to 'accepted', which erases whether a
+   * professor had actually approved it — this is how that verdict survives.
+   * Absent on assignments written before it was recorded.
+   */
+  prior_course_status?: unknown;
 }
 
 export interface ApprovalEntry {
@@ -95,17 +102,42 @@ export interface ApprovalEntry {
   instructor: string;
   /** Per-course status from the application ('' for an assignment-only row). */
   status: string;
-  /** True when a professor approved (or admin already accepted) this course. */
-  approved: boolean;
+  /**
+   * Did a professor approve this course? `null` when it can't be known — an
+   * assignment written before `prior_course_status` existed overwrote the
+   * verdict. Not the same as `status`: an admin can assign over a course no
+   * professor approved, and that lands as 'accepted' either way.
+   */
+  facultyApproved: boolean | null;
   /** Assignments doc id when the student currently holds this course. */
   assignmentId: string | null;
+}
+
+/**
+ * The faculty verdict behind a course entry.
+ *
+ * 'accepted' is an admin action, not a faculty one, so it says nothing on its
+ * own — the assignment's remembered `prior_course_status` is what carries the
+ * professor's answer across the assignment.
+ */
+function facultyVerdict(
+  status: string,
+  priorStatus: string | undefined
+): boolean | null {
+  const s = status.trim().toLowerCase();
+  if (s === 'approved') return true;
+  if (s === 'accepted') {
+    if (!priorStatus) return null;
+    return priorStatus === 'approved';
+  }
+  return false;
 }
 
 function makeEntry(
   semester: string,
   courseId: string,
   status: string,
-  approved: boolean,
+  facultyApproved: boolean | null,
   assignmentId: string | null,
   key: string
 ): ApprovalEntry {
@@ -117,7 +149,7 @@ function makeEntry(
     code,
     instructor,
     status,
-    approved,
+    facultyApproved,
     assignmentId,
   };
 }
@@ -139,6 +171,13 @@ export function buildApprovalEntries(
   assignments: AssignmentRef[]
 ): ApprovalEntry[] {
   const flat = flattenCourseStatuses(courses);
+  const priorById = new Map<string, string>();
+  for (const a of assignments) {
+    const prior = String(a.prior_course_status ?? '')
+      .trim()
+      .toLowerCase();
+    if (prior) priorById.set(a.id, prior);
+  }
   const assignmentByEntry = new Map<string, string>();
   const claimed = new Set<string>();
 
@@ -182,11 +221,23 @@ export function buildApprovalEntries(
   for (const e of flat) {
     const key = approvalKey(e.semester, e.courseId);
     const assignmentId = assignmentByEntry.get(key) ?? null;
-    const approved = APPROVED_STATUSES.has(e.status.trim().toLowerCase());
-    if (!approved && !assignmentId) continue;
+    // Show it if a professor signed off, or if the student holds it — an
+    // assignment must never be invisible, however it came about.
+    if (!APPROVED_STATUSES.has(e.status.trim().toLowerCase()) && !assignmentId)
+      continue;
     usedKeys.add(key);
     entries.push(
-      makeEntry(e.semester, e.courseId, e.status, approved, assignmentId, key)
+      makeEntry(
+        e.semester,
+        e.courseId,
+        e.status,
+        facultyVerdict(
+          e.status,
+          assignmentId ? priorById.get(assignmentId) : undefined
+        ),
+        assignmentId,
+        key
+      )
     );
   }
 
@@ -200,7 +251,19 @@ export function buildApprovalEntries(
     let key = approvalKey(semester, courseId);
     if (usedKeys.has(key)) key = `${key}#${assignment.id}`;
     usedKeys.add(key);
-    entries.push(makeEntry(semester, courseId, '', false, assignment.id, key));
+    // No course entry to read a verdict off: fall back to what the assignment
+    // remembered, and admit to knowing nothing when it remembered nothing.
+    const prior = priorById.get(assignment.id);
+    entries.push(
+      makeEntry(
+        semester,
+        courseId,
+        '',
+        prior ? prior === 'approved' : null,
+        assignment.id,
+        key
+      )
+    );
   }
 
   entries.sort((a, b) => {
@@ -237,20 +300,6 @@ export function formatCourseCode(code: string): string {
     .toUpperCase()
     .match(/^([A-Z]{2,4})(\d{3,4}[A-Z]?)$/);
   return m ? `${m[1]} ${m[2]}` : String(code ?? '').trim();
-}
-
-/** Instructor names, in display order, with duplicates collapsed. */
-export function approvingInstructors(entries: ApprovalEntry[]): string[] {
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const e of entries) {
-    if (!e.approved) continue;
-    const name = e.instructor.trim();
-    if (!name || seen.has(name)) continue;
-    seen.add(name);
-    out.push(name);
-  }
-  return out;
 }
 
 /**

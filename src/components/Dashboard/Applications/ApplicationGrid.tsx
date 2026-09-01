@@ -38,6 +38,7 @@ import {
 } from '@/utils/approvalAssignments';
 
 import AppView from './AppView';
+import { courseStatusPill } from './courseStatus';
 import ApprovedInstructorsDialog, {
   type ApplyAssignmentChange,
 } from './ApprovedInstructorsDialog';
@@ -84,6 +85,13 @@ interface Application {
 
 interface ApplicationGridProps {
   userRole: string;
+}
+
+/** One option in the assign dialog: the course label and its faculty status. */
+interface AssignCourseOption {
+  /** `${courseId} (${semester})` — parsed back apart on submit. */
+  label: string;
+  status: string;
 }
 
 // ─── firestore helpers ──────────────────────────────────────────────────────
@@ -421,7 +429,9 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [denyId, setDenyId] = React.useState<string | null>(null);
   const [assignOpen, setAssignOpen] = React.useState(false);
-  const [assignCourses, setAssignCourses] = React.useState<string[]>([]);
+  const [assignCourses, setAssignCourses] = React.useState<
+    AssignCourseOption[]
+  >([]);
   const [assignCourse, setAssignCourse] = React.useState('');
   const [assignHours, setAssignHours] = React.useState<string>('0');
   const [approvalsRow, setApprovalsRow] = React.useState<Application | null>(
@@ -536,8 +546,12 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
     // yet. Labels include the semester so admins can disambiguate the
     // same (course, instructor) appearing across multiple terms — the
     // submit handler parses the semester back out of the label.
-    const courses = flat.map(formatCourseLabel);
-    setAssignCourses(courses);
+    // Carry each course's status through so the list can say which ones a
+    // professor actually approved — the bypass above means most of these
+    // haven't been.
+    setAssignCourses(
+      flat.map((e) => ({ label: formatCourseLabel(e), status: e.status }))
+    );
     setAssignCourse('');
     setAssignHours('0');
     setSelectedId(id);
@@ -1112,7 +1126,9 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
             {assignCourses.length > 0 ? (
               <>
                 <DialogContentText sx={{ mb: 2, fontSize: 14 }}>
-                  Select the course and hours for this assignment.
+                  Select the course and hours for this assignment. Courses no
+                  professor has approved can still be assigned — admin approval
+                  supersedes faculty.
                 </DialogContentText>
                 <FormControl required sx={{ width: '100%' }}>
                   <RadioGroup
@@ -1120,17 +1136,32 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
                     value={assignCourse}
                     onChange={(e) => setAssignCourse(e.target.value)}
                   >
-                    {assignCourses.map((code) => (
-                      <FormControlLabel
-                        key={code}
-                        value={code}
-                        control={<Radio size="small" />}
-                        label={prettyLabel(code)}
-                        sx={{
-                          '& .MuiFormControlLabel-label': { fontSize: 14 },
-                        }}
-                      />
-                    ))}
+                    {assignCourses.map((option) => {
+                      const pill = courseStatusPill(option.status);
+                      return (
+                        <FormControlLabel
+                          key={option.label}
+                          value={option.label}
+                          control={<Radio size="small" />}
+                          label={
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                flexWrap: 'wrap',
+                              }}
+                            >
+                              <span>{prettyLabel(option.label)}</span>
+                              <StatusPill label={pill.label} tone={pill.tone} />
+                            </Box>
+                          }
+                          sx={{
+                            '& .MuiFormControlLabel-label': { fontSize: 14 },
+                          }}
+                        />
+                      );
+                    })}
                   </RadioGroup>
                   <TextField
                     label="Hours per week"

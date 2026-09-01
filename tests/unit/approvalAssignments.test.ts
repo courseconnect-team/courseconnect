@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
-  approvingInstructors,
   assignedEntry,
   buildApprovalEntries,
   flattenCourseStatuses,
@@ -51,7 +50,7 @@ test('lists every approval and leaves un-approved courses out', () => {
   const entries = buildApprovalEntries(courses, []);
   assert.equal(entries.length, 3);
   assert.ok(!entries.some((e) => e.code === 'EEL4744'));
-  assert.deepEqual(approvingInstructors(entries), ['Doe, John', 'Doe, Jane']);
+  assert.ok(entries.every((e) => e.facultyApproved === true));
 });
 
 test('marks only the assigned semester of a course repeated across terms', () => {
@@ -111,7 +110,7 @@ test('an admin-assigned course no professor approved is still shown', () => {
   ]);
   const smith = entries.find((e) => e.code === 'EEL4744');
   assert.ok(smith, 'assigned-but-unapproved course must stay visible');
-  assert.equal(smith?.approved, false);
+  assert.equal(smith?.facultyApproved, false);
   assert.equal(smith?.assignmentId, 'uid-1');
 });
 
@@ -125,7 +124,7 @@ test('an assignment matching no course entry becomes its own row', () => {
   ]);
   const ghost = entries.find((e) => e.instructor === 'Ghost, Casper');
   assert.equal(ghost?.assignmentId, 'uid-1');
-  assert.equal(ghost?.approved, false);
+  assert.equal(ghost?.facultyApproved, null);
   assert.equal(entries[0], ghost);
 });
 
@@ -214,4 +213,57 @@ test('keeps a dotted instructor name in its own path segment', () => {
     resolveCourseFieldPath(dotted, 'EEL3111C : Smith, John A.', 'Fall 2026'),
     ['courses', 'Fall 2026', 'EEL3111C : Smith, John A.']
   );
+});
+
+test('an assignment remembers the faculty verdict it overwrote', () => {
+  const assigned = { 'Fall 2026': { 'EEL3135 : Doe, Jane': 'accepted' } };
+
+  const approved = buildApprovalEntries(assigned, [
+    {
+      id: 'uid-1',
+      class_codes: 'EEL3135 : Doe, Jane',
+      semesters: ['Fall 2026'],
+      prior_course_status: 'approved',
+    },
+  ]);
+  assert.equal(approved[0].facultyApproved, true);
+
+  const bypassed = buildApprovalEntries(assigned, [
+    {
+      id: 'uid-1',
+      class_codes: 'EEL3135 : Doe, Jane',
+      semesters: ['Fall 2026'],
+      prior_course_status: 'applied',
+    },
+  ]);
+  assert.equal(
+    bypassed[0].facultyApproved,
+    false,
+    'admin assigned over a course no professor approved'
+  );
+});
+
+test('an assignment predating the recorded verdict admits it cannot say', () => {
+  const entries = buildApprovalEntries(
+    { 'Fall 2026': { 'EEL3135 : Doe, Jane': 'accepted' } },
+    [
+      {
+        id: 'uid-1',
+        class_codes: 'EEL3135 : Doe, Jane',
+        semesters: ['Fall 2026'],
+      },
+    ]
+  );
+  assert.equal(entries[0].facultyApproved, null);
+});
+
+test('a still-accepted course with no assignment doc stays visible', () => {
+  // The Assignments tab deletes assignment docs without touching the
+  // application, so this drift is reachable — and must not hide the course.
+  const entries = buildApprovalEntries(
+    { 'Fall 2026': { 'EEL3135 : Doe, Jane': 'accepted' } },
+    []
+  );
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].assignmentId, null);
 });
