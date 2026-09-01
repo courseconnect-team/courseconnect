@@ -9,3 +9,4 @@ import './courseSupervisor.test';
 import './semesterFilter.test';
 import './fetchRunStatus.test';
 import './scheduleOfClasses.test';
+import './approvalAssignments.test';

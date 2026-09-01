@@ -14,6 +14,7 @@ import {
   Radio,
   RadioGroup,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
@@ -26,10 +27,20 @@ import 'firebase/firestore';
 import { collection, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '@/firebase/auth/auth_context';
 import { emailToUsername } from '@/utils/email';
+import { normalizeCourseKey } from '@/utils/courseSupervisor';
 import { semesterRank, normalizeSemesters } from '@/utils/semester';
 import { prettyCourseId } from '@/hooks/useSemesterOptions';
+import {
+  flattenCourseStatuses,
+  normalizeSemesterName,
+  resolveCourseFieldPath,
+  type FlatCourseEntry,
+} from '@/utils/approvalAssignments';
 
 import AppView from './AppView';
+import ApprovedInstructorsDialog, {
+  type ApplyAssignmentChange,
+} from './ApprovedInstructorsDialog';
 import {
   AdminDataTable,
   ConfirmDialog,
@@ -45,6 +56,12 @@ interface Application {
   available_hours?: string;
   available_semesters?: string | string[];
   courses?: string[];
+  /**
+   * Courses the admin already assigned. Stored 'accepted' rather than
+   * 'approved', so they'd otherwise drop out of the Approved column the moment
+   * a student was assigned — leaving nothing to click.
+   */
+  acceptedCourses?: string[];
   allcourses?: string[];
   assignedCourses?: string;
   assignedSemesters?: string;
@@ -79,45 +96,6 @@ const applicationsSubcollection = () =>
 
 const applicationDoc = (id: string) => applicationsSubcollection().doc(id);
 
-// Walk the canonical nested shape `{ [semester]: { [courseId]: status } }`
-// (and the legacy `${semester}|||${courseId}` flat shape) into a list of
-// per-(semester, course) entries. Returning a list — not a map keyed by
-// courseId — avoids losing the semester scope: the same `(code,
-// instructor)` doc id often appears across multiple semesters now that
-// course doc ids are `${code} : ${instructor}` instead of including the
-// class number, and a map collapse would lose every status but the last.
-interface FlatCourseEntry {
-  semester: string;
-  courseId: string;
-  status: string;
-}
-function flattenCourses(courses: any): FlatCourseEntry[] {
-  if (!courses || typeof courses !== 'object') return [];
-  const out: FlatCourseEntry[] = [];
-  for (const [key, val] of Object.entries(courses)) {
-    if (val && typeof val === 'object') {
-      for (const [courseId, status] of Object.entries(
-        val as Record<string, unknown>
-      )) {
-        if (typeof status === 'string')
-          out.push({ semester: key, courseId, status });
-      }
-    } else if (typeof val === 'string') {
-      const sepIdx = key.indexOf('|||');
-      if (sepIdx !== -1) {
-        out.push({
-          semester: key.slice(0, sepIdx),
-          courseId: key.slice(sepIdx + 3),
-          status: val,
-        });
-      } else {
-        out.push({ semester: '', courseId: key, status: val });
-      }
-    }
-  }
-  return out;
-}
-
 // Render a course entry with its semester so users can disambiguate the
 // same (course, instructor) appearing across terms.
 function formatCourseLabel(e: FlatCourseEntry): string {
@@ -148,6 +126,286 @@ function prettyStatus(status?: string): string {
   return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// Notify a student that admin approved them onto a course.
+async function sendApproveEmail(assignment: any) {
+  try {
+    const snap = await applicationDoc(assignment.student_uid).get();
+    if (!snap.exists) return;
+    const d = snap.data() as Application;
+    await fetch(
+      'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'applicationStatusApproved',
+          data: {
+            user: {
+              name: `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim(),
+              email: d.email,
+            },
+            position: assignment.position,
+            classCode: assignment.class_codes,
+          },
+        }),
+      }
+    );
+  } catch (error) {
+    console.error('Error sending approve email:', error);
+  }
+}
+
+// Point a course's per-course status at its real storage slot. Both halves of a
+// course id are free text, so a dotted instructor name ("Smith, John A.") would
+// break a dotted field-path string — hence FieldPath segments.
+function courseStatusUpdate(
+  courses: unknown,
+  courseId: string,
+  semester: string | null | undefined
+) {
+  const segments = resolveCourseFieldPath(
+    courses,
+    courseId,
+    semester ?? undefined
+  );
+  return new firebase.firestore.FieldPath(...segments);
+}
+
+// Assign a student to one course: writes the assignments doc, flips the
+// application's per-course status, and sends the student and faculty notices.
+//
+// Shared by the row-level Approve action and the approved-instructors dialog so
+// an assignment made either way carries identical fields — the OnBase export
+// reads them straight off this doc.
+async function createAssignment(params: {
+  studentUid: string;
+  courseId: string;
+  semester: string | null;
+  hours: string | number;
+}): Promise<void> {
+  const { studentUid, courseId, hours } = params;
+  const doc = await applicationDoc(studentUid).get();
+
+  const courseRef = firebase.firestore().collection('courses').doc(courseId);
+  const courseDoc = await getDoc(courseRef);
+
+  const existingCourses = doc.data()?.courses || {};
+  let semesterBucket: string | null = params.semester;
+  if (!semesterBucket) {
+    for (const [semKey, val] of Object.entries(existingCourses)) {
+      if (
+        val &&
+        typeof val === 'object' &&
+        courseId in (val as Record<string, unknown>)
+      ) {
+        semesterBucket = semKey;
+        break;
+      }
+    }
+  }
+
+  const priorCourseStatus =
+    flattenCourseStatuses(existingCourses).find(
+      (e) =>
+        normalizeCourseKey(e.courseId) === normalizeCourseKey(courseId) &&
+        (!semesterBucket ||
+          normalizeSemesterName(e.semester) ===
+            normalizeSemesterName(semesterBucket))
+    )?.status ?? 'approved';
+
+  // Mark the assigned course 'accepted' (admin-assigned), not 'approved'
+  // (faculty-approved). The student status page reads per-course state to
+  // label "Accepted" — using 'approved' here would flip every other
+  // faculty-approved course to "Accepted" too.
+  await applicationDoc(studentUid).update(
+    'status',
+    'Admin_approved',
+    courseStatusUpdate(existingCourses, courseId, semesterBucket),
+    'accepted'
+  );
+
+  const now = new Date();
+  // Record the specific semester the admin picked in the assign dialog —
+  // not the application's submission-time `available_semesters`, which
+  // spans the next 3 terms and would mis-label a Summer hire as Spring
+  // when the student applied in the prior term.
+  const assignmentSemesters = semesterBucket
+    ? [semesterBucket]
+    : doc.data()?.available_semesters;
+
+  // Returning-hire detection: if this person already holds an assignment
+  // from an earlier semester, this is a re-appointment, not a new hire.
+  // Match on student_uid (how docs are keyed here) and ufid (covers rows
+  // imported from HR that carry a ufid but no student_uid). Only semesters
+  // strictly earlier than the one being assigned count — a second course in
+  // the same term is still a new hire.
+  const thisUfid = String(doc.data()?.ufid ?? '').trim();
+  const newRank = Math.max(
+    ...normalizeSemesters(assignmentSemesters)
+      .map((s) => semesterRank(s))
+      .filter((r): r is number => r != null),
+    -Infinity
+  );
+  let hasEarlierSemester = false;
+  try {
+    const assignmentsColRef = collection(firebase.firestore(), 'assignments');
+    const priorSnaps = await Promise.all([
+      getDocs(query(assignmentsColRef, where('student_uid', '==', studentUid))),
+      thisUfid
+        ? getDocs(query(assignmentsColRef, where('ufid', '==', thisUfid)))
+        : Promise.resolve(null),
+    ]);
+    for (const snap of priorSnaps) {
+      if (!snap) continue;
+      for (const priorDoc of snap.docs) {
+        const priorRanks = normalizeSemesters(priorDoc.data()?.semesters)
+          .map((s) => semesterRank(s))
+          .filter((r): r is number => r != null);
+        if (priorRanks.some((r) => r < newRank)) {
+          hasEarlierSemester = true;
+          break;
+        }
+      }
+      if (hasEarlierSemester) break;
+    }
+  } catch (err) {
+    // Non-fatal: fall back to NEW HIRE if the lookup fails.
+    console.error('Reappoint lookup failed; defaulting to NEW HIRE:', err);
+  }
+  const requestedAction = hasEarlierSemester ? 'REAPPOINT' : 'NEW HIRE';
+
+  const assignment = {
+    date: `${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}`,
+    student_uid: studentUid,
+    class_codes: courseId,
+    email: doc.data()?.email,
+    name: `${doc.data()?.firstname ?? ''} ${doc.data()?.lastname ?? ''}`,
+    semesters: assignmentSemesters,
+    department: doc.data()?.department,
+    hours: [Number(hours) || 0],
+    position: doc.data()?.position,
+    degree: doc.data()?.degree,
+    ufid: doc.data()?.ufid,
+    requested_action: requestedAction,
+    // Remembered so a later de-assignment can hand the course back to the
+    // state it was in — 'approved' when a professor signed off, 'applied'
+    // when the admin assigned a course no professor had approved.
+    prior_course_status: priorCourseStatus,
+  };
+
+  const assignmentsCol = firebase.firestore().collection('assignments');
+  const primaryRef = assignmentsCol.doc(studentUid);
+  const primaryDoc = await primaryRef.get();
+
+  if (primaryDoc.exists) {
+    let counter = 1;
+    let newRef = assignmentsCol.doc(`${studentUid}-${counter}`);
+    while ((await newRef.get()).exists) {
+      counter++;
+      newRef = assignmentsCol.doc(`${studentUid}-${counter}`);
+    }
+    await newRef.set(assignment);
+  } else {
+    await primaryRef.set(assignment);
+  }
+
+  // notify professors
+  const emailArray = courseDoc
+    .data()
+    ?.professor_emails?.split?.(';')
+    ?.map?.((email: string) => email.trim());
+  if (emailArray) {
+    for (const email of emailArray) {
+      try {
+        await fetch(
+          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'facultyAssignment',
+              data: {
+                userEmail: email,
+                position: doc.data()?.position,
+                classCode: courseDoc.data()?.code,
+                semester: courseDoc.data()?.semester,
+              },
+            }),
+          }
+        );
+      } catch (err) {
+        console.error('Error notifying professor:', err);
+      }
+    }
+  }
+
+  await sendApproveEmail(assignment);
+}
+
+// Undo one assignment: drop the assignments doc and hand the course back to the
+// faculty-approved state it held before the admin accepted it.
+//
+// The application's top-level status only reverts once the student holds
+// nothing at all — a student assigned to two courses is still Admin_approved
+// after losing one of them.
+async function removeAssignment(params: {
+  studentUid: string;
+  assignmentId: string;
+  courseId: string;
+  semester: string | null;
+}): Promise<void> {
+  const { studentUid, assignmentId, courseId, semester } = params;
+
+  const assignmentRef = firebase
+    .firestore()
+    .collection('assignments')
+    .doc(assignmentId);
+  const priorStatus = String(
+    (await assignmentRef.get()).data()?.prior_course_status ?? ''
+  ).trim();
+  await assignmentRef.delete();
+
+  const doc = await applicationDoc(studentUid).get();
+  if (!doc.exists) return;
+  const data = doc.data() ?? {};
+
+  const stillAssigned = await getDocs(
+    query(
+      collection(firebase.firestore(), 'assignments'),
+      where('student_uid', '==', studentUid)
+    )
+  );
+
+  // Only revert the slot this assignment actually claimed. The same course can
+  // be accepted in two terms, and reverting the wrong one would strip a
+  // still-live assignment's 'accepted' status.
+  const wasAccepted = flattenCourseStatuses(data.courses).some(
+    (e) =>
+      normalizeCourseKey(e.courseId) === normalizeCourseKey(courseId) &&
+      (!semester ||
+        !e.semester ||
+        normalizeSemesterName(e.semester) ===
+          normalizeSemesterName(semester)) &&
+      e.status.trim().toLowerCase() === 'accepted'
+  );
+
+  const updates: unknown[] = [];
+  if (wasAccepted) {
+    // Assignments predating `prior_course_status` fall back to 'approved',
+    // which is what all but the admin-overrode case was.
+    updates.push(
+      courseStatusUpdate(data.courses, courseId, semester),
+      priorStatus && priorStatus !== 'accepted' ? priorStatus : 'approved'
+    );
+  }
+  if (stillAssigned.empty && data.status === 'Admin_approved') {
+    updates.push('status', 'Submitted');
+  }
+  if (updates.length) {
+    await (applicationDoc(studentUid).update as any)(...updates);
+  }
+}
+
 // ─── component ──────────────────────────────────────────────────────────────
 export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
   const { user } = useAuth();
@@ -166,6 +424,9 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
   const [assignCourses, setAssignCourses] = React.useState<string[]>([]);
   const [assignCourse, setAssignCourse] = React.useState('');
   const [assignHours, setAssignHours] = React.useState<string>('0');
+  const [approvalsRow, setApprovalsRow] = React.useState<Application | null>(
+    null
+  );
 
   // fetch data
   React.useEffect(() => {
@@ -176,7 +437,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
           .filter((doc) => {
             const d = doc.data();
             if (d.status === 'Admin_denied') return false;
-            const flat = flattenCourses(d.courses);
+            const flat = flattenCourseStatuses(d.courses);
             if (d.status === 'Admin_approved' && flat.length < 2) {
               return false;
             }
@@ -184,12 +445,15 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
           })
           .map((doc) => {
             const d = doc.data();
-            const flat = flattenCourses(d.courses);
+            const flat = flattenCourseStatuses(d.courses);
             return {
               id: doc.id,
               ...d,
               courses: flat
                 .filter((e) => e.status === 'approved')
+                .map(formatCourseLabel),
+              acceptedCourses: flat
+                .filter((e) => e.status === 'accepted')
                 .map(formatCourseLabel),
               allcourses: flat.map(formatCourseLabel),
             } as Application;
@@ -266,7 +530,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
 
   const handleOpenAssignmentDialog = async (id: string) => {
     const doc = await applicationDoc(id).get();
-    const flat = flattenCourses(doc.data()?.courses);
+    const flat = flattenCourseStatuses(doc.data()?.courses);
     // Admin approval supersedes faculty: allow assigning any course the
     // applicant applied for, even if no faculty member has approved it
     // yet. Labels include the semester so admins can disambiguate the
@@ -314,34 +578,6 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
     }
   };
 
-  const sendApproveEmail = async (assignment: any) => {
-    try {
-      const snap = await applicationDoc(assignment.student_uid).get();
-      if (!snap.exists) return;
-      const d = snap.data() as Application;
-      await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'applicationStatusApproved',
-            data: {
-              user: {
-                name: `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim(),
-                email: d.email,
-              },
-              position: assignment.position,
-              classCode: assignment.class_codes,
-            },
-          }),
-        }
-      );
-    } catch (error) {
-      console.error('Error sending approve email:', error);
-    }
-  };
-
   const handleConfirmDeny = async () => {
     if (!denyId) return;
     setLoading(true);
@@ -365,170 +601,54 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
     setLoading(true);
 
     try {
-      const studentUid = selectedId;
-      const doc = await applicationDoc(studentUid).get();
-
       // Assign-dialog options come back as `${courseId} (${semester})` so
       // the same (course, instructor) appearing in two terms is
-      // distinguishable. Parse the suffix back out — falling through to a
-      // best-effort lookup when the label has no semester (legacy entries).
+      // distinguishable. Parse the suffix back out — createAssignment falls
+      // through to a best-effort lookup when the label has no semester
+      // (legacy entries).
       const labelMatch = assignCourse.match(/^(.*) \(([^)]+)\)$/);
-      const courseId = labelMatch ? labelMatch[1] : assignCourse;
-      const labeledSemester = labelMatch ? labelMatch[2] : null;
-
-      const courseRef = firebase
-        .firestore()
-        .collection('courses')
-        .doc(courseId);
-      const courseDoc = await getDoc(courseRef);
-
-      const existingCourses = doc.data()?.courses || {};
-      let semesterBucket: string | null = labeledSemester;
-      if (!semesterBucket) {
-        for (const [semKey, val] of Object.entries(existingCourses)) {
-          if (
-            val &&
-            typeof val === 'object' &&
-            courseId in (val as Record<string, unknown>)
-          ) {
-            semesterBucket = semKey;
-            break;
-          }
-        }
-      }
-      const coursePath = semesterBucket
-        ? `courses.${semesterBucket}.${courseId}`
-        : `courses.${courseId}`;
-
-      // Mark the assigned course 'accepted' (admin-assigned), not 'approved'
-      // (faculty-approved). The student status page reads per-course state to
-      // label "Accepted" — using 'approved' here would flip every other
-      // faculty-approved course to "Accepted" too.
-      await applicationDoc(studentUid).update({
-        status: 'Admin_approved',
-        [coursePath]: 'accepted',
+      await createAssignment({
+        studentUid: selectedId,
+        courseId: labelMatch ? labelMatch[1] : assignCourse,
+        semester: labelMatch ? labelMatch[2] : null,
+        hours: assignHours,
       });
-
-      const now = new Date();
-      // Record the specific semester the admin picked in the assign dialog —
-      // not the application's submission-time `available_semesters`, which
-      // spans the next 3 terms and would mis-label a Summer hire as Spring
-      // when the student applied in the prior term.
-      const assignmentSemesters = semesterBucket
-        ? [semesterBucket]
-        : doc.data()?.available_semesters;
-
-      // Returning-hire detection: if this person already holds an assignment
-      // from an earlier semester, this is a re-appointment, not a new hire.
-      // Match on student_uid (how docs are keyed here) and ufid (covers rows
-      // imported from HR that carry a ufid but no student_uid). Only semesters
-      // strictly earlier than the one being assigned count — a second course in
-      // the same term is still a new hire.
-      const thisUfid = String(doc.data()?.ufid ?? '').trim();
-      const newRank = Math.max(
-        ...normalizeSemesters(assignmentSemesters)
-          .map((s) => semesterRank(s))
-          .filter((r): r is number => r != null),
-        -Infinity
-      );
-      let hasEarlierSemester = false;
-      try {
-        const assignmentsColRef = collection(
-          firebase.firestore(),
-          'assignments'
-        );
-        const priorSnaps = await Promise.all([
-          getDocs(query(assignmentsColRef, where('student_uid', '==', studentUid))),
-          thisUfid
-            ? getDocs(query(assignmentsColRef, where('ufid', '==', thisUfid)))
-            : Promise.resolve(null),
-        ]);
-        for (const snap of priorSnaps) {
-          if (!snap) continue;
-          for (const priorDoc of snap.docs) {
-            const priorRanks = normalizeSemesters(priorDoc.data()?.semesters)
-              .map((s) => semesterRank(s))
-              .filter((r): r is number => r != null);
-            if (priorRanks.some((r) => r < newRank)) {
-              hasEarlierSemester = true;
-              break;
-            }
-          }
-          if (hasEarlierSemester) break;
-        }
-      } catch (err) {
-        // Non-fatal: fall back to NEW HIRE if the lookup fails.
-        console.error('Reappoint lookup failed; defaulting to NEW HIRE:', err);
-      }
-      const requestedAction = hasEarlierSemester ? 'REAPPOINT' : 'NEW HIRE';
-
-      const assignment = {
-        date: `${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}`,
-        student_uid: studentUid,
-        class_codes: courseId,
-        email: doc.data()?.email,
-        name: `${doc.data()?.firstname ?? ''} ${doc.data()?.lastname ?? ''}`,
-        semesters: assignmentSemesters,
-        department: doc.data()?.department,
-        hours: [Number(assignHours) || 0],
-        position: doc.data()?.position,
-        degree: doc.data()?.degree,
-        ufid: doc.data()?.ufid,
-        requested_action: requestedAction,
-      };
-
-      const assignmentsCol = firebase.firestore().collection('assignments');
-      const primaryRef = assignmentsCol.doc(studentUid);
-      const primaryDoc = await primaryRef.get();
-
-      if (primaryDoc.exists) {
-        let counter = 1;
-        let newRef = assignmentsCol.doc(`${studentUid}-${counter}`);
-        while ((await newRef.get()).exists) {
-          counter++;
-          newRef = assignmentsCol.doc(`${studentUid}-${counter}`);
-        }
-        await newRef.set(assignment);
-      } else {
-        await primaryRef.set(assignment);
-      }
-
-      // notify professors
-      const emailArray = courseDoc
-        .data()
-        ?.professor_emails?.split?.(';')
-        ?.map?.((email: string) => email.trim());
-      if (emailArray) {
-        for (const email of emailArray) {
-          try {
-            await fetch(
-              'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  type: 'facultyAssignment',
-                  data: {
-                    userEmail: email,
-                    position: doc.data()?.position,
-                    classCode: courseDoc.data()?.code,
-                    semester: courseDoc.data()?.semester,
-                  },
-                }),
-              }
-            );
-          } catch (err) {
-            console.error('Error notifying professor:', err);
-          }
-        }
-      }
-
-      await sendApproveEmail(assignment);
       handleCloseAssignmentDialog();
     } catch (error) {
       console.error('Error approving application:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Apply the approved-instructors dialog: de-assign, assign, or move the
+  // student from one approving instructor to another.
+  //
+  // Removals run first so a reassignment never leaves the student momentarily
+  // holding both courses — which would also make the new assignment's
+  // returning-hire lookup trip over the one being replaced.
+  const handleApplyAssignmentChange = async ({
+    studentUid,
+    removals,
+    additions,
+    hours,
+  }: ApplyAssignmentChange) => {
+    for (const entry of removals) {
+      if (!entry.assignmentId) continue;
+      await removeAssignment({
+        studentUid,
+        assignmentId: entry.assignmentId,
+        courseId: entry.courseId,
+        semester: entry.semester || null,
+      });
+    }
+    for (const entry of additions) {
+      await createAssignment({
+        studentUid,
+        courseId: entry.courseId,
+        semester: entry.semester || null,
+        hours,
+      });
     }
   };
 
@@ -635,13 +755,71 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       {
         id: 'approved_courses',
         header: 'Approved Courses',
-        accessorFn: (row) => (row.courses || []).map(prettyLabel).join(', '),
-        cell: ({ getValue }) => {
+        // Assigned course first: it is the one an admin scanning the column is
+        // usually looking for. Search and CSV export read this same string.
+        accessorFn: (row) =>
+          [...(row.acceptedCourses || []), ...(row.courses || [])]
+            .map(prettyLabel)
+            .join(', '),
+        cell: ({ row, getValue }) => {
           const v = getValue() as string;
-          return v ? (
-            <Box sx={{ color: '#065F46', fontWeight: 500 }}>{v}</Box>
-          ) : (
-            <span style={{ color: '#9CA3AF' }}>—</span>
+          if (!v) return <span style={{ color: '#9CA3AF' }}>—</span>;
+          const count =
+            (row.original.acceptedCourses || []).length +
+            (row.original.courses || []).length;
+          return (
+            <Tooltip title="View every instructor who approved this student">
+              <Box
+                component="button"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setApprovalsRow(row.original);
+                }}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.75,
+                  maxWidth: '100%',
+                  border: 'none',
+                  background: 'none',
+                  p: 0,
+                  font: 'inherit',
+                  color: '#065F46',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  '&:hover': { textDecoration: 'underline' },
+                }}
+              >
+                <Box
+                  sx={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {v}
+                </Box>
+                {count > 1 && (
+                  <Box
+                    component="span"
+                    sx={{
+                      flexShrink: 0,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: '#065F46',
+                      backgroundColor: '#D1FAE5',
+                      borderRadius: '10px',
+                      px: 0.75,
+                      py: '1px',
+                    }}
+                  >
+                    +{count - 1}
+                  </Box>
+                )}
+              </Box>
+            </Tooltip>
           );
         },
         size: 220,
@@ -901,6 +1079,17 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
         onCancel={() => setDenyId(null)}
         onConfirm={handleConfirmDeny}
         loading={loading}
+      />
+
+      {/* Approved-instructors dialog: view every approver, assign or move */}
+      <ApprovedInstructorsDialog
+        open={Boolean(approvalsRow)}
+        studentUid={approvalsRow?.id ?? null}
+        studentName={`${approvalsRow?.firstname ?? ''} ${
+          approvalsRow?.lastname ?? ''
+        }`.trim()}
+        onClose={() => setApprovalsRow(null)}
+        onApply={handleApplyAssignmentChange}
       />
 
       {/* Course assignment dialog */}
