@@ -9,10 +9,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  FormControl,
+  Checkbox,
   FormControlLabel,
-  Radio,
-  RadioGroup,
+  FormGroup,
   TextField,
   Tooltip,
 } from '@mui/material';
@@ -432,8 +431,11 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
   const [assignCourses, setAssignCourses] = React.useState<
     AssignCourseOption[]
   >([]);
-  const [assignCourse, setAssignCourse] = React.useState('');
-  const [assignHours, setAssignHours] = React.useState<string>('0');
+  // Selected courses, each with its own weekly hours. Hours are per-assignment
+  // on the OnBase export, so two courses can't share one figure.
+  const [assignSelection, setAssignSelection] = React.useState<
+    Record<string, string>
+  >({});
   const [approvalsRow, setApprovalsRow] = React.useState<Application | null>(
     null
   );
@@ -552,8 +554,7 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
     setAssignCourses(
       flat.map((e) => ({ label: formatCourseLabel(e), status: e.status }))
     );
-    setAssignCourse('');
-    setAssignHours('0');
+    setAssignSelection({});
     setSelectedId(id);
     setAssignOpen(true);
   };
@@ -607,11 +608,23 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
     }
   };
 
+  const assignCount = Object.keys(assignSelection).length;
+
+  const toggleAssignCourse = (label: string) =>
+    setAssignSelection((prev) => {
+      if (label in prev) {
+        const { [label]: _removed, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [label]: '0' };
+    });
+
   const handleSubmitAssignment = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
-    if (!selectedId || !assignCourse) return;
+    const picked = Object.entries(assignSelection);
+    if (!selectedId || !picked.length) return;
     setLoading(true);
 
     try {
@@ -620,13 +633,19 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       // distinguishable. Parse the suffix back out — createAssignment falls
       // through to a best-effort lookup when the label has no semester
       // (legacy entries).
-      const labelMatch = assignCourse.match(/^(.*) \(([^)]+)\)$/);
-      await createAssignment({
-        studentUid: selectedId,
-        courseId: labelMatch ? labelMatch[1] : assignCourse,
-        semester: labelMatch ? labelMatch[2] : null,
-        hours: assignHours,
-      });
+      //
+      // Sequential, not Promise.all: each createAssignment picks the next free
+      // `${uid}-N` doc id by reading what already exists, so two running at
+      // once would land on the same id and one would overwrite the other.
+      for (const [label, hours] of picked) {
+        const labelMatch = label.match(/^(.*) \(([^)]+)\)$/);
+        await createAssignment({
+          studentUid: selectedId,
+          courseId: labelMatch ? labelMatch[1] : label,
+          semester: labelMatch ? labelMatch[2] : null,
+          hours,
+        });
+      }
       handleCloseAssignmentDialog();
     } catch (error) {
       console.error('Error approving application:', error);
@@ -1119,30 +1138,33 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
         }}
       >
         <DialogTitle sx={{ fontSize: 17, fontWeight: 600 }}>
-          Assign course
+          Assign courses
         </DialogTitle>
         <form onSubmit={handleSubmitAssignment}>
           <DialogContent>
             {assignCourses.length > 0 ? (
               <>
                 <DialogContentText sx={{ mb: 2, fontSize: 14 }}>
-                  Select the course and hours for this assignment. Courses no
-                  professor has approved can still be assigned — admin approval
-                  supersedes faculty.
+                  Select the courses to assign and the weekly hours for each.
+                  Courses no professor has approved can still be assigned —
+                  admin approval supersedes faculty.
                 </DialogContentText>
-                <FormControl required sx={{ width: '100%' }}>
-                  <RadioGroup
-                    name="course-radio-group"
-                    value={assignCourse}
-                    onChange={(e) => setAssignCourse(e.target.value)}
-                  >
-                    {assignCourses.map((option) => {
-                      const pill = courseStatusPill(option.status);
-                      return (
+                <FormGroup sx={{ width: '100%' }}>
+                  {assignCourses.map((option) => {
+                    const pill = courseStatusPill(option.status);
+                    const selected = option.label in assignSelection;
+                    // Already assigned: checking it again would write a second
+                    // assignment doc for the same course. Existing assignments
+                    // are managed from the Approved column instead.
+                    const alreadyAssigned =
+                      option.status.trim().toLowerCase() === 'accepted';
+                    return (
+                      <Box key={option.label} sx={{ mb: 0.5 }}>
                         <FormControlLabel
-                          key={option.label}
-                          value={option.label}
-                          control={<Radio size="small" />}
+                          checked={selected}
+                          disabled={alreadyAssigned}
+                          onChange={() => toggleAssignCourse(option.label)}
+                          control={<Checkbox size="small" />}
                           label={
                             <Box
                               sx={{
@@ -1160,19 +1182,26 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
                             '& .MuiFormControlLabel-label': { fontSize: 14 },
                           }}
                         />
-                      );
-                    })}
-                  </RadioGroup>
-                  <TextField
-                    label="Hours per week"
-                    type="number"
-                    value={assignHours}
-                    onChange={(e) => setAssignHours(e.target.value)}
-                    size="small"
-                    sx={{ mt: 2, maxWidth: 200 }}
-                    inputProps={{ min: 0 }}
-                  />
-                </FormControl>
+                        {selected && (
+                          <TextField
+                            label="Hours per week"
+                            type="number"
+                            value={assignSelection[option.label]}
+                            onChange={(e) =>
+                              setAssignSelection((prev) => ({
+                                ...prev,
+                                [option.label]: e.target.value,
+                              }))
+                            }
+                            size="small"
+                            sx={{ ml: 4, mt: 0.5, mb: 1, maxWidth: 180 }}
+                            inputProps={{ min: 0 }}
+                          />
+                        )}
+                      </Box>
+                    );
+                  })}
+                </FormGroup>
               </>
             ) : (
               <DialogContentText sx={{ fontSize: 14 }}>
@@ -1191,14 +1220,18 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
             <Button
               type="submit"
               variant="contained"
-              disabled={!assignCourse || loading}
+              disabled={!assignCount || loading}
               sx={{
                 textTransform: 'none',
                 backgroundColor: '#0021A5',
                 '&:hover': { backgroundColor: '#001A85' },
               }}
             >
-              {loading ? 'Assigning…' : 'Assign'}
+              {loading
+                ? 'Assigning…'
+                : assignCount > 1
+                ? `Assign ${assignCount} courses`
+                : 'Assign'}
             </Button>
           </DialogActions>
         </form>
