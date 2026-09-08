@@ -19,6 +19,7 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import type { ColumnDef } from '@tanstack/react-table';
 
 import firebase from '@/firebase/firebase_config';
@@ -117,6 +118,51 @@ function prettyLabel(label: string): string {
   const semester = m ? m[2] : null;
   const pretty = prettyCourseId(courseId);
   return semester ? `${pretty} (${semester})` : pretty;
+}
+
+// Card listing every (course, instructor, semester) a student is approved for.
+// Shown on hover of the "+ N more" chip so the whole set is readable without
+// leaving the grid; the chip still opens the assignment dialog on click.
+function ApprovalsTooltipCard({ labels }: { labels: string[] }) {
+  return (
+    <Box sx={{ px: 2.5, py: 2 }}>
+      <Box
+        sx={{
+          fontSize: 16,
+          fontWeight: 700,
+          color: '#111827',
+          mb: 1.25,
+        }}
+      >
+        All Approvals
+      </Box>
+      <Box
+        component="ul"
+        sx={{
+          listStyle: 'none',
+          m: 0,
+          p: 0,
+          maxHeight: 260,
+          overflowY: 'auto',
+        }}
+      >
+        {labels.map((label, i) => (
+          <Box
+            component="li"
+            key={`${label}-${i}`}
+            sx={{
+              fontSize: 14,
+              lineHeight: 1.7,
+              color: '#374151',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {label}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
 }
 
 // ─── status display ─────────────────────────────────────────────────────────
@@ -797,62 +843,99 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
         cell: ({ row, getValue }) => {
           const v = getValue() as string;
           if (!v) return <span style={{ color: '#9CA3AF' }}>—</span>;
-          const count =
-            (row.original.acceptedCourses || []).length +
-            (row.original.courses || []).length;
+          const labels = [
+            ...(row.original.acceptedCourses || []),
+            ...(row.original.courses || []),
+          ].map(prettyLabel);
+          const [first, ...rest] = labels;
+          const openDialog = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            setApprovalsRow(row.original);
+          };
+          const buttonSx = {
+            border: 'none',
+            background: 'none',
+            p: 0,
+            font: 'inherit',
+            cursor: 'pointer',
+            textAlign: 'left' as const,
+          };
           return (
-            <Tooltip title="View every instructor who approved this student">
-              <Box
-                component="button"
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setApprovalsRow(row.original);
-                }}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.75,
-                  maxWidth: '100%',
-                  border: 'none',
-                  background: 'none',
-                  p: 0,
-                  font: 'inherit',
-                  color: '#065F46',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  '&:hover': { textDecoration: 'underline' },
-                }}
-              >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+                maxWidth: '100%',
+              }}
+            >
+              <Tooltip title="View every instructor who approved this student">
                 <Box
+                  component="button"
+                  type="button"
+                  onClick={openDialog}
                   sx={{
+                    ...buttonSx,
+                    minWidth: 0,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
+                    color: '#065F46',
+                    fontWeight: 500,
+                    '&:hover': { textDecoration: 'underline' },
                   }}
                 >
-                  {v}
+                  {first}
                 </Box>
-                {count > 1 && (
+              </Tooltip>
+              {rest.length > 0 && (
+                <Tooltip
+                  title={<ApprovalsTooltipCard labels={labels} />}
+                  placement="bottom-start"
+                  arrow
+                  enterDelay={200}
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: '#FFFFFF',
+                        color: '#374151',
+                        p: 0,
+                        maxWidth: 'none',
+                        borderRadius: '12px',
+                        border: '1px solid #E5E7EB',
+                        boxShadow: '0 12px 32px rgba(15, 23, 42, 0.16)',
+                      },
+                    },
+                    arrow: { sx: { color: '#FFFFFF' } },
+                  }}
+                >
                   <Box
-                    component="span"
+                    component="button"
+                    type="button"
+                    onClick={openDialog}
                     sx={{
+                      ...buttonSx,
                       flexShrink: 0,
-                      fontSize: 11,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.25,
+                      fontSize: 12,
                       fontWeight: 600,
-                      color: '#065F46',
-                      backgroundColor: '#D1FAE5',
-                      borderRadius: '10px',
-                      px: 0.75,
-                      py: '1px',
+                      color: '#5B21B6',
+                      backgroundColor: '#EDE9FE',
+                      borderRadius: '999px',
+                      pl: 1,
+                      pr: 0.5,
+                      py: '2px',
+                      '&:hover': { backgroundColor: '#DDD6FE' },
                     }}
                   >
-                    +{count - 1}
+                    + {rest.length} more
+                    <KeyboardArrowDownRoundedIcon sx={{ fontSize: 16 }} />
                   </Box>
-                )}
-              </Box>
-            </Tooltip>
+                </Tooltip>
+              )}
+            </Box>
           );
         },
         size: 220,
