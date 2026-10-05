@@ -5,8 +5,10 @@ import {
   getDocs,
   getFirestore,
 } from 'firebase/firestore';
+import { useCallback } from 'react';
 import {
   useQuery,
+  useQueryClient,
   keepPreviousData,
   type UseQueryResult,
 } from '@tanstack/react-query';
@@ -147,4 +149,22 @@ export function useCourseApplicationsByStatus(
         ? fetchAssignedForCourse(courseKey)
         : fetchApplicationsForCourse(courseKey, semester, [status]),
   });
+}
+
+/**
+ * After approving/denying, refetch the course list and the application doc so
+ * the table and modal reflect what Firestore now holds. Resolves once the
+ * on-screen queries have reloaded.
+ */
+export function useSyncCourseStatus() {
+  const qc = useQueryClient();
+  return useCallback(
+    async (courseKey: string, appId: string) => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['courseAppsByCourse', courseKey] }),
+        qc.invalidateQueries({ queryKey: ['application', appId] }),
+      ]);
+    },
+    [qc]
+  );
 }

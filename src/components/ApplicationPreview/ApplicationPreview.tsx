@@ -1,5 +1,6 @@
 import React from 'react';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
+import { useSyncCourseStatus } from '@/hooks/Applications/useFetchApplications';
 import { ApplicationData } from '@/types/query';
 import { prettyCourseId } from '@/hooks/useSemesterOptions';
 import {
@@ -53,6 +54,7 @@ export function ApplicationPreview({
 
   const name = `${firstname} ${lastname}`.trim();
   const [pending, setPending] = React.useState(false);
+  const syncCourseStatus = useSyncCourseStatus();
 
   const openConfirm = (kind: 'approve' | 'deny') =>
     setConfirm({ open: true, kind });
@@ -82,8 +84,9 @@ export function ApplicationPreview({
           position: position ?? '',
         });
       }
+      // Keep the dialog (and its spinner) up until the refetch lands.
+      await syncCourseStatus(courseId, documentId);
       closeConfirm();
-      // Optional: trigger a refetch or optimistic UI update here
     } catch (e) {
       console.error(e);
     } finally {

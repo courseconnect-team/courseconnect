@@ -9,6 +9,7 @@ import {
   approveApplication,
 } from '@/hooks/Applications/ApplicationFunctions';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
+import { useSyncCourseStatus } from '@/hooks/Applications/useFetchApplications';
 import { SemesterName, prettyCourseId } from '@/hooks/useSemesterOptions';
 import firebase from '@/firebase/firebase_config';
 import 'firebase/compat/firestore';
@@ -190,6 +191,7 @@ export const CourseApplicationsTable: React.FC<
   }>({ open: false, kind: null });
 
   const [pending, setPending] = React.useState(false);
+  const syncCourseStatus = useSyncCourseStatus();
 
   const [assignByUid, setAssignByUid] = React.useState<
     Record<string, { class_codes?: string; semesters?: string[] }[]>
@@ -247,8 +249,9 @@ export const CourseApplicationsTable: React.FC<
           position: confirm.row.position,
         });
       }
+      // Keep the dialog (and its spinner) up until the refetch lands.
+      await syncCourseStatus(courseId, confirm.row.id);
       closeConfirm();
-      // Optional: trigger a refetch or optimistic UI update here
     } catch (e) {
       console.error(e);
     } finally {

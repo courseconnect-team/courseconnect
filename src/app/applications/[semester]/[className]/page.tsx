@@ -38,7 +38,7 @@ const ApplicationsPage: FC = () => {
   const id = search.get('id');
   const modal = search.get('modal') === '1';
 
-  const { data, isLoading, isFetching, error } = useCourseApplications(
+  const { data, isLoading, error } = useCourseApplications(
     courseId,
     semesterId,
     statuses
@@ -85,7 +85,7 @@ const ApplicationsPage: FC = () => {
   if (roleError) return <p>Error loading role</p>;
   if (!user) return <p>Please sign in.</p>;
 
-  if (isLoading || loading || isFetching) return <LinearProgress />;
+  if (isLoading || loading) return <LinearProgress />;
   if (error || roleError) return <PageLayout mainTitle="Error" />;
 
   if (!data) return <PageLayout mainTitle="Course not Found" />;
