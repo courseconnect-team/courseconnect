@@ -324,7 +324,11 @@ export default function Application() {
         router.push('/');
       } catch (error) {
         toast.dismiss(toastId);
-        toast.error('Application submission failed!');
+        toast.error(
+          `Application submission failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
         console.error('ERROR: Failed to save application:', error);
       }
 
