@@ -119,7 +119,7 @@ export default function ConfigForm({
         {initial ? 'Edit workflow' : 'New auto-fetch workflow'}
       </DialogTitle>
       <DialogContent>
-        <Alert severity="info" sx={{ mt: 1, mb: 1 }}>
+        <Alert severity="info" sx={{ mt: 1, mb: 3 }}>
           This workflow will write courses into{' '}
           <Typography component="span" sx={{ fontWeight: 600 }}>
             {targetSemester}

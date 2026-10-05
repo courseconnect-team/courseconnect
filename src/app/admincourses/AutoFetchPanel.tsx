@@ -687,12 +687,15 @@ export default function AutoFetchPanel({
   const handleDelete = async (c: CourseFetchConfig) => {
     if (!window.confirm(`Delete "${c.label}"? Run history will be removed.`))
       return;
+    const toastId = toast.loading(`Deleting "${c.label}"…`);
     try {
       await api.remove(c.id);
-      toast.success('Workflow deleted');
+      toast.success('Workflow deleted', { id: toastId });
       reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Delete failed');
+      toast.error(e instanceof Error ? e.message : 'Delete failed', {
+        id: toastId,
+      });
     }
   };
   const handleToggle = async (c: CourseFetchConfig, enabled: boolean) => {
@@ -868,7 +871,7 @@ export default function AutoFetchPanel({
           alignItems={{ xs: 'flex-start', sm: 'center' }}
           spacing={1.5}
         >
-          <Stack spacing={0.5}>
+          <Stack spacing={0.5} sx={{ maxWidth: 820 }}>
             <Typography sx={{ fontWeight: 700 }}>
               Auto-fetch workflows
             </Typography>
@@ -880,14 +883,19 @@ export default function AutoFetchPanel({
               preserved.
             </Typography>
           </Stack>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="column" spacing={1} sx={{ flexShrink: 0 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               size="small"
               onClick={reload}
               disabled={loading}
+              disableElevation
               startIcon={<RefreshIcon fontSize="small" />}
-              sx={{ textTransform: 'none' }}
+              sx={{
+                textTransform: 'none',
+                bgcolor: PURPLE,
+                '&:hover': { bgcolor: '#4524a0' },
+              }}
             >
               Refresh
             </Button>
