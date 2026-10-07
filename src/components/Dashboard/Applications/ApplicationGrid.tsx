@@ -30,6 +30,7 @@ import { emailToUsername } from '@/utils/email';
 import { normalizeCourseKey } from '@/utils/courseSupervisor';
 import { semesterRank, normalizeSemesters } from '@/utils/semester';
 import { prettyCourseId } from '@/hooks/useSemesterOptions';
+import { callFunction } from '@/firebase/functions/callFunction';
 import {
   flattenCourseStatuses,
   normalizeSemesterName,
@@ -185,24 +186,17 @@ async function sendApproveEmail(assignment: any) {
     const snap = await applicationDoc(assignment.student_uid).get();
     if (!snap.exists) return;
     const d = snap.data() as Application;
-    await fetch(
-      'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'applicationStatusApproved',
-          data: {
-            user: {
-              name: `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim(),
-              email: d.email,
-            },
-            position: assignment.position,
-            classCode: assignment.class_codes,
-          },
-        }),
-      }
-    );
+    await callFunction('sendEmail', {
+      type: 'applicationStatusApproved',
+      data: {
+        user: {
+          name: `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim(),
+          email: d.email,
+        },
+        position: assignment.position,
+        classCode: assignment.class_codes,
+      },
+    });
   } catch (error) {
     console.error('Error sending approve email:', error);
   }
@@ -370,22 +364,15 @@ async function createAssignment(params: {
   if (emailArray) {
     for (const email of emailArray) {
       try {
-        await fetch(
-          'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'facultyAssignment',
-              data: {
-                userEmail: email,
-                position: doc.data()?.position,
-                classCode: courseDoc.data()?.code,
-                semester: courseDoc.data()?.semester,
-              },
-            }),
-          }
-        );
+        await callFunction('sendEmail', {
+          type: 'facultyAssignment',
+          data: {
+            userEmail: email,
+            position: doc.data()?.position,
+            classCode: courseDoc.data()?.code,
+            semester: courseDoc.data()?.semester,
+          },
+        });
       } catch (err) {
         console.error('Error notifying professor:', err);
       }
@@ -616,24 +603,22 @@ export default function ApplicationGrid({ userRole }: ApplicationGridProps) {
       const snapshot = await applicationDoc(id).get();
       if (!snapshot.exists) return;
       const d = snapshot.data() as Application;
-      await fetch(
-        'https://us-central1-courseconnect-c6a7b.cloudfunctions.net/sendEmail',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'applicationStatusDenied',
-            data: {
-              user: {
-                name: `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim(),
-                email: d.email,
-              },
-              position: d.position,
-              classCode: d.courses,
-            },
-          }),
-        }
+      // Admin deny rejects the whole application, so name every course on it;
+      // sendEmail requires classCode to be a string.
+      const courseIds = Array.from(
+        new Set(flattenCourseStatuses(d.courses).map((e) => e.courseId))
       );
+      await callFunction('sendEmail', {
+        type: 'applicationStatusDenied',
+        data: {
+          user: {
+            name: `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim(),
+            email: d.email,
+          },
+          position: d.position,
+          classCode: courseIds.join(', ') || 'your requested courses',
+        },
+      });
     } catch (error) {
       console.error('Error sending deny email:', error);
     }
