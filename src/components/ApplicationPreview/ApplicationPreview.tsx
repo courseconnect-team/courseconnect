@@ -56,6 +56,14 @@ export function ApplicationPreview({
   const [pending, setPending] = React.useState(false);
   const syncCourseStatus = useSyncCourseStatus();
 
+  // Firestore stores lowercase statuses ('approved' | 'denied') even though
+  // ApplicationStatus is typed with capitals, so compare case-insensitively.
+  const normalizedStatus = status?.toLowerCase();
+  const approveSelected = normalizedStatus === 'approved';
+  const denySelected = normalizedStatus === 'denied';
+  const baseBtn =
+    'inline-flex items-center justify-center min-w-[100px] h-8 px-5 rounded-lg text-sm font-semibold border transition';
+
   const openConfirm = (kind: 'approve' | 'deny') =>
     setConfirm({ open: true, kind });
   const closeConfirm = () => {
@@ -136,26 +144,30 @@ export function ApplicationPreview({
 
           {/* Right: actions + status badge (old .thumbsContainer + .applicantStatus23/.review23) */}
 
-          {status === 'applied' && (
+          {status && (
             <div className="flex items-center gap-4">
               <button
-                onClick={() => openConfirm('approve')}
-                className="inline-flex items-center justify-center
-                 min-w-[100px] h-8 px-5
-                 rounded-lg text-sm font-semibold border transition
-                 bg-status-approvedLt text-status-approved border-status-approved
-                 hover:bg-status-approved hover:cursor-pointer hover:text-on-primary"
+                type="button"
+                onClick={
+                  approveSelected ? undefined : () => openConfirm('approve')
+                }
+                className={`${baseBtn} ${
+                  approveSelected
+                    ? 'bg-status-approved text-on-primary border-status-approved'
+                    : 'bg-status-approvedLt text-status-approved border-status-approved hover:bg-status-approved hover:cursor-pointer hover:text-on-primary'
+                }`}
               >
                 Approve
               </button>
 
               <button
-                onClick={() => openConfirm('deny')}
-                className="inline-flex items-center justify-center
-                 min-w-[100px] h-8 px-5
-                 rounded-lg text-sm font-semibold border transition
-                 bg-status-errorLt text-status-error border-status-error
-                 hover:bg-status-error hover:cursor-pointer  hover:text-on-primary"
+                type="button"
+                onClick={denySelected ? undefined : () => openConfirm('deny')}
+                className={`${baseBtn} ${
+                  denySelected
+                    ? 'bg-status-error text-on-primary border-status-error'
+                    : 'bg-status-errorLt text-status-error border-status-error hover:bg-status-error hover:cursor-pointer hover:text-on-primary'
+                }`}
               >
                 Deny
               </button>
