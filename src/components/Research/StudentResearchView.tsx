@@ -18,10 +18,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
-import ProjectCard from '@/components/Research/ProjectCard';
+import ProjectCard, {
+  ProjectCardSkeleton,
+} from '@/components/Research/ProjectCard';
 
 interface StudentResearchViewProps {
   researchListings: any[];
+  loading: boolean;
   role: string;
   uid: string;
   department: string;
@@ -38,8 +41,11 @@ const DEPARTMENT_LABELS: Record<string, string> = {
   'Engineering Education': 'Education',
 };
 
+const SKELETON_COUNT = 6;
+
 const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   researchListings,
+  loading,
   role,
   uid,
   department,
@@ -298,7 +304,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
         </Box>
 
         {/* Active filter chips + result summary */}
-        {(hasActiveFilters || totalCount > 0) && (
+        {(hasActiveFilters || totalCount > 0 || loading) && (
           <Box
             sx={{
               display: 'flex',
@@ -379,7 +385,9 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
                 fontSize: '0.82rem',
               }}
             >
-              {hasActiveFilters
+              {loading
+                ? 'Loading positions…'
+                : hasActiveFilters
                 ? `${resultCount} of ${totalCount} ${
                     totalCount === 1 ? 'position' : 'positions'
                   }`
@@ -392,7 +400,20 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
       </Box>
 
       {/* Listings */}
-      {resultCount === 0 ? (
+      {loading ? (
+        <Grid
+          container
+          spacing={3}
+          aria-busy="true"
+          aria-label="Loading positions"
+        >
+          {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <Grid item xs={12} sm={6} lg={4} key={i}>
+              <ProjectCardSkeleton />
+            </Grid>
+          ))}
+        </Grid>
+      ) : resultCount === 0 ? (
         <Box
           sx={{
             display: 'flex',

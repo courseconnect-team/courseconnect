@@ -8,6 +8,7 @@ import {
   Box,
   Chip,
   Stack,
+  Skeleton,
 } from '@mui/material';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
@@ -491,6 +492,56 @@ const ProjectCard: React.FC<ProjectCardProps> = (props) => {
     </>
   );
 };
+
+// Placeholder matching ProjectCard's layout, shown while listings load.
+export const ProjectCardSkeleton: React.FC = () => (
+  <Card
+    sx={{
+      borderRadius: '16px',
+      boxShadow: '0 1px 3px rgba(16, 24, 40, 0.06)',
+      border: '1px solid #EEE9F7',
+      backgroundColor: '#fff',
+      height: '100%',
+      overflow: 'hidden',
+    }}
+  >
+    <Skeleton
+      variant="rectangular"
+      animation="wave"
+      sx={{ width: '100%', height: 'auto', aspectRatio: '16 / 9' }}
+    />
+    <CardContent sx={{ p: 2.5, pb: 1.5 }}>
+      <Skeleton animation="wave" sx={{ fontSize: '1.05rem', width: '90%' }} />
+      <Skeleton
+        animation="wave"
+        sx={{ fontSize: '1.05rem', width: '60%', mb: 0.75 }}
+      />
+      <Skeleton animation="wave" sx={{ fontSize: '0.82rem', width: '45%' }} />
+      <Stack direction="row" spacing={1} sx={{ mt: 1.5 }}>
+        <Skeleton
+          variant="rounded"
+          animation="wave"
+          width={72}
+          height={24}
+          sx={{ borderRadius: '999px' }}
+        />
+        <Skeleton
+          variant="rounded"
+          animation="wave"
+          width={88}
+          height={24}
+          sx={{ borderRadius: '999px' }}
+        />
+      </Stack>
+      <Skeleton
+        variant="rounded"
+        animation="wave"
+        height={36}
+        sx={{ mt: 2, borderRadius: '999px' }}
+      />
+    </CardContent>
+  </Card>
+);
 
 // Memoized so typing in the board search box (which re-renders the parent on
 // every keystroke) doesn't re-render every card.

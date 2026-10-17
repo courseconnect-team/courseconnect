@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { Box, Tabs, Tab } from '@mui/material';
 import { useUserInfo } from '@/hooks/User/useGetUserInfo';
@@ -22,17 +22,27 @@ const ResearchPage: React.FC = () => {
   const [researchListings, setResearchListings] = useState<ResearchListing[]>(
     []
   );
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const latestRequest = useRef(0);
 
   const getResearchListings = useCallback(async () => {
+    // Only the newest request may update state, so a slow response for a
+    // previous department can't overwrite results or clear the loader early.
+    const requestId = ++latestRequest.current;
+    setListingsLoading(true);
     try {
       // Student level is matched client-side in StudentResearchView: the field
       // is free text (e.g. "Junior, Senior"), so an exact-match query misses.
       const listings = await fetchResearchListings({ department });
+      if (requestId !== latestRequest.current) return;
       setResearchListings(listings);
     } catch (error) {
+      if (requestId !== latestRequest.current) return;
       console.error('Error fetching research listings:', error);
       toast.error('Failed to load research listings.');
       setResearchListings([]);
+    } finally {
+      if (requestId === latestRequest.current) setListingsLoading(false);
     }
   }, [department]);
 
@@ -68,6 +78,7 @@ const ResearchPage: React.FC = () => {
         {(role === 'student_applying' || role === 'student_applied') && (
           <StudentResearchView
             researchListings={researchListings}
+            loading={listingsLoading}
             role={role}
             uid={user.uid}
             department={department}
@@ -131,6 +142,7 @@ const ResearchPage: React.FC = () => {
             {activeTab === 1 && (
               <StudentResearchView
                 researchListings={researchListings}
+                loading={listingsLoading}
                 role={role}
                 uid={user.uid}
                 department={department}
