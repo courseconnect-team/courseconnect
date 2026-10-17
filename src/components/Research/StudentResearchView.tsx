@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import Fuse from 'fuse.js';
 import { useDebounce } from '@/hooks/useDebounce';
 import {
@@ -30,8 +30,6 @@ interface StudentResearchViewProps {
   setStudentLevel: (value: string) => void;
   termsAvailable: string;
   setTermsAvailable: (value: string) => void;
-  getResearchListings: () => void;
-  setResearchListings: (listings: any[]) => void;
 }
 
 const DEPARTMENT_LABELS: Record<string, string> = {
@@ -50,77 +48,32 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
   setStudentLevel,
   termsAvailable,
   setTermsAvailable,
-  getResearchListings,
-  setResearchListings,
 }) => {
-  const [originalListings, setOriginalListings] = useState<any[]>([]);
   const [myPostingsOnly, setMyPostingsOnly] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const debouncedSearch = useDebounce(searchText);
+  const debouncedSearch = useDebounce(searchText.trim(), 500);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const isFacultyOrAdmin = role === 'faculty' || role === 'admin';
 
-  useEffect(() => {
-    if (researchListings.length > 0 && originalListings.length === 0) {
-      setOriginalListings([...researchListings]);
-    }
-  }, [researchListings, originalListings.length]);
+  // Department is filtered server-side by the parent's fetch; level, terms and
+  // "my postings" are narrowed here before fuzzy search.
+  const candidates = useMemo(() => {
+    let filtered = researchListings;
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(originalListings.length > 0 ? originalListings : researchListings, {
-        keys: ['project_title', 'project_description', 'faculty_contact'],
-        threshold: 0.35,
-        ignoreLocation: true,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [originalListings]
-  );
-
-  const applyFilters = (
-    searchOverride?: string,
-    myPostingsOverride?: boolean
-  ) => {
-    const search = searchOverride ?? searchText;
-    const showMine = myPostingsOverride ?? myPostingsOnly;
-
-    if (!search && !department && !termsAvailable && !showMine) {
-      setResearchListings([...originalListings]);
-      return;
-    }
-
-    const source =
-      originalListings.length > 0
-        ? [...originalListings]
-        : [...researchListings];
-    let filtered = source;
-
-    if (showMine && isFacultyOrAdmin) {
+    if (myPostingsOnly && isFacultyOrAdmin) {
       filtered = filtered.filter(
         (item) => item.faculty_members?.includes(uid) || item.creator_id === uid
       );
     }
 
-    if (search) {
-      const fuseResults = fuse.search(search).map((r) => r.item);
-      const fuseIds = new Set(fuseResults.map((item: any) => item.docID));
-      filtered = filtered.filter((item) => fuseIds.has(item.docID));
-    }
-
-    if (department) {
-      filtered = filtered.filter((item) => {
-        const normalized = item.department?.toLowerCase().trim();
-        if (
-          department === 'Computer and Information Sciences and Engineering'
-        ) {
-          return (
-            normalized === 'computer and information science and engineering' ||
-            normalized === 'computer and information sciences and engineering'
-          );
-        }
-        return normalized === department.toLowerCase();
-      });
+    if (studentLevel) {
+      // Word-start match so "Graduate" doesn't hit "Undergraduate" but
+      // "Juniors" still matches "Junior". Levels are fixed menu values.
+      const levelPattern = new RegExp(`\\b${studentLevel}`, 'i');
+      filtered = filtered.filter((item) =>
+        levelPattern.test(item.student_level ?? '')
+      );
     }
 
     if (termsAvailable) {
@@ -131,26 +84,51 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
       );
     }
 
-    setResearchListings(filtered);
-  };
+    return filtered;
+  }, [
+    researchListings,
+    myPostingsOnly,
+    isFacultyOrAdmin,
+    uid,
+    studentLevel,
+    termsAvailable,
+  ]);
 
-  useEffect(() => {
-    applyFilters(debouncedSearch);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+  const fuse = useMemo(
+    () =>
+      new Fuse(candidates, {
+        keys: [
+          { name: 'project_title', weight: 3 },
+          {
+            name: 'faculty_mentor',
+            weight: 2,
+            // Stored either as a name string or an { email: name } map.
+            getFn: (item: any) =>
+              item.faculty_mentor && typeof item.faculty_mentor === 'object'
+                ? Object.values(item.faculty_mentor as Record<string, string>)
+                : item.faculty_mentor ?? '',
+          },
+          { name: 'faculty_contact', weight: 1 },
+          { name: 'project_description', weight: 1 },
+          { name: 'prerequisites', weight: 0.5 },
+        ],
+        threshold: 0.35,
+        ignoreLocation: true,
+      }),
+    [candidates]
+  );
+
+  // Results come back in relevance order when searching.
+  const visibleListings = useMemo(
+    () =>
+      debouncedSearch
+        ? fuse.search(debouncedSearch).map((r) => r.item)
+        : candidates,
+    [fuse, debouncedSearch, candidates]
+  );
 
   const handleSearchChange = (value: string) => {
     setSearchText(value);
-  };
-
-  const handleDepartmentChange = (value: string) => {
-    setDepartment(value);
-    setTimeout(() => applyFilters(), 0);
-  };
-
-  const handleTermsChange = (value: string) => {
-    setTermsAvailable(value);
-    setTimeout(() => applyFilters(), 0);
   };
 
   const clearAll = () => {
@@ -159,15 +137,14 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
     setStudentLevel('');
     setTermsAvailable('');
     setMyPostingsOnly(false);
-    setResearchListings([...originalListings]);
   };
 
   const hasActiveFilters = Boolean(
     searchText || department || studentLevel || termsAvailable || myPostingsOnly
   );
 
-  const resultCount = researchListings.length;
-  const totalCount = originalListings.length || researchListings.length;
+  const resultCount = visibleListings.length;
+  const totalCount = researchListings.length;
 
   return (
     <Box sx={{ mb: 4 }}>
@@ -207,12 +184,6 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               value={searchText}
               inputRef={searchInputRef}
               onChange={(e) => handleSearchChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  applyFilters();
-                }
-              }}
               sx={{ flex: 1, fontSize: '0.9rem' }}
             />
             {searchText && (
@@ -239,7 +210,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
             <Select
               value={department}
               label="Department"
-              onChange={(e) => handleDepartmentChange(e.target.value as string)}
+              onChange={(e) => setDepartment(e.target.value as string)}
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="Computer and Information Sciences and Engineering">
@@ -263,10 +234,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
             <Select
               value={studentLevel}
               label="Student Level"
-              onChange={(e) => {
-                setStudentLevel(e.target.value as string);
-                getResearchListings();
-              }}
+              onChange={(e) => setStudentLevel(e.target.value as string)}
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="Freshman">Freshman</MenuItem>
@@ -288,7 +256,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
             <Select
               value={termsAvailable}
               label="Terms"
-              onChange={(e) => handleTermsChange(e.target.value as string)}
+              onChange={(e) => setTermsAvailable(e.target.value as string)}
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="Fall">Fall</MenuItem>
@@ -301,11 +269,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
             <Button
               variant={myPostingsOnly ? 'contained' : 'outlined'}
               startIcon={<PersonOutlineIcon />}
-              onClick={() => {
-                const next = !myPostingsOnly;
-                setMyPostingsOnly(next);
-                applyFilters(undefined, next);
-              }}
+              onClick={() => setMyPostingsOnly((prev) => !prev)}
               sx={{
                 borderRadius: '999px',
                 textTransform: 'none',
@@ -353,7 +317,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               {department && (
                 <Chip
                   label={DEPARTMENT_LABELS[department] || department}
-                  onDelete={() => handleDepartmentChange('')}
+                  onDelete={() => setDepartment('')}
                   size="small"
                   sx={{ backgroundColor: '#F4F1FC', color: '#4A35B8' }}
                 />
@@ -361,10 +325,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               {studentLevel && (
                 <Chip
                   label={studentLevel}
-                  onDelete={() => {
-                    setStudentLevel('');
-                    getResearchListings();
-                  }}
+                  onDelete={() => setStudentLevel('')}
                   size="small"
                   sx={{ backgroundColor: '#F4F1FC', color: '#4A35B8' }}
                 />
@@ -372,7 +333,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               {termsAvailable && (
                 <Chip
                   label={termsAvailable}
-                  onDelete={() => handleTermsChange('')}
+                  onDelete={() => setTermsAvailable('')}
                   size="small"
                   sx={{ backgroundColor: '#F4F1FC', color: '#4A35B8' }}
                 />
@@ -388,10 +349,7 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
               {myPostingsOnly && (
                 <Chip
                   label="My Postings"
-                  onDelete={() => {
-                    setMyPostingsOnly(false);
-                    applyFilters(undefined, false);
-                  }}
+                  onDelete={() => setMyPostingsOnly(false)}
                   size="small"
                   sx={{ backgroundColor: '#F4F1FC', color: '#4A35B8' }}
                 />
@@ -499,8 +457,8 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {researchListings.map((item, index) => (
-            <Grid item xs={12} sm={6} lg={4} key={index}>
+          {visibleListings.map((item) => (
+            <Grid item xs={12} sm={6} lg={4} key={item.docID}>
               <ProjectCard
                 uid={uid}
                 applications={item.applications}

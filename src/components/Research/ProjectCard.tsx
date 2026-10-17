@@ -492,4 +492,6 @@ const ProjectCard: React.FC<ProjectCardProps> = (props) => {
   );
 };
 
-export default ProjectCard;
+// Memoized so typing in the board search box (which re-renders the parent on
+// every keystroke) doesn't re-render every card.
+export default React.memo(ProjectCard);

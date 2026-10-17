@@ -25,17 +25,16 @@ const ResearchPage: React.FC = () => {
 
   const getResearchListings = useCallback(async () => {
     try {
-      const listings = await fetchResearchListings({
-        department,
-        studentLevel,
-      });
+      // Student level is matched client-side in StudentResearchView: the field
+      // is free text (e.g. "Junior, Senior"), so an exact-match query misses.
+      const listings = await fetchResearchListings({ department });
       setResearchListings(listings);
     } catch (error) {
       console.error('Error fetching research listings:', error);
       toast.error('Failed to load research listings.');
       setResearchListings([]);
     }
-  }, [department, studentLevel]);
+  }, [department]);
 
   const postNewResearchPosition = useCallback(async (formData: any) => {
     const docId = await createResearchListing(formData);
@@ -75,8 +74,6 @@ const ResearchPage: React.FC = () => {
             setDepartment={setDepartment}
             studentLevel={studentLevel}
             setStudentLevel={setStudentLevel}
-            getResearchListings={getResearchListings}
-            setResearchListings={setResearchListings}
             termsAvailable={termsAvailable}
             setTermsAvailable={setTermsAvailable}
           />
@@ -140,8 +137,6 @@ const ResearchPage: React.FC = () => {
                 setDepartment={setDepartment}
                 studentLevel={studentLevel}
                 setStudentLevel={setStudentLevel}
-                getResearchListings={getResearchListings}
-                setResearchListings={setResearchListings}
                 termsAvailable={termsAvailable}
                 setTermsAvailable={setTermsAvailable}
               />
