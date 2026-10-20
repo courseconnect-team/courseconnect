@@ -129,11 +129,19 @@ const ProjectDetailsDialog: React.FC<ProjectDetailsDialogProps> = ({
         },
       }}
     >
-      <Box sx={{ position: 'relative' }}>
+      <Box
+        sx={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+        }}
+      >
         <Box
           sx={{
             position: 'relative',
             width: '100%',
+            flexShrink: 0,
             height: { xs: 160, sm: 220 },
             ...(image_url
               ? {}
