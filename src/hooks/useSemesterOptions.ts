@@ -105,7 +105,7 @@ export type CourseOption = {
 // Input for the course picker. Fields come straight from the semester's course
 // doc (`semesters/{sem}/courses/{id}`). Doc id is `${code} : ${instructor}`
 // (shared between auto-fetch and Excel upload — see
-// `functions/src/courseFetcher/runner.ts::semesterCourseDocId`). `classNumber`
+// `functions/src/courseFetcher/semesterCourseDoc.ts::semesterCourseDocId`). `classNumber`
 // is informational only now (a comma-joined list when a prof teaches multiple
 // sections of the same course).
 export type CourseMinimalInput = {
