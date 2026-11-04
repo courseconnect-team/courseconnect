@@ -529,7 +529,7 @@ export default function Application() {
                   instructor.
                 </Typography>
                 <br />
-                <FormControl variant="filled" fullWidth>
+                <FormControl variant="filled" fullWidth sx={modernInputSx}>
                   <Autocomplete<CourseOption, true, false, false>
                     multiple
                     disableCloseOnSelect
@@ -546,7 +546,11 @@ export default function Application() {
                     }
                     isOptionEqualToValue={(opt, val) => opt.value === val.value}
                     renderInput={(params) => (
-                      <TextField {...params} label="Course(s)*" />
+                      <TextField
+                        {...params}
+                        variant="filled"
+                        label="Course(s)*"
+                      />
                     )}
                   />
                 </FormControl>

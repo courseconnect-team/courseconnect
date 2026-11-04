@@ -341,7 +341,7 @@ function semesterNameFrom(
   return `${cap} ${year}`;
 }
 
-// Mirror of `instructorKeyFromSection` in `courseFetcher/runner.ts`. Kept
+// Mirror of `instructorKeyFromSection` in `courseFetcher/instructors.ts`. Kept
 // inline here so the preview's diff key matches the runner's write key
 // without having to plumb the helper through the pipeline boundary.
 function previewInstructorKey(

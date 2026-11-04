@@ -122,7 +122,7 @@ export function addCodeSpace(code: string): string {
 }
 
 // Names that mean "no real instructor on file" — same set the auto-fetch
-// runner collapses (see `functions/src/courseFetcher/runner.ts`). All map
+// runner collapses (see `functions/src/courseFetcher/instructors.ts`). All map
 // to 'TBA' so a course has at most one no-instructor doc per semester.
 const PLACEHOLDER_INSTRUCTOR_LOWER = new Set([
   'tba',
@@ -133,7 +133,7 @@ const PLACEHOLDER_INSTRUCTOR_LOWER = new Set([
 ]);
 
 // Stable instructor key used in the doc id. Mirrors
-// `instructorKeyFromSection` in `functions/src/courseFetcher/runner.ts`:
+// `instructorKeyFromSection` in `functions/src/courseFetcher/instructors.ts`:
 // trim + collapse whitespace, fall back to 'TBA' when missing or when the
 // source uses a placeholder string. Keeping the two writers aligned means
 // re-runs and re-uploads merge into the same doc.

@@ -296,7 +296,7 @@ async function walkStride(params: {
       page = await fetchPage(url, fetcher);
     } catch (err) {
       errors.push(
-        `worker(start=${start}, last=${last}): ${
+        `worker(start=${start}, last=${last}) ${url}: ${
           err instanceof Error ? err.message : String(err)
         }`
       );

@@ -4,6 +4,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { modernInputSx } from '@/components/FormStyles';
 
 export default function DepartmentSelect() {
   const [department, setDepartment] = React.useState('');
@@ -17,7 +18,7 @@ export default function DepartmentSelect() {
 
   return (
     <Box sx={{ minWidth: 120 }}>
-      <FormControl fullWidth>
+      <FormControl fullWidth variant="filled" sx={modernInputSx}>
         <InputLabel required id="department-select-label">
           Department
         </InputLabel>

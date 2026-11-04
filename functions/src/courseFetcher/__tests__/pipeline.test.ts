@@ -25,6 +25,11 @@ import {
 import { ufTermCode } from '../providers/uf';
 import { fetchCoursesForConfig } from '../pipeline';
 import { validateConfigInput, computeNextRefreshAt } from '../validation';
+import {
+  createDirectoryLookup,
+  parseDirectoryResults,
+  splitInstructorName,
+} from '../directory';
 import type { Fetcher, NormalizedCourse } from '../types';
 
 // --- normalize.addCodeSpace ---
@@ -469,4 +474,54 @@ test('fetchCoursesForConfig handles non-JSON gracefully', async () => {
   );
   assert.equal(result.status, 'failed');
   assert.ok(result.errors.some((e) => e.includes('non-JSON')));
+});
+
+// --- directory lookup ---
+
+test('splitInstructorName uses first and last tokens', () => {
+  assert.deepEqual(splitInstructorName('Ana Martin-Ryals'), {
+    firstName: 'Ana',
+    lastName: 'Martin-Ryals',
+  });
+  assert.deepEqual(splitInstructorName('Gabriel Pereira Pundrich'), {
+    firstName: 'Gabriel',
+    lastName: 'Pundrich',
+  });
+  assert.equal(splitInstructorName('TBA'), null);
+});
+
+test('parseDirectoryResults reads the count and distinct emails', () => {
+  const html = `<p><span>1</span>
+    Results Found</p>
+    <a href="/directory/indv/x">admartin@ufl.edu</a>
+    <a href="mailto:admartin@ufl.edu"><img></a>`;
+  assert.deepEqual(parseDirectoryResults(html), {
+    resultCount: 1,
+    emails: ['admartin@ufl.edu'],
+  });
+  assert.deepEqual(parseDirectoryResults('<html>nothing</html>'), {
+    resultCount: 0,
+    emails: [],
+  });
+});
+
+test('directory lookup only accepts a single unambiguous match', async () => {
+  const page = (count: number, emails: string[]) =>
+    `<span>${count}</span> Results Found ` +
+    emails.map((e) => `<a href="mailto:${e}">x</a>`).join('');
+  const responses: Record<string, string> = {
+    'Ana:Martin-Ryals': page(1, ['admartin@ufl.edu']),
+    'John:Smith': page(3, ['jsmith10000@ufl.edu']),
+    'No:Email': page(1, []),
+  };
+  const fetcher: Fetcher = async (_url, init) => {
+    const body = new URLSearchParams(String(init?.body));
+    const key = `${body.get('firstName')}:${body.get('lastName')}`;
+    return new Response(responses[key] ?? page(0, []), { status: 200 });
+  };
+  const lookup = createDirectoryLookup(fetcher);
+  assert.equal(await lookup('Ana Martin-Ryals'), 'admartin@ufl.edu');
+  assert.equal(await lookup('John Smith'), undefined);
+  assert.equal(await lookup('No Email'), undefined);
+  assert.equal(await lookup('Nobody Here'), undefined);
 });

@@ -47,7 +47,7 @@ function init() {
 }
 
 // Mirror of `instructorKeyFromSection` in
-// `functions/src/courseFetcher/runner.ts` — kept here so the script stays
+// `functions/src/courseFetcher/instructors.ts` — kept here so the script stays
 // dependency-free and matches whatever format the runner writes.
 function instructorKey(rawNames: unknown): string {
   const cleaned = String(rawNames ?? '')

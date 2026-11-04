@@ -351,13 +351,11 @@ export default function SupervisedTeachingApplication() {
                   id="registerTerm"
                   label="Which term to register for EEL 6940"
                   defaultValue=""
-                  SelectProps={{ displayEmpty: true }}
                   error={!!fieldErrors.registerTerm}
                   helperText={fieldErrors.registerTerm ?? ' '}
                   onChange={() => clearFieldError('registerTerm')}
                   sx={modernInputSx}
                 >
-                  <MenuItem value="">Select term</MenuItem>
                   {visibleSems.map((s) => (
                     <MenuItem key={s} value={s}>
                       {s}
