@@ -5,6 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { modernInputSx } from '@/components/FormStyles';
 
 export default function GPA_Select() {
   const [gpa, setGPA] = React.useState('');
@@ -18,7 +19,7 @@ export default function GPA_Select() {
 
   return (
     <Box sx={{ minWidth: 120 }}>
-      <FormControl fullWidth>
+      <FormControl fullWidth variant="filled" sx={modernInputSx}>
         <InputLabel required id="gpa-select-label">
           GPA
         </InputLabel>
