@@ -7,7 +7,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
   InputBase,
   Button,
   Typography,
@@ -21,6 +20,7 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import ProjectCard, {
   ProjectCardSkeleton,
 } from '@/components/Research/ProjectCard';
+import { cardGridSx } from '@/components/Research/shared/cardGridSx';
 
 interface StudentResearchViewProps {
   researchListings: any[];
@@ -401,18 +401,13 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
 
       {/* Listings */}
       {loading ? (
-        <Grid
-          container
-          spacing={3}
-          aria-busy="true"
-          aria-label="Loading positions"
-        >
+        <Box sx={cardGridSx(3)} aria-busy="true" aria-label="Loading positions">
           {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-            <Grid item xs={12} sm={6} lg={4} key={i}>
+            <Box key={i} sx={{ minWidth: 0 }}>
               <ProjectCardSkeleton />
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       ) : resultCount === 0 ? (
         <Box
           sx={{
@@ -477,9 +472,9 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
           )}
         </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Box sx={cardGridSx(3)}>
           {visibleListings.map((item) => (
-            <Grid item xs={12} sm={6} lg={4} key={item.docID}>
+            <Box key={item.docID} sx={{ minWidth: 0 }}>
               <ProjectCard
                 uid={uid}
                 applications={item.applications}
@@ -505,9 +500,9 @@ const StudentResearchView: React.FC<StudentResearchViewProps> = ({
                 hours_per_week={item.hours_per_week}
                 image_url={item.image_url}
               />
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       )}
     </Box>
   );

@@ -5,7 +5,6 @@ import {
   Box,
   Typography,
   Button,
-  Grid,
   Card,
   Dialog,
   DialogActions,
@@ -30,6 +29,7 @@ import FacultyApplicantsView from '@/components/Research/FacultyApplicantsView';
 import { deleteResearchListing } from '@/services/researchService';
 import EditResearchModal from './EditResearchModal';
 import { getDepartmentGradient } from './ProjectCard';
+import { cardGridSx } from './shared/cardGridSx';
 
 interface FacultyResearchViewProps {
   researchListings: any[];
@@ -291,13 +291,13 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
             </Box>
           ) : (
             <>
-              <Grid container spacing={2.5}>
+              <Box sx={cardGridSx(2.5)}>
                 {displayedPositions.map((item, index) => {
                   const applicationCount = Array.isArray(item.applications)
                     ? item.applications.length
                     : 0;
                   return (
-                    <Grid item xs={12} sm={6} lg={4} key={index}>
+                    <Box key={index} sx={{ minWidth: 0 }}>
                       <Card
                         sx={{
                           position: 'relative',
@@ -418,10 +418,10 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                           </Tooltip>
                         </Box>
                       </Card>
-                    </Grid>
+                    </Box>
                   );
                 })}
-              </Grid>
+              </Box>
 
               {filteredPositions.length > 6 && !showAll && (
                 <Box textAlign="right" mt={2}>
