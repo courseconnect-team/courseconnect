@@ -94,7 +94,7 @@ export default function AnnouncementsRow({
       aria-label={unread ? `${title} (unread)` : title}
       data-pinned={pinned ? 'true' : undefined}
     >
-      <div className="flex items-center justify-between gap-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="flex min-w-0 items-center gap-4">
           <div className="relative flex h-10 w-10 flex-none items-center justify-center rounded-full bg-gray-800 text-sm font-semibold text-white">
             {initial}
@@ -107,7 +107,7 @@ export default function AnnouncementsRow({
 
           <div className="min-w-0">
             <div
-              className={`flex items-center gap-1.5 text-base ${
+              className={`flex items-start gap-1.5 text-base ${
                 unread ? 'font-bold' : 'font-semibold'
               } text-gray-900`}
             >
@@ -115,15 +115,15 @@ export default function AnnouncementsRow({
                 <PushPinOutlined
                   fontSize="small"
                   aria-label="Pinned"
-                  className="flex-none text-amber-600"
+                  className="mt-[3px] flex-none text-amber-600"
                   sx={{ transform: 'rotate(45deg)', fontSize: 18 }}
                 />
               )}
-              <span className="truncate">{title}</span>
+              <span className="min-w-0 break-words">{title}</span>
             </div>
             <div
               data-testid="row-body-preview"
-              className={`text-sm overflow-hidden text-ellipsis whitespace-nowrap ${
+              className={`text-sm break-words ${
                 unread ? 'text-gray-800' : 'text-gray-600'
               }`}
             >
@@ -150,7 +150,7 @@ export default function AnnouncementsRow({
             </Tooltip>
           )}
 
-          <div className="text-right">
+          <div className="sm:text-right">
             <div className="text-sm font-semibold text-gray-900">
               Posted on:
             </div>

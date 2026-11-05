@@ -78,7 +78,9 @@ export default function AnnouncementSections({ role }: { role: Role }) {
   const allCaughtUp = unread.length === 0 && read.length > 0;
 
   return (
-    <div className="flex flex-col gap-4">
+    // inline-size containment stops long unbroken strings from widening
+    // PageLayout's flex column, so text wraps at the page padding.
+    <div className="flex flex-col gap-4 [contain:inline-size]">
       {canCreate ? (
         <div className="flex items-center gap-3">
           <PrimaryButton

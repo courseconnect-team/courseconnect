@@ -4,8 +4,8 @@
  *
  * A deliberately-narrow utility that converts the subset of Markdown the
  * Announcements composer produces (via `@uiw/react-md-editor` + a custom
- * `<u>` command) into a single-line, plain-text preview suitable for a
- * row with `text-ellipsis` truncation.
+ * `<u>` command) into a whitespace-collapsed, plain-text preview for an
+ * announcement row.
  *
  * This is NOT a general-purpose Markdown parser. The real, full-fidelity
  * rendering happens in the detail view through

@@ -132,7 +132,9 @@ export default function AnnouncementView({
   };
 
   return (
-    <div className="w-full">
+    // inline-size containment stops long unbroken strings and code blocks from
+    // widening PageLayout's flex column, so text wraps at the page padding.
+    <div className="w-full [contain:inline-size]">
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="p-6">
           {/* Header */}
@@ -150,7 +152,7 @@ export default function AnnouncementView({
           </div>
 
           {/* Title */}
-          <div className="mt-5 text-3xl font-bold text-gray-900">
+          <div className="mt-5 break-words text-3xl font-bold text-gray-900">
             {announcement.title}
           </div>
 
@@ -165,7 +167,7 @@ export default function AnnouncementView({
               breaking out of the parent column on long, unbroken tokens. */}
           <div
             data-color-mode="light"
-            className="mt-4 text-sm leading-6 text-gray-700"
+            className="mt-4 break-words text-sm leading-6 text-gray-700"
           >
             <MDPreview
               source={announcement.bodyMd ?? ''}

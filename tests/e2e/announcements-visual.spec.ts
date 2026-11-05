@@ -72,7 +72,7 @@ test.describe('[student] announcements visual polish', () => {
       const text = (await previews.nth(i).innerText()).trim();
       // Allow empty previews (empty announcement body); otherwise the
       // stripper should have removed every raw markdown marker we care
-      // about for a single-line preview.
+      // about for a row preview.
       expect(
         containsRawMarkdown(text),
         `Row #${i} preview contained raw markdown characters: ${JSON.stringify(
