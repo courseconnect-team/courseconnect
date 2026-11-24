@@ -11,9 +11,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  FormControl,
-  Select,
-  MenuItem,
   IconButton,
   Tooltip,
   InputBase,
@@ -54,7 +51,6 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   const [selectedResearchId, setSelectedResearchId] = useState<string | null>(
     null
   );
-  const [selectedSemester, setSelectedSemester] = useState('Spring 2026');
   const [showAll, setShowAll] = useState(false);
   const [searchText, setSearchText] = useState('');
   const debouncedSearch = useDebounce(searchText);
@@ -113,7 +109,7 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
   return (
     <>
       {selectedResearchId ? (
-        <Box display="flex" justifyContent="space-between" flexWrap="wrap">
+        <Box sx={{ width: '100%', minWidth: 0 }}>
           <FacultyApplicantsView
             id={selectedResearchId}
             researchListing={researchListings.find(
@@ -179,24 +175,6 @@ const FacultyResearchView: React.FC<FacultyResearchViewProps> = ({
                   }}
                 />
               </Box>
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: 160,
-                  '& .MuiOutlinedInput-root': { borderRadius: '999px' },
-                }}
-              >
-                <Select
-                  value={selectedSemester}
-                  onChange={(e) =>
-                    setSelectedSemester(e.target.value as string)
-                  }
-                >
-                  <MenuItem value="Spring 2026">Spring 2026</MenuItem>
-                  <MenuItem value="Fall 2025">Fall 2025</MenuItem>
-                  <MenuItem value="Summer 2025">Summer 2025</MenuItem>
-                </Select>
-              </FormControl>
             </Box>
 
             <Button

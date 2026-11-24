@@ -19,6 +19,9 @@ interface FormData {
   item: any;
   buttonText?: string;
   buttonStyle?: SxProps<Theme>;
+  /** Controlled mode: when `open` is passed, no trigger button is rendered */
+  open?: boolean;
+  onClose?: () => void;
 }
 
 // Fields that should be hidden from the review
@@ -69,8 +72,12 @@ const ReviewModal: React.FC<FormData> = ({
   item,
   buttonText = 'Review',
   buttonStyle,
+  open: controlledOpen,
+  onClose,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
 
   /** Opens the dialog (modal). */
   const handleOpen = () => {
@@ -79,7 +86,8 @@ const ReviewModal: React.FC<FormData> = ({
 
   /** Closes the dialog (modal). */
   const handleClose = () => {
-    setOpen(false);
+    if (isControlled) onClose?.();
+    else setOpen(false);
   };
 
   // Get formatted field label
@@ -143,25 +151,27 @@ const ReviewModal: React.FC<FormData> = ({
 
   return (
     <div>
-      {/* Button to open the modal */}
-      <Button
-        onClick={handleOpen}
-        variant="outlined"
-        sx={
-          buttonStyle
-            ? buttonStyle
-            : {
-                borderColor: '#5A41D8',
-                color: '#5A41D8',
-                '&:hover': {
-                  borderColor: '#4A35B8',
-                  backgroundColor: 'rgba(90, 65, 216, 0.04)',
-                },
-              }
-        }
-      >
-        {buttonText}
-      </Button>
+      {/* Button to open the modal (uncontrolled mode only) */}
+      {!isControlled && (
+        <Button
+          onClick={handleOpen}
+          variant="outlined"
+          sx={
+            buttonStyle
+              ? buttonStyle
+              : {
+                  borderColor: '#5A41D8',
+                  color: '#5A41D8',
+                  '&:hover': {
+                    borderColor: '#4A35B8',
+                    backgroundColor: 'rgba(90, 65, 216, 0.04)',
+                  },
+                }
+          }
+        >
+          {buttonText}
+        </Button>
+      )}
 
       <Dialog
         open={open}

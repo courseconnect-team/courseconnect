@@ -26,7 +26,7 @@ export type UIRow = {
   employmentAction: string;
 };
 
-function Pill({
+export function Pill({
   variant,
   children,
 }: {
@@ -39,11 +39,11 @@ function Pill({
     pending:
       'bg-status-pendingLt border border-status-pending text-status-pending',
     neutral: 'bg-gray-100 text-gray-500 border border-gray-500',
-    request: 'w-44 bg-white border border-gray-300 text-gray-700', // <- fixed width
+    request: 'w-full max-w-44 bg-white border border-gray-300 text-gray-700', // shrinks on narrow screens
   };
   return (
     <span
-      className={`inline-block px-5  py-1 rounded-lg text-xs font-semibold  ${styles[variant]}`}
+      className={`inline-block max-w-full text-center break-words px-3 md:px-5 py-1 rounded-lg text-xs font-semibold ${styles[variant]}`}
     >
       {children}
     </span>
@@ -57,7 +57,7 @@ const toFilterKey = (ui: UIRow): StatusFilter => {
   return 'All';
 };
 
-function ApproveDeny({
+export function ApproveDeny({
   status, // 'approved' | 'denied' | null
   onApprove,
   onDeny,
@@ -85,7 +85,7 @@ function ApproveDeny({
       'bg-status-errorLt text-status-error border-status-error hover:bg-status-error hover:text-on-primary';
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
         onClick={approveSelected ? undefined : onApprove}
@@ -280,19 +280,19 @@ export const CourseApplicationsTable: React.FC<
   }, [uiRows]);
   return (
     <>
-      <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+      <div className="w-full max-w-full overflow-x-auto rounded-lg shadow-sm border border-gray-200">
         <table className="min-w-full text-sm">
           {/* header */}
           <thead>
             <tr className="bg-[#ECE6FF] text-left text-xs font-semibold tracking-wide">
-              <th className="px-4 py-3 w-10"></th>
-              <th className="px-4 py-3">Applicant Details</th>
-              <th className="px-4 py-3">Submitted</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Employment Action</th>
-              <th className="px-4 py-3">Faculty Approval</th>
-              <th className="px-4 py-3">Admin Approval</th>
-              <th className="px-4 py-3">Admin Approved Course &amp; Semester</th>
+              <th className="px-2 md:px-4 py-3 w-10"></th>
+              <th className="px-2 md:px-4 py-3">Applicant Details</th>
+              <th className="px-2 md:px-4 py-3">Submitted</th>
+              <th className="px-2 md:px-4 py-3">Status</th>
+              <th className="px-2 md:px-4 py-3">Employment Action</th>
+              <th className="px-2 md:px-4 py-3">Faculty Approval</th>
+              <th className="px-2 md:px-4 py-3">Admin Approval</th>
+              <th className="px-2 md:px-4 py-3">Admin Approved Course &amp; Semester</th>
             </tr>
           </thead>
 
@@ -304,23 +304,23 @@ export const CourseApplicationsTable: React.FC<
                     key={`sk-${i}`}
                     className={i % 2 ? 'bg-surface' : 'bg-background'}
                   >
-                    <td className="px-4 py-4">
+                    <td className="px-2 md:px-4 py-4">
                       <div className="h-5 w-5 rounded-full bg-gray-200" />
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-2 md:px-4 py-4">
                       <div className="h-4 w-48 bg-gray-200 rounded mb-2" />
                       <div className="h-3 w-64 bg-gray-200 rounded" />
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-2 md:px-4 py-4">
                       <div className="h-3 w-24 bg-gray-200 rounded" />
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-2 md:px-4 py-4">
                       <div className="h-6 w-28 bg-gray-200 rounded-full" />
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-2 md:px-4 py-4">
                       <div className="h-6 w-28 bg-gray-200 rounded-full" />
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-2 md:px-4 py-4">
                       <div className="h-6 w-28 bg-gray-200 rounded-full" />
                     </td>
                   </tr>
@@ -331,7 +331,7 @@ export const CourseApplicationsTable: React.FC<
             {!loading && filteredUiRows.length === 0 && (
               <tr>
                 <td
-                  className="px-4 py-6 text-center text-sm text-muted-foreground"
+                  className="px-2 md:px-4 py-6 text-center text-sm text-muted-foreground"
                   colSpan={5}
                 >
                   {emptyMessage}
@@ -349,7 +349,7 @@ export const CourseApplicationsTable: React.FC<
                     className={`${zebra} border-t border-gray-100`}
                   >
                     {/* magnifier */}
-                    <td className="px-4 py-3">
+                    <td className="px-2 md:px-4 py-3">
                       <Link
                         href={{
                           pathname: `/applications/${semester}/${courseId}`,
@@ -369,7 +369,7 @@ export const CourseApplicationsTable: React.FC<
                     </td>
 
                     {/* applicant */}
-                    <td className="px-4 py-3">
+                    <td className="px-2 md:px-4 py-3">
                       <div className="flex flex-col">
                         <span className="font-medium">{ui.applicantName}</span>
                         {/* If you want to show email or student id, add here from raw.data */}
@@ -377,10 +377,10 @@ export const CourseApplicationsTable: React.FC<
                     </td>
 
                     {/* submitted */}
-                    <td className="px-4 py-3">{ui.submitted}</td>
+                    <td className="px-2 md:px-4 py-3">{ui.submitted}</td>
 
                     {/* status */}
-                    <td className="px-4 py-3">
+                    <td className="px-2 md:px-4 py-3">
                       {(() => {
                         const denied =
                           ui.adminStatus === 'denied' ||
@@ -413,12 +413,12 @@ export const CourseApplicationsTable: React.FC<
                     </td>
 
                     {/*Employement Action */}
-                    <td className="px-4 py-3">
+                    <td className="px-2 md:px-4 py-3">
                       <Pill variant="request">{ui.employmentAction}</Pill>
                     </td>
 
                     {/* faculty status */}
-                    <td className="px-4 py-3">
+                    <td className="px-2 md:px-4 py-3">
                       <ApproveDeny
                         onApprove={() => openConfirm('approve', ui)}
                         onDeny={() => openConfirm('deny', ui)}
@@ -427,7 +427,7 @@ export const CourseApplicationsTable: React.FC<
                     </td>
 
                     {/* admin approval */}
-                    <td className="px-4 py-3">
+                    <td className="px-2 md:px-4 py-3">
                       {ui.adminStatus === 'approved' ? (
                         <Pill variant="approved">Approved</Pill>
                       ) : ui.adminStatus === 'denied' ? (
@@ -438,7 +438,7 @@ export const CourseApplicationsTable: React.FC<
                     </td>
 
                     {/* admin approved course & semester */}
-                    <td className="px-4 py-3">
+                    <td className="px-2 md:px-4 py-3">
                       {(() => {
                         const assigns = assignByUid[ui.id] ?? [];
                         if (assigns.length === 0)

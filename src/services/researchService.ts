@@ -84,9 +84,11 @@ export async function fetchResearchListings(
     const listings: ResearchListing[] = snapshot.docs.map((doc) => {
       const apps = applicationsMap.get(doc.id) || [];
       return normalizeResearchListing({
-        docID: doc.id,
-        applications: apps,
         ...doc.data(),
+        docID: doc.id,
+        // Always use the applications subcollection, never a stale
+        // `applications` field stored on the listing document itself.
+        applications: apps,
       });
     });
 

@@ -164,7 +164,7 @@ export const StatusTable: React.FC<StatusTableProps> = ({
   if (adminDenied) rows.forEach((r) => (r.status = 'rejected'));
 
   return (
-    <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+    <div className="w-full max-w-full overflow-x-auto rounded-lg shadow-sm border border-gray-200">
       <table className="min-w-full text-sm">
         {/* header */}
         <thead className="text-left text-xs font-semibold uppercase tracking-wider">
@@ -172,7 +172,7 @@ export const StatusTable: React.FC<StatusTableProps> = ({
             {['Application', 'Position', 'Submitted', 'Status'].map((h) => (
               <th
                 key={h}
-                className="px-4 py-3 !bg-primary-light text-on-background"
+                className="px-2 md:px-4 py-3 !bg-primary-light text-on-background"
               >
                 {h}
               </th>
@@ -184,10 +184,10 @@ export const StatusTable: React.FC<StatusTableProps> = ({
         <tbody>
           {rows.map((row, idx) => (
             <tr key={idx} className={idx % 2 ? 'bg-surface' : 'bg-background'}>
-              <td className="px-4 py-3 font-medium">{row.application}</td>
-              <td className="px-4 py-3">{row.position}</td>
-              <td className="px-4 py-3">{row.submitted}</td>
-              <td className="px-4 py-3">
+              <td className="px-2 md:px-4 py-3 font-medium">{row.application}</td>
+              <td className="px-2 md:px-4 py-3">{row.position}</td>
+              <td className="px-2 md:px-4 py-3">{row.submitted}</td>
+              <td className="px-2 md:px-4 py-3">
                 <StatusPill status={row.status} />
               </td>
             </tr>
