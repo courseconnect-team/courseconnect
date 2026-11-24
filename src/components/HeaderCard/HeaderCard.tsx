@@ -30,11 +30,11 @@ export default function HeaderCard({ title, children }: HeaderCardProps) {
       <SideNav navItems={navItems} />
 
       {/* TopNav + Content */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0">
         <TopNav />
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto pt-14 px-6 md:px-12">
+        <main className="flex-1 min-w-0 overflow-y-auto pt-14 px-6 md:px-12">
           <h1 className="text-5xl md:text-3xl font-bold text-black mb-8 mt-8">
             {title}
           </h1>

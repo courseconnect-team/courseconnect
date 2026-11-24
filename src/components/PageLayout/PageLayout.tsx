@@ -30,9 +30,9 @@ const PageLayout: FC<PageLayoutProps> = ({
   return (
     <div className="flex h-screen">
       <SideNav navItems={navItems} />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0">
         <TopNav />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden pt-16 px-6 md:px-12 ml-10">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden pt-16 px-6 md:px-12 ml-10">
           <h1 className="wrap-anywhere text-5xl md:text-3xl font-bold text-black mb-6 mt-4">
             {mainTitle}
           </h1>
