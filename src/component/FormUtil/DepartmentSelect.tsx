@@ -6,6 +6,20 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { modernInputSx } from '@/components/FormStyles';
 
+/** Department codes offered on the TA and research application forms. */
+export const TA_DEPARTMENTS = [
+  'ECE',
+  'CISE',
+  'ESSIE',
+  'MAE',
+  'MSE',
+  'ABE',
+  'CHE',
+  'ISE',
+  'EED',
+  'BME',
+] as const;
+
 export default function DepartmentSelect() {
   const [department, setDepartment] = React.useState('');
 
@@ -31,16 +45,11 @@ export default function DepartmentSelect() {
           label="Department"
           onChange={handleChange}
         >
-          <MenuItem value={'ECE'}>ECE</MenuItem>
-          <MenuItem value={'CISE'}>CISE</MenuItem>
-          <MenuItem value={'ESSIE'}>ESSIE</MenuItem>
-          <MenuItem value={'MAE'}>MAE</MenuItem>
-          <MenuItem value={'MSE'}>MSE</MenuItem>
-          <MenuItem value={'ABE'}>ABE</MenuItem>
-          <MenuItem value={'CHE'}>CHE</MenuItem>
-          <MenuItem value={'ISE'}>ISE</MenuItem>
-          <MenuItem value={'EED'}>EED</MenuItem>
-          <MenuItem value={'BME'}>BME</MenuItem>
+          {TA_DEPARTMENTS.map((d) => (
+            <MenuItem key={d} value={d}>
+              {d}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
     </Box>

@@ -151,7 +151,9 @@ const ApplicationFormPage = () => {
           <TextField
             label="Graduation Date"
             name="graduationDate"
+            type="date"
             fullWidth
+            InputLabelProps={{ shrink: true }}
             value={formData.graduationDate}
             onChange={handleChange}
           />
