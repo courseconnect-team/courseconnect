@@ -11,7 +11,10 @@ import {
   Grid,
   Snackbar,
   Alert,
+  MenuItem,
 } from '@mui/material';
+import { TA_DEPARTMENTS } from '@/component/FormUtil/DepartmentSelect';
+import { resolveDepartmentCode } from '@/constants/research';
 import { getAuth } from 'firebase/auth';
 import firebase from '@/firebase/firebase_config';
 import {
@@ -25,6 +28,20 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
+
+/**
+ * Map a profile's department (a code like "ECE" or a full name) onto one of
+ * the dropdown options, or '' when it doesn't match any of them.
+ */
+function toDepartmentOption(raw: string | undefined): string {
+  const value = (raw ?? '').trim().toUpperCase();
+  const code = (TA_DEPARTMENTS as readonly string[]).includes(value)
+    ? value
+    : resolveDepartmentCode(raw);
+  return code && (TA_DEPARTMENTS as readonly string[]).includes(code)
+    ? code
+    : '';
+}
 
 interface ModalApplicationFormProps {
   open: boolean;
@@ -56,6 +73,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
 
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [graduationDateError, setGraduationDateError] = useState('');
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -77,10 +95,16 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
             firstname: profileData.firstname || '',
             lastname: profileData.lastname || '',
             phone: profileData.phonenumber || '',
-            department: profileData.department || '',
+            department: toDepartmentOption(profileData.department),
             degree: profileData.degree || '',
             gpa: profileData.gpa || '',
-            graduationDate: profileData.graduationdate || '',
+            // The date input only accepts YYYY-MM-DD; older profiles may
+            // hold free text (e.g. "May 2027"), so drop those.
+            graduationDate: /^\d{4}-\d{2}-\d{2}$/.test(
+              profileData.graduationdate ?? ''
+            )
+              ? profileData.graduationdate
+              : '',
             resume: '',
             qualifications: '',
             weeklyHours: '',
@@ -100,6 +124,7 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
 
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'graduationDate') setGraduationDateError('');
   };
 
   const handleSubmit = async () => {
@@ -107,6 +132,13 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
       setError('You must be signed in to apply.');
       return;
     }
+    // A partly typed date reports an empty value, so this also catches
+    // incomplete dates.
+    if (!formData.graduationDate) {
+      setGraduationDateError('Graduation date is required.');
+      return;
+    }
+
     const requiredFields = [
       'firstname',
       'lastname',
@@ -261,13 +293,20 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
             </Grid>
             <Grid item xs={6}>
               <TextField
+                select
                 name="department"
                 label="Department"
                 fullWidth
                 required
                 value={formData.department}
                 onChange={handleChange}
-              />
+              >
+                {TA_DEPARTMENTS.map((d) => (
+                  <MenuItem key={d} value={d}>
+                    {d}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
             <Grid item xs={6}>
               <TextField
@@ -293,10 +332,14 @@ const ModalApplicationForm: React.FC<ModalApplicationFormProps> = ({
               <TextField
                 name="graduationDate"
                 label="Graduation Date"
+                type="date"
                 fullWidth
                 required
+                InputLabelProps={{ shrink: true }}
                 value={formData.graduationDate}
                 onChange={handleChange}
+                error={!!graduationDateError}
+                helperText={graduationDateError}
               />
             </Grid>
             <Grid item xs={12}>
