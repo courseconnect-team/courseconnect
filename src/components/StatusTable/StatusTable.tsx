@@ -4,6 +4,7 @@ import { useQueries } from '@tanstack/react-query';
 import { doc, getDoc } from 'firebase/firestore';
 import firebase from '@/firebase/firebase_config';
 import { prettyCourseId } from '@/hooks/useSemesterOptions';
+import type { StudentResearchApplication } from '@/hooks/Research/useStudentResearchApplications';
 
 /* Pill that reflects the four possible states */
 function StatusPill({
@@ -54,6 +55,7 @@ interface StatusTableProps {
   adminDenied: boolean;
   position: string;
   dateApplied: string;
+  researchApplications?: StudentResearchApplication[];
 }
 
 type Row = {
@@ -115,6 +117,7 @@ export const StatusTable: React.FC<StatusTableProps> = ({
   adminDenied,
   position,
   dateApplied,
+  researchApplications = [],
 }) => {
   const flattened = React.useMemo(
     () => (courses ? flattenCourses(courses) : []),
@@ -160,8 +163,23 @@ export const StatusTable: React.FC<StatusTableProps> = ({
     });
   });
 
-  /* whole application denied */
+  /* whole application denied (course applications only) */
   if (adminDenied) rows.forEach((r) => (r.status = 'rejected'));
+
+  /* research applications */
+  researchApplications.forEach((app) =>
+    rows.push({
+      application: app.projectTitle,
+      position: 'Research',
+      submitted: app.dateApplied,
+      status:
+        app.status === 'Approved'
+          ? 'accepted'
+          : app.status === 'Denied'
+            ? 'rejected'
+            : 'in-progress',
+    })
+  );
 
   return (
     <div className="w-full max-w-full overflow-x-auto rounded-lg shadow-sm border border-gray-200">
